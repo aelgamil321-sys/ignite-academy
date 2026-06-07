@@ -1,0 +1,4 @@
+
+ALTER TABLE public.articles
+  ADD COLUMN IF NOT EXISTS grade text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS unit_slug text NOT NULL DEFAULT '';

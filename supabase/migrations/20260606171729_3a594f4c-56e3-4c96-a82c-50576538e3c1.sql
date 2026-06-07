@@ -1,0 +1,1 @@
+ALTER TABLE public.videos ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'quran';
