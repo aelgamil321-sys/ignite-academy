@@ -20,9 +20,13 @@ import { LessonQuizResults } from "@/components/lesson-quiz-results";
 export function LessonQuizStudent({
   lessonId,
   questions: rawQuestions,
+  gradeName,
+  lessonTitle,
 }: {
   lessonId: string;
   questions: QuizQuestion[];
+  gradeName: { en: string; ar: string };
+  lessonTitle: { en: string; ar: string };
 }) {
   const { tr, lang } = useI18n();
   const questions = normalizeQuizList(rawQuestions);
@@ -200,7 +204,12 @@ export function LessonQuizStudent({
           {lang === "ar" ? "جارٍ تحميل نتيجة الاختبار…" : "Loading quiz result…"}
         </div>
       ) : showResults ? (
-        <LessonQuizResults submission={savedSubmission!} questions={questions} />
+        <LessonQuizResults
+          submission={savedSubmission!}
+          questions={questions}
+          gradeName={gradeName}
+          lessonTitle={lessonTitle}
+        />
       ) : showQuizForm ? (
         <>
           <div className="space-y-6">

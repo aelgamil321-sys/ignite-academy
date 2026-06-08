@@ -233,6 +233,39 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_certificates: {
+        Row: {
+          id: string
+          certificate_id: string
+          student_id: string
+          lesson_id: string
+          submission_id: string
+          score: number
+          percentage: number
+          issued_at: string
+        }
+        Insert: {
+          id?: string
+          certificate_id: string
+          student_id: string
+          lesson_id: string
+          submission_id: string
+          score?: number
+          percentage?: number
+          issued_at?: string
+        }
+        Update: {
+          id?: string
+          certificate_id?: string
+          student_id?: string
+          lesson_id?: string
+          submission_id?: string
+          score?: number
+          percentage?: number
+          issued_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

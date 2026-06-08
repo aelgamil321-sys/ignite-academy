@@ -7,21 +7,29 @@ import {
   type QuizSubmissionAnswerItem,
   type SavedQuizSubmission,
 } from "@/lib/lesson-quiz";
+import { canIssueQuizCertificate } from "@/lib/quiz-certificate";
+import { QuizCertificateButton } from "@/components/quiz-certificate-modal";
+import type { Bi } from "@/lib/curriculum";
 
 const L = (en: string, ar: string) => ({ en, ar });
 
 export function LessonQuizResults({
   submission,
   questions,
+  gradeName,
+  lessonTitle,
 }: {
   submission: SavedQuizSubmission;
   questions: QuizQuestion[];
+  gradeName: Bi;
+  lessonTitle: Bi;
 }) {
   const { tr, lang } = useI18n();
   const pending = submission.status === "pending_review";
   const finalScore = submission.final_score ?? submission.auto_score + submission.essay_score;
   const percentage = submission.percentage ?? 0;
   const gradeLabel = gradeLabelForPercentage(percentage, lang);
+  const showCertificate = canIssueQuizCertificate(submission, questions);
 
   const answerByIndex = new Map<number, QuizSubmissionAnswerItem>();
   for (const a of submission.answers) {
@@ -85,6 +93,17 @@ export function LessonQuizResults({
             </span>
           </div>
         </div>
+
+        {showCertificate && (
+          <div className="pt-2">
+            <QuizCertificateButton
+              submission={submission}
+              gradeName={gradeName}
+              lessonTitle={lessonTitle}
+              lang={lang}
+            />
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">

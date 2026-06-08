@@ -173,7 +173,12 @@ function LessonPage() {
             <LessonDownloads custom={custom} />
 
             {custom && normalizeQuizList(custom.quiz).length > 0 && (
-              <LessonQuizStudent lessonId={custom.id} questions={custom.quiz} />
+              <LessonQuizStudent
+                lessonId={custom.id}
+                questions={custom.quiz}
+                gradeName={grade.name}
+                lessonTitle={lesson.title}
+              />
             )}
           </div>
 
