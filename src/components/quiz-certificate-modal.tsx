@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
 import { Award, Download, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import type { Bi } from "@/lib/curriculum";
 import type { SavedQuizSubmission } from "@/lib/lesson-quiz";
+import { downloadCertificatePdf } from "@/lib/certificate-pdf";
 import {
   buildCertificateDisplayData,
   getOrCreateQuizCertificate,
@@ -52,6 +52,7 @@ function validateCertificateInputs(
   return missing;
 }
 
+/** Responsive on-screen preview only — never used for PDF capture. */
 function CertificatePreviewScaler({ data }: { data: QuizCertificateDisplayData }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.3);
@@ -80,22 +81,60 @@ function CertificatePreviewScaler({ data }: { data: QuizCertificateDisplayData }
   const scaledHeight = CERTIFICATE_HEIGHT_PX * scale;
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full rounded-lg border border-border bg-muted/30 overflow-hidden"
-      style={{ height: scaledHeight }}
-    >
+    <div className="w-full max-w-full overflow-x-hidden">
       <div
-        style={{
-          width: CERTIFICATE_WIDTH_PX,
-          height: CERTIFICATE_HEIGHT_PX,
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
-        }}
+        ref={containerRef}
+        className="w-full max-w-full rounded-lg border border-border bg-muted/30 overflow-hidden"
+        style={{ height: scaledHeight }}
       >
-        <QuizCertificateDocument data={data} />
+        <div
+          style={{
+            width: CERTIFICATE_WIDTH_PX,
+            height: CERTIFICATE_HEIGHT_PX,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          <QuizCertificateDocument data={data} />
+        </div>
       </div>
     </div>
+  );
+}
+
+/** Hidden full-size 1123×794 source — portaled to body, used only for PDF export. */
+function CertificatePdfSource({
+  data,
+  pdfRef,
+}: {
+  data: QuizCertificateDisplayData;
+  pdfRef: RefObject<HTMLDivElement | null>;
+}) {
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      ref={pdfRef}
+      id="certificate-pdf-export-source"
+      aria-hidden
+      data-certificate-pdf-source
+      style={{
+        position: "fixed",
+        left: 0,
+        top: 0,
+        width: CERTIFICATE_WIDTH_PX,
+        height: CERTIFICATE_HEIGHT_PX,
+        zIndex: -1,
+        overflow: "hidden",
+        pointerEvents: "none",
+        transform: "translateX(-300vw)",
+        opacity: 1,
+        visibility: "visible",
+      }}
+    >
+      <QuizCertificateDocument data={data} />
+    </div>,
+    document.body,
   );
 }
 
@@ -114,15 +153,17 @@ export function QuizCertificateModal({
   lessonTitle: Bi;
   lang: "en" | "ar";
 }) {
-  const certRef = useRef<HTMLDivElement>(null);
+  const pdfRef = useRef<HTMLDivElement>(null);
   const [displayData, setDisplayData] = useState<QuizCertificateDisplayData | null>(null);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   const prepareCertificate = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
+    setPdfError(null);
     try {
       const inputMissing = validateCertificateInputs(submission, gradeName, lessonTitle, null);
       const inputOnly = inputMissing.filter((f) => f !== "displayData");
@@ -178,31 +219,28 @@ export function QuizCertificateModal({
     } else {
       setDisplayData(null);
       setLoadError(null);
+      setPdfError(null);
     }
   }, [open, prepareCertificate]);
 
   const handleDownloadPdf = async () => {
-    const el = certRef.current;
-    if (!el || !displayData) return;
+    const el = pdfRef.current;
+    if (!el || !displayData) {
+      setPdfError("PDF source element not found (certificate-pdf-export-source)");
+      return;
+    }
 
     setDownloading(true);
+    setPdfError(null);
     try {
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#fffef8",
-        width: CERTIFICATE_WIDTH_PX,
-        height: CERTIFICATE_HEIGHT_PX,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-      pdf.addImage(imgData, "PNG", 0, 0, 297, 210);
-      pdf.save(`certificate-${displayData.certificateId}.pdf`);
+      await downloadCertificatePdf(el, displayData.studentName);
       toast.success(L("Certificate downloaded", "تم تحميل الشهادة")[lang]);
     } catch (error) {
       console.error("[certificate pdf]", error);
-      toast.error(L("PDF download failed", "فشل تحميل PDF")[lang]);
+      const message =
+        error instanceof Error ? error.message : String(error);
+      setPdfError(message);
+      toast.error(message);
     } finally {
       setDownloading(false);
     }
@@ -213,100 +251,106 @@ export function QuizCertificateModal({
     : validateCertificateInputs(submission, gradeName, lessonTitle, null);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className={[
-          "fixed z-50 flex flex-col gap-3 p-4 sm:p-6",
-          "left-[2.5vw] top-[5vh] translate-x-0 translate-y-0",
-          "w-[95vw] max-w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden",
-          "sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]",
-          "sm:w-[95vw] sm:max-h-[90vh]",
-        ].join(" ")}
-      >
-        <DialogHeader className="shrink-0 pr-8">
-          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <Award className="h-5 w-5 text-emerald shrink-0" />
-            {L("Certificate Preview", "معاينة الشهادة")[lang]}
-          </DialogTitle>
-          <DialogDescription>
-            {L(
-              "Review your certificate before downloading as PDF.",
-              "راجع شهادتك قبل التحميل بصيغة PDF.",
-            )[lang]}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      {displayData && open && (
+        <CertificatePdfSource data={displayData} pdfRef={pdfRef} />
+      )}
 
-        {loading ? (
-          <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            {L("Preparing certificate…", "جارٍ تجهيز الشهادة…")[lang]}
-          </div>
-        ) : loadError ? (
-          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive space-y-2">
-            <div className="font-semibold">
-              {L("Certificate could not be loaded", "تعذر تحميل الشهادة")[lang]}
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent
+          className={[
+            "fixed z-50 flex flex-col gap-3 p-4 sm:p-6",
+            "left-[2.5vw] top-[5vh] translate-x-0 translate-y-0",
+            "w-[95vw] max-w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden",
+            "sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]",
+            "sm:w-[95vw] sm:max-h-[90vh]",
+          ].join(" ")}
+        >
+          <DialogHeader className="shrink-0 pr-8">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Award className="h-5 w-5 text-emerald shrink-0" />
+              {L("Certificate Preview", "معاينة الشهادة")[lang]}
+            </DialogTitle>
+            <DialogDescription>
+              {L(
+                "Review your certificate before downloading as PDF.",
+                "راجع شهادتك قبل التحميل بصيغة PDF.",
+              )[lang]}
+            </DialogDescription>
+          </DialogHeader>
+
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              {L("Preparing certificate…", "جارٍ تجهيز الشهادة…")[lang]}
             </div>
-            <div className="font-mono text-xs break-all">{loadError}</div>
-            {missingFields.length > 0 && (
-              <div className="text-xs">
-                {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
+          ) : loadError ? (
+            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive space-y-2">
+              <div className="font-semibold">
+                {L("Certificate could not be loaded", "تعذر تحميل الشهادة")[lang]}
               </div>
-            )}
-          </div>
-        ) : displayData ? (
-          <div className="flex flex-col gap-4 min-h-0">
-            <CertificatePreviewScaler data={displayData} />
-
-            {/* Full-size hidden copy for PDF export */}
-            <div
-              aria-hidden
-              style={{
-                position: "fixed",
-                left: -10000,
-                top: 0,
-                pointerEvents: "none",
-                opacity: 0,
-              }}
-            >
-              <QuizCertificateDocument ref={certRef} data={displayData} />
+              <div className="font-mono text-xs break-all">{loadError}</div>
+              {missingFields.length > 0 && (
+                <div className="text-xs">
+                  {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
+                </div>
+              )}
             </div>
+          ) : displayData ? (
+            <div className="flex flex-col gap-4 min-h-0 w-full max-w-full overflow-x-hidden">
+              <CertificatePreviewScaler data={displayData} />
 
-            <div className="flex flex-col sm:flex-row gap-2 shrink-0 pt-1">
-              <button
-                type="button"
-                disabled={downloading}
-                onClick={() => void handleDownloadPdf()}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-50 flex-1"
-              >
-                {downloading ? (
+              {downloading && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
-                Download PDF / تحميل PDF
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenChange(false)}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold hover:border-emerald hover:text-emerald transition-colors flex-1"
-              >
-                <X className="h-4 w-4" />
-                Close / إغلاق
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-            {L("No certificate data available.", "لا توجد بيانات للشهادة.")[lang]}
-            {missingFields.length > 0 && (
-              <div className="mt-2 font-mono text-xs">
-                {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
+                  Generating PDF...
+                </div>
+              )}
+
+              {pdfError && (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive font-mono text-xs break-all">
+                  {pdfError}
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-2 shrink-0 pt-1">
+                <button
+                  type="button"
+                  disabled={downloading}
+                  onClick={() => void handleDownloadPdf()}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-50 flex-1"
+                >
+                  {downloading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  {downloading ? "Generating PDF..." : "Download PDF / تحميل PDF"}
+                </button>
+                <button
+                  type="button"
+                  disabled={downloading}
+                  onClick={() => onOpenChange(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold hover:border-emerald hover:text-emerald transition-colors flex-1 disabled:opacity-50"
+                >
+                  <X className="h-4 w-4" />
+                  Close / إغلاق
+                </button>
               </div>
-            )}
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+              {L("No certificate data available.", "لا توجد بيانات للشهادة.")[lang]}
+              {missingFields.length > 0 && (
+                <div className="mt-2 font-mono text-xs">
+                  {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
