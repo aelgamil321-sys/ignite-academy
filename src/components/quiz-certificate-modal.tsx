@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Bi } from "@/lib/curriculum";
 import type { SavedQuizSubmission } from "@/lib/lesson-quiz";
 import { downloadCertificatePdf } from "@/lib/certificate-pdf";
+import { buildCertificateQrDataUrl } from "@/lib/certificate-qr";
 import {
   buildCertificateDisplayData,
   getOrCreateQuizCertificate,
@@ -162,11 +163,12 @@ export function QuizCertificateModal({
         .eq("user_id", uid)
         .maybeSingle();
 
-      const studentName =
-        profile?.full_name?.trim() ||
-        profile?.email?.trim() ||
-        sessionData.session?.user?.email?.trim() ||
-        "";
+      const studentName = profile?.full_name?.trim() || "";
+      if (!studentName) {
+        throw new Error(
+          "Missing required fields: student full name (add full_name in your profile — email is not shown on certificates)",
+        );
+      }
 
       const certificate = await getOrCreateQuizCertificate(submission);
       const built = buildCertificateDisplayData(
@@ -176,13 +178,15 @@ export function QuizCertificateModal({
         gradeName,
         lessonTitle,
       );
+      const qrDataUrl = await buildCertificateQrDataUrl(built.certificateId);
+      const withQr = { ...built, qrDataUrl };
 
-      const missing = validateCertificateInputs(submission, gradeName, lessonTitle, built);
+      const missing = validateCertificateInputs(submission, gradeName, lessonTitle, withQr);
       if (missing.length > 0) {
         throw new Error(`Missing required fields: ${missing.join(", ")}`);
       }
 
-      setDisplayData(built);
+      setDisplayData(withQr);
     } catch (error) {
       console.error("[certificate prepare]", error);
       const message =

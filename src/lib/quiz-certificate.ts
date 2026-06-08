@@ -99,6 +99,8 @@ export type QuizCertificateDisplayData = {
   gradeLabelEn: string;
   gradeLabelAr: string;
   completionDate: string;
+  /** PNG data URL for QR encoding the certificate ID (PDF-safe). */
+  qrDataUrl: string;
 };
 
 export function buildCertificateDisplayData(

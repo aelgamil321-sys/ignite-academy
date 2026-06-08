@@ -6,7 +6,7 @@ import {
 import {
   CERTIFICATE_HEIGHT_PX,
   CERTIFICATE_WIDTH_PX,
-} from "@/components/quiz-certificate-document";
+} from "@/components/certificate-body";
 
 const PDF_BACKGROUND = "#FFFDF5";
 
@@ -27,6 +27,24 @@ async function waitForPaint(): Promise<void> {
   await new Promise<void>((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
   });
+}
+
+async function waitForImages(root: HTMLElement): Promise<void> {
+  const images = Array.from(root.querySelectorAll("img"));
+  await Promise.all(
+    images.map(
+      (img) =>
+        new Promise<void>((resolve) => {
+          if (img.complete && img.naturalWidth > 0) {
+            resolve();
+            return;
+          }
+          const done = () => resolve();
+          img.addEventListener("load", done, { once: true });
+          img.addEventListener("error", done, { once: true });
+        }),
+    ),
+  );
 }
 
 function stripClasses(root: HTMLElement): void {
@@ -122,6 +140,7 @@ export async function captureCertificateToImage(
   mount.appendChild(clone);
 
   await waitForPaint();
+  await waitForImages(clone);
 
   try {
     const canvas = await html2canvas(clone, {
