@@ -17,15 +17,6 @@ import {
 } from "@/lib/lesson-quiz";
 import { LessonQuizResults } from "@/components/lesson-quiz-results";
 
-type QuizLoadDebug = {
-  userId: string | null;
-  lessonId: string;
-  submissionsFound: number;
-  latestSubmissionId: string | null;
-  latestStatus: string | null;
-  loadError: string | null;
-};
-
 export function LessonQuizStudent({
   lessonId,
   questions: rawQuestions,
@@ -43,14 +34,6 @@ export function LessonQuizStudent({
   const [loadingSubmission, setLoadingSubmission] = useState(true);
   const [authReady, setAuthReady] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [debug, setDebug] = useState<QuizLoadDebug>({
-    userId: null,
-    lessonId,
-    submissionsFound: 0,
-    latestSubmissionId: null,
-    latestStatus: null,
-    loadError: null,
-  });
   const loadSeqRef = useRef(0);
 
   const loadFromSupabase = useCallback(async () => {
@@ -67,14 +50,6 @@ export function LessonQuizStudent({
 
       if (!uid) {
         setSavedSubmission(null);
-        setDebug({
-          userId: null,
-          lessonId,
-          submissionsFound: 0,
-          latestSubmissionId: null,
-          latestStatus: null,
-          loadError: null,
-        });
         return;
       }
 
@@ -83,19 +58,12 @@ export function LessonQuizStudent({
       if (seq !== loadSeqRef.current) return;
 
       setSavedSubmission(result.latest);
-      setDebug({
-        userId: uid,
-        lessonId,
-        submissionsFound: result.count,
-        latestSubmissionId: result.latest?.id ?? null,
-        latestStatus: result.latest?.status ?? null,
-        loadError: result.error,
-      });
+      if (result.error) {
+        console.error("[quiz load]", result.error);
+      }
     } catch (error) {
       if (seq !== loadSeqRef.current) return;
-      const message = error instanceof Error ? error.message : String(error);
       console.error("[quiz load]", error);
-      setDebug((prev) => ({ ...prev, loadError: message }));
     } finally {
       if (seq === loadSeqRef.current) {
         setLoadingSubmission(false);
@@ -160,13 +128,6 @@ export function LessonQuizStudent({
       const existing = await fetchLatestQuizSubmission(lessonId, user.id);
       if (existing) {
         setSavedSubmission(existing);
-        setDebug((prev) => ({
-          ...prev,
-          userId: user.id,
-          submissionsFound: Math.max(prev.submissionsFound, 1),
-          latestSubmissionId: existing.id,
-          latestStatus: existing.status,
-        }));
         toast.info(
           lang === "ar" ? "تم إرسال هذا الاختبار مسبقاً" : "This quiz was already submitted",
         );
@@ -204,14 +165,6 @@ export function LessonQuizStudent({
 
       const submission = submissionRowToSaved(inserted as Record<string, unknown>);
       setSavedSubmission(submission);
-      setDebug({
-        userId: user.id,
-        lessonId,
-        submissionsFound: 1,
-        latestSubmissionId: submission.id,
-        latestStatus: submission.status,
-        loadError: null,
-      });
       toast.success(
         scoreResult.hasEssayPending
           ? lang === "ar"
@@ -239,36 +192,6 @@ export function LessonQuizStudent({
           <HelpCircle className="h-5 w-5" />
         </div>
         <h2 className="font-display text-xl font-semibold text-primary">{tr("ls_quiz")}</h2>
-      </div>
-
-      <div className="mb-4 rounded-lg border border-dashed border-amber-400/60 bg-amber-50/50 dark:bg-amber-950/20 p-3 text-xs font-mono space-y-1">
-        <div className="font-sans text-[11px] font-semibold text-amber-800 dark:text-amber-300 mb-1">
-          Quiz load debug (temporary)
-        </div>
-        <div>
-          <span className="text-muted-foreground">user id:</span>{" "}
-          <span className="break-all">{debug.userId ?? "— (not signed in)"}</span>
-        </div>
-        <div>
-          <span className="text-muted-foreground">lesson id:</span>{" "}
-          <span className="break-all">{debug.lessonId}</span>
-        </div>
-        <div>
-          <span className="text-muted-foreground">submissions found:</span> {debug.submissionsFound}
-        </div>
-        <div>
-          <span className="text-muted-foreground">latest submission id:</span>{" "}
-          <span className="break-all">{debug.latestSubmissionId ?? "—"}</span>
-        </div>
-        <div>
-          <span className="text-muted-foreground">latest status:</span>{" "}
-          {debug.latestStatus ?? "—"}
-        </div>
-        {debug.loadError && (
-          <div className="text-destructive">
-            <span className="text-muted-foreground">error:</span> {debug.loadError}
-          </div>
-        )}
       </div>
 
       {!authReady || loadingSubmission ? (
