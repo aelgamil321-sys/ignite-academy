@@ -268,8 +268,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          arabic_name: string
           created_at: string
           email: string
+          english_name: string
           full_name: string
           grade: string
           id: string
@@ -277,8 +279,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          arabic_name?: string
           created_at?: string
           email?: string
+          english_name?: string
           full_name?: string
           grade?: string
           id?: string
@@ -286,8 +290,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          arabic_name?: string
           created_at?: string
           email?: string
+          english_name?: string
           full_name?: string
           grade?: string
           id?: string

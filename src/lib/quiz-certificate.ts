@@ -99,23 +99,32 @@ function metaString(meta: Record<string, unknown>, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-/** Resolve certificate names from auth user — does not require profiles.full_name. */
-export function resolveCertificateStudentNames(user: {
-  email?: string | null;
-  user_metadata?: Record<string, unknown> | null;
-}): CertificateStudentNames {
+export const CERTIFICATE_NAME_FALLBACK_EN = "Student Name";
+export const CERTIFICATE_NAME_FALLBACK_AR = "اسم الطالب";
+
+export type CertificateNameProfile = {
+  full_name?: string | null;
+  arabic_name?: string | null;
+  english_name?: string | null;
+};
+
+/** Resolve certificate names — never uses email or email prefix. */
+export function resolveCertificateStudentNames(
+  user: { user_metadata?: Record<string, unknown> | null },
+  profile?: CertificateNameProfile | null,
+): CertificateStudentNames {
   const meta = user.user_metadata ?? {};
 
-  const fromMeta =
-    metaString(meta, "full_name") ||
-    metaString(meta, "name") ||
-    metaString(meta, "display_name");
+  const fullName = metaString(meta, "full_name") || profile?.full_name?.trim() || "";
+  const englishName = metaString(meta, "english_name") || profile?.english_name?.trim() || "";
+  const arabicName =
+    metaString(meta, "arabic_name") ||
+    profile?.arabic_name?.trim() ||
+    metaString(meta, "student_ar_name") ||
+    "";
 
-  const emailPrefix = user.email?.split("@")[0]?.trim() ?? "";
-  const studentName = fromMeta || emailPrefix || "Student";
-
-  const studentArName = metaString(meta, "student_ar_name");
-  const studentNameAr = studentArName || studentName;
+  const studentName = englishName || fullName || CERTIFICATE_NAME_FALLBACK_EN;
+  const studentNameAr = arabicName || fullName || CERTIFICATE_NAME_FALLBACK_AR;
 
   return { studentName, studentNameAr };
 }

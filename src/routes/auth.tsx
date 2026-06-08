@@ -26,7 +26,9 @@ function AuthPage() {
   const { mode: initialMode } = Route.useSearch();
   const { lang } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
-  const [name, setName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [arabicName, setArabicName] = useState("");
+  const [englishName, setEnglishName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [grade, setGrade] = useState(grades.find((g) => g.slug === "8")?.slug ?? grades[0]?.slug ?? "");
@@ -52,7 +54,12 @@ function AuthPage() {
       : "Create your account or sign in to access your lessons, quizzes, and progress.",
     signup: lang === "ar" ? "إنشاء حساب طالب" : "Create Student Account",
     login: lang === "ar" ? "تسجيل الدخول" : "Login",
-    name: lang === "ar" ? "الاسم الكامل" : "Full name",
+    fullName: lang === "ar" ? "الاسم الكامل" : "Full Name",
+    fullNameHint: lang === "ar" ? "الاسم الكامل" : "Full Name / الاسم الكامل",
+    arabicName: lang === "ar" ? "الاسم باللغة العربية" : "Arabic Name",
+    arabicNameHint: lang === "ar" ? "اختياري" : "Arabic Name / الاسم باللغة العربية (optional)",
+    englishName: lang === "ar" ? "الاسم باللغة الإنجليزية" : "English Name",
+    englishNameHint: lang === "ar" ? "اختياري" : "English Name / الاسم باللغة الإنجليزية (optional)",
     email: lang === "ar" ? "البريد الإلكتروني" : "Email",
     password: lang === "ar" ? "كلمة المرور" : "Password",
     grade: lang === "ar" ? "الصف الدراسي" : "Grade",
@@ -73,7 +80,13 @@ function AuthPage() {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/student-dashboard`,
-            data: { full_name: name, role_intent: "student", grade },
+            data: {
+              full_name: fullName.trim(),
+              arabic_name: arabicName.trim() || undefined,
+              english_name: englishName.trim() || undefined,
+              role_intent: "student",
+              grade,
+            },
           },
         });
         if (error) throw error;
@@ -131,12 +144,33 @@ function AuthPage() {
             {mode === "signup" && (
               <>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.name}</label>
+                  <label className="text-xs font-medium text-muted-foreground">{T.fullNameHint}</label>
                   <input
                     type="text"
                     required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    maxLength={100}
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">{T.arabicNameHint}</label>
+                  <input
+                    type="text"
+                    value={arabicName}
+                    onChange={(e) => setArabicName(e.target.value)}
+                    maxLength={100}
+                    dir="rtl"
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">{T.englishNameHint}</label>
+                  <input
+                    type="text"
+                    value={englishName}
+                    onChange={(e) => setEnglishName(e.target.value)}
                     maxLength={100}
                     className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
                   />

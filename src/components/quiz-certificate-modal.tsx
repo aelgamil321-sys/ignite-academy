@@ -158,7 +158,13 @@ export function QuizCertificateModal({
       const user = sessionData.session?.user;
       if (!user?.id) throw new Error("Missing required fields: authenticated user (not signed in)");
 
-      const studentNames = resolveCertificateStudentNames(user);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, arabic_name, english_name")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const studentNames = resolveCertificateStudentNames(user, profile);
 
       const certificate = await getOrCreateQuizCertificate(submission);
       const built = buildCertificateDisplayData(

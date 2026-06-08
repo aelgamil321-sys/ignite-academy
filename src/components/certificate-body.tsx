@@ -116,10 +116,7 @@ function MosqueWatermark() {
   );
 }
 
-/** Visible logo viewport — scales image to crop file letterbox padding (display only). */
-const LOGO_VIEWPORT_HEIGHT = 132;
-const LOGO_IMAGE_WIDTH = 980;
-const LOGO_IMAGE_SCALE = 1.26;
+const LOGO_MAX_HEIGHT = 170;
 
 function LogoBanner({ logoUrl }: { logoUrl: string }) {
   return (
@@ -138,11 +135,12 @@ function LogoBanner({ logoUrl }: { logoUrl: string }) {
       <div
         style={{
           width: "100%",
-          height: LOGO_VIEWPORT_HEIGHT,
-          position: "relative",
-          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           backgroundColor: CERT_COLORS.white,
           borderRadius: 6,
+          padding: "4px 0",
         }}
       >
         <img
@@ -150,16 +148,14 @@ function LogoBanner({ logoUrl }: { logoUrl: string }) {
           alt="Ignite School — Department of Islamic Education"
           crossOrigin="anonymous"
           style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            width: LOGO_IMAGE_WIDTH,
-            maxWidth: "none",
-            height: "auto",
             display: "block",
-            transform: `translate(-50%, -50%) scale(${LOGO_IMAGE_SCALE})`,
-            transformOrigin: "center center",
+            width: "100%",
+            maxHeight: LOGO_MAX_HEIGHT,
+            height: "auto",
+            objectFit: "contain",
+            objectPosition: "center center",
             imageOrientation: "from-image",
+            backgroundColor: CERT_COLORS.white,
           }}
         />
       </div>
