@@ -398,14 +398,14 @@ function LessonsTab({
     ...builtIn.map((l) => ({ id: l.slug, title: l.title, builtIn: true, published: true })),
     ...custom.map((l) => ({ id: l.id, title: l.title, builtIn: false, published: l.published })),
   ];
+  const { deleteLesson } = useCMS();
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this lesson?")) return;
+    if (!confirm(L("Are you sure you want to delete this lesson?", "هل أنت متأكد أنك تريد حذف هذا الدرس?")[lang])) return;
     try {
-      const { error } = await supabase.from("lessons").delete().eq("id", id);
-      if (error) throw error;
+      await deleteLesson(id);
       toast.success(L("Deleted", "تم الحذف")[lang]);
       await onRefresh();
-    } catch (e) { toast.error(`Delete failed: ${formatError(e)}`); }
+    } catch { /* CMS layer already shows the error toast */ }
   };
   const togglePub = async (id: string, next: boolean) => {
     try {

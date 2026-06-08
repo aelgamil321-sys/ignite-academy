@@ -15,22 +15,25 @@ import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminLoginRouteImport } from './routes/admin-login'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VideosIndexRouteImport } from './routes/videos.index'
 import { Route as QuizzesIndexRouteImport } from './routes/quizzes.index'
 import { Route as ParentIndexRouteImport } from './routes/parent.index'
 import { Route as GradesIndexRouteImport } from './routes/grades.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
 import { Route as QuizzesSlugRouteImport } from './routes/quizzes.$slug'
 import { Route as ParentSlugRouteImport } from './routes/parent.$slug'
 import { Route as CategoriesCategoryRouteImport } from './routes/categories.$category'
 import { Route as AnnouncementsSlugRouteImport } from './routes/announcements.$slug'
 import { Route as GradesGradeIndexRouteImport } from './routes/grades.$grade.index'
+import { Route as AdminLessonsIndexRouteImport } from './routes/admin/lessons.index'
 import { Route as GradesGradeLessonRouteImport } from './routes/grades.$grade.$lesson'
 import { Route as GradesGradeUnitsUnitRouteImport } from './routes/grades.$grade.units.$unit'
+import { Route as AdminLessonsEditLessonIdRouteImport } from './routes/admin.lessons.edit.$lessonId'
 
 const StudentDashboardRoute = StudentDashboardRouteImport.update({
   id: '/student-dashboard',
@@ -62,14 +65,14 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -102,6 +105,11 @@ const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
   path: '/announcements/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const VideosSlugRoute = VideosSlugRouteImport.update({
   id: '/videos/$slug',
   path: '/videos/$slug',
@@ -132,6 +140,11 @@ const GradesGradeIndexRoute = GradesGradeIndexRouteImport.update({
   path: '/grades/$grade/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLessonsIndexRoute = AdminLessonsIndexRouteImport.update({
+  id: '/lessons/',
+  path: '/lessons/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const GradesGradeLessonRoute = GradesGradeLessonRouteImport.update({
   id: '/grades/$grade/$lesson',
   path: '/grades/$grade/$lesson',
@@ -142,11 +155,17 @@ const GradesGradeUnitsUnitRoute = GradesGradeUnitsUnitRouteImport.update({
   path: '/grades/$grade/units/$unit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLessonsEditLessonIdRoute =
+  AdminLessonsEditLessonIdRouteImport.update({
+    id: '/lessons/edit/$lessonId',
+    path: '/lessons/edit/$lessonId',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
@@ -158,19 +177,21 @@ export interface FileRoutesByFullPath {
   '/parent/$slug': typeof ParentSlugRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
   '/videos/$slug': typeof VideosSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/grades/': typeof GradesIndexRoute
   '/parent/': typeof ParentIndexRoute
   '/quizzes/': typeof QuizzesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
+  '/admin/lessons/': typeof AdminLessonsIndexRoute
   '/grades/$grade/': typeof GradesGradeIndexRoute
+  '/admin/lessons/edit/$lessonId': typeof AdminLessonsEditLessonIdRoute
   '/grades/$grade/units/$unit': typeof GradesGradeUnitsUnitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
@@ -182,20 +203,23 @@ export interface FileRoutesByTo {
   '/parent/$slug': typeof ParentSlugRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
   '/videos/$slug': typeof VideosSlugRoute
+  '/admin': typeof AdminIndexRoute
   '/announcements': typeof AnnouncementsIndexRoute
   '/grades': typeof GradesIndexRoute
   '/parent': typeof ParentIndexRoute
   '/quizzes': typeof QuizzesIndexRoute
   '/videos': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
+  '/admin/lessons': typeof AdminLessonsIndexRoute
   '/grades/$grade': typeof GradesGradeIndexRoute
+  '/admin/lessons/edit/$lessonId': typeof AdminLessonsEditLessonIdRoute
   '/grades/$grade/units/$unit': typeof GradesGradeUnitsUnitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
@@ -207,21 +231,24 @@ export interface FileRoutesById {
   '/parent/$slug': typeof ParentSlugRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
   '/videos/$slug': typeof VideosSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/grades/': typeof GradesIndexRoute
   '/parent/': typeof ParentIndexRoute
   '/quizzes/': typeof QuizzesIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
+  '/admin/lessons/': typeof AdminLessonsIndexRoute
   '/grades/$grade/': typeof GradesGradeIndexRoute
+  '/admin/lessons/edit/$lessonId': typeof AdminLessonsEditLessonIdRoute
   '/grades/$grade/units/$unit': typeof GradesGradeUnitsUnitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
     | '/admin'
+    | '/about'
     | '/admin-login'
     | '/auth'
     | '/contact'
@@ -233,19 +260,21 @@ export interface FileRouteTypes {
     | '/parent/$slug'
     | '/quizzes/$slug'
     | '/videos/$slug'
+    | '/admin/'
     | '/announcements/'
     | '/grades/'
     | '/parent/'
     | '/quizzes/'
     | '/videos/'
     | '/grades/$grade/$lesson'
+    | '/admin/lessons/'
     | '/grades/$grade/'
+    | '/admin/lessons/edit/$lessonId'
     | '/grades/$grade/units/$unit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/admin-login'
     | '/auth'
     | '/contact'
@@ -257,19 +286,22 @@ export interface FileRouteTypes {
     | '/parent/$slug'
     | '/quizzes/$slug'
     | '/videos/$slug'
+    | '/admin'
     | '/announcements'
     | '/grades'
     | '/parent'
     | '/quizzes'
     | '/videos'
     | '/grades/$grade/$lesson'
+    | '/admin/lessons'
     | '/grades/$grade'
+    | '/admin/lessons/edit/$lessonId'
     | '/grades/$grade/units/$unit'
   id:
     | '__root__'
     | '/'
-    | '/about'
     | '/admin'
+    | '/about'
     | '/admin-login'
     | '/auth'
     | '/contact'
@@ -281,20 +313,23 @@ export interface FileRouteTypes {
     | '/parent/$slug'
     | '/quizzes/$slug'
     | '/videos/$slug'
+    | '/admin/'
     | '/announcements/'
     | '/grades/'
     | '/parent/'
     | '/quizzes/'
     | '/videos/'
     | '/grades/$grade/$lesson'
+    | '/admin/lessons/'
     | '/grades/$grade/'
+    | '/admin/lessons/edit/$lessonId'
     | '/grades/$grade/units/$unit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
@@ -360,18 +395,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -416,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/videos/$slug': {
       id: '/videos/$slug'
       path: '/videos/$slug'
@@ -458,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GradesGradeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/lessons/': {
+      id: '/admin/lessons/'
+      path: '/lessons'
+      fullPath: '/admin/lessons/'
+      preLoaderRoute: typeof AdminLessonsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/grades/$grade/$lesson': {
       id: '/grades/$grade/$lesson'
       path: '/grades/$grade/$lesson'
@@ -472,13 +521,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GradesGradeUnitsUnitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/lessons/edit/$lessonId': {
+      id: '/admin/lessons/edit/$lessonId'
+      path: '/lessons/edit/$lessonId'
+      fullPath: '/admin/lessons/edit/$lessonId'
+      preLoaderRoute: typeof AdminLessonsEditLessonIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminLessonsIndexRoute: typeof AdminLessonsIndexRoute
+  AdminLessonsEditLessonIdRoute: typeof AdminLessonsEditLessonIdRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+  AdminLessonsIndexRoute: AdminLessonsIndexRoute,
+  AdminLessonsEditLessonIdRoute: AdminLessonsEditLessonIdRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRoute,
   AdminLoginRoute: AdminLoginRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,

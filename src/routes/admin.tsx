@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
@@ -10,24 +10,31 @@ import { normalizeGradeSlug } from "@/lib/grade-utils";
 import type { QuizQuestion } from "@/lib/curriculum";
 import {
   BookOpen, Video, FileUp, Newspaper, Folder, GraduationCap,
-  Layers, ClipboardCheck, Megaphone, Plus, Trash2, Eye, EyeOff, Save, X, ExternalLink, LogOut,
+  Layers, ClipboardCheck, Megaphone, Plus, Trash2, Eye, EyeOff, Save, X, ExternalLink, LogOut, Pencil, RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { uploadToStorage, formatError } from "@/lib/upload";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AdminSidebar, type AdminTab } from "@/components/admin-sidebar";
+import { DeleteLessonButton } from "@/components/admin-manage-lessons";
 
-export const Route = createFileRoute("/admin")({
-  head: () => ({
-    meta: [
-      { title: "Admin Dashboard — Ignite Islamic Academy" },
-      { name: "description", content: "Manage lessons, articles, videos, quizzes, resources and announcements for Ignite Islamic Academy." },
-      { name: "robots", content: "noindex,nofollow" },
-    ],
-    links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/admin" }],
-  }),
-  component: AdminGate,
+export const adminRouteSearch = (search: Record<string, unknown>) => ({
+  tab: typeof search.tab === "string" ? (search.tab as AdminTab) : undefined,
 });
 
-function AdminGate() {
+export const adminRouteHead = () => ({
+  meta: [
+    { title: "Admin Dashboard — Ignite Islamic Academy" },
+    { name: "description", content: "Manage lessons, articles, videos, quizzes, resources and announcements for Ignite Islamic Academy." },
+    { name: "robots", content: "noindex,nofollow" },
+  ],
+  links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/admin" }],
+});
+
+export function AdminGate() {
   const navigate = useNavigate();
   const [state, setState] = useState<"checking" | "ok" | "denied">("checking");
   const [email, setEmail] = useState<string>("");
@@ -64,7 +71,7 @@ function AdminGate() {
       </PageShell>
     );
   }
-  return <AdminPage email={email} />;
+  return <AdminLayoutShell email={email} />;
 }
 
 async function handleLogout(navigate: ReturnType<typeof useNavigate>) {
@@ -73,84 +80,82 @@ async function handleLogout(navigate: ReturnType<typeof useNavigate>) {
   navigate({ to: "/admin-login" });
 }
 
-type Tab =
-  | "overview" | "new-lesson" | "new-article" | "new-video" | "new-file"
-  | "manage-resources" | "manage-grades" | "manage-units" | "manage-quizzes" | "manage-announcements" | "manage-users";
+type Tab = AdminTab;
 
 const L = (en: string, ar: string) => ({ en, ar });
 
-function AdminPage({ email }: { email: string }) {
+function parseAdminTab(search: Record<string, unknown>): Tab | undefined {
+  return typeof search.tab === "string" ? (search.tab as Tab) : undefined;
+}
+
+export function AdminLayoutShell({ email }: { email: string }) {
   const navigate = useNavigate();
   const { lang } = useI18n();
-  const [tab, setTab] = useState<Tab>("overview");
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
+  const tab = parseAdminTab(search) ?? "overview";
+  const onLessonsList = pathname === "/admin/lessons" || pathname === "/admin/lessons/";
+  const onLessonsEdit = pathname.startsWith("/admin/lessons/edit/");
 
-  const t = (k: "title" | "lead") => k === "title"
-    ? L("Admin Dashboard", "لوحة الإدارة")[lang]
-    : L("Create, edit, publish, and manage all content via Supabase CMS.",
-        "أنشئ المحتوى وحرّره وانشره وأدره عبر نظام إدارة المحتوى.")[lang];
-
-  const sidebar: Array<{ key: Tab; label: { en: string; ar: string }; icon: typeof BookOpen; section: 1 | 2 }> = [
-    { key: "overview", label: L("Overview", "نظرة عامة"), icon: GraduationCap, section: 1 },
-    { key: "new-lesson", label: L("Add New Lesson", "إضافة درس جديد"), icon: BookOpen, section: 1 },
-    { key: "new-article", label: L("Add New Article", "إضافة مقال جديد"), icon: Newspaper, section: 1 },
-    { key: "new-video", label: L("Add New Video", "إضافة فيديو جديد"), icon: Video, section: 1 },
-    { key: "new-file", label: L("Upload New File", "رفع ملف جديد"), icon: FileUp, section: 1 },
-    { key: "manage-resources", label: L("Manage Resources", "إدارة الموارد"), icon: Folder, section: 2 },
-    { key: "manage-grades", label: L("Manage Grades", "إدارة الصفوف"), icon: GraduationCap, section: 2 },
-    { key: "manage-units", label: L("Manage Units", "إدارة الوحدات"), icon: Layers, section: 2 },
-    { key: "manage-quizzes", label: L("Manage Quizzes", "إدارة الاختبارات"), icon: ClipboardCheck, section: 2 },
-    { key: "manage-announcements", label: L("Manage Announcements", "إدارة الإعلانات"), icon: Megaphone, section: 2 },
-    { key: "manage-users", label: L("Manage Users", "إدارة المستخدمين"), icon: GraduationCap, section: 2 },
-  ];
+  const adminLabel = L("Admin", "الإدارة")[lang];
+  const manageLessonsLabel = L("Manage Lessons", "إدارة الدروس")[lang];
+  const title = onLessonsList
+    ? manageLessonsLabel
+    : onLessonsEdit
+      ? L("Edit Lesson", "تعديل الدرس")[lang]
+      : L("Admin Dashboard", "لوحة الإدارة")[lang];
+  const lead = onLessonsList
+    ? L("View and edit all lessons.", "عرض وتعديل جميع الدروس.")[lang]
+    : onLessonsEdit
+      ? L("Update the existing lesson.", "تحديث بيانات الدرس الحالي.")[lang]
+      : L("Create, edit, publish, and manage all content via Supabase CMS.",
+          "أنشئ المحتوى وحرّره وانشره وأدره عبر نظام إدارة المحتوى.")[lang];
+  const crumbs = onLessonsList
+    ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel }]
+    : onLessonsEdit
+      ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel, to: "/admin/lessons" }, { label: L("Edit", "تعديل")[lang] }]
+      : [{ label: title }];
 
   return (
-    <PageShell eyebrow={L("Admin", "الإدارة")[lang]} title={t("title")} lead={t("lead")} crumbs={[{ label: t("title") }]}>
+    <PageShell eyebrow={adminLabel} title={title} lead={lead} crumbs={crumbs}>
       <div className="grid gap-6 lg:grid-cols-[260px,1fr]">
-        <aside className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] h-fit">
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground px-3 py-2">{L("Create", "إنشاء")[lang]}</div>
-          {sidebar.filter(s => s.section === 1).map((s) => (
-            <SideButton key={s.key} active={tab === s.key} onClick={() => setTab(s.key)} icon={s.icon} label={s.label[lang]} />
-          ))}
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground px-3 py-2 mt-2">{L("Manage", "إدارة")[lang]}</div>
-          {sidebar.filter(s => s.section === 2).map((s) => (
-            <SideButton key={s.key} active={tab === s.key} onClick={() => setTab(s.key)} icon={s.icon} label={s.label[lang]} />
-          ))}
-        </aside>
-
+        <AdminSidebar
+          email={email}
+          activeTab={tab}
+          onLogout={() => void handleLogout(navigate)}
+        />
         <div className="min-w-0 space-y-4">
-          <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-2 text-xs">
-            <span className="text-muted-foreground">Signed in as <span className="font-medium text-foreground">{email}</span></span>
-            <button onClick={() => void handleLogout(navigate)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 hover:bg-muted">
-              <LogOut className="h-3.5 w-3.5" /> Log out
-            </button>
-          </div>
-
-          <DebugPanel />
-          {tab === "overview" && <Overview />}
-          {tab === "new-lesson" && <LessonForm />}
-          {tab === "new-article" && <ArticleForm />}
-          {tab === "new-video" && <VideoForm />}
-          {tab === "new-file" && <FileForm />}
-          {tab === "manage-resources" && <ManageResources />}
-          {tab === "manage-grades" && <ManageGrades />}
-          {tab === "manage-units" && <ManageUnits />}
-          {tab === "manage-quizzes" && <ManageQuizzes />}
-          {tab === "manage-announcements" && <ManageAnnouncements />}
-          {tab === "manage-users" && <ManageUsers />}
+          <Outlet />
         </div>
-
       </div>
     </PageShell>
   );
 }
 
-function SideButton({ active, onClick, icon: Icon, label }: { active: boolean; onClick: () => void; icon: typeof BookOpen; label: string }) {
+export function AdminDashboard() {
+  const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
+  const tabFromUrl = parseAdminTab(search);
+  const [tab, setTab] = useState<Tab>(tabFromUrl ?? "overview");
+
+  useEffect(() => {
+    if (tabFromUrl) setTab(tabFromUrl);
+  }, [tabFromUrl]);
+
   return (
-    <button onClick={onClick}
-      className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-emerald text-emerald-foreground" : "text-foreground/80 hover:bg-muted"}`}>
-      <Icon className="h-4 w-4" /> <span className="text-start">{label}</span>
-    </button>
+    <>
+      <DebugPanel />
+      {tab === "overview" && <Overview />}
+      {tab === "new-lesson" && <LessonForm />}
+      {tab === "new-article" && <ArticleForm />}
+      {tab === "new-video" && <VideoForm />}
+      {tab === "new-file" && <FileForm />}
+      {tab === "manage-resources" && <ManageResources />}
+      {tab === "manage-grades" && <ManageGrades />}
+      {tab === "manage-units" && <ManageUnits />}
+      {tab === "manage-quizzes" && <ManageQuizzes />}
+      {tab === "manage-announcements" && <ManageAnnouncements />}
+      {tab === "manage-users" && <ManageUsers />}
+    </>
   );
 }
 
@@ -206,9 +211,32 @@ function Overview() {
 // ============ Lesson Form ============
 const emptyQuiz: QuizQuestion = { q: { en: "", ar: "" }, options: [{ en: "", ar: "" }, { en: "", ar: "" }, { en: "", ar: "" }, { en: "", ar: "" }], answer: 0 };
 
-function LessonForm() {
+function lessonToFormState(l: CustomLesson) {
+  return {
+    grade: l.grade,
+    unitEn: l.unit.en, unitAr: l.unit.ar,
+    titleEn: l.title.en, titleAr: l.title.ar,
+    outEn: l.outcome.en, outAr: l.outcome.ar,
+    expEn: l.explanation.en, expAr: l.explanation.ar,
+    vocEn: l.vocab.en, vocAr: l.vocab.ar,
+    actEn: l.activity.en, actAr: l.activity.ar,
+    wsEn: l.worksheetText.en, wsAr: l.worksheetText.ar,
+    subjectCategory: l.subjectCategory,
+    yt: l.youtubeUrl,
+    pdf: l.pdfUrl ? { url: l.pdfUrl, name: l.pdfName ?? "PDF" } : null,
+    ppt: l.pptUrl ? { url: l.pptUrl, name: l.pptName ?? "PowerPoint" } : null,
+    ws: l.worksheetUrl ? { url: l.worksheetUrl, name: l.worksheetName ?? "Worksheet" } : null,
+    quiz: l.quiz.length > 0
+      ? l.quiz.map((q) => ({ ...q, q: { ...q.q }, options: q.options.map((o) => ({ ...o })) }))
+      : [{ ...emptyQuiz, options: emptyQuiz.options.map((o) => ({ ...o })) }],
+    pub: l.published,
+  };
+}
+
+function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onSaved?: () => void; onCancel?: () => void }) {
+  const isEditing = !!editId;
   const { lang } = useI18n();
-  const { refresh } = useCMS();
+  const { refresh, lessons, updateLesson } = useCMS();
   const navigate = useNavigate();
   const [grade, setGrade] = useState(grades[0]?.slug ?? "");
   const [unitEn, setUnitEn] = useState(""); const [unitAr, setUnitAr] = useState("");
@@ -227,6 +255,26 @@ function LessonForm() {
   const [pub, setPub] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dbg, setDbg] = useState({ clicked: false, valid: false, status: "" as "" | "success" | "error", error: "", id: "" });
+
+  useEffect(() => {
+    if (!editId) return;
+    const lesson = lessons.find((l) => l.id === editId);
+    if (!lesson) return;
+    const s = lessonToFormState(lesson);
+    setGrade(s.grade);
+    setUnitEn(s.unitEn); setUnitAr(s.unitAr);
+    setTitleEn(s.titleEn); setTitleAr(s.titleAr);
+    setOutEn(s.outEn); setOutAr(s.outAr);
+    setExpEn(s.expEn); setExpAr(s.expAr);
+    setVocEn(s.vocEn); setVocAr(s.vocAr);
+    setActEn(s.actEn); setActAr(s.actAr);
+    setWsEn(s.wsEn); setWsAr(s.wsAr);
+    setSubjectCategory(s.subjectCategory);
+    setYt(s.yt);
+    setPdf(s.pdf); setPpt(s.ppt); setWs(s.ws);
+    setQuiz(s.quiz);
+    setPub(s.pub);
+  }, [editId, lessons]);
 
   const onFile = (setter: (v: { url: string; name: string } | null) => void, folder: string) => async (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
@@ -297,6 +345,35 @@ function LessonForm() {
     }
 
     try {
+      if (isEditing && editId) {
+        console.log("[LessonForm] table=lessons action=update id=", editId, "payload=", payload);
+        await updateLesson(editId, {
+          grade: payload.grade,
+          unit: payload.unit,
+          title: payload.title,
+          outcome: payload.outcome,
+          explanation: payload.explanation,
+          vocab: payload.vocab,
+          activity: payload.activity,
+          worksheetText: payload.worksheet_text,
+          subjectCategory: payload.subject_category,
+          youtubeUrl: payload.youtube_url,
+          pdfUrl: payload.pdf_url ?? undefined,
+          pdfName: payload.pdf_name ?? undefined,
+          pptUrl: payload.ppt_url ?? undefined,
+          pptName: payload.ppt_name ?? undefined,
+          worksheetUrl: payload.worksheet_url ?? undefined,
+          worksheetName: payload.worksheet_name ?? undefined,
+          quiz: payload.quiz,
+          published: payload.published,
+        });
+        setDbg({ clicked: true, valid: true, status: "success", error: "", id: editId });
+        toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
+        await refresh();
+        onSaved?.();
+        return;
+      }
+
       console.log("[LessonForm] table=lessons payload=", payload);
       const { data, error } = await supabase
         .from("lessons")
@@ -323,16 +400,29 @@ function LessonForm() {
       }
     } catch (e) {
       const msg = formatError(e);
-      setDbg({ clicked: true, valid: true, status: "error", error: msg, id: "" });
-      toast.error(`Save failed: ${msg}`);
+      setDbg({ clicked: true, valid: true, status: "error", error: msg, id: editId ?? "" });
+      if (!isEditing) toast.error(`Save failed: ${msg}`);
     } finally {
       setSaving(false);
     }
   };
 
 
+  if (isEditing && editId && !lessons.find((l) => l.id === editId)) {
+    return (
+      <FormCard title={L("Edit Lesson", "تعديل الدرس")[lang]}>
+        <div className="text-sm text-muted-foreground">{L("Lesson not found.", "الدرس غير موجود.")[lang]}</div>
+        {onCancel && (
+          <button type="button" onClick={onCancel} className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm hover:bg-muted">
+            <X className="h-4 w-4" /> {L("Back to lessons", "العودة إلى الدروس")[lang]}
+          </button>
+        )}
+      </FormCard>
+    );
+  }
+
   return (
-    <FormCard title={L("Add New Lesson", "إضافة درس جديد")[lang]}>
+    <FormCard title={isEditing ? L("Edit Lesson", "تعديل الدرس")[lang] : L("Add New Lesson", "إضافة درس جديد")[lang]}>
       <Row>
         <Field label={L("Grade", "الصف")[lang]}>
           <select value={grade} onChange={(e) => setGrade(e.target.value)} className="input">
@@ -425,28 +515,44 @@ function LessonForm() {
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
         <label className="inline-flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-emerald h-4 w-4" />
-          {L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[lang]}
+          {isEditing
+            ? L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[lang]
+            : L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[lang]}
         </label>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => { void submit(pub); }}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          <Save className="h-4 w-4" />
-          {saving
-            ? L("Saving…", "جارٍ الحفظ…")[lang]
-            : pub ? L("Publish", "نشر")[lang] : L("Save Draft", "حفظ كمسودة")[lang]}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {isEditing && onCancel && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={onCancel}
+              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:bg-muted disabled:opacity-60"
+            >
+              <X className="h-4 w-4" /> {L("Cancel", "إلغاء")[lang]}
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => { void submit(pub); }}
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <Save className="h-4 w-4" />
+            {saving
+              ? L("Saving…", "جارٍ الحفظ…")[lang]
+              : isEditing
+                ? L("Save Changes", "حفظ التغييرات")[lang]
+                : pub ? L("Publish", "نشر")[lang] : L("Save Draft", "حفظ كمسودة")[lang]}
+          </button>
+        </div>
       </div>
 
       <div className="rounded-lg border border-border bg-background/60 p-3 text-xs font-mono space-y-1">
         <div className="font-semibold text-muted-foreground uppercase tracking-wider mb-1">Debug</div>
         <div>Button clicked: <span className={dbg.clicked ? "text-emerald" : ""}>{dbg.clicked ? "yes" : "no"}</span></div>
         <div>Form valid: <span className={dbg.valid ? "text-emerald" : "text-destructive"}>{dbg.clicked ? (dbg.valid ? "yes" : "no") : "—"}</span></div>
-        <div>Supabase insert: <span className={dbg.status === "success" ? "text-emerald" : dbg.status === "error" ? "text-destructive" : ""}>{dbg.status || "—"}</span></div>
+        <div>Supabase {isEditing ? "update" : "insert"}: <span className={dbg.status === "success" ? "text-emerald" : dbg.status === "error" ? "text-destructive" : ""}>{dbg.status || "—"}</span></div>
         <div className="break-all">Last error: <span className="text-destructive">{dbg.error || "—"}</span></div>
-        <div className="break-all">Last inserted ID: <span className="text-emerald">{dbg.id || "—"}</span></div>
+        <div className="break-all">Last {isEditing ? "updated" : "inserted"} ID: <span className="text-emerald">{dbg.id || "—"}</span></div>
       </div>
     </FormCard>
   );
@@ -679,7 +785,17 @@ function FileForm() {
 }
 
 // ============ Manage Lists ============
-function ItemRow({ children, onPublish, onDelete, published, viewHref }: { children: React.ReactNode; onPublish: () => void; onDelete: () => void; published: boolean; viewHref?: string }) {
+function ItemRow({
+  children, onPublish, onDelete, published, viewHref, lessonDelete,
+}: {
+  children: React.ReactNode;
+  onPublish: () => void;
+  onDelete: () => void;
+  published: boolean;
+  viewHref?: string;
+  lessonDelete?: CustomLesson;
+}) {
+  const { lang } = useI18n();
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
       <div className="flex-1 min-w-0">{children}</div>
@@ -689,14 +805,23 @@ function ItemRow({ children, onPublish, onDelete, published, viewHref }: { child
       <button onClick={onPublish} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${published ? "border-emerald text-emerald" : "border-border text-muted-foreground"}`}>
         {published ? <><Eye className="h-3.5 w-3.5" /> Published</> : <><EyeOff className="h-3.5 w-3.5" /> Draft</>}
       </button>
-      <button onClick={onDelete} className="inline-flex items-center justify-center rounded-full border border-destructive/40 text-destructive p-1.5 hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
+      {lessonDelete ? (
+        <DeleteLessonButton
+          lesson={lessonDelete}
+          lang={lang}
+          iconOnly
+          className="inline-flex items-center justify-center rounded-full border border-destructive/40 text-destructive p-1.5 hover:bg-destructive/10"
+        />
+      ) : (
+        <button onClick={onDelete} className="inline-flex items-center justify-center rounded-full border border-destructive/40 text-destructive p-1.5 hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
+      )}
     </div>
   );
 }
 
 function ManageResources() {
   const { lang } = useI18n();
-  const { files, updateFile, deleteFile, lessons, updateLesson, deleteLesson } = useCMS();
+  const { files, updateFile, deleteFile, lessons, updateLesson } = useCMS();
   return (
     <div className="space-y-6">
       <SectionCard title={L("Uploaded Files", "الملفات المرفوعة")[lang]}>
@@ -713,7 +838,8 @@ function ManageResources() {
         {lessons.length === 0 ? <Empty lang={lang} /> : lessons.map((l: CustomLesson) => (
           <ItemRow key={l.id} published={l.published}
             onPublish={() => updateLesson(l.id, { published: !l.published })}
-            onDelete={() => { deleteLesson(l.id); toast.success(L("Deleted", "تم الحذف")[lang]); }}
+            onDelete={() => {}}
+            lessonDelete={l}
             viewHref={`/grades/${l.grade}/${l.id}`}>
             <div className="font-medium text-foreground truncate">{l.title[lang]}</div>
             <div className="text-xs text-muted-foreground">{L("Grade", "الصف")[lang]}: {grades.find(g => g.slug === l.grade)?.name[lang]}</div>
@@ -786,13 +912,14 @@ function ManageUnits() {
 
 function ManageQuizzes() {
   const { lang } = useI18n();
-  const { lessons, updateLesson, deleteLesson } = useCMS();
+  const { lessons, updateLesson } = useCMS();
   return (
     <SectionCard title={L("Custom Lesson Quizzes", "اختبارات الدروس المخصصة")[lang]}>
       {lessons.length === 0 ? <Empty lang={lang} /> : lessons.map((l) => (
         <ItemRow key={l.id} published={l.published}
           onPublish={() => updateLesson(l.id, { published: !l.published })}
-          onDelete={() => { deleteLesson(l.id); toast.success(L("Deleted", "تم الحذف")[lang]); }}
+          onDelete={() => {}}
+          lessonDelete={l}
           viewHref={`/grades/${l.grade}/${l.id}`}>
           <div className="font-medium text-foreground truncate">{l.title[lang]}</div>
           <div className="text-xs text-muted-foreground">{l.quiz.length} {L("questions", "أسئلة")[lang]} · {grades.find(g => g.slug === l.grade)?.name[lang]}</div>

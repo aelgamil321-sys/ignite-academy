@@ -81,6 +81,7 @@ export interface CMSDebug {
 }
 interface CMSState {
   lessons: CustomLesson[];
+  deletedLessons: CustomLesson[];
   videos: CustomVideo[];
   files: CustomFile[];
   articles: CustomArticle[];
@@ -91,6 +92,7 @@ interface CMSCtx extends CMSState {
   addLesson: (l: Omit<CustomLesson, "id" | "createdAt">) => Promise<void>;
   updateLesson: (id: string, l: Partial<CustomLesson>) => Promise<void>;
   deleteLesson: (id: string) => Promise<void>;
+  restoreLesson: (id: string) => Promise<void>;
   addVideo: (v: Omit<CustomVideo, "id" | "createdAt">) => Promise<void>;
   updateVideo: (id: string, v: Partial<CustomVideo>) => Promise<void>;
   deleteVideo: (id: string) => Promise<void>;
@@ -130,7 +132,19 @@ type LessonRow = {
   worksheet_text?: Bi | null;
   quiz: QuizQuestion[]; published: boolean; created_at: string;
   subject_category?: string | null;
+  is_deleted?: boolean;
 };
+
+function splitLessonRows(rows: LessonRow[]): { active: CustomLesson[]; deleted: CustomLesson[] } {
+  const active: CustomLesson[] = [];
+  const deleted: CustomLesson[] = [];
+  for (const row of rows) {
+    const lesson = lessonFromRow(row);
+    if (row.is_deleted) deleted.push(lesson);
+    else active.push(lesson);
+  }
+  return { active, deleted };
+}
 const lessonFromRow = (r: LessonRow): CustomLesson => ({
   id: r.id,
   grade: normalizeGradeSlug(r.grade),
@@ -271,6 +285,7 @@ const articleToRow = (a: Partial<CustomArticle>) => {
 // ---------- Provider ----------
 export function CMSProvider({ children }: { children: ReactNode }) {
   const [lessons, setLessons] = useState<CustomLesson[]>([]);
+  const [deletedLessons, setDeletedLessons] = useState<CustomLesson[]>([]);
   const [videos, setVideos] = useState<CustomVideo[]>([]);
   const [files, setFiles] = useState<CustomFile[]>([]);
   const [articles, setArticles] = useState<CustomArticle[]>([]);
@@ -292,7 +307,9 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       if (v.error) throw v.error;
       if (f.error) throw f.error;
       if (a.error) throw a.error;
-      setLessons(((l.data ?? []) as unknown as LessonRow[]).map(lessonFromRow));
+      const lessonSplit = splitLessonRows((l.data ?? []) as unknown as LessonRow[]);
+      setLessons(lessonSplit.active);
+      setDeletedLessons(lessonSplit.deleted);
       setVideos(((v.data ?? []) as unknown as VideoRow[]).map(videoFromRow));
       setFiles(((f.data ?? []) as unknown as FileRow[]).map(fileFromRow));
       setArticles(((a.data ?? []) as unknown as ArticleRow[]).map(articleFromRow));
@@ -333,11 +350,18 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     setLessons((s) => s.map((x) => x.id === id ? lessonFromRow(row) : x));
   };
   const deleteLesson = async (id: string) => {
-    await run<{ id: string }>("lessons", "delete", async () => {
-      const { error } = await supabase.from("lessons").delete().eq("id", id);
-      return { data: error ? null : { id }, error };
-    });
+    const row = await run<LessonRow>("lessons", "soft-delete", () =>
+      supabase.from("lessons").update({ is_deleted: true }).eq("id", id).select().single() as never);
+    const lesson = lessonFromRow(row);
     setLessons((s) => s.filter((x) => x.id !== id));
+    setDeletedLessons((s) => [lesson, ...s.filter((x) => x.id !== id)]);
+  };
+  const restoreLesson = async (id: string) => {
+    const row = await run<LessonRow>("lessons", "restore", () =>
+      supabase.from("lessons").update({ is_deleted: false }).eq("id", id).select().single() as never);
+    const lesson = lessonFromRow(row);
+    setDeletedLessons((s) => s.filter((x) => x.id !== id));
+    setLessons((s) => [lesson, ...s.filter((x) => x.id !== id)]);
   };
 
   const addVideo = async (v: Omit<CustomVideo, "id" | "createdAt">) => {
@@ -395,8 +419,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   };
 
   const value: CMSCtx = {
-    lessons, videos, files, articles, loading, debug,
-    addLesson, updateLesson, deleteLesson,
+    lessons, deletedLessons, videos, files, articles, loading, debug,
+    addLesson, updateLesson, deleteLesson, restoreLesson,
     addVideo, updateVideo, deleteVideo,
     addFile, updateFile, deleteFile,
     addArticle, updateArticle, deleteArticle,

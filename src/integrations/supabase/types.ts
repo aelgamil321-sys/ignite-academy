@@ -105,6 +105,7 @@ export type Database = {
           explanation: Json
           grade: string
           id: string
+          is_deleted: boolean
           outcome: Json
           pdf_name: string | null
           pdf_url: string | null
@@ -127,6 +128,7 @@ export type Database = {
           explanation?: Json
           grade: string
           id?: string
+          is_deleted?: boolean
           outcome?: Json
           pdf_name?: string | null
           pdf_url?: string | null
@@ -149,6 +151,7 @@ export type Database = {
           explanation?: Json
           grade?: string
           id?: string
+          is_deleted?: boolean
           outcome?: Json
           pdf_name?: string | null
           pdf_url?: string | null
