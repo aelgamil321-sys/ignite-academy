@@ -10,6 +10,7 @@ import { buildCertificateQrDataUrl } from "@/lib/certificate-qr";
 import {
   buildCertificateDisplayData,
   getOrCreateQuizCertificate,
+  resolveCertificateStudentNames,
   type QuizCertificateDisplayData,
 } from "@/lib/quiz-certificate";
 import {
@@ -154,27 +155,16 @@ export function QuizCertificateModal({
       }
 
       const { data: sessionData } = await supabase.auth.getSession();
-      const uid = sessionData.session?.user?.id;
-      if (!uid) throw new Error("Missing required fields: authenticated user (not signed in)");
+      const user = sessionData.session?.user;
+      if (!user?.id) throw new Error("Missing required fields: authenticated user (not signed in)");
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, email")
-        .eq("user_id", uid)
-        .maybeSingle();
-
-      const studentName = profile?.full_name?.trim() || "";
-      if (!studentName) {
-        throw new Error(
-          "Missing required fields: student full name (add full_name in your profile — email is not shown on certificates)",
-        );
-      }
+      const studentNames = resolveCertificateStudentNames(user);
 
       const certificate = await getOrCreateQuizCertificate(submission);
       const built = buildCertificateDisplayData(
         submission,
         certificate,
-        studentName,
+        studentNames,
         gradeName,
         lessonTitle,
       );

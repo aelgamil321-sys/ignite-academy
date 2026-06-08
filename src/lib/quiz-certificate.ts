@@ -88,9 +88,42 @@ export async function getOrCreateQuizCertificate(
   return rowToCertificate(data as Record<string, unknown>);
 }
 
+export type CertificateStudentNames = {
+  /** English / display name shown on certificate (never the raw email). */
+  studentName: string;
+  studentNameAr: string;
+};
+
+function metaString(meta: Record<string, unknown>, key: string): string {
+  const value = meta[key];
+  return typeof value === "string" ? value.trim() : "";
+}
+
+/** Resolve certificate names from auth user — does not require profiles.full_name. */
+export function resolveCertificateStudentNames(user: {
+  email?: string | null;
+  user_metadata?: Record<string, unknown> | null;
+}): CertificateStudentNames {
+  const meta = user.user_metadata ?? {};
+
+  const fromMeta =
+    metaString(meta, "full_name") ||
+    metaString(meta, "name") ||
+    metaString(meta, "display_name");
+
+  const emailPrefix = user.email?.split("@")[0]?.trim() ?? "";
+  const studentName = fromMeta || emailPrefix || "Student";
+
+  const studentArName = metaString(meta, "student_ar_name");
+  const studentNameAr = studentArName || studentName;
+
+  return { studentName, studentNameAr };
+}
+
 export type QuizCertificateDisplayData = {
   certificateId: string;
   studentName: string;
+  studentNameAr: string;
   gradeName: Bi;
   lessonTitle: Bi;
   finalScore: number;
@@ -106,7 +139,7 @@ export type QuizCertificateDisplayData = {
 export function buildCertificateDisplayData(
   submission: SavedQuizSubmission,
   certificate: QuizCertificateRecord,
-  studentName: string,
+  studentNames: CertificateStudentNames,
   gradeName: Bi,
   lessonTitle: Bi,
 ): QuizCertificateDisplayData {
@@ -117,7 +150,8 @@ export function buildCertificateDisplayData(
 
   return {
     certificateId: certificate.certificate_id,
-    studentName,
+    studentName: studentNames.studentName,
+    studentNameAr: studentNames.studentNameAr,
     gradeName,
     lessonTitle,
     finalScore,

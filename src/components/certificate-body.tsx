@@ -22,24 +22,6 @@ export const CERT_COLORS = {
   gray: "#6B7280",
 } as const;
 
-const ARABIC_NAME_PLACEHOLDER = "[Student Arabic Name]";
-
-function hasArabicScript(text: string): boolean {
-  return /[\u0600-\u06FF\u0750-\u077F]/.test(text);
-}
-
-/** Display-only split — does not change stored profile data. */
-export function certificateStudentNames(fullName: string): { en: string; ar: string } {
-  const trimmed = fullName.trim();
-  if (!trimmed) {
-    return { en: "", ar: ARABIC_NAME_PLACEHOLDER };
-  }
-  return {
-    en: trimmed,
-    ar: hasArabicScript(trimmed) ? trimmed : ARABIC_NAME_PLACEHOLDER,
-  };
-}
-
 const PATTERN_BG: CSSProperties = {
   backgroundColor: CERT_COLORS.cream,
   backgroundImage: [
@@ -355,7 +337,8 @@ export function CertificatePageBody({
   const gradeEn = data.gradeName.en?.trim() || data.gradeName.ar?.trim() || "—";
   const gradeDisplay = gradeAr !== gradeEn ? `${gradeEn} / ${gradeAr}` : gradeEn;
 
-  const { en: studentNameEn, ar: studentNameAr } = certificateStudentNames(data.studentName);
+  const studentNameEn = data.studentName;
+  const studentNameAr = data.studentNameAr;
 
   const nameEnStyle: CSSProperties = {
     fontSize: 26,
