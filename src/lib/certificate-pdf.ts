@@ -3,6 +3,7 @@ import { jsPDF } from "jspdf";
 import {
   CERTIFICATE_HEIGHT_PX,
   CERTIFICATE_WIDTH_PX,
+  CERT_COLORS,
 } from "@/components/quiz-certificate-document";
 
 export function safeCertificateFilename(studentName: string): string {
@@ -55,6 +56,8 @@ export async function captureCertificateToImage(
   style.opacity = "1";
   style.visibility = "visible";
   style.pointerEvents = "none";
+  style.backgroundColor = CERT_COLORS.cream;
+  style.color = CERT_COLORS.darkGreen;
 
   await waitForPaint();
 
@@ -63,7 +66,7 @@ export async function captureCertificateToImage(
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: "#fffef8",
+      backgroundColor: CERT_COLORS.cream,
       width: CERTIFICATE_WIDTH_PX,
       height: CERTIFICATE_HEIGHT_PX,
       windowWidth: CERTIFICATE_WIDTH_PX,
@@ -71,6 +74,27 @@ export async function captureCertificateToImage(
       scrollX: 0,
       scrollY: -window.scrollY,
       logging: false,
+      onclone: (clonedDoc) => {
+        // Tailwind v4 theme CSS uses lab()/oklch() — html2canvas cannot parse those rules.
+        clonedDoc
+          .querySelectorAll('style, link[rel="stylesheet"]')
+          .forEach((node) => node.remove());
+
+        clonedDoc.body.style.setProperty("color", CERT_COLORS.darkGreen, "important");
+        clonedDoc.body.style.setProperty("background-color", CERT_COLORS.cream, "important");
+
+        const source = clonedDoc.getElementById("certificate-pdf-export-source");
+        if (!source) return;
+
+        source.style.setProperty("color", CERT_COLORS.darkGreen, "important");
+        source.style.setProperty("background-color", CERT_COLORS.cream, "important");
+
+        source.querySelectorAll("*").forEach((node) => {
+          if (node instanceof HTMLElement) {
+            node.removeAttribute("class");
+          }
+        });
+      },
     });
 
     if (canvas.width === 0 || canvas.height === 0) {

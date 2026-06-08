@@ -130,6 +130,14 @@ function CertificatePdfSource({
         transform: "translateX(-300vw)",
         opacity: 1,
         visibility: "visible",
+        margin: 0,
+        padding: 0,
+        border: "none",
+        backgroundColor: "#FFFDF5",
+        color: "#0F3D2E",
+        fontFamily: "Georgia, 'Times New Roman', serif",
+        lineHeight: "normal",
+        boxSizing: "border-box",
       }}
     >
       <QuizCertificateDocument data={data} />
