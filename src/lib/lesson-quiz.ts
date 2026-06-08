@@ -1,4 +1,5 @@
 import type { Bi, QuizQuestion, QuizQuestionType } from "@/lib/curriculum";
+import { supabase } from "@/integrations/supabase/client";
 
 export const TRUE_FALSE_OPTIONS: Bi[] = [
   { en: "True", ar: "صح" },
@@ -24,6 +25,7 @@ export type QuizSubmissionAnswerItem =
       points: number;
       earned: number;
       status: "pending_review" | "reviewed";
+      teacherFeedback?: Bi;
     };
 
 export function emptyMultipleChoiceQuestion(): QuizQuestion {
@@ -324,6 +326,11 @@ export function parseSubmissionAnswers(raw: unknown): QuizSubmissionAnswerItem[]
     const questionIndex = typeof o.questionIndex === "number" ? o.questionIndex : 0;
 
     if (type === "essay") {
+      const fbRaw = o.teacherFeedback ?? o.teacher_feedback;
+      const teacherFeedback =
+        fbRaw && typeof fbRaw === "object" ? parseBi(fbRaw) : undefined;
+      const hasFeedback =
+        teacherFeedback && (teacherFeedback.en.trim() || teacherFeedback.ar.trim());
       return {
         questionIndex,
         type: "essay" as const,
@@ -331,6 +338,7 @@ export function parseSubmissionAnswers(raw: unknown): QuizSubmissionAnswerItem[]
         points,
         earned,
         status: o.status === "reviewed" ? "reviewed" : "pending_review",
+        ...(hasFeedback ? { teacherFeedback } : {}),
       };
     }
 
@@ -344,4 +352,101 @@ export function parseSubmissionAnswers(raw: unknown): QuizSubmissionAnswerItem[]
       status: "auto_graded" as const,
     };
   });
+}
+
+export type SavedQuizSubmission = {
+  id: string;
+  lesson_id: string;
+  student_id: string;
+  auto_score: number;
+  essay_score: number;
+  final_score: number;
+  total_points: number;
+  percentage: number;
+  status: QuizSubmissionStatus;
+  answers: QuizSubmissionAnswerItem[];
+  submitted_at: string;
+};
+
+export function gradeLabelForPercentage(
+  percentage: number,
+  lang: "en" | "ar",
+): string {
+  if (percentage >= 90) return lang === "ar" ? "ممتاز" : "Excellent";
+  if (percentage >= 80) return lang === "ar" ? "جيد جدًا" : "Very Good";
+  if (percentage >= 70) return lang === "ar" ? "جيد" : "Good";
+  if (percentage >= 60) return lang === "ar" ? "مقبول" : "Pass";
+  return lang === "ar" ? "يحتاج إلى تحسين" : "Needs Improvement";
+}
+
+export function optionLabel(
+  options: Bi[],
+  index: number,
+  lang: "en" | "ar",
+): string {
+  const opt = options[index];
+  if (!opt) return "—";
+  return opt[lang] || opt.en || opt.ar || "—";
+}
+
+export function submissionRowToSaved(row: Record<string, unknown>): SavedQuizSubmission {
+  return {
+    id: String(row.id),
+    lesson_id: String(row.lesson_id),
+    student_id: String(row.student_id),
+    auto_score: Number(row.auto_score ?? row.score ?? 0),
+    essay_score: Number(row.essay_score ?? 0),
+    final_score: Number(row.final_score ?? row.score ?? 0),
+    total_points: Number(row.total_points ?? 0),
+    percentage: Number(row.percentage ?? 0),
+    status: (row.status === "pending_review" ? "pending_review" : "reviewed") as QuizSubmissionStatus,
+    answers: parseSubmissionAnswers(row.answers),
+    submitted_at: String(row.submitted_at ?? ""),
+  };
+}
+
+/** Load the latest saved quiz submission for a student + lesson from Supabase. */
+export async function fetchLatestQuizSubmission(
+  lessonId: string,
+  studentId: string,
+): Promise<SavedQuizSubmission | null> {
+  const result = await fetchStudentQuizSubmissions(lessonId, studentId);
+  return result.latest;
+}
+
+export type StudentQuizSubmissionLoad = {
+  latest: SavedQuizSubmission | null;
+  count: number;
+  error: string | null;
+};
+
+/**
+ * Fetch submissions for the current student + lesson.
+ * Always call after supabase.auth.getSession() so RLS sees auth.uid().
+ */
+export async function fetchStudentQuizSubmissions(
+  lessonId: string,
+  studentId: string,
+): Promise<StudentQuizSubmissionLoad> {
+  const { data, error, count } = await supabase
+    .from("lesson_quiz_submissions")
+    .select("*", { count: "exact" })
+    .eq("lesson_id", lessonId)
+    .eq("student_id", studentId)
+    .order("submitted_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("[fetchStudentQuizSubmissions]", error);
+    return { latest: null, count: 0, error: error.message };
+  }
+
+  const rows = data ?? [];
+  return {
+    latest: rows[0]
+      ? submissionRowToSaved(rows[0] as Record<string, unknown>)
+      : null,
+    count: count ?? rows.length,
+    error: null,
+  };
 }

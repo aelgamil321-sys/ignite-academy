@@ -12,7 +12,7 @@ import {
   type QuizSubmissionAnswerItem,
   type QuizSubmissionStatus,
 } from "@/lib/lesson-quiz";
-import type { QuizQuestion } from "@/lib/curriculum";
+import type { QuizQuestion, Bi } from "@/lib/curriculum";
 
 const L = (en: string, ar: string) => ({ en, ar });
 
@@ -51,6 +51,7 @@ function AdminQuizSubmissionsPage() {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [draftScores, setDraftScores] = useState<Record<string, Record<number, number>>>({});
+  const [draftFeedback, setDraftFeedback] = useState<Record<string, Record<number, Bi>>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const lessonMap = useMemo(() => new Map(lessons.map((l) => [l.id, l])), [lessons]);
@@ -101,6 +102,29 @@ function AdminQuizSubmissionsPage() {
     }));
   };
 
+  const getFeedbackDraft = (
+    submissionId: string,
+    questionIndex: number,
+    fallback?: Bi,
+  ): Bi => draftFeedback[submissionId]?.[questionIndex] ?? fallback ?? { en: "", ar: "" };
+
+  const setFeedbackDraft = (
+    submissionId: string,
+    questionIndex: number,
+    patch: Partial<Bi>,
+  ) => {
+    setDraftFeedback((prev) => {
+      const current = prev[submissionId]?.[questionIndex] ?? { en: "", ar: "" };
+      return {
+        ...prev,
+        [submissionId]: {
+          ...prev[submissionId],
+          [questionIndex]: { ...current, ...patch },
+        },
+      };
+    });
+  };
+
   const handleSaveReview = async (row: SubmissionRow) => {
     setSavingId(row.id);
     try {
@@ -112,7 +136,16 @@ function AdminQuizSubmissionsPage() {
           a.points,
           Math.max(0, draft[a.questionIndex] ?? a.earned),
         );
-        return { ...a, earned, status: "reviewed" as const };
+        const fb = getFeedbackDraft(row.id, a.questionIndex, a.teacherFeedback);
+        const hasFeedback = fb.en.trim() || fb.ar.trim();
+        return {
+          ...a,
+          earned,
+          status: "reviewed" as const,
+          ...(hasFeedback
+            ? { teacherFeedback: { en: fb.en.trim(), ar: fb.ar.trim() } }
+            : {}),
+        };
       });
 
       const autoScore =
@@ -141,6 +174,11 @@ function AdminQuizSubmissionsPage() {
 
       toast.success(L("Submission reviewed", "تمت مراجعة الإرسال")[lang]);
       setDraftScores((prev) => {
+        const next = { ...prev };
+        delete next[row.id];
+        return next;
+      });
+      setDraftFeedback((prev) => {
         const next = { ...prev };
         delete next[row.id];
         return next;
@@ -312,6 +350,33 @@ function AdminQuizSubmissionsPage() {
                                 }
                               />
                             </label>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <label className="block text-xs">
+                                <span className="text-muted-foreground">
+                                  {L("Teacher feedback (Arabic)", "ملاحظات المعلّم (عربي)")[lang]}
+                                </span>
+                                <textarea
+                                  className="mt-1 w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm min-h-[72px]"
+                                  dir="rtl"
+                                  value={getFeedbackDraft(row.id, a.questionIndex, a.teacherFeedback).ar}
+                                  onChange={(e) =>
+                                    setFeedbackDraft(row.id, a.questionIndex, { ar: e.target.value })
+                                  }
+                                />
+                              </label>
+                              <label className="block text-xs">
+                                <span className="text-muted-foreground">
+                                  {L("Teacher feedback (English)", "ملاحظات المعلّم (إنجليزي)")[lang]}
+                                </span>
+                                <textarea
+                                  className="mt-1 w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm min-h-[72px]"
+                                  value={getFeedbackDraft(row.id, a.questionIndex, a.teacherFeedback).en}
+                                  onChange={(e) =>
+                                    setFeedbackDraft(row.id, a.questionIndex, { en: e.target.value })
+                                  }
+                                />
+                              </label>
+                            </div>
                           </div>
                         );
                       }
