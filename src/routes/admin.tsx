@@ -1,5 +1,5 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
@@ -23,7 +23,9 @@ import { DeleteLessonButton } from "@/components/admin-manage-lessons";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
 import {
   bilingualFilesFromLesson,
+  bilingualFilesSavePayload,
   bilingualFilesToLessonUpdate,
+  mergeBilingualFiles,
   EMPTY_BILINGUAL_LESSON_FILES,
   type BilingualLessonFiles,
 } from "@/lib/lesson-bilingual-files";
@@ -264,6 +266,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const [pub, setPub] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dbg, setDbg] = useState({ clicked: false, valid: false, status: "" as "" | "success" | "error", error: "", id: "" });
+  const bilingualLoadedFor = useRef<string | null>(null);
 
   useEffect(() => {
     if (!editId) return;
@@ -281,9 +284,24 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
     setSubjectCategory(s.subjectCategory);
     setYt(s.yt);
     setPdf(s.pdf); setPpt(s.ppt); setWs(s.ws);
-    setBilingualFiles(s.bilingualFiles);
     setQuiz(s.quiz);
     setPub(s.pub);
+  }, [editId, lessons]);
+
+  useEffect(() => {
+    if (!editId) {
+      setBilingualFiles(EMPTY_BILINGUAL_LESSON_FILES);
+      bilingualLoadedFor.current = null;
+      return;
+    }
+    if (bilingualLoadedFor.current !== editId) {
+      bilingualLoadedFor.current = null;
+    }
+    const lesson = lessons.find((l) => l.id === editId);
+    if (!lesson) return;
+    if (bilingualLoadedFor.current === editId) return;
+    bilingualLoadedFor.current = editId;
+    setBilingualFiles(lessonToFormState(lesson).bilingualFiles);
   }, [editId, lessons]);
 
   const onFile = (setter: (v: { url: string; name: string } | null) => void, folder: string) => async (e: ChangeEvent<HTMLInputElement>) => {
@@ -362,6 +380,9 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
 
     try {
       if (isEditing && editId) {
+        const existing = lessons.find((l) => l.id === editId);
+        const baselineFiles = existing ? bilingualFilesFromLesson(existing) : EMPTY_BILINGUAL_LESSON_FILES;
+        const mergedFiles = mergeBilingualFiles(bilingualFiles, baselineFiles);
         console.log("[LessonForm] table=lessons action=update id=", editId, "payload=", payload);
         await updateLesson(editId, {
           grade: payload.grade,
@@ -382,7 +403,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
           worksheetName: payload.worksheet_name ?? undefined,
           quiz: payload.quiz,
           published: payload.published,
-          ...bilingualFilesToLessonUpdate(bilingualFiles),
+          ...bilingualFilesSavePayload(mergedFiles, baselineFiles),
         });
         setDbg({ clicked: true, valid: true, status: "success", error: "", id: editId });
         toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
@@ -437,6 +458,8 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       </FormCard>
     );
   }
+
+  const editLesson = editId ? lessons.find((l) => l.id === editId) : undefined;
 
   return (
     <FormCard title={isEditing ? L("Edit Lesson", "تعديل الدرس")[lang] : L("Add New Lesson", "إضافة درس جديد")[lang]}>
@@ -502,6 +525,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
         files={bilingualFiles}
         onChange={setBilingualFiles}
         lessonId={editId ?? undefined}
+        savedFiles={editLesson ? bilingualFilesFromLesson(editLesson) : undefined}
       />
 
       <div className="rounded-xl border border-border bg-background p-4 mt-2">

@@ -8,6 +8,23 @@ export type BilingualFileKey =
   | "pdfArUrl"
   | "pdfEnUrl";
 
+/** Maps CMS field keys to Supabase `lessons` table columns. */
+export const BILINGUAL_FILE_DB_COLUMN: Record<BilingualFileKey, string> = {
+  pptArUrl: "ppt_ar_url",
+  pptEnUrl: "ppt_en_url",
+  worksheetArUrl: "worksheet_ar_url",
+  worksheetEnUrl: "worksheet_en_url",
+  pdfArUrl: "pdf_ar_url",
+  pdfEnUrl: "pdf_en_url",
+};
+
+export type BilingualFileDbColumn = (typeof BILINGUAL_FILE_DB_COLUMN)[BilingualFileKey];
+
+export function bilingualKeyFromDbColumn(column: BilingualFileDbColumn): BilingualFileKey | null {
+  const entry = Object.entries(BILINGUAL_FILE_DB_COLUMN).find(([, dbColumn]) => dbColumn === column);
+  return entry ? (entry[0] as BilingualFileKey) : null;
+}
+
 export type BilingualLessonFiles = Record<BilingualFileKey, string | null>;
 
 export type BilingualFileSlot = {
@@ -68,6 +85,41 @@ export function bilingualFilesToLessonUpdate(files: BilingualLessonFiles) {
     pdfArUrl: files.pdfArUrl,
     pdfEnUrl: files.pdfEnUrl,
   };
+}
+
+/** Merge local uploads over lesson baseline — local non-null wins. */
+export function mergeBilingualFiles(
+  local: BilingualLessonFiles,
+  baseline: BilingualLessonFiles,
+): BilingualLessonFiles {
+  const out = { ...baseline };
+  for (const slot of BILINGUAL_LESSON_FILE_SLOTS) {
+    if (local[slot.key]) out[slot.key] = local[slot.key];
+  }
+  return out;
+}
+
+/**
+ * Save payload: only sends file URL fields that have a value, or explicit null
+ * when the user removed a file that previously existed. Omits untouched empty fields
+ * so Save Changes does not wipe URLs already in the database.
+ */
+export function bilingualFilesSavePayload(
+  local: BilingualLessonFiles,
+  baseline: BilingualLessonFiles,
+): Partial<CustomLesson> {
+  const out: Partial<CustomLesson> = {};
+  for (const slot of BILINGUAL_LESSON_FILE_SLOTS) {
+    const key = slot.key;
+    const localVal = local[key];
+    const baseVal = baseline[key];
+    if (localVal) {
+      out[key] = localVal;
+    } else if (localVal === null && baseVal) {
+      out[key] = null;
+    }
+  }
+  return out;
 }
 
 export function fileNameFromUrl(url: string): string {

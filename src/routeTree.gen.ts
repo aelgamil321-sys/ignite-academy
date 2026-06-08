@@ -29,6 +29,7 @@ import { Route as QuizzesSlugRouteImport } from './routes/quizzes.$slug'
 import { Route as ParentSlugRouteImport } from './routes/parent.$slug'
 import { Route as CategoriesCategoryRouteImport } from './routes/categories.$category'
 import { Route as AnnouncementsSlugRouteImport } from './routes/announcements.$slug'
+import { Route as AdminUploadTestRouteImport } from './routes/admin/upload-test'
 import { Route as GradesGradeIndexRouteImport } from './routes/grades.$grade.index'
 import { Route as AdminLessonsIndexRouteImport } from './routes/admin/lessons.index'
 import { Route as GradesGradeLessonRouteImport } from './routes/grades.$grade.$lesson'
@@ -135,6 +136,11 @@ const AnnouncementsSlugRoute = AnnouncementsSlugRouteImport.update({
   path: '/announcements/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUploadTestRoute = AdminUploadTestRouteImport.update({
+  id: '/upload-test',
+  path: '/upload-test',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const GradesGradeIndexRoute = GradesGradeIndexRouteImport.update({
   id: '/grades/$grade/',
   path: '/grades/$grade/',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/resources': typeof ResourcesRoute
   '/student': typeof StudentRoute
   '/student-dashboard': typeof StudentDashboardRoute
+  '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/resources': typeof ResourcesRoute
   '/student': typeof StudentRoute
   '/student-dashboard': typeof StudentDashboardRoute
+  '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
@@ -226,6 +234,7 @@ export interface FileRoutesById {
   '/resources': typeof ResourcesRoute
   '/student': typeof StudentRoute
   '/student-dashboard': typeof StudentDashboardRoute
+  '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
@@ -255,6 +264,7 @@ export interface FileRouteTypes {
     | '/resources'
     | '/student'
     | '/student-dashboard'
+    | '/admin/upload-test'
     | '/announcements/$slug'
     | '/categories/$category'
     | '/parent/$slug'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/resources'
     | '/student'
     | '/student-dashboard'
+    | '/admin/upload-test'
     | '/announcements/$slug'
     | '/categories/$category'
     | '/parent/$slug'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/resources'
     | '/student'
     | '/student-dashboard'
+    | '/admin/upload-test'
     | '/announcements/$slug'
     | '/categories/$category'
     | '/parent/$slug'
@@ -493,6 +505,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/upload-test': {
+      id: '/admin/upload-test'
+      path: '/upload-test'
+      fullPath: '/admin/upload-test'
+      preLoaderRoute: typeof AdminUploadTestRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/grades/$grade/': {
       id: '/grades/$grade/'
       path: '/grades/$grade'
@@ -532,12 +551,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteRouteChildren {
+  AdminUploadTestRoute: typeof AdminUploadTestRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminLessonsIndexRoute: typeof AdminLessonsIndexRoute
   AdminLessonsEditLessonIdRoute: typeof AdminLessonsEditLessonIdRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminUploadTestRoute: AdminUploadTestRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminLessonsIndexRoute: AdminLessonsIndexRoute,
   AdminLessonsEditLessonIdRoute: AdminLessonsEditLessonIdRoute,

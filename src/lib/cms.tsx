@@ -190,12 +190,12 @@ const lessonToRow = (l: Partial<CustomLesson>) => {
   if (l.pptName !== undefined) o.ppt_name = l.pptName ?? null;
   if (l.worksheetUrl !== undefined) o.worksheet_url = l.worksheetUrl ?? null;
   if (l.worksheetName !== undefined) o.worksheet_name = l.worksheetName ?? null;
-  if ("pptArUrl" in l) o.ppt_ar_url = l.pptArUrl ?? null;
-  if ("pptEnUrl" in l) o.ppt_en_url = l.pptEnUrl ?? null;
-  if ("worksheetArUrl" in l) o.worksheet_ar_url = l.worksheetArUrl ?? null;
-  if ("worksheetEnUrl" in l) o.worksheet_en_url = l.worksheetEnUrl ?? null;
-  if ("pdfArUrl" in l) o.pdf_ar_url = l.pdfArUrl ?? null;
-  if ("pdfEnUrl" in l) o.pdf_en_url = l.pdfEnUrl ?? null;
+  if (l.pptArUrl !== undefined) o.ppt_ar_url = l.pptArUrl ?? null;
+  if (l.pptEnUrl !== undefined) o.ppt_en_url = l.pptEnUrl ?? null;
+  if (l.worksheetArUrl !== undefined) o.worksheet_ar_url = l.worksheetArUrl ?? null;
+  if (l.worksheetEnUrl !== undefined) o.worksheet_en_url = l.worksheetEnUrl ?? null;
+  if (l.pdfArUrl !== undefined) o.pdf_ar_url = l.pdfArUrl ?? null;
+  if (l.pdfEnUrl !== undefined) o.pdf_en_url = l.pdfEnUrl ?? null;
   if (l.quiz !== undefined) o.quiz = l.quiz;
   if (l.subjectCategory !== undefined) o.subject_category = l.subjectCategory;
   if (l.published !== undefined) o.published = l.published;

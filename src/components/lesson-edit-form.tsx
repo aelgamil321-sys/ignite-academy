@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
@@ -9,7 +9,8 @@ import { uploadToStorage, formatError } from "@/lib/upload";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
 import {
   bilingualFilesFromLesson,
-  bilingualFilesToLessonUpdate,
+  bilingualFilesSavePayload,
+  mergeBilingualFiles,
   type BilingualLessonFiles,
 } from "@/lib/lesson-bilingual-files";
 
@@ -72,6 +73,7 @@ export function LessonEditForm({
     bilingualFilesFromLesson(lesson),
   );
   const [saving, setSaving] = useState(false);
+  const bilingualLessonId = useRef<string | null>(null);
 
   useEffect(() => {
     setGrade(lesson.grade);
@@ -94,8 +96,13 @@ export function LessonEditForm({
     setPpt(lesson.pptUrl ? { url: lesson.pptUrl, name: lesson.pptName ?? "PowerPoint" } : null);
     setWs(lesson.worksheetUrl ? { url: lesson.worksheetUrl, name: lesson.worksheetName ?? "Worksheet" } : null);
     setPub(lesson.published);
-    setBilingualFiles(bilingualFilesFromLesson(lesson));
   }, [lesson]);
+
+  useEffect(() => {
+    if (bilingualLessonId.current === lesson.id) return;
+    bilingualLessonId.current = lesson.id;
+    setBilingualFiles(bilingualFilesFromLesson(lesson));
+  }, [lesson.id]);
 
   const onFile = (setter: (v: { url: string; name: string } | null) => void, folder: string) =>
     async (e: ChangeEvent<HTMLInputElement>) => {
@@ -124,6 +131,9 @@ export function LessonEditForm({
     setSaving(true);
     const gradeSlug = normalizeGradeSlug(grade);
 
+    const baselineFiles = bilingualFilesFromLesson(lesson);
+    const mergedFiles = mergeBilingualFiles(bilingualFiles, baselineFiles);
+
     try {
       await updateLesson(lesson.id, {
         grade: gradeSlug,
@@ -142,7 +152,7 @@ export function LessonEditForm({
         worksheetUrl: ws?.url ?? lesson.worksheetUrl,
         worksheetName: ws?.name ?? lesson.worksheetName,
         published: pub,
-        ...bilingualFilesToLessonUpdate(bilingualFiles),
+        ...bilingualFilesSavePayload(mergedFiles, baselineFiles),
       });
       toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
       onSaved();
@@ -251,6 +261,7 @@ export function LessonEditForm({
         files={bilingualFiles}
         onChange={setBilingualFiles}
         lessonId={lesson.id}
+        savedFiles={bilingualFilesFromLesson(lesson)}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">

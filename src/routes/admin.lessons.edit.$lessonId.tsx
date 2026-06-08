@@ -117,7 +117,7 @@ function AdminLessonEditPage() {
         <div>Current user email: <span className="break-all">{email || "—"}</span></div>
       </div>
 
-      {fetching || loading ? (
+      {!lesson && (fetching || loading) ? (
         <div className="text-sm text-muted-foreground">
           {lang === "ar" ? "جارٍ تحميل الدرس…" : "Loading lesson…"}
         </div>
@@ -127,6 +127,7 @@ function AdminLessonEditPage() {
         </div>
       ) : (
         <LessonEditForm
+          key={lesson.id}
           lesson={lesson}
           onSaved={() => {
             void refresh();
