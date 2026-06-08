@@ -20,6 +20,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AdminSidebar, type AdminTab } from "@/components/admin-sidebar";
 import { DeleteLessonButton } from "@/components/admin-manage-lessons";
+import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
+import {
+  bilingualFilesFromLesson,
+  bilingualFilesToLessonUpdate,
+  EMPTY_BILINGUAL_LESSON_FILES,
+  type BilingualLessonFiles,
+} from "@/lib/lesson-bilingual-files";
 
 export const adminRouteSearch = (search: Record<string, unknown>) => ({
   tab: typeof search.tab === "string" ? (search.tab as AdminTab) : undefined,
@@ -226,6 +233,7 @@ function lessonToFormState(l: CustomLesson) {
     pdf: l.pdfUrl ? { url: l.pdfUrl, name: l.pdfName ?? "PDF" } : null,
     ppt: l.pptUrl ? { url: l.pptUrl, name: l.pptName ?? "PowerPoint" } : null,
     ws: l.worksheetUrl ? { url: l.worksheetUrl, name: l.worksheetName ?? "Worksheet" } : null,
+    bilingualFiles: bilingualFilesFromLesson(l),
     quiz: l.quiz.length > 0
       ? l.quiz.map((q) => ({ ...q, q: { ...q.q }, options: q.options.map((o) => ({ ...o })) }))
       : [{ ...emptyQuiz, options: emptyQuiz.options.map((o) => ({ ...o })) }],
@@ -251,6 +259,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const [pdf, setPdf] = useState<{ url: string; name: string } | null>(null);
   const [ppt, setPpt] = useState<{ url: string; name: string } | null>(null);
   const [ws, setWs] = useState<{ url: string; name: string } | null>(null);
+  const [bilingualFiles, setBilingualFiles] = useState<BilingualLessonFiles>(EMPTY_BILINGUAL_LESSON_FILES);
   const [quiz, setQuiz] = useState<QuizQuestion[]>([{ ...emptyQuiz }]);
   const [pub, setPub] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -272,6 +281,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
     setSubjectCategory(s.subjectCategory);
     setYt(s.yt);
     setPdf(s.pdf); setPpt(s.ppt); setWs(s.ws);
+    setBilingualFiles(s.bilingualFiles);
     setQuiz(s.quiz);
     setPub(s.pub);
   }, [editId, lessons]);
@@ -291,7 +301,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const resetForm = () => {
     setTitleEn(""); setTitleAr(""); setOutEn(""); setOutAr(""); setExpEn(""); setExpAr("");
     setVocEn(""); setVocAr(""); setActEn(""); setActAr(""); setWsEn(""); setWsAr(""); setYt("");
-    setPdf(null); setPpt(null); setWs(null); setQuiz([{ ...emptyQuiz }]);
+    setPdf(null); setPpt(null); setWs(null); setBilingualFiles(EMPTY_BILINGUAL_LESSON_FILES); setQuiz([{ ...emptyQuiz }]);
     setUnitEn(""); setUnitAr("");
   };
 
@@ -329,6 +339,12 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       ppt_name: ppt?.name ?? null,
       worksheet_url: ws?.url ?? null,
       worksheet_name: ws?.name ?? null,
+      ppt_ar_url: bilingualFiles.pptArUrl,
+      ppt_en_url: bilingualFiles.pptEnUrl,
+      worksheet_ar_url: bilingualFiles.worksheetArUrl,
+      worksheet_en_url: bilingualFiles.worksheetEnUrl,
+      pdf_ar_url: bilingualFiles.pdfArUrl,
+      pdf_en_url: bilingualFiles.pdfEnUrl,
       quiz: quiz.filter((q) => q.q.en || q.q.ar),
       published: publish,
     };
@@ -366,6 +382,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
           worksheetName: payload.worksheet_name ?? undefined,
           quiz: payload.quiz,
           published: payload.published,
+          ...bilingualFilesToLessonUpdate(bilingualFiles),
         });
         setDbg({ clicked: true, valid: true, status: "success", error: "", id: editId });
         toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
@@ -480,6 +497,12 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
         <input type="file" onChange={onFile(setWs, "lessons/worksheet")} className="input" />
         {ws && <div className="text-xs text-emerald mt-1">✓ {ws.name}</div>}
       </Field>
+
+      <LessonBilingualFileFields
+        files={bilingualFiles}
+        onChange={setBilingualFiles}
+        lessonId={editId ?? undefined}
+      />
 
       <div className="rounded-xl border border-border bg-background p-4 mt-2">
         <div className="flex items-center justify-between mb-3">

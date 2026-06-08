@@ -10,8 +10,8 @@ import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { getGrade, type Lesson } from "@/lib/curriculum";
-import { useResolveLesson, ytId, type CustomFile, useCMS } from "@/lib/cms";
-import { toast } from "sonner";
+import { useResolveLesson, ytId, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
+import { studentDownloadItems, fileNameFromUrl } from "@/lib/lesson-bilingual-files";
 import videoPlaceholder from "@/assets/video-placeholder.jpg";
 
 export const Route = createFileRoute("/grades/$grade/$lesson")({
@@ -74,16 +74,8 @@ function LessonPage() {
     { icon: ClipboardList, key: "ls_worksheet", body: worksheetBody },
   ];
 
-  const handleDownload = (label: string, url?: string, name?: string) => {
-    if (url) {
-      const a = document.createElement("a");
-      a.href = url; a.download = name ?? label; a.click();
-    } else {
-      toast.info(`${label}: ${lesson.title[lang]}`);
-    }
-  };
-
   const ytUrl = custom?.youtubeUrl ? ytId(custom.youtubeUrl) : "";
+  const bilingualDownloads = custom ? studentDownloadItems(custom) : [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -178,32 +170,37 @@ function LessonPage() {
               )}
             </div>
 
+            <LessonDownloads custom={custom} lang={lang} />
+
             <Quiz lesson={lesson} />
           </div>
 
           <aside className="space-y-6">
             <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] sticky top-24">
-              <h3 className="font-display text-lg font-semibold text-primary mb-4">{tr("ls_downloads")}</h3>
-              <div className="space-y-2.5">
-                <button
-                  onClick={() => handleDownload(tr("download_pdf"), custom?.pdfUrl, custom?.pdfName)}
-                  className="w-full inline-flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-emerald hover:text-emerald transition-colors"
-                >
-                  <span className="inline-flex items-center gap-2"><Download className="h-4 w-4" /> {tr("download_pdf")}</span>
-                </button>
-                <button
-                  onClick={() => handleDownload(tr("download_ppt"), custom?.pptUrl, custom?.pptName)}
-                  className="w-full inline-flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-emerald hover:text-emerald transition-colors"
-                >
-                  <span className="inline-flex items-center gap-2"><Download className="h-4 w-4" /> {tr("download_ppt")}</span>
-                </button>
-                <button
-                  onClick={() => handleDownload(tr("download_worksheet"), custom?.worksheetUrl, custom?.worksheetName)}
-                  className="w-full inline-flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-emerald hover:text-emerald transition-colors"
-                >
-                  <span className="inline-flex items-center gap-2"><Download className="h-4 w-4" /> {tr("download_worksheet")}</span>
-                </button>
-              </div>
+              {bilingualDownloads.length > 0 && (
+                <div className="mb-5">
+                  <h3 className="font-display text-lg font-semibold text-primary mb-4">
+                    {lang === "ar" ? "الملفات" : "Downloads"}
+                  </h3>
+                  <div className="space-y-2.5">
+                    {bilingualDownloads.map((item) => (
+                      <a
+                        key={item.url}
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download={fileNameFromUrl(item.url)}
+                        className="w-full inline-flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-emerald hover:text-emerald transition-colors"
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <Download className="h-4 w-4 shrink-0" />
+                          {lang === "ar" ? item.labelAr : item.labelEn}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
               {lessonFiles.length > 0 && (
                 <div className="mt-5 pt-5 border-t border-border">
                   <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{tr("ls_resources")}</div>
@@ -223,6 +220,40 @@ function LessonPage() {
       </main>
       <SiteFooter />
       <AskMrAhmed />
+    </div>
+  );
+}
+
+function LessonDownloads({ custom, lang }: { custom?: CustomLesson; lang: "en" | "ar" }) {
+  if (!custom) return null;
+  const items = studentDownloadItems(custom);
+  if (items.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald">
+          <Download className="h-5 w-5" />
+        </div>
+        <h2 className="font-display text-xl font-semibold text-primary">
+          {lang === "ar" ? "الملفات" : "Downloads"}
+        </h2>
+      </div>
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        {items.map((item) => (
+          <a
+            key={item.url}
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            download={fileNameFromUrl(item.url)}
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-emerald hover:text-emerald transition-colors"
+          >
+            <Download className="h-4 w-4 shrink-0" />
+            <span>{lang === "ar" ? item.labelAr : item.labelEn}</span>
+          </a>
+        ))}
+      </div>
     </div>
   );
 }

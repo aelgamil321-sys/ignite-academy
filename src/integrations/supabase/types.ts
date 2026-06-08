@@ -107,8 +107,12 @@ export type Database = {
           id: string
           is_deleted: boolean
           outcome: Json
+          pdf_ar_url: string | null
+          pdf_en_url: string | null
           pdf_name: string | null
           pdf_url: string | null
+          ppt_ar_url: string | null
+          ppt_en_url: string | null
           ppt_name: string | null
           ppt_url: string | null
           published: boolean
@@ -117,6 +121,8 @@ export type Database = {
           title: Json
           unit: Json
           vocab: Json
+          worksheet_ar_url: string | null
+          worksheet_en_url: string | null
           worksheet_name: string | null
           worksheet_text: Json
           worksheet_url: string | null
@@ -130,8 +136,12 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           outcome?: Json
+          pdf_ar_url?: string | null
+          pdf_en_url?: string | null
           pdf_name?: string | null
           pdf_url?: string | null
+          ppt_ar_url?: string | null
+          ppt_en_url?: string | null
           ppt_name?: string | null
           ppt_url?: string | null
           published?: boolean
@@ -140,6 +150,8 @@ export type Database = {
           title?: Json
           unit?: Json
           vocab?: Json
+          worksheet_ar_url?: string | null
+          worksheet_en_url?: string | null
           worksheet_name?: string | null
           worksheet_text?: Json
           worksheet_url?: string | null
@@ -153,8 +165,12 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           outcome?: Json
+          pdf_ar_url?: string | null
+          pdf_en_url?: string | null
           pdf_name?: string | null
           pdf_url?: string | null
+          ppt_ar_url?: string | null
+          ppt_en_url?: string | null
           ppt_name?: string | null
           ppt_url?: string | null
           published?: boolean
@@ -163,6 +179,8 @@ export type Database = {
           title?: Json
           unit?: Json
           vocab?: Json
+          worksheet_ar_url?: string | null
+          worksheet_en_url?: string | null
           worksheet_name?: string | null
           worksheet_text?: Json
           worksheet_url?: string | null

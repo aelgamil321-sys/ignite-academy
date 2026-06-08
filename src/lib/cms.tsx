@@ -24,6 +24,9 @@ export interface CustomLesson {
   pdfUrl?: string; pdfName?: string;
   pptUrl?: string; pptName?: string;
   worksheetUrl?: string; worksheetName?: string;
+  pptArUrl?: string; pptEnUrl?: string;
+  worksheetArUrl?: string; worksheetEnUrl?: string;
+  pdfArUrl?: string; pdfEnUrl?: string;
   quiz: QuizQuestion[];
   subjectCategory: SubjectCategory;
   published: boolean;
@@ -129,6 +132,9 @@ type LessonRow = {
   pdf_url: string | null; pdf_name: string | null;
   ppt_url: string | null; ppt_name: string | null;
   worksheet_url: string | null; worksheet_name: string | null;
+  ppt_ar_url?: string | null; ppt_en_url?: string | null;
+  worksheet_ar_url?: string | null; worksheet_en_url?: string | null;
+  pdf_ar_url?: string | null; pdf_en_url?: string | null;
   worksheet_text?: Bi | null;
   quiz: QuizQuestion[]; published: boolean; created_at: string;
   subject_category?: string | null;
@@ -159,6 +165,9 @@ const lessonFromRow = (r: LessonRow): CustomLesson => ({
   pdfUrl: r.pdf_url ?? undefined, pdfName: r.pdf_name ?? undefined,
   pptUrl: r.ppt_url ?? undefined, pptName: r.ppt_name ?? undefined,
   worksheetUrl: r.worksheet_url ?? undefined, worksheetName: r.worksheet_name ?? undefined,
+  pptArUrl: r.ppt_ar_url ?? undefined, pptEnUrl: r.ppt_en_url ?? undefined,
+  worksheetArUrl: r.worksheet_ar_url ?? undefined, worksheetEnUrl: r.worksheet_en_url ?? undefined,
+  pdfArUrl: r.pdf_ar_url ?? undefined, pdfEnUrl: r.pdf_en_url ?? undefined,
   quiz: Array.isArray(r.quiz) ? r.quiz : [],
   subjectCategory: ((r.subject_category ?? "quran") as SubjectCategory),
   published: r.published,
@@ -181,6 +190,12 @@ const lessonToRow = (l: Partial<CustomLesson>) => {
   if (l.pptName !== undefined) o.ppt_name = l.pptName ?? null;
   if (l.worksheetUrl !== undefined) o.worksheet_url = l.worksheetUrl ?? null;
   if (l.worksheetName !== undefined) o.worksheet_name = l.worksheetName ?? null;
+  if ("pptArUrl" in l) o.ppt_ar_url = l.pptArUrl ?? null;
+  if ("pptEnUrl" in l) o.ppt_en_url = l.pptEnUrl ?? null;
+  if ("worksheetArUrl" in l) o.worksheet_ar_url = l.worksheetArUrl ?? null;
+  if ("worksheetEnUrl" in l) o.worksheet_en_url = l.worksheetEnUrl ?? null;
+  if ("pdfArUrl" in l) o.pdf_ar_url = l.pdfArUrl ?? null;
+  if ("pdfEnUrl" in l) o.pdf_en_url = l.pdfEnUrl ?? null;
   if (l.quiz !== undefined) o.quiz = l.quiz;
   if (l.subjectCategory !== undefined) o.subject_category = l.subjectCategory;
   if (l.published !== undefined) o.published = l.published;

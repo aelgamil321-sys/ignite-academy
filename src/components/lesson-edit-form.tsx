@@ -6,6 +6,12 @@ import { grades } from "@/lib/curriculum";
 import { useCMS, type CustomLesson } from "@/lib/cms";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { uploadToStorage, formatError } from "@/lib/upload";
+import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
+import {
+  bilingualFilesFromLesson,
+  bilingualFilesToLessonUpdate,
+  type BilingualLessonFiles,
+} from "@/lib/lesson-bilingual-files";
 
 const L = (en: string, ar: string) => ({ en, ar });
 
@@ -62,6 +68,9 @@ export function LessonEditForm({
     lesson.worksheetUrl ? { url: lesson.worksheetUrl, name: lesson.worksheetName ?? "Worksheet" } : null,
   );
   const [pub, setPub] = useState(lesson.published);
+  const [bilingualFiles, setBilingualFiles] = useState<BilingualLessonFiles>(
+    bilingualFilesFromLesson(lesson),
+  );
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -85,6 +94,7 @@ export function LessonEditForm({
     setPpt(lesson.pptUrl ? { url: lesson.pptUrl, name: lesson.pptName ?? "PowerPoint" } : null);
     setWs(lesson.worksheetUrl ? { url: lesson.worksheetUrl, name: lesson.worksheetName ?? "Worksheet" } : null);
     setPub(lesson.published);
+    setBilingualFiles(bilingualFilesFromLesson(lesson));
   }, [lesson]);
 
   const onFile = (setter: (v: { url: string; name: string } | null) => void, folder: string) =>
@@ -132,6 +142,7 @@ export function LessonEditForm({
         worksheetUrl: ws?.url ?? lesson.worksheetUrl,
         worksheetName: ws?.name ?? lesson.worksheetName,
         published: pub,
+        ...bilingualFilesToLessonUpdate(bilingualFiles),
       });
       toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
       onSaved();
@@ -235,6 +246,12 @@ export function LessonEditForm({
         <input type="file" onChange={onFile(setWs, "lessons/worksheet")} className="lesson-input" />
         {ws && <div className="text-xs text-emerald mt-1">✓ {ws.name}</div>}
       </Field>
+
+      <LessonBilingualFileFields
+        files={bilingualFiles}
+        onChange={setBilingualFiles}
+        lessonId={lesson.id}
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
         <label className="inline-flex items-center gap-2 text-sm">

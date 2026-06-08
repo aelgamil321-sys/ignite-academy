@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const BUCKET = "cms-uploads";
+export const LESSON_FILES_BUCKET = "lesson-files";
 
 export interface UploadedFile {
   url: string;
@@ -36,6 +37,31 @@ export async function uploadToStorage(file: File, folder = "files"): Promise<Upl
     throw new Error(`Could not get file URL: ${signed.error?.message ?? "unknown"}`);
   }
   return { url: signed.data.signedUrl, name: file.name, size: humanSize(file.size), path };
+}
+
+const TEN_YEARS = 60 * 60 * 24 * 365 * 10;
+
+/** Upload a lesson attachment to the lesson-files bucket (admin only). */
+export async function uploadLessonFile(file: File, folder: string): Promise<UploadedFile> {
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${sanitize(file.name)}`;
+  const up = await supabase.storage.from(LESSON_FILES_BUCKET).upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type || undefined,
+  });
+  if (up.error) throw new Error(`Upload failed: ${up.error.message}`);
+
+  const signed = await supabase.storage.from(LESSON_FILES_BUCKET).createSignedUrl(path, TEN_YEARS);
+  if (signed.error || !signed.data?.signedUrl) {
+    throw new Error(`Could not get file URL: ${signed.error?.message ?? "unknown"}`);
+  }
+  return { url: signed.data.signedUrl, name: file.name, size: humanSize(file.size), path };
+}
+
+/** Best-effort removal of a stored lesson file (admin only). */
+export async function deleteLessonFile(storagePath: string): Promise<void> {
+  const { error } = await supabase.storage.from(LESSON_FILES_BUCKET).remove([storagePath]);
+  if (error) throw new Error(`Delete failed: ${error.message}`);
 }
 
 /** Format any thrown value (Error / Supabase PostgrestError / object) into readable text. */
