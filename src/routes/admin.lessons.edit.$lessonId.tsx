@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LessonEditForm } from "@/components/lesson-edit-form";
+import { normalizeQuizList } from "@/lib/lesson-quiz";
 import { useCMS, type CustomLesson } from "@/lib/cms";
 import { useI18n } from "@/lib/i18n";
 
@@ -84,7 +85,7 @@ function AdminLessonEditPage() {
         worksheetEnUrl: row.worksheet_en_url ? String(row.worksheet_en_url) : undefined,
         pdfArUrl: row.pdf_ar_url ? String(row.pdf_ar_url) : undefined,
         pdfEnUrl: row.pdf_en_url ? String(row.pdf_en_url) : undefined,
-        quiz: Array.isArray(row.quiz) ? row.quiz : [],
+        quiz: normalizeQuizList(Array.isArray(row.quiz) ? row.quiz : []),
         subjectCategory: (row.subject_category as CustomLesson["subjectCategory"]) ?? "quran",
         published: Boolean(row.published),
         createdAt: new Date(String(row.created_at)).getTime(),

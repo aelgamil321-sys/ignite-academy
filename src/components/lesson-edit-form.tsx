@@ -7,12 +7,15 @@ import { useCMS, type CustomLesson } from "@/lib/cms";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { uploadToStorage, formatError } from "@/lib/upload";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
+import { LessonQuizBuilder } from "@/components/lesson-quiz-builder";
 import {
   bilingualFilesFromLesson,
   bilingualFilesSavePayload,
   mergeBilingualFiles,
   type BilingualLessonFiles,
 } from "@/lib/lesson-bilingual-files";
+import { quizQuestionsForForm, serializeQuizForSave } from "@/lib/lesson-quiz";
+import type { QuizQuestion } from "@/lib/curriculum";
 
 const L = (en: string, ar: string) => ({ en, ar });
 
@@ -72,8 +75,10 @@ export function LessonEditForm({
   const [bilingualFiles, setBilingualFiles] = useState<BilingualLessonFiles>(
     bilingualFilesFromLesson(lesson),
   );
+  const [quiz, setQuiz] = useState<QuizQuestion[]>(() => quizQuestionsForForm(lesson.quiz));
   const [saving, setSaving] = useState(false);
   const bilingualLessonId = useRef<string | null>(null);
+  const quizLessonId = useRef<string | null>(null);
 
   useEffect(() => {
     setGrade(lesson.grade);
@@ -102,6 +107,12 @@ export function LessonEditForm({
     if (bilingualLessonId.current === lesson.id) return;
     bilingualLessonId.current = lesson.id;
     setBilingualFiles(bilingualFilesFromLesson(lesson));
+  }, [lesson.id]);
+
+  useEffect(() => {
+    if (quizLessonId.current === lesson.id) return;
+    quizLessonId.current = lesson.id;
+    setQuiz(quizQuestionsForForm(lesson.quiz));
   }, [lesson.id]);
 
   const onFile = (setter: (v: { url: string; name: string } | null) => void, folder: string) =>
@@ -152,6 +163,7 @@ export function LessonEditForm({
         worksheetUrl: ws?.url ?? lesson.worksheetUrl,
         worksheetName: ws?.name ?? lesson.worksheetName,
         published: pub,
+        quiz: serializeQuizForSave(quiz),
         ...bilingualFilesSavePayload(mergedFiles, baselineFiles),
       });
       toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
@@ -263,6 +275,8 @@ export function LessonEditForm({
         lessonId={lesson.id}
         savedFiles={bilingualFilesFromLesson(lesson)}
       />
+
+      <LessonQuizBuilder questions={quiz} onChange={setQuiz} />
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
         <label className="inline-flex items-center gap-2 text-sm">

@@ -23,8 +23,10 @@ const L = (en: string, ar: string): Bi => ({ en, ar });
 const empty: Bi = { en: "", ar: "" };
 const emptyQ: QuizQuestion = {
   q: { en: "", ar: "" },
+  type: "multiple_choice",
   options: [{ en: "", ar: "" }, { en: "", ar: "" }, { en: "", ar: "" }, { en: "", ar: "" }],
   answer: 0,
+  points: 1,
 };
 
 // ---------- route ----------

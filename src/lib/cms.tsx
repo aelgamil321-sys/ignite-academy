@@ -6,6 +6,7 @@ import {
 } from "./extras";
 import { type SubjectCategory, subjectCategoryName } from "./categories";
 import { gradeDisplayName, gradeMatches, normalizeGradeSlug } from "./grade-utils";
+import { normalizeQuizList } from "./lesson-quiz";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -168,7 +169,7 @@ const lessonFromRow = (r: LessonRow): CustomLesson => ({
   pptArUrl: r.ppt_ar_url ?? undefined, pptEnUrl: r.ppt_en_url ?? undefined,
   worksheetArUrl: r.worksheet_ar_url ?? undefined, worksheetEnUrl: r.worksheet_en_url ?? undefined,
   pdfArUrl: r.pdf_ar_url ?? undefined, pdfEnUrl: r.pdf_en_url ?? undefined,
-  quiz: Array.isArray(r.quiz) ? r.quiz : [],
+  quiz: normalizeQuizList(Array.isArray(r.quiz) ? r.quiz : []),
   subjectCategory: ((r.subject_category ?? "quran") as SubjectCategory),
   published: r.published,
   createdAt: new Date(r.created_at).getTime(),
@@ -482,7 +483,7 @@ export function customToLesson(c: CustomLesson, lang: "en" | "ar" = "en"): Lesso
     activity: c.activity,
     worksheet: c.worksheetText,
     videoTitle: c.title,
-    quiz: c.quiz ?? [],
+    quiz: normalizeQuizList(c.quiz ?? []),
   };
 }
 

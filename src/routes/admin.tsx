@@ -8,6 +8,7 @@ import { useCMS, type CustomLesson, type CustomVideo, type CustomFile, type Cust
 import { SUBJECT_CATEGORIES, type SubjectCategory } from "@/lib/categories";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import type { QuizQuestion } from "@/lib/curriculum";
+import { emptyMultipleChoiceQuestion, serializeQuizForSave } from "@/lib/lesson-quiz";
 import {
   BookOpen, Video, FileUp, Newspaper, Folder, GraduationCap,
   Layers, ClipboardCheck, Megaphone, Plus, Trash2, Eye, EyeOff, Save, X, ExternalLink, LogOut, Pencil, RotateCcw,
@@ -218,7 +219,7 @@ function Overview() {
 }
 
 // ============ Lesson Form ============
-const emptyQuiz: QuizQuestion = { q: { en: "", ar: "" }, options: [{ en: "", ar: "" }, { en: "", ar: "" }, { en: "", ar: "" }, { en: "", ar: "" }], answer: 0 };
+const emptyQuiz: QuizQuestion = emptyMultipleChoiceQuestion();
 
 function lessonToFormState(l: CustomLesson) {
   return {
@@ -363,7 +364,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       worksheet_en_url: bilingualFiles.worksheetEnUrl,
       pdf_ar_url: bilingualFiles.pdfArUrl,
       pdf_en_url: bilingualFiles.pdfEnUrl,
-      quiz: quiz.filter((q) => q.q.en || q.q.ar),
+      quiz: serializeQuizForSave(quiz),
       published: publish,
     };
 

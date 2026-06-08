@@ -1,17 +1,18 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
 import {
   ChevronLeft, Clock, Target, BookOpen, Sparkles, ClipboardList,
-  FileText, Video, HelpCircle, Download, CheckCircle2, XCircle, RotateCcw,
+  FileText, Video, HelpCircle, Download,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { useI18n, type TKey } from "@/lib/i18n";
-import { getGrade, type Lesson } from "@/lib/curriculum";
+import { getGrade } from "@/lib/curriculum";
 import { useResolveLesson, ytId, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
 import { studentDownloadItems, fileNameFromUrl } from "@/lib/lesson-bilingual-files";
+import { LessonQuizStudent } from "@/components/lesson-quiz-student";
+import { normalizeQuizList } from "@/lib/lesson-quiz";
 import videoPlaceholder from "@/assets/video-placeholder.jpg";
 
 export const Route = createFileRoute("/grades/$grade/$lesson")({
@@ -97,7 +98,7 @@ function LessonPage() {
             <h1 className="font-display text-3xl md:text-5xl font-semibold text-primary leading-tight">{lesson.title[lang]}</h1>
             <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5"><Clock className="h-4 w-4" /> {lesson.duration} {tr("minutes")}</span>
-              <span className="inline-flex items-center gap-1.5"><HelpCircle className="h-4 w-4" /> {lesson.quiz.length} Q</span>
+              <span className="inline-flex items-center gap-1.5"><HelpCircle className="h-4 w-4" /> {normalizeQuizList(custom?.quiz ?? lesson.quiz).length} Q</span>
               <span className="inline-flex items-center gap-1.5"><BookOpen className="h-4 w-4" /> {grade.name[lang]}</span>
             </div>
           </div>
@@ -171,7 +172,9 @@ function LessonPage() {
 
             <LessonDownloads custom={custom} />
 
-            <Quiz lesson={lesson} />
+            {custom && normalizeQuizList(custom.quiz).length > 0 && (
+              <LessonQuizStudent lessonId={custom.id} questions={custom.quiz} />
+            )}
           </div>
 
           <aside className="space-y-6">
@@ -234,81 +237,6 @@ function LessonDownloads({ custom }: { custom?: CustomLesson }) {
           No files attached to this lesson
         </p>
       )}
-    </div>
-  );
-}
-
-function Quiz({ lesson }: { lesson: Lesson }) {
-  const { tr, lang } = useI18n();
-  const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [submitted, setSubmitted] = useState(false);
-  if (lesson.quiz.length === 0) return null;
-  const score = lesson.quiz.reduce((acc, q, i) => acc + (answers[i] === q.answer ? 1 : 0), 0);
-
-  return (
-    <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald">
-          <HelpCircle className="h-5 w-5" />
-        </div>
-        <h2 className="font-display text-xl font-semibold text-primary">{tr("ls_quiz")}</h2>
-      </div>
-      <div className="space-y-6">
-        {lesson.quiz.map((q, i) => {
-          const selected = answers[i];
-          const isCorrect = submitted && selected === q.answer;
-          return (
-            <div key={i} className="rounded-xl border border-border bg-background p-5">
-              <div className="text-xs uppercase tracking-[0.18em] text-emerald mb-2">{tr("question")} {i + 1}</div>
-              <div className="font-medium text-foreground mb-3">{q.q[lang]}</div>
-              <div className="grid gap-2">
-                {q.options.map((opt, oi) => {
-                  const chosen = selected === oi;
-                  const correctChoice = submitted && oi === q.answer;
-                  const wrongChoice = submitted && chosen && oi !== q.answer;
-                  return (
-                    <button key={oi} disabled={submitted}
-                      onClick={() => setAnswers((a) => ({ ...a, [i]: oi }))}
-                      className={[
-                        "text-start rounded-lg border px-4 py-2.5 text-sm transition-colors",
-                        correctChoice ? "border-emerald bg-emerald/10 text-emerald"
-                          : wrongChoice ? "border-destructive bg-destructive/10 text-destructive"
-                          : chosen ? "border-primary bg-primary/5 text-primary"
-                          : "border-border hover:border-emerald hover:text-emerald",
-                      ].join(" ")}
-                    >{opt[lang]}</button>
-                  );
-                })}
-              </div>
-              {submitted && (
-                <div className={`mt-3 inline-flex items-center gap-2 text-sm font-medium ${isCorrect ? "text-emerald" : "text-destructive"}`}>
-                  {isCorrect ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                  {isCorrect ? tr("correct") : tr("incorrect")}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-        {!submitted ? (
-          <button onClick={() => setSubmitted(true)}
-            disabled={Object.keys(answers).length !== lesson.quiz.length}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)] disabled:opacity-50 disabled:cursor-not-allowed">
-            {tr("submit_quiz")}
-          </button>
-        ) : (
-          <>
-            <div className="font-display text-lg text-primary">
-              {tr("your_score")}: <span className="text-emerald">{score}/{lesson.quiz.length}</span>
-            </div>
-            <button onClick={() => { setAnswers({}); setSubmitted(false); }}
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-sm font-semibold hover:border-emerald hover:text-emerald transition-colors">
-              <RotateCcw className="h-4 w-4" /> {tr("retry_quiz")}
-            </button>
-          </>
-        )}
-      </div>
     </div>
   );
 }

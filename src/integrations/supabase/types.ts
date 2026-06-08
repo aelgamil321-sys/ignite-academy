@@ -188,6 +188,39 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_quiz_submissions: {
+        Row: {
+          id: string
+          student_id: string
+          lesson_id: string
+          score: number
+          total_points: number
+          percentage: number
+          answers: Json
+          submitted_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          lesson_id: string
+          score?: number
+          total_points?: number
+          percentage?: number
+          answers?: Json
+          submitted_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          lesson_id?: string
+          score?: number
+          total_points?: number
+          percentage?: number
+          answers?: Json
+          submitted_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

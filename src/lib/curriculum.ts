@@ -1,9 +1,13 @@
 export type Bi = { en: string; ar: string };
 
+export type QuizQuestionType = "multiple_choice" | "true_false";
+
 export interface QuizQuestion {
   q: Bi;
+  type: QuizQuestionType;
   options: Bi[];
   answer: number;
+  points: number;
 }
 
 export interface Lesson {
