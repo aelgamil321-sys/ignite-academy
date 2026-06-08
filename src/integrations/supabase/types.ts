@@ -194,8 +194,12 @@ export type Database = {
           student_id: string
           lesson_id: string
           score: number
+          auto_score: number
+          essay_score: number
+          final_score: number
           total_points: number
           percentage: number
+          status: string
           answers: Json
           submitted_at: string
         }
@@ -204,8 +208,12 @@ export type Database = {
           student_id: string
           lesson_id: string
           score?: number
+          auto_score?: number
+          essay_score?: number
+          final_score?: number
           total_points?: number
           percentage?: number
+          status?: string
           answers?: Json
           submitted_at?: string
         }
@@ -214,8 +222,12 @@ export type Database = {
           student_id?: string
           lesson_id?: string
           score?: number
+          auto_score?: number
+          essay_score?: number
+          final_score?: number
           total_points?: number
           percentage?: number
+          status?: string
           answers?: Json
           submitted_at?: string
         }

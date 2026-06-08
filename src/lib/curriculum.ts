@@ -1,6 +1,6 @@
 export type Bi = { en: string; ar: string };
 
-export type QuizQuestionType = "multiple_choice" | "true_false";
+export type QuizQuestionType = "multiple_choice" | "true_false" | "essay";
 
 export interface QuizQuestion {
   q: Bi;
@@ -8,6 +8,8 @@ export interface QuizQuestion {
   options: Bi[];
   answer: number;
   points: number;
+  /** Optional model answer for essay questions (admin reference only). */
+  modelAnswer?: Bi;
 }
 
 export interface Lesson {

@@ -106,25 +106,34 @@ export function AdminLayoutShell({ email }: { email: string }) {
   const tab = parseAdminTab(search) ?? "overview";
   const onLessonsList = pathname === "/admin/lessons" || pathname === "/admin/lessons/";
   const onLessonsEdit = pathname.startsWith("/admin/lessons/edit/");
+  const onQuizSubmissions =
+    pathname === "/admin/quiz-submissions" || pathname === "/admin/quiz-submissions/";
 
   const adminLabel = L("Admin", "الإدارة")[lang];
   const manageLessonsLabel = L("Manage Lessons", "إدارة الدروس")[lang];
-  const title = onLessonsList
-    ? manageLessonsLabel
-    : onLessonsEdit
-      ? L("Edit Lesson", "تعديل الدرس")[lang]
-      : L("Admin Dashboard", "لوحة الإدارة")[lang];
-  const lead = onLessonsList
-    ? L("View and edit all lessons.", "عرض وتعديل جميع الدروس.")[lang]
-    : onLessonsEdit
-      ? L("Update the existing lesson.", "تحديث بيانات الدرس الحالي.")[lang]
-      : L("Create, edit, publish, and manage all content via Supabase CMS.",
-          "أنشئ المحتوى وحرّره وانشره وأدره عبر نظام إدارة المحتوى.")[lang];
-  const crumbs = onLessonsList
-    ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel }]
-    : onLessonsEdit
-      ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel, to: "/admin/lessons" }, { label: L("Edit", "تعديل")[lang] }]
-      : [{ label: title }];
+  const quizSubmissionsLabel = L("Quiz Submissions", "إرسالات الاختبارات")[lang];
+  const title = onQuizSubmissions
+    ? quizSubmissionsLabel
+    : onLessonsList
+      ? manageLessonsLabel
+      : onLessonsEdit
+        ? L("Edit Lesson", "تعديل الدرس")[lang]
+        : L("Admin Dashboard", "لوحة الإدارة")[lang];
+  const lead = onQuizSubmissions
+    ? L("Review student quiz submissions and grade essay answers.", "راجع إرسالات الطلاب وقيّم الإجابات المقالية.")[lang]
+    : onLessonsList
+      ? L("View and edit all lessons.", "عرض وتعديل جميع الدروس.")[lang]
+      : onLessonsEdit
+        ? L("Update the existing lesson.", "تحديث بيانات الدرس الحالي.")[lang]
+        : L("Create, edit, publish, and manage all content via Supabase CMS.",
+            "أنشئ المحتوى وحرّره وانشره وأدره عبر نظام إدارة المحتوى.")[lang];
+  const crumbs = onQuizSubmissions
+    ? [{ label: adminLabel, to: "/admin" }, { label: quizSubmissionsLabel }]
+    : onLessonsList
+      ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel }]
+      : onLessonsEdit
+        ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel, to: "/admin/lessons" }, { label: L("Edit", "تعديل")[lang] }]
+        : [{ label: title }];
 
   return (
     <PageShell eyebrow={adminLabel} title={title} lead={lead} crumbs={crumbs}>

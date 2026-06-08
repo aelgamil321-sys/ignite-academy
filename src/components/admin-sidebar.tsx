@@ -46,6 +46,8 @@ export function AdminSidebar({
   const { lang } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const onLessonsRoute = pathname === "/admin/lessons" || pathname.startsWith("/admin/lessons/");
+  const onQuizSubmissionsRoute =
+    pathname === "/admin/quiz-submissions" || pathname.startsWith("/admin/quiz-submissions/");
 
   return (
     <aside className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] h-fit">
@@ -54,7 +56,7 @@ export function AdminSidebar({
       </div>
       {createItems.map((s) => {
         const Icon = s.icon;
-        const active = !onLessonsRoute && activeTab === s.key;
+        const active = !onLessonsRoute && !onQuizSubmissionsRoute && activeTab === s.key;
         return (
           <Link
             key={s.key}
@@ -77,9 +79,14 @@ export function AdminSidebar({
         <span className="text-start">{L("Manage Lessons", "إدارة الدروس")[lang]}</span>
       </Link>
 
+      <Link to="/admin/quiz-submissions" className={sideClass(onQuizSubmissionsRoute)}>
+        <ClipboardCheck className="h-4 w-4 shrink-0" />
+        <span className="text-start">{L("Quiz Submissions", "إرسالات الاختبارات")[lang]}</span>
+      </Link>
+
       {manageTabItems.map((s) => {
         const Icon = s.icon;
-        const active = !onLessonsRoute && activeTab === s.key;
+        const active = !onLessonsRoute && !onQuizSubmissionsRoute && activeTab === s.key;
         return (
           <Link
             key={s.key}
