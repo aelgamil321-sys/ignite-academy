@@ -116,14 +116,14 @@ function MosqueWatermark() {
   );
 }
 
-const LOGO_MAX_HEIGHT = 170;
+const LOGO_MAX_HEIGHT = 89;
 
 function LogoBanner({ logoUrl }: { logoUrl: string }) {
   return (
     <div
       style={{
-        margin: "6px 16px 0",
-        padding: "6px",
+        margin: "3px 16px 0",
+        padding: "3px",
         border: `3px solid ${CERT_COLORS.gold}`,
         borderRadius: 10,
         backgroundColor: CERT_COLORS.white,
@@ -135,12 +135,15 @@ function LogoBanner({ logoUrl }: { logoUrl: string }) {
       <div
         style={{
           width: "100%",
+          height: LOGO_MAX_HEIGHT,
+          maxHeight: 93,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: CERT_COLORS.white,
           borderRadius: 6,
-          padding: "4px 0",
+          padding: "1px 0",
+          boxSizing: "border-box",
         }}
       >
         <img
@@ -186,7 +189,7 @@ function ScoreIcon({ type }: { type: "score" | "percent" | "grade" }) {
     borderRadius: "50%",
     border: `2px solid ${CERT_COLORS.gold}`,
     backgroundColor: CERT_COLORS.darkGreen,
-    margin: "0 auto 8px",
+    margin: "0 auto 5px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -244,7 +247,7 @@ function ScoreCard({
       <div
         style={{
           background: `linear-gradient(180deg, ${CERT_COLORS.navy} 0%, ${CERT_COLORS.darkGreen} 100%)`,
-          padding: "6px 8px",
+          padding: "5px 8px",
           textAlign: "center",
           borderBottom: `2px solid ${CERT_COLORS.gold}`,
         }}
@@ -256,7 +259,7 @@ function ScoreCard({
           {labelEn}
         </div>
       </div>
-      <div style={{ padding: "8px 8px 7px", textAlign: "center", backgroundColor: CERT_COLORS.beige }}>
+      <div style={{ padding: "6px 8px 5px", textAlign: "center", backgroundColor: CERT_COLORS.beige }}>
         <ScoreIcon type={type} />
         <div
           style={{
@@ -291,7 +294,7 @@ function DetailCard({
         border: `2px solid ${CERT_COLORS.gold}`,
         borderRadius: 8,
         backgroundColor: CERT_COLORS.white,
-        padding: "8px 10px",
+        padding: "6px 8px",
         textAlign: "center",
         boxSizing: "border-box",
         boxShadow: "0 2px 8px #071A3D14",
@@ -300,7 +303,7 @@ function DetailCard({
       <div style={{ fontSize: 9, color: CERT_COLORS.gray, direction: "rtl", marginBottom: 2 }}>
         {labelAr}
       </div>
-      <div style={{ fontSize: 9, color: CERT_COLORS.gray, marginBottom: 6, direction: "ltr", fontWeight: 600 }}>
+      <div style={{ fontSize: 9, color: CERT_COLORS.gray, marginBottom: 4, direction: "ltr", fontWeight: 600 }}>
         {labelEn}
       </div>
       <div
@@ -340,8 +343,8 @@ export function CertificatePageBody({
     fontSize: 26,
     fontWeight: 700,
     color: CERT_COLORS.navy,
-    margin: "8px 0 6px",
-    padding: "4px 0 8px",
+    margin: "5px 0 4px",
+    padding: "2px 0 5px",
     borderBottom: `3px solid ${CERT_COLORS.gold}`,
     lineHeight: 1.15,
     wordBreak: "break-word",
@@ -417,17 +420,18 @@ export function CertificatePageBody({
 
         <div
           style={{
-            padding: "4px 32px 8px",
+            padding: "2px 32px 8px",
             flex: 1,
             display: "flex",
             flexDirection: "column",
             boxSizing: "border-box",
             minHeight: 0,
+            justifyContent: "flex-start",
           }}
         >
           {/* Title */}
-          <div style={{ textAlign: "center", marginBottom: 4, flexShrink: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 2 }}>
+          <div style={{ textAlign: "center", marginBottom: 2, flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 1 }}>
               <GoldDiamond />
               <span
                 style={{
@@ -458,7 +462,7 @@ export function CertificatePageBody({
                 width: 240,
                 height: 2,
                 background: `linear-gradient(90deg, transparent, ${CERT_COLORS.gold}, transparent)`,
-                margin: "5px auto 0",
+                margin: "3px auto 0",
               }}
             />
           </div>
@@ -468,12 +472,12 @@ export function CertificatePageBody({
             style={{
               display: "flex",
               gap: 0,
-              marginBottom: 6,
+              marginBottom: 4,
               flexShrink: 0,
               backgroundColor: CERT_COLORS.beige,
               border: `2px solid ${CERT_COLORS.gold}`,
               borderRadius: 10,
-              padding: "8px 6px",
+              padding: "6px 6px",
               boxSizing: "border-box",
             }}
           >
@@ -515,8 +519,8 @@ export function CertificatePageBody({
           <div
             style={{
               display: "flex",
-              gap: 14,
-              marginBottom: 6,
+              gap: 10,
+              marginBottom: 4,
               flexShrink: 0,
             }}
           >
@@ -541,13 +545,13 @@ export function CertificatePageBody({
           </div>
 
           {/* Lesson details — 3 wider cards */}
-          <div style={{ marginBottom: 6, flexShrink: 0 }}>
+          <div style={{ marginBottom: 2, flexShrink: 0 }}>
             <div
               style={{
                 background: `linear-gradient(90deg, ${CERT_COLORS.navy}, ${CERT_COLORS.darkGreen})`,
                 border: `2px solid ${CERT_COLORS.gold}`,
                 borderRadius: "8px 8px 0 0",
-                padding: "5px 12px",
+                padding: "4px 12px",
                 textAlign: "center",
               }}
             >
@@ -562,8 +566,8 @@ export function CertificatePageBody({
             <div
               style={{
                 display: "flex",
-                gap: 12,
-                padding: "8px",
+                gap: 10,
+                padding: "6px",
                 backgroundColor: CERT_COLORS.cream,
                 border: `2px solid ${CERT_COLORS.gold}`,
                 borderTop: "none",
@@ -583,10 +587,10 @@ export function CertificatePageBody({
           {/* Signature footer */}
           <div
             style={{
-              marginTop: "auto",
+              marginTop: 2,
               flexShrink: 0,
               borderTop: `2px solid ${CERT_COLORS.gold}`,
-              paddingTop: 8,
+              paddingTop: 3,
               display: "flex",
               justifyContent: "center",
             }}
@@ -599,7 +603,7 @@ export function CertificatePageBody({
                 backgroundColor: CERT_COLORS.white,
                 border: `2px solid ${CERT_COLORS.gold}`,
                 borderRadius: 10,
-                padding: "10px 24px 12px",
+                padding: "7px 20px 8px",
                 boxSizing: "border-box",
                 boxShadow: "0 3px 12px #071A3D18",
               }}
@@ -608,7 +612,7 @@ export function CertificatePageBody({
                 style={{
                   fontSize: 8,
                   color: CERT_COLORS.gray,
-                  marginBottom: 8,
+                  marginBottom: 5,
                   fontWeight: 700,
                   letterSpacing: 0.6,
                 }}
@@ -626,7 +630,7 @@ export function CertificatePageBody({
                   width: 120,
                   height: 2,
                   backgroundColor: CERT_COLORS.gold,
-                  margin: "8px auto",
+                  margin: "5px auto",
                 }}
               />
               <div style={{ fontSize: 15, fontWeight: 700, direction: "ltr", color: CERT_COLORS.navy }}>
