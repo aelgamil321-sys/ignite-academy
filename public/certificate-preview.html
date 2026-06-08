@@ -14,6 +14,10 @@
         repeating-linear-gradient(45deg, #FFFDF5 0px, #FFFDF5 12px, #EFE4CC 12px, #EFE4CC 13px),
         repeating-linear-gradient(-45deg, transparent 0px, transparent 24px, #F7EEDC 24px, #F7EEDC 25px);
     }
+    .grid {
+      position: relative; z-index: 5; height: 100%; box-sizing: border-box;
+      padding: 14px 28px 12px; display: flex; flex-direction: column; justify-content: space-between;
+    }
   </style>
 </head>
 <body>
@@ -21,69 +25,78 @@
     <div style="position:absolute;inset:0;border:4px solid #071A3D;box-sizing:border-box;z-index:3;pointer-events:none;"></div>
     <div style="position:absolute;inset:8px;border:2px solid #C9A227;box-sizing:border-box;z-index:3;pointer-events:none;"></div>
     <div style="position:absolute;inset:13px;border:1px solid #C9A227;box-sizing:border-box;z-index:3;pointer-events:none;"></div>
-    <div style="position:absolute;top:6px;left:6px;width:56px;height:56px;background:#071A3D;border:2px solid #C9A227;z-index:4;"><div style="position:absolute;inset:5px;border:1px solid #C9A227;transform:rotate(45deg);"></div><div style="position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px 0 0 -4px;background:#C9A227;transform:rotate(45deg);"></div></div>
-    <div style="position:absolute;top:6px;right:6px;width:56px;height:56px;background:#071A3D;border:2px solid #C9A227;z-index:4;"><div style="position:absolute;inset:5px;border:1px solid #C9A227;transform:rotate(45deg);"></div><div style="position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px 0 0 -4px;background:#C9A227;transform:rotate(45deg);"></div></div>
-    <div style="position:absolute;bottom:6px;left:6px;width:56px;height:56px;background:#071A3D;border:2px solid #C9A227;z-index:4;"><div style="position:absolute;inset:5px;border:1px solid #C9A227;transform:rotate(45deg);"></div><div style="position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px 0 0 -4px;background:#C9A227;transform:rotate(45deg);"></div></div>
-    <div style="position:absolute;bottom:6px;right:6px;width:56px;height:56px;background:#071A3D;border:2px solid #C9A227;z-index:4;"><div style="position:absolute;inset:5px;border:1px solid #C9A227;transform:rotate(45deg);"></div><div style="position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px 0 0 -4px;background:#C9A227;transform:rotate(45deg);"></div></div>
+    <div style="position:absolute;top:6px;left:6px;width:56px;height:56px;background:#071A3D;border:2px solid #C9A227;z-index:4;"></div>
+    <div style="position:absolute;top:6px;right:6px;width:56px;height:56px;background:#071A3D;border:2px solid #C9A227;z-index:4;"></div>
+    <div style="position:absolute;bottom:6px;left:6px;width:56px;height:56px;background:#071A3D;border:2px solid #C9A227;z-index:4;"></div>
+    <div style="position:absolute;bottom:6px;right:6px;width:56px;height:56px;background:#071A3D;border:2px solid #C9A227;z-index:4;"></div>
 
-    <div style="height:100%;display:flex;flex-direction:column;position:relative;z-index:5;">
-      <div style="margin:3px 16px 0;padding:3px;border:3px solid #C9A227;border-radius:10px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #071A3D;">
-        <div style="width:100%;height:89px;max-height:93px;display:flex;align-items:center;justify-content:center;background:#FFFFFF;border-radius:6px;padding:1px 0;box-sizing:border-box;">
-          <img id="logo" src="/logos/ignite-islamic-department.jpg?v=20260609" alt="Logo" style="display:block;width:100%;max-height:89px;height:auto;object-fit:contain;object-position:center center;background:#FFFFFF;image-orientation:from-image;" crossorigin="anonymous" />
+    <div class="grid">
+      <!-- Logo 125px -->
+      <div style="height:125px;flex-shrink:0;padding:4px;border:3px solid #C9A227;border-radius:10px;background:#FFFFFF;box-sizing:border-box;overflow:hidden;">
+        <div style="width:100%;height:100%;background:#FFFFFF;display:flex;align-items:center;justify-content:center;">
+          <img src="/logos/ignite-islamic-department.jpg?v=20260609" alt="Logo" style="display:block;width:100%;height:100%;object-fit:contain;background:#FFFFFF;" crossorigin="anonymous" />
         </div>
       </div>
 
-      <div style="padding:2px 32px 8px;flex:1;display:flex;flex-direction:column;">
-        <div style="text-align:center;margin-bottom:2px;">
-          <div style="display:flex;align-items:center;justify-content:center;margin-bottom:1px;">
-            <span style="display:inline-block;width:9px;height:9px;background:#C9A227;transform:rotate(45deg);margin:0 12px;"></span>
-            <span style="font-size:30px;font-weight:700;direction:rtl;color:#071A3D;">شهادة إنجاز</span>
-            <span style="display:inline-block;width:9px;height:9px;background:#C9A227;transform:rotate(45deg);margin:0 12px;"></span>
-          </div>
-          <div style="font-size:13px;font-weight:700;color:#0F3D2E;letter-spacing:2.2px;">CERTIFICATE OF ACHIEVEMENT</div>
-          <div style="width:240px;height:2px;background:linear-gradient(90deg,transparent,#C9A227,transparent);margin:3px auto 0;"></div>
-        </div>
+      <!-- Title 60px -->
+      <div style="height:60px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;">
+        <div style="font-size:28px;font-weight:700;color:#071A3D;direction:rtl;line-height:1;">شهادة إنجاز</div>
+        <div style="font-size:17px;font-weight:700;color:#0F3D2E;letter-spacing:2px;margin-top:4px;">CERTIFICATE OF ACHIEVEMENT</div>
+        <div style="width:220px;height:2px;background:linear-gradient(90deg,transparent,#C9A227,transparent);margin-top:5px;"></div>
+      </div>
 
-        <div style="display:flex;margin-bottom:4px;background:#F7EEDC;border:2px solid #C9A227;border-radius:10px;padding:6px 6px;">
-          <div style="flex:1;font-size:12px;line-height:1.55;padding:0 8px;direction:ltr;text-align:left;">
-            <div style="font-weight:700;color:#071A3D;margin-bottom:4px;">Ignite School – Department of Islamic Education</div>
-            <div style="margin-bottom:2px;">is proud to award this certificate to:</div>
-            <div style="font-size:26px;font-weight:700;color:#071A3D;margin:5px 0 4px;padding:2px 0 5px;border-bottom:3px solid #C9A227;">Student Name</div>
-            <div style="font-size:11px;">for successfully completing the lesson assessment and achieving the score shown below.</div>
-          </div>
-          <div style="width:3px;background:#C9A227;margin:0 10px;flex-shrink:0;border-radius:2px;"></div>
-          <div style="flex:1;font-size:12px;line-height:1.55;padding:0 8px;direction:rtl;text-align:right;">
-            <div style="font-weight:700;color:#071A3D;margin-bottom:4px;">تتشرف مدرسة إغنايت – قسم التربية الإسلامية</div>
-            <div style="margin-bottom:2px;">بمنح هذه الشهادة إلى الطالب/ـة:</div>
-            <div style="font-size:26px;font-weight:700;color:#071A3D;margin:5px 0 4px;padding:2px 0 5px;border-bottom:3px solid #C9A227;">اسم الطالب</div>
-            <div style="font-size:11px;">وذلك لإتمامه/إتمامها متطلبات الدرس والاختبار الإلكتروني بنجاح.</div>
-          </div>
+      <!-- Name 115px -->
+      <div style="height:115px;flex-shrink:0;display:flex;background:#F7EEDC;border:2px solid #C9A227;border-radius:10px;overflow:hidden;box-sizing:border-box;">
+        <div style="flex:1;padding:0 6px;font-size:11px;line-height:1.35;">
+          <div style="font-weight:700;color:#071A3D;font-size:11px;">Ignite School – Department of Islamic Education</div>
+          <div style="font-size:10px;margin-top:2px;">is proud to award this certificate to:</div>
+          <div style="font-size:28px;font-weight:700;color:#071A3D;margin:4px 0;padding-bottom:4px;border-bottom:3px solid #C9A227;">Student Name</div>
         </div>
-
-        <div style="display:flex;gap:10px;margin-bottom:4px;">
-          <div style="flex:1;border:2px solid #C9A227;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px #071A3D20;"><div style="background:linear-gradient(180deg,#071A3D,#0F3D2E);padding:5px 8px;text-align:center;border-bottom:2px solid #C9A227;"><div style="font-size:9px;color:#F3E4A4;direction:rtl;">الدرجة النهائية</div><div style="font-size:9px;color:#FFFFFF;font-weight:700;">Final Score</div></div><div style="padding:6px 8px 5px;text-align:center;background:#F7EEDC;"><div style="width:42px;height:42px;border-radius:50%;border:2px solid #C9A227;background:#0F3D2E;color:#C9A227;font-size:18px;font-weight:700;line-height:38px;margin:0 auto 5px;">#</div><div style="font-size:20px;font-weight:700;color:#071A3D;">10 / 10</div></div></div>
-          <div style="flex:1;border:2px solid #C9A227;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px #071A3D20;"><div style="background:linear-gradient(180deg,#071A3D,#0F3D2E);padding:5px 8px;text-align:center;border-bottom:2px solid #C9A227;"><div style="font-size:9px;color:#F3E4A4;direction:rtl;">النسبة المئوية</div><div style="font-size:9px;color:#FFFFFF;font-weight:700;">Percentage</div></div><div style="padding:6px 8px 5px;text-align:center;background:#F7EEDC;"><div style="width:42px;height:42px;border-radius:50%;border:2px solid #C9A227;background:#0F3D2E;color:#C9A227;font-size:18px;font-weight:700;line-height:38px;margin:0 auto 5px;">%</div><div style="font-size:20px;font-weight:700;color:#071A3D;">100%</div></div></div>
-          <div style="flex:1;border:2px solid #C9A227;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px #071A3D20;"><div style="background:linear-gradient(180deg,#071A3D,#0F3D2E);padding:5px 8px;text-align:center;border-bottom:2px solid #C9A227;"><div style="font-size:9px;color:#F3E4A4;direction:rtl;">التقدير</div><div style="font-size:9px;color:#FFFFFF;font-weight:700;">Grade</div></div><div style="padding:6px 8px 5px;text-align:center;background:#F7EEDC;"><div style="width:42px;height:42px;border-radius:50%;border:2px solid #C9A227;background:#0F3D2E;color:#C9A227;font-size:18px;font-weight:700;line-height:38px;margin:0 auto 5px;">★</div><div style="font-size:20px;font-weight:700;color:#071A3D;">Excellent / ممتاز</div></div></div>
+        <div style="width:3px;background:#C9A227;margin:8px 6px;flex-shrink:0;"></div>
+        <div style="flex:1;padding:0 6px;font-size:11px;line-height:1.35;direction:rtl;text-align:right;">
+          <div style="font-weight:700;color:#071A3D;font-size:11px;">تتشرف مدرسة إغنايت – قسم التربية الإسلامية</div>
+          <div style="font-size:10px;margin-top:2px;">بمنح هذه الشهادة إلى الطالب/ـة:</div>
+          <div style="font-size:28px;font-weight:700;color:#071A3D;margin:4px 0;padding-bottom:4px;border-bottom:3px solid #C9A227;">اسم الطالب</div>
         </div>
+      </div>
 
-        <div style="margin-bottom:2px;">
-          <div style="background:linear-gradient(90deg,#071A3D,#0F3D2E);border:2px solid #C9A227;border-radius:8px 8px 0 0;padding:4px 12px;text-align:center;"><span style="font-size:11px;font-weight:700;color:#C9A227;direction:rtl;">بيانات الدرس</span><span style="font-size:10px;color:#FFFFFF;margin:0 10px;">/</span><span style="font-size:10px;font-weight:700;color:#FFFFFF;letter-spacing:1.5px;">LESSON DETAILS</span></div>
-          <div style="display:flex;gap:10px;padding:6px;background:#FFFDF5;border:2px solid #C9A227;border-top:none;border-radius:0 0 8px 8px;">
-            <div style="flex:1;border:2px solid #C9A227;border-radius:8px;background:#FFFFFF;padding:6px 8px;text-align:center;box-shadow:0 2px 8px #071A3D14;"><div style="font-size:9px;color:#6B7280;direction:rtl;">عنوان الدرس</div><div style="font-size:9px;color:#6B7280;font-weight:600;margin-bottom:4px;">Lesson Title</div><div style="font-size:12px;font-weight:700;color:#071A3D;">Lesson 3: Prayer / الدرس الثالث: الصلاة</div></div>
-            <div style="flex:1;border:2px solid #C9A227;border-radius:8px;background:#FFFFFF;padding:6px 8px;text-align:center;box-shadow:0 2px 8px #071A3D14;"><div style="font-size:9px;color:#6B7280;direction:rtl;">الصف</div><div style="font-size:9px;color:#6B7280;font-weight:600;margin-bottom:4px;">Grade</div><div style="font-size:12px;font-weight:700;color:#071A3D;">Grade 5 / الصف الخامس</div></div>
-            <div style="flex:1;border:2px solid #C9A227;border-radius:8px;background:#FFFFFF;padding:6px 8px;text-align:center;box-shadow:0 2px 8px #071A3D14;"><div style="font-size:9px;color:#6B7280;direction:rtl;">تاريخ الإنجاز</div><div style="font-size:9px;color:#6B7280;font-weight:600;margin-bottom:4px;">Completion Date</div><div style="font-size:12px;font-weight:700;color:#071A3D;">8 June 2026</div></div>
-          </div>
+      <!-- Scores 120px -->
+      <div style="height:120px;flex-shrink:0;display:flex;gap:12px;">
+        <div style="flex:1;border:2px solid #C9A227;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="background:linear-gradient(180deg,#071A3D,#0F3D2E);padding:5px 6px;text-align:center;border-bottom:2px solid #C9A227;"><div style="font-size:9px;color:#F3E4A4;">الدرجة النهائية</div><div style="font-size:9px;color:#FFF;font-weight:700;">Final Score</div></div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#F7EEDC;font-size:26px;font-weight:700;color:#071A3D;">10 / 10</div>
         </div>
+        <div style="flex:1;border:2px solid #C9A227;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="background:linear-gradient(180deg,#071A3D,#0F3D2E);padding:5px 6px;text-align:center;border-bottom:2px solid #C9A227;"><div style="font-size:9px;color:#F3E4A4;">النسبة المئوية</div><div style="font-size:9px;color:#FFF;font-weight:700;">Percentage</div></div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#F7EEDC;font-size:26px;font-weight:700;color:#071A3D;">100%</div>
+        </div>
+        <div style="flex:1;border:2px solid #C9A227;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="background:linear-gradient(180deg,#071A3D,#0F3D2E);padding:5px 6px;text-align:center;border-bottom:2px solid #C9A227;"><div style="font-size:9px;color:#F3E4A4;">التقدير</div><div style="font-size:9px;color:#FFF;font-weight:700;">Grade</div></div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#F7EEDC;font-size:24px;font-weight:700;color:#071A3D;">Excellent / ممتاز</div>
+        </div>
+      </div>
 
-        <div style="margin-top:2px;border-top:2px solid #C9A227;padding-top:3px;display:flex;justify-content:center;">
-          <div style="min-width:360px;text-align:center;background:#FFFFFF;border:2px solid #C9A227;border-radius:10px;padding:7px 20px 8px;box-shadow:0 3px 12px #071A3D18;">
-            <div style="font-size:8px;color:#6B7280;margin-bottom:5px;font-weight:700;">Electronic Signature / التوقيع الإلكتروني</div>
-            <div style="font-size:16px;font-weight:700;direction:rtl;color:#071A3D;">أيمن عبد الله</div>
-            <div style="font-size:11px;direction:rtl;color:#6B7280;margin-top:3px;">رئيس قسم التربية الإسلامية</div>
-            <div style="width:120px;height:2px;background:#C9A227;margin:5px auto;"></div>
-            <div style="font-size:15px;font-weight:700;color:#071A3D;">Ayman Abdullah</div>
-            <div style="font-size:10px;color:#6B7280;margin-top:3px;">Head of Islamic Education Department</div>
-          </div>
+      <!-- Lesson 95px -->
+      <div style="height:95px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="background:linear-gradient(90deg,#071A3D,#0F3D2E);border:2px solid #C9A227;border-radius:8px 8px 0 0;padding:4px 12px;text-align:center;">
+          <span style="font-size:11px;font-weight:700;color:#C9A227;">بيانات الدرس</span><span style="color:#FFF;margin:0 8px;">/</span><span style="font-size:10px;font-weight:700;color:#FFF;">LESSON DETAILS</span>
+        </div>
+        <div style="flex:1;display:flex;gap:10px;padding:6px;background:#FFFDF5;border:2px solid #C9A227;border-top:none;border-radius:0 0 8px 8px;min-height:0;">
+          <div style="flex:1;border:2px solid #C9A227;border-radius:8px;background:#FFF;padding:6px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center;"><div style="font-size:9px;color:#6B7280;">عنوان الدرس / Lesson Title</div><div style="font-size:13px;font-weight:700;color:#071A3D;margin-top:4px;">Lesson 3: Prayer / الدرس الثالث: الصلاة</div></div>
+          <div style="flex:1;border:2px solid #C9A227;border-radius:8px;background:#FFF;padding:6px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center;"><div style="font-size:9px;color:#6B7280;">الصف / Grade</div><div style="font-size:13px;font-weight:700;color:#071A3D;margin-top:4px;">Grade 5 / الصف الخامس</div></div>
+          <div style="flex:1;border:2px solid #C9A227;border-radius:8px;background:#FFF;padding:6px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center;"><div style="font-size:9px;color:#6B7280;">تاريخ الإنجاز / Completion Date</div><div style="font-size:13px;font-weight:700;color:#071A3D;margin-top:4px;">8 June 2026</div></div>
+        </div>
+      </div>
+
+      <!-- Signature 90px -->
+      <div style="height:90px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+        <div style="width:360px;height:90px;text-align:center;background:#FFFFFF;border:2px solid #C9A227;border-radius:10px;padding:6px 16px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;">
+          <div style="font-size:7px;color:#6B7280;font-weight:700;">Electronic Signature / التوقيع الإلكتروني</div>
+          <div style="font-size:13px;font-weight:700;color:#071A3D;direction:rtl;margin-top:2px;">أيمن عبد الله</div>
+          <div style="font-size:9px;color:#6B7280;direction:rtl;">رئيس قسم التربية الإسلامية</div>
+          <div style="width:100px;height:2px;background:#C9A227;margin:3px auto;"></div>
+          <div style="font-size:12px;font-weight:700;color:#071A3D;">Ayman Abdullah</div>
+          <div style="font-size:8px;color:#6B7280;">Head of Islamic Education Department</div>
         </div>
       </div>
     </div>
