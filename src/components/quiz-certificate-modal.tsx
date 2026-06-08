@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
-import { Award, Download, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Award, Download, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
@@ -26,6 +26,79 @@ import {
 
 const L = (en: string, ar: string) => ({ en, ar });
 
+function validateCertificateInputs(
+  submission: SavedQuizSubmission,
+  gradeName: Bi,
+  lessonTitle: Bi,
+  displayData: QuizCertificateDisplayData | null,
+): string[] {
+  const missing: string[] = [];
+  if (!submission?.id) missing.push("submission.id");
+  if (!submission.lesson_id) missing.push("submission.lesson_id");
+  if (submission.total_points == null) missing.push("submission.total_points");
+  if (submission.percentage == null) missing.push("submission.percentage");
+  if (!gradeName?.en?.trim() && !gradeName?.ar?.trim()) missing.push("gradeName");
+  if (!lessonTitle?.en?.trim() && !lessonTitle?.ar?.trim()) missing.push("lessonTitle");
+  if (!displayData) {
+    missing.push("displayData");
+    return missing;
+  }
+  if (!displayData.certificateId?.trim()) missing.push("certificateId");
+  if (!displayData.studentName?.trim()) missing.push("studentName");
+  if (!displayData.completionDate?.trim()) missing.push("completionDate");
+  if (displayData.finalScore == null) missing.push("finalScore");
+  if (!displayData.gradeLabelEn?.trim()) missing.push("gradeLabelEn");
+  if (!displayData.gradeLabelAr?.trim()) missing.push("gradeLabelAr");
+  return missing;
+}
+
+function CertificatePreviewScaler({ data }: { data: QuizCertificateDisplayData }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.3);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const w = el.clientWidth;
+      if (w > 0) {
+        setScale(Math.min(1, w / CERTIFICATE_WIDTH_PX));
+      }
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [data]);
+
+  const scaledHeight = CERTIFICATE_HEIGHT_PX * scale;
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full rounded-lg border border-border bg-muted/30 overflow-hidden"
+      style={{ height: scaledHeight }}
+    >
+      <div
+        style={{
+          width: CERTIFICATE_WIDTH_PX,
+          height: CERTIFICATE_HEIGHT_PX,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      >
+        <QuizCertificateDocument data={data} />
+      </div>
+    </div>
+  );
+}
+
 export function QuizCertificateModal({
   open,
   onOpenChange,
@@ -45,13 +118,21 @@ export function QuizCertificateModal({
   const [displayData, setDisplayData] = useState<QuizCertificateDisplayData | null>(null);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const prepareCertificate = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
+      const inputMissing = validateCertificateInputs(submission, gradeName, lessonTitle, null);
+      const inputOnly = inputMissing.filter((f) => f !== "displayData");
+      if (inputOnly.length > 0) {
+        throw new Error(`Missing required fields: ${inputOnly.join(", ")}`);
+      }
+
       const { data: sessionData } = await supabase.auth.getSession();
       const uid = sessionData.session?.user?.id;
-      if (!uid) throw new Error("Not signed in");
+      if (!uid) throw new Error("Missing required fields: authenticated user (not signed in)");
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -62,36 +143,43 @@ export function QuizCertificateModal({
       const studentName =
         profile?.full_name?.trim() ||
         profile?.email?.trim() ||
-        sessionData.session?.user?.email ||
-        (lang === "ar" ? "طالب" : "Student");
+        sessionData.session?.user?.email?.trim() ||
+        "";
 
       const certificate = await getOrCreateQuizCertificate(submission);
-      setDisplayData(
-        buildCertificateDisplayData(
-          submission,
-          certificate,
-          studentName,
-          gradeName,
-          lessonTitle,
-        ),
+      const built = buildCertificateDisplayData(
+        submission,
+        certificate,
+        studentName,
+        gradeName,
+        lessonTitle,
       );
+
+      const missing = validateCertificateInputs(submission, gradeName, lessonTitle, built);
+      if (missing.length > 0) {
+        throw new Error(`Missing required fields: ${missing.join(", ")}`);
+      }
+
+      setDisplayData(built);
     } catch (error) {
       console.error("[certificate prepare]", error);
-      toast.error(
-        error instanceof Error ? error.message : L("Could not load certificate", "تعذر تحميل الشهادة")[lang],
-      );
-      onOpenChange(false);
+      const message =
+        error instanceof Error ? error.message : "Could not load certificate";
+      setLoadError(message);
+      setDisplayData(null);
     } finally {
       setLoading(false);
     }
-  }, [submission, gradeName, lessonTitle, lang, onOpenChange]);
+  }, [submission, gradeName, lessonTitle]);
 
-  const handleOpenChange = (next: boolean) => {
-    onOpenChange(next);
-    if (next && !displayData) {
+  useEffect(() => {
+    if (open) {
       void prepareCertificate();
+    } else {
+      setDisplayData(null);
+      setLoadError(null);
     }
-  };
+  }, [open, prepareCertificate]);
 
   const handleDownloadPdf = async () => {
     const el = certRef.current;
@@ -120,12 +208,24 @@ export function QuizCertificateModal({
     }
   };
 
+  const missingFields = displayData
+    ? validateCertificateInputs(submission, gradeName, lessonTitle, displayData)
+    : validateCertificateInputs(submission, gradeName, lessonTitle, null);
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-emerald" />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className={[
+          "fixed z-50 flex flex-col gap-3 p-4 sm:p-6",
+          "left-[2.5vw] top-[5vh] translate-x-0 translate-y-0",
+          "w-[95vw] max-w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden",
+          "sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]",
+          "sm:w-[95vw] sm:max-h-[90vh]",
+        ].join(" ")}
+      >
+        <DialogHeader className="shrink-0 pr-8">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Award className="h-5 w-5 text-emerald shrink-0" />
             {L("Certificate Preview", "معاينة الشهادة")[lang]}
           </DialogTitle>
           <DialogDescription>
@@ -137,52 +237,74 @@ export function QuizCertificateModal({
         </DialogHeader>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+          <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
             {L("Preparing certificate…", "جارٍ تجهيز الشهادة…")[lang]}
           </div>
-        ) : displayData ? (
-          <div className="space-y-4">
-            <div className="overflow-x-auto rounded-lg border border-border bg-muted/30 p-2">
-              <div
-                style={{
-                  transform: "scale(0.55)",
-                  transformOrigin: "top left",
-                  width: CERTIFICATE_WIDTH_PX * 0.55,
-                  height: CERTIFICATE_HEIGHT_PX * 0.55,
-                }}
-              >
-                <QuizCertificateDocument data={displayData} />
-              </div>
+        ) : loadError ? (
+          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive space-y-2">
+            <div className="font-semibold">
+              {L("Certificate could not be loaded", "تعذر تحميل الشهادة")[lang]}
             </div>
+            <div className="font-mono text-xs break-all">{loadError}</div>
+            {missingFields.length > 0 && (
+              <div className="text-xs">
+                {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
+              </div>
+            )}
+          </div>
+        ) : displayData ? (
+          <div className="flex flex-col gap-4 min-h-0">
+            <CertificatePreviewScaler data={displayData} />
 
+            {/* Full-size hidden copy for PDF export */}
             <div
               aria-hidden
               style={{
                 position: "fixed",
-                left: -9999,
+                left: -10000,
                 top: 0,
                 pointerEvents: "none",
+                opacity: 0,
               }}
             >
               <QuizCertificateDocument ref={certRef} data={displayData} />
             </div>
 
-            <button
-              type="button"
-              disabled={downloading}
-              onClick={() => void handleDownloadPdf()}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-50 w-full justify-center sm:w-auto"
-            >
-              {downloading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4" />
-              )}
-              {L("Download PDF", "تحميل PDF")[lang]}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 shrink-0 pt-1">
+              <button
+                type="button"
+                disabled={downloading}
+                onClick={() => void handleDownloadPdf()}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-50 flex-1"
+              >
+                {downloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                Download PDF / تحميل PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold hover:border-emerald hover:text-emerald transition-colors flex-1"
+              >
+                <X className="h-4 w-4" />
+                Close / إغلاق
+              </button>
+            </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+            {L("No certificate data available.", "لا توجد بيانات للشهادة.")[lang]}
+            {missingFields.length > 0 && (
+              <div className="mt-2 font-mono text-xs">
+                {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
+              </div>
+            )}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
