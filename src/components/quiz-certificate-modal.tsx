@@ -17,6 +17,10 @@ import {
   QuizCertificateDocument,
 } from "@/components/quiz-certificate-document";
 import {
+  CERTIFICATE_EXPORT_ID,
+  QuizCertificateExport,
+} from "@/components/quiz-certificate-export";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -102,7 +106,7 @@ function CertificatePreviewScaler({ data }: { data: QuizCertificateDisplayData }
   );
 }
 
-/** Hidden full-size 1123×794 source — portaled to body, used only for PDF export. */
+/** Hidden #certificate-export — portaled to body, used only for PDF (never the modal). */
 function CertificatePdfSource({
   data,
   pdfRef,
@@ -112,38 +116,7 @@ function CertificatePdfSource({
 }) {
   if (typeof document === "undefined") return null;
 
-  return createPortal(
-    <div
-      ref={pdfRef}
-      id="certificate-pdf-export-source"
-      aria-hidden
-      data-certificate-pdf-source
-      style={{
-        position: "fixed",
-        left: 0,
-        top: 0,
-        width: CERTIFICATE_WIDTH_PX,
-        height: CERTIFICATE_HEIGHT_PX,
-        zIndex: -1,
-        overflow: "hidden",
-        pointerEvents: "none",
-        transform: "translateX(-300vw)",
-        opacity: 1,
-        visibility: "visible",
-        margin: 0,
-        padding: 0,
-        border: "none",
-        backgroundColor: "#FFFDF5",
-        color: "#0F3D2E",
-        fontFamily: "Georgia, 'Times New Roman', serif",
-        lineHeight: "normal",
-        boxSizing: "border-box",
-      }}
-    >
-      <QuizCertificateDocument data={data} />
-    </div>,
-    document.body,
-  );
+  return createPortal(<QuizCertificateExport ref={pdfRef} data={data} />, document.body);
 }
 
 export function QuizCertificateModal({
@@ -234,7 +207,7 @@ export function QuizCertificateModal({
   const handleDownloadPdf = async () => {
     const el = pdfRef.current;
     if (!el || !displayData) {
-      setPdfError("PDF source element not found (certificate-pdf-export-source)");
+      setPdfError(`PDF source element not found (#${CERTIFICATE_EXPORT_ID})`);
       return;
     }
 

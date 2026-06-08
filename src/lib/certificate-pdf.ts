@@ -1,10 +1,14 @@
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import {
+  CERTIFICATE_EXPORT_ID,
+} from "@/components/quiz-certificate-export";
+import {
   CERTIFICATE_HEIGHT_PX,
   CERTIFICATE_WIDTH_PX,
-  CERT_COLORS,
 } from "@/components/quiz-certificate-document";
+
+const PDF_BACKGROUND = "#FFFDF5";
 
 export function safeCertificateFilename(studentName: string): string {
   const safe =
@@ -25,76 +29,113 @@ async function waitForPaint(): Promise<void> {
   });
 }
 
+function stripClasses(root: HTMLElement): void {
+  root.removeAttribute("class");
+  root.querySelectorAll("[class]").forEach((node) => {
+    if (node instanceof HTMLElement) {
+      node.removeAttribute("class");
+    }
+  });
+}
+
+function prepareCloneForCapture(source: HTMLElement): HTMLElement {
+  const clone = source.cloneNode(true) as HTMLElement;
+  stripClasses(clone);
+  clone.id = CERTIFICATE_EXPORT_ID;
+  clone.style.position = "relative";
+  clone.style.left = "0";
+  clone.style.top = "0";
+  clone.style.transform = "none";
+  clone.style.visibility = "visible";
+  clone.style.opacity = "1";
+  clone.style.zIndex = "auto";
+  clone.style.pointerEvents = "none";
+  clone.style.width = `${CERTIFICATE_WIDTH_PX}px`;
+  clone.style.height = `${CERTIFICATE_HEIGHT_PX}px`;
+  clone.style.backgroundColor = PDF_BACKGROUND;
+  clone.style.color = "#0F3D2E";
+  return clone;
+}
+
+function createIsolatedCaptureDocument(): {
+  iframe: HTMLIFrameElement;
+  mount: HTMLElement;
+  cleanup: () => void;
+} {
+  const iframe = document.createElement("iframe");
+  iframe.setAttribute("aria-hidden", "true");
+  iframe.setAttribute("title", "certificate-pdf-capture");
+  iframe.style.cssText = [
+    "position:fixed",
+    "left:0",
+    "top:0",
+    `width:${CERTIFICATE_WIDTH_PX}px`,
+    `height:${CERTIFICATE_HEIGHT_PX}px`,
+    "border:0",
+    "margin:0",
+    "padding:0",
+    "opacity:0",
+    "pointer-events:none",
+    "z-index:2147483646",
+  ].join(";");
+
+  document.body.appendChild(iframe);
+
+  const iDoc = iframe.contentDocument;
+  if (!iDoc) {
+    iframe.remove();
+    throw new Error("Could not create isolated capture iframe");
+  }
+
+  iDoc.open();
+  iDoc.write(
+    `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background-color:${PDF_BACKGROUND};color:#0F3D2E;"></body></html>`,
+  );
+  iDoc.close();
+
+  const mount = iDoc.body;
+
+  return {
+    iframe,
+    mount,
+    cleanup: () => {
+      iframe.remove();
+    },
+  };
+}
+
 /**
- * Capture a full-size (1123×794) certificate element for PDF export.
- * Temporarily positions the element on-screen so mobile browsers paint it.
+ * Capture #certificate-export inside an isolated iframe (no app stylesheets / lab() colors).
  */
 export async function captureCertificateToImage(
   element: HTMLElement,
 ): Promise<string> {
-  const style = element.style;
-  const prev = {
-    position: style.position,
-    left: style.left,
-    top: style.top,
-    width: style.width,
-    height: style.height,
-    transform: style.transform,
-    zIndex: style.zIndex,
-    opacity: style.opacity,
-    visibility: style.visibility,
-    pointerEvents: style.pointerEvents,
-  };
+  if (element.id !== CERTIFICATE_EXPORT_ID) {
+    throw new Error(
+      `PDF capture requires #${CERTIFICATE_EXPORT_ID}, got #${element.id || "(no id)"}`,
+    );
+  }
 
-  style.position = "fixed";
-  style.left = "0";
-  style.top = "0";
-  style.width = `${CERTIFICATE_WIDTH_PX}px`;
-  style.height = `${CERTIFICATE_HEIGHT_PX}px`;
-  style.transform = "none";
-  style.zIndex = "2147483646";
-  style.opacity = "1";
-  style.visibility = "visible";
-  style.pointerEvents = "none";
-  style.backgroundColor = CERT_COLORS.cream;
-  style.color = CERT_COLORS.darkGreen;
+  const clone = prepareCloneForCapture(element);
+  const { mount, cleanup } = createIsolatedCaptureDocument();
+
+  mount.appendChild(clone);
 
   await waitForPaint();
 
   try {
-    const canvas = await html2canvas(element, {
+    const canvas = await html2canvas(clone, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: CERT_COLORS.cream,
+      backgroundColor: PDF_BACKGROUND,
       width: CERTIFICATE_WIDTH_PX,
       height: CERTIFICATE_HEIGHT_PX,
       windowWidth: CERTIFICATE_WIDTH_PX,
       windowHeight: CERTIFICATE_HEIGHT_PX,
       scrollX: 0,
-      scrollY: -window.scrollY,
+      scrollY: 0,
       logging: false,
-      onclone: (clonedDoc) => {
-        // Tailwind v4 theme CSS uses lab()/oklch() — html2canvas cannot parse those rules.
-        clonedDoc
-          .querySelectorAll('style, link[rel="stylesheet"]')
-          .forEach((node) => node.remove());
-
-        clonedDoc.body.style.setProperty("color", CERT_COLORS.darkGreen, "important");
-        clonedDoc.body.style.setProperty("background-color", CERT_COLORS.cream, "important");
-
-        const source = clonedDoc.getElementById("certificate-pdf-export-source");
-        if (!source) return;
-
-        source.style.setProperty("color", CERT_COLORS.darkGreen, "important");
-        source.style.setProperty("background-color", CERT_COLORS.cream, "important");
-
-        source.querySelectorAll("*").forEach((node) => {
-          if (node instanceof HTMLElement) {
-            node.removeAttribute("class");
-          }
-        });
-      },
     });
 
     if (canvas.width === 0 || canvas.height === 0) {
@@ -103,16 +144,7 @@ export async function captureCertificateToImage(
 
     return canvas.toDataURL("image/png");
   } finally {
-    style.position = prev.position;
-    style.left = prev.left;
-    style.top = prev.top;
-    style.width = prev.width;
-    style.height = prev.height;
-    style.transform = prev.transform;
-    style.zIndex = prev.zIndex;
-    style.opacity = prev.opacity;
-    style.visibility = prev.visibility;
-    style.pointerEvents = prev.pointerEvents;
+    cleanup();
   }
 }
 

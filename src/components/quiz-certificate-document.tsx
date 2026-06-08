@@ -13,7 +13,6 @@ export const CERT_COLORS = {
   cream: "#FFFDF5",
   white: "#FFFFFF",
   gray: "#4B5563",
-  goldLight: "#E5D4A1",
 } as const;
 
 function LogoIgnite() {
@@ -290,7 +289,7 @@ export const QuizCertificateDocument = forwardRef<
             alignItems: "flex-end",
             marginTop: "auto",
             paddingTop: 16,
-            borderTop: `1px solid ${CERT_COLORS.goldLight}`,
+            borderTop: `1px solid ${CERT_COLORS.gold}`,
             fontSize: 11,
             color: CERT_COLORS.gray,
             backgroundColor: "transparent",
