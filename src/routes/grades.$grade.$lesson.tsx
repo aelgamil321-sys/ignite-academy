@@ -75,7 +75,6 @@ function LessonPage() {
   ];
 
   const ytUrl = custom?.youtubeUrl ? ytId(custom.youtubeUrl) : "";
-  const bilingualDownloads = custom ? studentDownloadItems(custom) : [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -170,51 +169,25 @@ function LessonPage() {
               )}
             </div>
 
-            <LessonDownloads custom={custom} lang={lang} />
+            <LessonDownloads custom={custom} />
 
             <Quiz lesson={lesson} />
           </div>
 
           <aside className="space-y-6">
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] sticky top-24">
-              {bilingualDownloads.length > 0 && (
-                <div className="mb-5">
-                  <h3 className="font-display text-lg font-semibold text-primary mb-4">
-                    {lang === "ar" ? "الملفات" : "Downloads"}
-                  </h3>
-                  <div className="space-y-2.5">
-                    {bilingualDownloads.map((item) => (
-                      <a
-                        key={item.url}
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        download={fileNameFromUrl(item.url)}
-                        className="w-full inline-flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-emerald hover:text-emerald transition-colors"
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <Download className="h-4 w-4 shrink-0" />
-                          {lang === "ar" ? item.labelAr : item.labelEn}
-                        </span>
-                      </a>
-                    ))}
-                  </div>
+            {lessonFiles.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] sticky top-24">
+                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{tr("ls_resources")}</div>
+                <div className="space-y-2">
+                  {lessonFiles.map((f: CustomFile) => (
+                    <a key={f.id} href={f.fileUrl} download={f.fileName}
+                      className="block rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-emerald hover:text-emerald">
+                      {f.title[lang]} <span className="opacity-60">· {f.type.toUpperCase()}</span>
+                    </a>
+                  ))}
                 </div>
-              )}
-              {lessonFiles.length > 0 && (
-                <div className="mt-5 pt-5 border-t border-border">
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{tr("ls_resources")}</div>
-                  <div className="space-y-2">
-                    {lessonFiles.map((f: CustomFile) => (
-                      <a key={f.id} href={f.fileUrl} download={f.fileName}
-                        className="block rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-emerald hover:text-emerald">
-                        {f.title[lang]} <span className="opacity-60">· {f.type.toUpperCase()}</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </aside>
         </section>
       </main>
@@ -224,10 +197,8 @@ function LessonPage() {
   );
 }
 
-function LessonDownloads({ custom, lang }: { custom?: CustomLesson; lang: "en" | "ar" }) {
-  if (!custom) return null;
-  const items = studentDownloadItems(custom);
-  if (items.length === 0) return null;
+function LessonDownloads({ custom }: { custom?: CustomLesson }) {
+  const items = custom ? studentDownloadItems(custom) : [];
 
   return (
     <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
@@ -236,24 +207,33 @@ function LessonDownloads({ custom, lang }: { custom?: CustomLesson; lang: "en" |
           <Download className="h-5 w-5" />
         </div>
         <h2 className="font-display text-xl font-semibold text-primary">
-          {lang === "ar" ? "الملفات" : "Downloads"}
+          Downloads / الملفات
         </h2>
       </div>
-      <div className="grid gap-2.5 sm:grid-cols-2">
-        {items.map((item) => (
-          <a
-            key={item.url}
-            href={item.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            download={fileNameFromUrl(item.url)}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-emerald hover:text-emerald transition-colors"
-          >
-            <Download className="h-4 w-4 shrink-0" />
-            <span>{lang === "ar" ? item.labelAr : item.labelEn}</span>
-          </a>
-        ))}
-      </div>
+
+      {items.length > 0 ? (
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {items.map((item) => (
+            <a
+              key={item.key}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              download={fileNameFromUrl(item.url)}
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-emerald hover:text-emerald transition-colors"
+            >
+              <Download className="h-4 w-4 shrink-0" />
+              <span>{item.label}</span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          لا توجد ملفات مرفقة لهذا الدرس
+          <br />
+          No files attached to this lesson
+        </p>
+      )}
     </div>
   );
 }

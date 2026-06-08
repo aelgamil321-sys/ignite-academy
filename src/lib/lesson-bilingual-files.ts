@@ -82,34 +82,24 @@ export function fileNameFromUrl(url: string): string {
 
 export type StudentDownloadItem = {
   url: string;
-  labelEn: string;
-  labelAr: string;
+  label: string;
+  key: BilingualFileKey;
 };
 
+/** Fixed student-facing download buttons for the six bilingual lesson file columns. */
+export const STUDENT_LESSON_FILE_DOWNLOADS: Array<{ key: BilingualFileKey; label: string }> = [
+  { key: "pptArUrl", label: "تحميل بوربوينت عربي" },
+  { key: "pptEnUrl", label: "Download English PowerPoint" },
+  { key: "worksheetArUrl", label: "تحميل ورقة عمل عربية" },
+  { key: "worksheetEnUrl", label: "Download English Worksheet" },
+  { key: "pdfArUrl", label: "تحميل PDF عربي" },
+  { key: "pdfEnUrl", label: "Download English PDF" },
+];
+
 export function studentDownloadItems(custom: CustomLesson): StudentDownloadItem[] {
-  const items: StudentDownloadItem[] = [];
-  for (const slot of BILINGUAL_LESSON_FILE_SLOTS) {
-    const url = custom[slot.key];
-    if (url) {
-      items.push({
-        url,
-        labelEn: `Download ${slot.labelEn}`,
-        labelAr: `تحميل ${slot.labelAr}`,
-      });
-    }
-  }
-  // Legacy single-file columns (shown only when bilingual URLs are not set)
-  const hasBilingualPpt = Boolean(custom.pptArUrl || custom.pptEnUrl);
-  const hasBilingualWorksheet = Boolean(custom.worksheetArUrl || custom.worksheetEnUrl);
-  const hasBilingualPdf = Boolean(custom.pdfArUrl || custom.pdfEnUrl);
-  if (!hasBilingualPpt && custom.pptUrl) {
-    items.push({ url: custom.pptUrl, labelEn: "Download PowerPoint", labelAr: "تحميل عرض باوربوينت" });
-  }
-  if (!hasBilingualWorksheet && custom.worksheetUrl) {
-    items.push({ url: custom.worksheetUrl, labelEn: "Download Worksheet", labelAr: "تحميل ورقة العمل" });
-  }
-  if (!hasBilingualPdf && custom.pdfUrl) {
-    items.push({ url: custom.pdfUrl, labelEn: "Download PDF", labelAr: "تحميل ملف PDF" });
-  }
-  return items;
+  return STUDENT_LESSON_FILE_DOWNLOADS.flatMap((entry) => {
+    const url = custom[entry.key]?.trim();
+    if (!url) return [];
+    return [{ key: entry.key, url, label: entry.label }];
+  });
 }
