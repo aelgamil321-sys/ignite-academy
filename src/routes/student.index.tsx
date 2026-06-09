@@ -8,6 +8,7 @@ import { useLessonsForGrade } from "@/lib/cms";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { GraduationCap, BookOpen, ClipboardCheck, TrendingUp, ArrowRight, LogOut, User } from "lucide-react";
 import { toast } from "sonner";
+import { isStudentProfileComplete } from "@/lib/student-profile";
 
 export const Route = createFileRoute("/student/")({
   head: () => ({
@@ -25,6 +26,7 @@ function StudentGate() {
   const [state, setState] = useState<"checking" | "ok">("checking");
   const [email, setEmail] = useState("");
   const [gradeSlug, setGradeSlug] = useState("8");
+  const [profileComplete, setProfileComplete] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -35,12 +37,13 @@ function StudentGate() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("email, grade")
+        .select("email, grade, arabic_name, english_name")
         .eq("user_id", data.user.id)
         .maybeSingle();
 
       setEmail(profile?.email ?? data.user.email ?? "");
       setGradeSlug(normalizeGradeSlug(profile?.grade ?? "8") || "8");
+      setProfileComplete(isStudentProfileComplete(profile));
       setState("ok");
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
@@ -56,10 +59,18 @@ function StudentGate() {
       </PageShell>
     );
   }
-  return <StudentPage email={email} gradeSlug={gradeSlug} />;
+  return <StudentPage email={email} gradeSlug={gradeSlug} profileComplete={profileComplete} />;
 }
 
-function StudentPage({ email, gradeSlug }: { email: string; gradeSlug: string }) {
+function StudentPage({
+  email,
+  gradeSlug,
+  profileComplete,
+}: {
+  email: string;
+  gradeSlug: string;
+  profileComplete: boolean;
+}) {
   const navigate = useNavigate();
   const { tr, lang, dir } = useI18n();
   const myGrade = grades.find((g) => g.slug === gradeSlug) ?? grades.find((g) => g.slug === "8")!;
@@ -106,6 +117,23 @@ function StudentPage({ email, gradeSlug }: { email: string; gradeSlug: string })
           </button>
         </div>
       </div>
+
+      {!profileComplete && (
+        <div className="mb-6 rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <p>
+            {lang === "ar"
+              ? "يرجى إكمال ملفك الشخصي (الاسم بالإنجليزية والعربية) قبل إنشاء الشهادات."
+              : "Please complete your profile (English and Arabic names) before generating certificates."}
+          </p>
+          <Link
+            to="/student/profile"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-emerald transition-colors"
+          >
+            <User className="h-3.5 w-3.5" />
+            {lang === "ar" ? "الملف الشخصي" : "Profile"}
+          </Link>
+        </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-3 mb-10">
         {stats.map((s) => (

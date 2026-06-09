@@ -15,6 +15,21 @@ export type StudentProfileForm = {
   english_name: string;
 };
 
+export const CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE =
+  "Please complete your profile before generating certificates.";
+
+export type StudentProfileCertificateFields = Pick<
+  StudentProfileRow,
+  "full_name" | "arabic_name" | "english_name"
+>;
+
+/** Certificate names require both English and Arabic names on the student profile. */
+export function isStudentProfileComplete(
+  profile: StudentProfileCertificateFields | null | undefined,
+): boolean {
+  return Boolean(profile?.english_name?.trim() && profile?.arabic_name?.trim());
+}
+
 export async function fetchStudentProfile(userId: string): Promise<StudentProfileRow | null> {
   const { data, error } = await supabase
     .from("profiles")

@@ -28,6 +28,11 @@ export {
 } from "@/lib/quiz-certificate";
 
 export {
+  CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE,
+  isStudentProfileComplete,
+} from "@/lib/student-profile";
+
+export {
   downloadCertificatePdf,
   safeCertificateFilename,
 } from "@/lib/certificate-pdf";

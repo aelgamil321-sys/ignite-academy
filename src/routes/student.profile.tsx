@@ -112,8 +112,12 @@ function StudentProfilePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.full_name.trim()) {
-      toast.error(lang === "ar" ? "الاسم الكامل مطلوب" : "Full name is required");
+    if (!form.english_name.trim()) {
+      toast.error(lang === "ar" ? "الاسم بالإنجليزية مطلوب" : "English name is required");
+      return;
+    }
+    if (!form.arabic_name.trim()) {
+      toast.error(lang === "ar" ? "الاسم بالعربية مطلوب" : "Arabic name is required");
       return;
     }
 
@@ -179,7 +183,6 @@ function StudentProfilePage() {
               <label className="text-xs font-medium text-muted-foreground">{T.fullNameHint}</label>
               <input
                 type="text"
-                required
                 value={form.full_name}
                 onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
                 maxLength={100}
@@ -188,24 +191,26 @@ function StudentProfilePage() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{T.arabicNameHint}</label>
+              <label className="text-xs font-medium text-muted-foreground">{T.englishNameHint} *</label>
               <input
                 type="text"
-                value={form.arabic_name}
-                onChange={(e) => setForm((f) => ({ ...f, arabic_name: e.target.value }))}
+                required
+                value={form.english_name}
+                onChange={(e) => setForm((f) => ({ ...f, english_name: e.target.value }))}
                 maxLength={100}
-                dir="rtl"
                 className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{T.englishNameHint}</label>
+              <label className="text-xs font-medium text-muted-foreground">{T.arabicNameHint} *</label>
               <input
                 type="text"
-                value={form.english_name}
-                onChange={(e) => setForm((f) => ({ ...f, english_name: e.target.value }))}
+                required
+                value={form.arabic_name}
+                onChange={(e) => setForm((f) => ({ ...f, arabic_name: e.target.value }))}
                 maxLength={100}
+                dir="rtl"
                 className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
               />
             </div>

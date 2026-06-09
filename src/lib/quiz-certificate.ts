@@ -97,11 +97,6 @@ export type CertificateStudentNames = {
   studentNameAr: string;
 };
 
-function metaString(meta: Record<string, unknown>, key: string): string {
-  const value = meta[key];
-  return typeof value === "string" ? value.trim() : "";
-}
-
 export const CERTIFICATE_NAME_FALLBACK_EN = "Student Name";
 export const CERTIFICATE_NAME_FALLBACK_AR = "اسم الطالب";
 
@@ -111,20 +106,13 @@ export type CertificateNameProfile = {
   english_name?: string | null;
 };
 
-/** Resolve certificate names — never uses email or email prefix. */
+/** Resolve certificate names from the student profile only — never email or auth metadata. */
 export function resolveCertificateStudentNames(
-  user: { user_metadata?: Record<string, unknown> | null },
-  profile?: CertificateNameProfile | null,
+  profile: CertificateNameProfile | null | undefined,
 ): CertificateStudentNames {
-  const meta = user.user_metadata ?? {};
-
-  const fullName = metaString(meta, "full_name") || profile?.full_name?.trim() || "";
-  const englishName = metaString(meta, "english_name") || profile?.english_name?.trim() || "";
-  const arabicName =
-    metaString(meta, "arabic_name") ||
-    profile?.arabic_name?.trim() ||
-    metaString(meta, "student_ar_name") ||
-    "";
+  const englishName = profile?.english_name?.trim() || "";
+  const arabicName = profile?.arabic_name?.trim() || "";
+  const fullName = profile?.full_name?.trim() || "";
 
   const studentName = englishName || fullName || CERTIFICATE_NAME_FALLBACK_EN;
 
@@ -137,7 +125,6 @@ export function resolveCertificateStudentNames(
     studentNameAr = CERTIFICATE_NAME_FALLBACK_AR;
   }
 
-  // When english_name is set, do not echo the same Latin name on the Arabic side.
   if (!arabicName && englishName && studentNameAr === studentName) {
     studentNameAr = CERTIFICATE_NAME_FALLBACK_AR;
   }

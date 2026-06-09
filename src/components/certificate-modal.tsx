@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Award, Download, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,11 +8,14 @@ import type { Bi } from "@/lib/curriculum";
 import type { SavedQuizSubmission } from "@/lib/lesson-quiz";
 import {
   buildCertificateDisplayData,
+  CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE,
   downloadCertificatePdf,
   getOrCreateQuizCertificate,
+  isStudentProfileComplete,
   resolveCertificateStudentNames,
   type CertificateDisplayData,
 } from "@/lib/certificate";
+import { fetchStudentProfile } from "@/lib/student-profile";
 import { buildCertificateQrDataUrl } from "@/lib/certificate-qr";
 import {
   CERTIFICATE_HEIGHT_PX,
@@ -158,13 +162,12 @@ export function CertificateModal({
       const user = sessionData.session?.user;
       if (!user?.id) throw new Error("Missing required fields: authenticated user (not signed in)");
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, arabic_name, english_name")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const profile = await fetchStudentProfile(user.id);
+      if (!isStudentProfileComplete(profile)) {
+        throw new Error(CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE);
+      }
 
-      const studentNames = resolveCertificateStudentNames(user, profile);
+      const studentNames = resolveCertificateStudentNames(profile);
 
       const certificate = await getOrCreateQuizCertificate(submission);
       const built = buildCertificateDisplayData(
@@ -268,10 +271,22 @@ export function CertificateModal({
           ) : loadError ? (
             <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive space-y-2">
               <div className="font-semibold">
-                {L("Certificate could not be loaded", "تعذر تحميل الشهادة")[lang]}
+                {loadError === CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE
+                  ? CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE
+                  : L("Certificate could not be loaded", "تعذر تحميل الشهادة")[lang]}
               </div>
-              <div className="font-mono text-xs break-all">{loadError}</div>
-              {missingFields.length > 0 && (
+              {loadError !== CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE && (
+                <div className="font-mono text-xs break-all">{loadError}</div>
+              )}
+              {loadError === CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE && (
+                <Link
+                  to="/student/profile"
+                  className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors"
+                >
+                  {L("Complete profile", "إكمال الملف الشخصي")[lang]}
+                </Link>
+              )}
+              {missingFields.length > 0 && loadError !== CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE && (
                 <div className="text-xs">
                   {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
                 </div>
@@ -347,17 +362,50 @@ export function CertificateButton({
   lessonTitle: Bi;
   lang: "en" | "ar";
 }) {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [checking, setChecking] = useState(false);
+
+  const handleOpen = async () => {
+    setChecking(true);
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      const user = authData.user;
+      if (!user) {
+        toast.error(L("Please sign in to download your certificate.", "يرجى تسجيل الدخول لتحميل الشهادة.")[lang]);
+        navigate({ to: "/auth", search: { mode: "login" } });
+        return;
+      }
+
+      const profile = await fetchStudentProfile(user.id);
+      if (!isStudentProfileComplete(profile)) {
+        toast.error(CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE, {
+          action: {
+            label: L("Profile", "الملف الشخصي")[lang],
+            onClick: () => navigate({ to: "/student/profile" }),
+          },
+        });
+        return;
+      }
+
+      setOpen(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    } finally {
+      setChecking(false);
+    }
+  };
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-full border-2 border-emerald bg-emerald/10 px-6 py-2.5 text-sm font-semibold text-emerald hover:bg-emerald hover:text-white transition-colors"
+        disabled={checking}
+        onClick={() => void handleOpen()}
+        className="inline-flex items-center gap-2 rounded-full border-2 border-emerald bg-emerald/10 px-6 py-2.5 text-sm font-semibold text-emerald hover:bg-emerald hover:text-white transition-colors disabled:opacity-60"
       >
-        <Award className="h-4 w-4" />
-        Download Certificate / تحميل الشهادة
+        {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Award className="h-4 w-4" />}
+        {checking ? "Checking profile… / جارٍ التحقق…" : "Download Certificate / تحميل الشهادة"}
       </button>
       <CertificateModal
         open={open}
