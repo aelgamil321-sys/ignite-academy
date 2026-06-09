@@ -1,11 +1,27 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, BookOpen, Languages } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, BookOpen, Languages, User } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
   const { tr, toggle, lang } = useI18n();
+
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (active) setSignedIn(!!data.user);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(!!session?.user);
+    });
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   const nav: Array<{ label: string; to: string }> = [
     { label: tr("nav_home"), to: "/" },
@@ -57,13 +73,23 @@ export function SiteHeader() {
             <Languages className="h-4 w-4" />
             <span>{lang === "en" ? "العربية" : "English"}</span>
           </button>
-          <Link
-            to="/auth"
-            search={{ mode: "login" }}
-            className="hidden md:inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)]"
-          >
-            {tr("nav_login")}
-          </Link>
+          {signedIn ? (
+            <Link
+              to="/student/profile"
+              className="hidden md:inline-flex items-center gap-1.5 justify-center rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground hover:border-emerald hover:text-emerald transition-colors"
+            >
+              <User className="h-4 w-4" />
+              {lang === "ar" ? "الملف الشخصي" : "Profile"}
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              search={{ mode: "login" }}
+              className="hidden md:inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)]"
+            >
+              {tr("nav_login")}
+            </Link>
+          )}
           <button
             aria-label="Toggle menu"
             onClick={() => setOpen((o) => !o)}
@@ -87,6 +113,16 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            {signedIn && (
+              <Link
+                to="/student/profile"
+                onClick={() => setOpen(false)}
+                className="px-3 py-2.5 text-sm font-medium rounded-md hover:bg-muted inline-flex items-center gap-2"
+              >
+                <User className="h-4 w-4" />
+                {lang === "ar" ? "الملف الشخصي" : "Profile"}
+              </Link>
+            )}
           </div>
         </div>
       )}

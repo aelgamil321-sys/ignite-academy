@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { grades } from "@/lib/curriculum";
 import { useLessonsForGrade } from "@/lib/cms";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
-import { GraduationCap, BookOpen, ClipboardCheck, TrendingUp, ArrowRight, LogOut } from "lucide-react";
+import { GraduationCap, BookOpen, ClipboardCheck, TrendingUp, ArrowRight, LogOut, User } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/student")({
@@ -90,12 +90,21 @@ function StudentPage({ email, gradeSlug }: { email: string; gradeSlug: string })
           <span className="text-muted-foreground">{lang === "ar" ? "مرحبًا" : "Welcome"}, </span>
           <span className="font-semibold text-primary">{email}</span>
         </div>
-        <button
-          onClick={signOut}
-          className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
-        >
-          <LogOut className="h-3.5 w-3.5" /> {lang === "ar" ? "تسجيل الخروج" : "Sign out"}
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            to="/student/profile"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
+          >
+            <User className="h-3.5 w-3.5" />
+            {lang === "ar" ? "الملف الشخصي" : "Profile"}
+          </Link>
+          <button
+            onClick={signOut}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
+          >
+            <LogOut className="h-3.5 w-3.5" /> {lang === "ar" ? "تسجيل الخروج" : "Sign out"}
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 mb-10">

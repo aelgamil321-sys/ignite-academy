@@ -25,6 +25,7 @@ import { Route as GradesIndexRouteImport } from './routes/grades.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
+import { Route as StudentProfileRouteImport } from './routes/student_.profile'
 import { Route as QuizzesSlugRouteImport } from './routes/quizzes.$slug'
 import { Route as ParentSlugRouteImport } from './routes/parent.$slug'
 import { Route as CategoriesCategoryRouteImport } from './routes/categories.$category'
@@ -117,6 +118,11 @@ const VideosSlugRoute = VideosSlugRouteImport.update({
   path: '/videos/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentProfileRoute = StudentProfileRouteImport.update({
+  id: '/student_/profile',
+  path: '/student/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuizzesSlugRoute = QuizzesSlugRouteImport.update({
   id: '/quizzes/$slug',
   path: '/quizzes/$slug',
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
+  '/student/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
+  '/student/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
   '/admin': typeof AdminIndexRoute
   '/announcements': typeof AnnouncementsIndexRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
+  '/student_/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/categories/$category'
     | '/parent/$slug'
     | '/quizzes/$slug'
+    | '/student/profile'
     | '/videos/$slug'
     | '/admin/'
     | '/announcements/'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/categories/$category'
     | '/parent/$slug'
     | '/quizzes/$slug'
+    | '/student/profile'
     | '/videos/$slug'
     | '/admin'
     | '/announcements'
@@ -336,6 +347,7 @@ export interface FileRouteTypes {
     | '/categories/$category'
     | '/parent/$slug'
     | '/quizzes/$slug'
+    | '/student_/profile'
     | '/videos/$slug'
     | '/admin/'
     | '/announcements/'
@@ -365,6 +377,7 @@ export interface RootRouteChildren {
   CategoriesCategoryRoute: typeof CategoriesCategoryRoute
   ParentSlugRoute: typeof ParentSlugRoute
   QuizzesSlugRoute: typeof QuizzesSlugRoute
+  StudentProfileRoute: typeof StudentProfileRoute
   VideosSlugRoute: typeof VideosSlugRoute
   AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
   GradesIndexRoute: typeof GradesIndexRoute
@@ -490,6 +503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student_/profile': {
+      id: '/student_/profile'
+      path: '/student/profile'
+      fullPath: '/student/profile'
+      preLoaderRoute: typeof StudentProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quizzes/$slug': {
       id: '/quizzes/$slug'
       path: '/quizzes/$slug'
@@ -604,6 +624,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesCategoryRoute: CategoriesCategoryRoute,
   ParentSlugRoute: ParentSlugRoute,
   QuizzesSlugRoute: QuizzesSlugRoute,
+  StudentProfileRoute: StudentProfileRoute,
   VideosSlugRoute: VideosSlugRoute,
   AnnouncementsIndexRoute: AnnouncementsIndexRoute,
   GradesIndexRoute: GradesIndexRoute,
