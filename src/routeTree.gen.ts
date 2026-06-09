@@ -19,13 +19,14 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VideosIndexRouteImport } from './routes/videos.index'
+import { Route as StudentIndexRouteImport } from './routes/student.index'
 import { Route as QuizzesIndexRouteImport } from './routes/quizzes.index'
 import { Route as ParentIndexRouteImport } from './routes/parent.index'
 import { Route as GradesIndexRouteImport } from './routes/grades.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
-import { Route as StudentProfileRouteImport } from './routes/student_.profile'
+import { Route as StudentProfileRouteImport } from './routes/student.profile'
 import { Route as QuizzesSlugRouteImport } from './routes/quizzes.$slug'
 import { Route as ParentSlugRouteImport } from './routes/parent.$slug'
 import { Route as CategoriesCategoryRouteImport } from './routes/categories.$category'
@@ -88,6 +89,11 @@ const VideosIndexRoute = VideosIndexRouteImport.update({
   path: '/videos/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentIndexRoute = StudentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StudentRoute,
+} as any)
 const QuizzesIndexRoute = QuizzesIndexRouteImport.update({
   id: '/quizzes/',
   path: '/quizzes/',
@@ -119,9 +125,9 @@ const VideosSlugRoute = VideosSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudentProfileRoute = StudentProfileRouteImport.update({
-  id: '/student_/profile',
-  path: '/student/profile',
-  getParentRoute: () => rootRouteImport,
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => StudentRoute,
 } as any)
 const QuizzesSlugRoute = QuizzesSlugRouteImport.update({
   id: '/quizzes/$slug',
@@ -189,7 +195,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/resources': typeof ResourcesRoute
-  '/student': typeof StudentRoute
+  '/student': typeof StudentRouteWithChildren
   '/student-dashboard': typeof StudentDashboardRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/grades/': typeof GradesIndexRoute
   '/parent/': typeof ParentIndexRoute
   '/quizzes/': typeof QuizzesIndexRoute
+  '/student/': typeof StudentIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
   '/admin/lessons/': typeof AdminLessonsIndexRoute
@@ -218,7 +225,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/resources': typeof ResourcesRoute
-  '/student': typeof StudentRoute
   '/student-dashboard': typeof StudentDashboardRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
@@ -232,6 +238,7 @@ export interface FileRoutesByTo {
   '/grades': typeof GradesIndexRoute
   '/parent': typeof ParentIndexRoute
   '/quizzes': typeof QuizzesIndexRoute
+  '/student': typeof StudentIndexRoute
   '/videos': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
   '/admin/lessons': typeof AdminLessonsIndexRoute
@@ -249,20 +256,21 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/resources': typeof ResourcesRoute
-  '/student': typeof StudentRoute
+  '/student': typeof StudentRouteWithChildren
   '/student-dashboard': typeof StudentDashboardRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
-  '/student_/profile': typeof StudentProfileRoute
+  '/student/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/grades/': typeof GradesIndexRoute
   '/parent/': typeof ParentIndexRoute
   '/quizzes/': typeof QuizzesIndexRoute
+  '/student/': typeof StudentIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
   '/admin/lessons/': typeof AdminLessonsIndexRoute
@@ -295,6 +303,7 @@ export interface FileRouteTypes {
     | '/grades/'
     | '/parent/'
     | '/quizzes/'
+    | '/student/'
     | '/videos/'
     | '/grades/$grade/$lesson'
     | '/admin/lessons/'
@@ -310,7 +319,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/resources'
-    | '/student'
     | '/student-dashboard'
     | '/admin/upload-test'
     | '/announcements/$slug'
@@ -324,6 +332,7 @@ export interface FileRouteTypes {
     | '/grades'
     | '/parent'
     | '/quizzes'
+    | '/student'
     | '/videos'
     | '/grades/$grade/$lesson'
     | '/admin/lessons'
@@ -347,13 +356,14 @@ export interface FileRouteTypes {
     | '/categories/$category'
     | '/parent/$slug'
     | '/quizzes/$slug'
-    | '/student_/profile'
+    | '/student/profile'
     | '/videos/$slug'
     | '/admin/'
     | '/announcements/'
     | '/grades/'
     | '/parent/'
     | '/quizzes/'
+    | '/student/'
     | '/videos/'
     | '/grades/$grade/$lesson'
     | '/admin/lessons/'
@@ -371,13 +381,12 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
   ResourcesRoute: typeof ResourcesRoute
-  StudentRoute: typeof StudentRoute
+  StudentRoute: typeof StudentRouteWithChildren
   StudentDashboardRoute: typeof StudentDashboardRoute
   AnnouncementsSlugRoute: typeof AnnouncementsSlugRoute
   CategoriesCategoryRoute: typeof CategoriesCategoryRoute
   ParentSlugRoute: typeof ParentSlugRoute
   QuizzesSlugRoute: typeof QuizzesSlugRoute
-  StudentProfileRoute: typeof StudentProfileRoute
   VideosSlugRoute: typeof VideosSlugRoute
   AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
   GradesIndexRoute: typeof GradesIndexRoute
@@ -461,6 +470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student/': {
+      id: '/student/'
+      path: '/'
+      fullPath: '/student/'
+      preLoaderRoute: typeof StudentIndexRouteImport
+      parentRoute: typeof StudentRoute
+    }
     '/quizzes/': {
       id: '/quizzes/'
       path: '/quizzes'
@@ -503,12 +519,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/student_/profile': {
-      id: '/student_/profile'
-      path: '/student/profile'
+    '/student/profile': {
+      id: '/student/profile'
+      path: '/profile'
       fullPath: '/student/profile'
       preLoaderRoute: typeof StudentProfileRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof StudentRoute
     }
     '/quizzes/$slug': {
       id: '/quizzes/$slug'
@@ -610,6 +626,19 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface StudentRouteChildren {
+  StudentProfileRoute: typeof StudentProfileRoute
+  StudentIndexRoute: typeof StudentIndexRoute
+}
+
+const StudentRouteChildren: StudentRouteChildren = {
+  StudentProfileRoute: StudentProfileRoute,
+  StudentIndexRoute: StudentIndexRoute,
+}
+
+const StudentRouteWithChildren =
+  StudentRoute._addFileChildren(StudentRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
@@ -618,13 +647,12 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
   ResourcesRoute: ResourcesRoute,
-  StudentRoute: StudentRoute,
+  StudentRoute: StudentRouteWithChildren,
   StudentDashboardRoute: StudentDashboardRoute,
   AnnouncementsSlugRoute: AnnouncementsSlugRoute,
   CategoriesCategoryRoute: CategoriesCategoryRoute,
   ParentSlugRoute: ParentSlugRoute,
   QuizzesSlugRoute: QuizzesSlugRoute,
-  StudentProfileRoute: StudentProfileRoute,
   VideosSlugRoute: VideosSlugRoute,
   AnnouncementsIndexRoute: AnnouncementsIndexRoute,
   GradesIndexRoute: GradesIndexRoute,

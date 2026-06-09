@@ -12,7 +12,7 @@ import {
   type StudentProfileForm,
 } from "@/lib/student-profile";
 
-export const Route = createFileRoute("/student_/profile")({
+export const Route = createFileRoute("/student/profile")({
   head: () => ({
     meta: [
       { title: "Student Profile — Ignite Islamic Academy" },
