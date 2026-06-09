@@ -1,24 +1,23 @@
 import { forwardRef } from "react";
-import type { QuizCertificateDisplayData } from "@/lib/quiz-certificate";
+import type { CertificateDisplayData } from "@/lib/certificate";
 import {
   CertificatePageBody,
   CERTIFICATE_HEIGHT_PX,
   CERTIFICATE_WIDTH_PX,
   CERT_COLORS,
   certificatePageStyle,
-  getCertificateLogoUrl,
 } from "@/components/certificate-body";
 
 export { CERTIFICATE_WIDTH_PX, CERTIFICATE_HEIGHT_PX, CERT_COLORS };
 
-/** On-screen preview only — not used for PDF capture. */
-export const QuizCertificateDocument = forwardRef<
+/** On-screen certificate preview — uses the global CertificatePageBody template. */
+export const CertificateDocument = forwardRef<
   HTMLDivElement,
-  { data: QuizCertificateDisplayData }
->(function QuizCertificateDocument({ data }, ref) {
+  { data: CertificateDisplayData }
+>(function CertificateDocument({ data }, ref) {
   return (
     <div ref={ref} data-certificate-root style={certificatePageStyle()}>
-      <CertificatePageBody data={data} logoUrl={getCertificateLogoUrl()} />
+      <CertificatePageBody data={data} />
     </div>
   );
 });

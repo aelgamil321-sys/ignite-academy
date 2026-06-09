@@ -1,8 +1,6 @@
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
-import {
-  CERTIFICATE_EXPORT_ID,
-} from "@/components/quiz-certificate-export";
+import { CERTIFICATE_EXPORT_ID } from "@/components/certificate-export";
 import {
   CERTIFICATE_HEIGHT_PX,
   CERTIFICATE_WIDTH_PX,

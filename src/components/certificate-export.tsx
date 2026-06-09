@@ -1,11 +1,10 @@
 import { forwardRef, type CSSProperties } from "react";
-import type { QuizCertificateDisplayData } from "@/lib/quiz-certificate";
+import type { CertificateDisplayData } from "@/lib/certificate";
 import {
   CertificatePageBody,
   CERTIFICATE_HEIGHT_PX,
   CERTIFICATE_WIDTH_PX,
   certificatePageStyle,
-  getCertificateLogoUrl,
 } from "@/components/certificate-body";
 
 /** Element id passed to html2canvas — must not use className or theme CSS */
@@ -36,14 +35,14 @@ const exportRootStyle: CSSProperties = {
  * PDF-only certificate tree: inline HEX styles, no className, no CSS variables.
  * Portaled to document.body; html2canvas captures #certificate-export only.
  */
-export const QuizCertificateExport = forwardRef<
+export const CertificateExport = forwardRef<
   HTMLDivElement,
-  { data: QuizCertificateDisplayData }
->(function QuizCertificateExport({ data }, ref) {
+  { data: CertificateDisplayData }
+>(function CertificateExport({ data }, ref) {
   return (
     <div id={CERTIFICATE_EXPORT_ID} ref={ref} aria-hidden={true} style={exportRootStyle}>
       <div style={certificatePageStyle()}>
-        <CertificatePageBody data={data} logoUrl={getCertificateLogoUrl()} />
+        <CertificatePageBody data={data} />
       </div>
     </div>
   );

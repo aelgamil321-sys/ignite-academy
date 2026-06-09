@@ -23,6 +23,9 @@ export function canIssueQuizCertificate(
   return false;
 }
 
+/** Platform-wide alias — quiz completion is the current issuance source. */
+export const canIssueCertificate = canIssueQuizCertificate;
+
 export function generateCertificateId(): string {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -129,7 +132,8 @@ export function resolveCertificateStudentNames(
   return { studentName, studentNameAr };
 }
 
-export type QuizCertificateDisplayData = {
+/** Display payload for the platform certificate template (all completion types). */
+export type CertificateDisplayData = {
   certificateId: string;
   studentName: string;
   studentNameAr: string;
@@ -142,8 +146,11 @@ export type QuizCertificateDisplayData = {
   gradeLabelAr: string;
   completionDate: string;
   /** PNG data URL for QR encoding the certificate ID (PDF-safe). */
-  qrDataUrl: string;
+  qrDataUrl?: string;
 };
+
+/** @deprecated Use CertificateDisplayData */
+export type QuizCertificateDisplayData = CertificateDisplayData;
 
 export function buildCertificateDisplayData(
   submission: SavedQuizSubmission,
@@ -151,7 +158,7 @@ export function buildCertificateDisplayData(
   studentNames: CertificateStudentNames,
   gradeName: Bi,
   lessonTitle: Bi,
-): QuizCertificateDisplayData {
+): CertificateDisplayData {
   const finalScore =
     submission.final_score ?? submission.auto_score + submission.essay_score;
   const percentage = submission.percentage ?? certificate.percentage;

@@ -1,8 +1,18 @@
+/**
+ * GLOBAL CERTIFICATE TEMPLATE
+ *
+ * CertificatePageBody is the single approved layout for all platform certificates:
+ * lesson quizzes, assessments, projects, assignments, and future completion types.
+ * Every grade level (KG1, KG2, Grades 1–12) renders through this component.
+ */
 import type { CSSProperties } from "react";
-import type { QuizCertificateDisplayData } from "@/lib/quiz-certificate";
+import type { CertificateDisplayData } from "@/lib/certificate";
 import {
   CERTIFICATE_SIGNATURE,
-  certificateLogoUrl,
+  certificateIslamicLogoUrl,
+  certificateSchoolLogoUrl,
+  certificateSignatureArImageUrl,
+  certificateSignatureEnImageUrl,
 } from "@/lib/certificate-branding";
 
 /** Landscape A4 at ~96dpi for html2canvas capture */
@@ -11,11 +21,11 @@ export const CERTIFICATE_HEIGHT_PX = 794;
 
 /** Fixed vertical grid (px) — must fit inside CERTIFICATE_HEIGHT_PX */
 const GRID = {
-  logo: 125,
-  title: 60,
-  name: 115,
-  scores: 120,
-  lesson: 95,
+  header: 105,
+  headerLogoWidth: 250,
+  name: 128,
+  scores: 135,
+  lesson: 112,
   footer: 90,
   padX: 28,
   padTop: 14,
@@ -129,117 +139,105 @@ function MosqueWatermark() {
   );
 }
 
-function LogoBanner({ logoUrl }: { logoUrl: string }) {
+function HeaderLogoBox({ src, alt }: { src: string; alt: string }) {
   return (
     <div
       style={{
-        height: GRID.logo,
+        width: GRID.headerLogoWidth,
+        height: GRID.header,
         flexShrink: 0,
         boxSizing: "border-box",
-        padding: "4px",
-        border: `3px solid ${CERT_COLORS.gold}`,
-        borderRadius: 10,
+        padding: 4,
+        border: `2px solid ${CERT_COLORS.gold}`,
+        borderRadius: 8,
         backgroundColor: CERT_COLORS.white,
-        boxShadow: "inset 0 0 0 1px #071A3D",
         overflow: "hidden",
       }}
     >
-      <div
+      <img
+        src={src}
+        alt={alt}
+        crossOrigin="anonymous"
         style={{
+          display: "block",
           width: "100%",
           height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          objectFit: "contain",
+          objectPosition: "center center",
           backgroundColor: CERT_COLORS.white,
-          borderRadius: 6,
-          overflow: "hidden",
         }}
-      >
-        <img
-          src={logoUrl}
-          alt="Ignite School — Department of Islamic Education"
-          crossOrigin="anonymous"
-          style={{
-            display: "block",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            objectPosition: "center center",
-            backgroundColor: CERT_COLORS.white,
-          }}
-        />
-      </div>
+      />
     </div>
   );
 }
 
-function GoldDiamond() {
-  return (
-    <span
-      style={{
-        display: "inline-block",
-        width: 8,
-        height: 8,
-        backgroundColor: CERT_COLORS.gold,
-        transform: "rotate(45deg)",
-        margin: "0 10px",
-        flexShrink: 0,
-      }}
-    />
-  );
-}
-
-function TitleBlock() {
+function CertificateHeader({
+  schoolLogoUrl,
+  islamicLogoUrl,
+}: {
+  schoolLogoUrl: string;
+  islamicLogoUrl: string;
+}) {
   return (
     <div
       style={{
-        height: GRID.title,
+        height: GRID.header,
         flexShrink: 0,
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: "stretch",
+        gap: 10,
         boxSizing: "border-box",
-        overflow: "hidden",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <GoldDiamond />
-        <span
+      <HeaderLogoBox src={islamicLogoUrl} alt="Department of Islamic Education" />
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          height: GRID.header,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          padding: "0 8px",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
           style={{
             fontSize: 28,
             fontWeight: 700,
             direction: "rtl",
             color: CERT_COLORS.navy,
-            lineHeight: 1,
+            lineHeight: 1.05,
           }}
         >
           شهادة إنجاز
-        </span>
-        <GoldDiamond />
+        </div>
+        <div
+          style={{
+            fontSize: 17,
+            fontWeight: 700,
+            color: CERT_COLORS.darkGreen,
+            letterSpacing: 1.2,
+            direction: "ltr",
+            lineHeight: 1.2,
+            marginTop: 6,
+          }}
+        >
+          Certificate of Achievement
+        </div>
+        <div
+          style={{
+            width: 200,
+            height: 2,
+            background: `linear-gradient(90deg, transparent, ${CERT_COLORS.gold}, transparent)`,
+            marginTop: 8,
+          }}
+        />
       </div>
-      <div
-        style={{
-          fontSize: 17,
-          fontWeight: 700,
-          color: CERT_COLORS.darkGreen,
-          letterSpacing: 2,
-          direction: "ltr",
-          lineHeight: 1.2,
-          marginTop: 4,
-        }}
-      >
-        CERTIFICATE OF ACHIEVEMENT
-      </div>
-      <div
-        style={{
-          width: 220,
-          height: 2,
-          background: `linear-gradient(90deg, transparent, ${CERT_COLORS.gold}, transparent)`,
-          marginTop: 5,
-        }}
-      />
+      <HeaderLogoBox src={schoolLogoUrl} alt="Ignite School" />
     </div>
   );
 }
@@ -280,10 +278,10 @@ function ScoreCard({
           flexShrink: 0,
         }}
       >
-        <div style={{ fontSize: 9, color: CERT_COLORS.goldPale, direction: "rtl", lineHeight: 1.15 }}>
+        <div style={{ fontSize: 10, color: CERT_COLORS.goldPale, direction: "rtl", lineHeight: 1.15 }}>
           {labelAr}
         </div>
-        <div style={{ fontSize: 9, color: CERT_COLORS.white, fontWeight: 700, direction: "ltr", lineHeight: 1.15 }}>
+        <div style={{ fontSize: 10, color: CERT_COLORS.white, fontWeight: 700, direction: "ltr", lineHeight: 1.15 }}>
           {labelEn}
         </div>
       </div>
@@ -344,22 +342,98 @@ function DetailCard({
         overflow: "hidden",
       }}
     >
-      <div style={{ fontSize: 9, color: CERT_COLORS.gray, direction: "rtl", lineHeight: 1.1 }}>
+      <div style={{ fontSize: 10, color: CERT_COLORS.gray, direction: "rtl", lineHeight: 1.15 }}>
         {labelAr}
       </div>
-      <div style={{ fontSize: 9, color: CERT_COLORS.gray, marginBottom: 4, direction: "ltr", fontWeight: 600, lineHeight: 1.1 }}>
+      <div style={{ fontSize: 10, color: CERT_COLORS.gray, marginBottom: 5, direction: "ltr", fontWeight: 600, lineHeight: 1.15 }}>
         {labelEn}
       </div>
       <div
         style={{
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: 700,
           color: CERT_COLORS.navy,
-          lineHeight: 1.25,
+          lineHeight: 1.3,
           wordBreak: "break-word",
         }}
       >
         {value}
+      </div>
+    </div>
+  );
+}
+
+const SIGNATURE_CARD_WIDTH = 260;
+
+function SignatureCard({
+  imageUrl,
+  imageAlt,
+  name,
+  title,
+  direction,
+}: {
+  imageUrl: string;
+  imageAlt: string;
+  name: string;
+  title: string;
+  direction: "rtl" | "ltr";
+}) {
+  return (
+    <div
+      style={{
+        width: SIGNATURE_CARD_WIDTH,
+        height: GRID.footer,
+        flexShrink: 0,
+        boxSizing: "border-box",
+        backgroundColor: CERT_COLORS.white,
+        border: `2px solid ${CERT_COLORS.gold}`,
+        borderRadius: 10,
+        padding: "3px 6px",
+        boxShadow: "0 3px 12px #071A3D18",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        textAlign: "center",
+      }}
+    >
+      <img
+        src={imageUrl}
+        alt={imageAlt}
+        crossOrigin="anonymous"
+        style={{
+          display: "block",
+          width: 135,
+          height: "auto",
+          maxHeight: 40,
+          objectFit: "contain",
+          objectPosition: "center center",
+          flexShrink: 0,
+        }}
+      />
+      <div
+        style={{
+          fontSize: 9,
+          fontWeight: 700,
+          direction,
+          color: CERT_COLORS.navy,
+          lineHeight: 1.1,
+          marginTop: 2,
+        }}
+      >
+        {name}
+      </div>
+      <div
+        style={{
+          fontSize: 7,
+          direction,
+          color: CERT_COLORS.gray,
+          lineHeight: 1.1,
+          marginTop: 1,
+        }}
+      >
+        {title}
       </div>
     </div>
   );
@@ -373,63 +447,29 @@ function SignatureFooter() {
         flexShrink: 0,
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "space-between",
         boxSizing: "border-box",
       }}
     >
-      <div
-        style={{
-          width: 360,
-          height: GRID.footer,
-          textAlign: "center",
-          backgroundColor: CERT_COLORS.white,
-          border: `2px solid ${CERT_COLORS.gold}`,
-          borderRadius: 10,
-          padding: "6px 16px",
-          boxSizing: "border-box",
-          boxShadow: "0 3px 12px #071A3D18",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ fontSize: 7, color: CERT_COLORS.gray, fontWeight: 700, letterSpacing: 0.4, lineHeight: 1.1 }}>
-          Electronic Signature / التوقيع الإلكتروني
-        </div>
-        <div style={{ fontSize: 13, fontWeight: 700, direction: "rtl", color: CERT_COLORS.navy, lineHeight: 1.15, marginTop: 2 }}>
-          {CERTIFICATE_SIGNATURE.arName}
-        </div>
-        <div style={{ fontSize: 9, direction: "rtl", color: CERT_COLORS.gray, lineHeight: 1.1 }}>
-          {CERTIFICATE_SIGNATURE.arTitle}
-        </div>
-        <div
-          style={{
-            width: 100,
-            height: 2,
-            backgroundColor: CERT_COLORS.gold,
-            margin: "3px auto",
-            flexShrink: 0,
-          }}
-        />
-        <div style={{ fontSize: 12, fontWeight: 700, direction: "ltr", color: CERT_COLORS.navy, lineHeight: 1.15 }}>
-          {CERTIFICATE_SIGNATURE.enName}
-        </div>
-        <div style={{ fontSize: 8, color: CERT_COLORS.gray, direction: "ltr", lineHeight: 1.1 }}>
-          {CERTIFICATE_SIGNATURE.enTitle}
-        </div>
-      </div>
+      <SignatureCard
+        imageUrl={certificateSignatureEnImageUrl()}
+        imageAlt="Ayman Abdullah signature"
+        name={CERTIFICATE_SIGNATURE.enName}
+        title={CERTIFICATE_SIGNATURE.enTitle}
+        direction="ltr"
+      />
+      <SignatureCard
+        imageUrl={certificateSignatureArImageUrl()}
+        imageAlt="توقيع أيمن عبد الله"
+        name={CERTIFICATE_SIGNATURE.arName}
+        title={CERTIFICATE_SIGNATURE.arTitle}
+        direction="rtl"
+      />
     </div>
   );
 }
 
-export function CertificatePageBody({
-  data,
-  logoUrl,
-}: {
-  data: QuizCertificateDisplayData;
-  logoUrl: string;
-}) {
+export function CertificatePageBody({ data }: { data: CertificateDisplayData }) {
   const lessonAr = data.lessonTitle.ar?.trim() || data.lessonTitle.en?.trim() || "—";
   const lessonEn = data.lessonTitle.en?.trim() || data.lessonTitle.ar?.trim() || "—";
   const lessonDisplay =
@@ -438,23 +478,26 @@ export function CertificatePageBody({
   const gradeEn = data.gradeName.en?.trim() || data.gradeName.ar?.trim() || "—";
   const gradeDisplay = gradeAr !== gradeEn ? `${gradeEn} / ${gradeAr}` : gradeEn;
 
+  const schoolLogoUrl = certificateSchoolLogoUrl();
+  const islamicLogoUrl = certificateIslamicLogoUrl();
+
   const colText: CSSProperties = {
     flex: 1,
     minWidth: 0,
-    fontSize: 11,
-    lineHeight: 1.35,
+    fontSize: 12,
+    lineHeight: 1.4,
     color: CERT_COLORS.darkGreen,
-    padding: "0 6px",
+    padding: "0 8px",
     boxSizing: "border-box",
     overflow: "hidden",
   };
 
   const nameStyle: CSSProperties = {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 700,
     color: CERT_COLORS.navy,
-    margin: "4px 0",
-    paddingBottom: 4,
+    margin: "6px 0 4px",
+    paddingBottom: 5,
     borderBottom: `3px solid ${CERT_COLORS.gold}`,
     lineHeight: 1.1,
     wordBreak: "break-word",
@@ -516,10 +559,9 @@ export function CertificatePageBody({
           overflow: "hidden",
         }}
       >
-        <LogoBanner logoUrl={logoUrl} />
-        <TitleBlock />
+        <CertificateHeader schoolLogoUrl={schoolLogoUrl} islamicLogoUrl={islamicLogoUrl} />
 
-        {/* Name section — 115px */}
+        {/* Name section */}
         <div
           style={{
             height: GRID.name,
@@ -533,10 +575,10 @@ export function CertificatePageBody({
           }}
         >
           <div style={{ ...colText, direction: "ltr", textAlign: "left" }}>
-            <div style={{ fontWeight: 700, color: CERT_COLORS.navy, fontSize: 11, lineHeight: 1.2 }}>
+            <div style={{ fontWeight: 700, color: CERT_COLORS.navy, fontSize: 12, lineHeight: 1.25 }}>
               Ignite School – Department of Islamic Education
             </div>
-            <div style={{ fontSize: 10, marginTop: 2 }}>is proud to award this certificate to:</div>
+            <div style={{ fontSize: 11, marginTop: 3 }}>is proud to award this certificate to:</div>
             <div style={nameStyle}>{data.studentName}</div>
           </div>
 
@@ -551,15 +593,15 @@ export function CertificatePageBody({
           />
 
           <div style={{ ...colText, direction: "rtl", textAlign: "right" }}>
-            <div style={{ fontWeight: 700, color: CERT_COLORS.navy, fontSize: 11, lineHeight: 1.2 }}>
-              تتشرف مدرسة إغنايت – قسم التربية الإسلامية
+            <div style={{ fontWeight: 700, color: CERT_COLORS.navy, fontSize: 12, lineHeight: 1.25 }}>
+              تتشرف مدرسة اجنايت – قسم التربية الإسلامية
             </div>
-            <div style={{ fontSize: 10, marginTop: 2 }}>بمنح هذه الشهادة إلى الطالب/ـة:</div>
+            <div style={{ fontSize: 11, marginTop: 3 }}>بمنح هذه الشهادة إلى الطالب/ـة:</div>
             <div style={{ ...nameStyle, direction: "rtl" }}>{data.studentNameAr}</div>
           </div>
         </div>
 
-        {/* Score cards — 120px */}
+        {/* Score cards */}
         <div
           style={{
             height: GRID.scores,
@@ -573,23 +615,23 @@ export function CertificatePageBody({
             labelEn="Final Score"
             labelAr="الدرجة النهائية"
             value={`${data.finalScore} / ${data.totalPoints}`}
-            valueSize={26}
+            valueSize={30}
           />
           <ScoreCard
             labelEn="Percentage"
             labelAr="النسبة المئوية"
             value={`${data.percentage}%`}
-            valueSize={26}
+            valueSize={30}
           />
           <ScoreCard
             labelEn="Grade"
             labelAr="التقدير"
             value={`${data.gradeLabelEn} / ${data.gradeLabelAr}`}
-            valueSize={24}
+            valueSize={28}
           />
         </div>
 
-        {/* Lesson details — 95px */}
+        {/* Lesson details */}
         <div
           style={{
             height: GRID.lesson,
@@ -660,6 +702,3 @@ export function certificatePageStyle() {
   };
 }
 
-export function getCertificateLogoUrl(): string {
-  return certificateLogoUrl();
-}

@@ -7,8 +7,8 @@ import {
   type QuizSubmissionAnswerItem,
   type SavedQuizSubmission,
 } from "@/lib/lesson-quiz";
-import { canIssueQuizCertificate } from "@/lib/quiz-certificate";
-import { QuizCertificateButton } from "@/components/quiz-certificate-modal";
+import { canIssueCertificate } from "@/lib/certificate";
+import { CertificateButton } from "@/components/certificate-modal";
 import type { Bi } from "@/lib/curriculum";
 
 const L = (en: string, ar: string) => ({ en, ar });
@@ -29,7 +29,7 @@ export function LessonQuizResults({
   const finalScore = submission.final_score ?? submission.auto_score + submission.essay_score;
   const percentage = submission.percentage ?? 0;
   const gradeLabel = gradeLabelForPercentage(percentage, lang);
-  const showCertificate = canIssueQuizCertificate(submission, questions);
+  const showCertificate = canIssueCertificate(submission, questions);
 
   const answerByIndex = new Map<number, QuizSubmissionAnswerItem>();
   for (const a of submission.answers) {
@@ -96,7 +96,7 @@ export function LessonQuizResults({
 
         {showCertificate && (
           <div className="pt-2">
-            <QuizCertificateButton
+            <CertificateButton
               submission={submission}
               gradeName={gradeName}
               lessonTitle={lessonTitle}

@@ -5,23 +5,23 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Bi } from "@/lib/curriculum";
 import type { SavedQuizSubmission } from "@/lib/lesson-quiz";
-import { downloadCertificatePdf } from "@/lib/certificate-pdf";
-import { buildCertificateQrDataUrl } from "@/lib/certificate-qr";
 import {
   buildCertificateDisplayData,
+  downloadCertificatePdf,
   getOrCreateQuizCertificate,
   resolveCertificateStudentNames,
-  type QuizCertificateDisplayData,
-} from "@/lib/quiz-certificate";
+  type CertificateDisplayData,
+} from "@/lib/certificate";
+import { buildCertificateQrDataUrl } from "@/lib/certificate-qr";
 import {
   CERTIFICATE_HEIGHT_PX,
   CERTIFICATE_WIDTH_PX,
-  QuizCertificateDocument,
-} from "@/components/quiz-certificate-document";
+  CertificateDocument,
+} from "@/components/certificate-document";
 import {
   CERTIFICATE_EXPORT_ID,
-  QuizCertificateExport,
-} from "@/components/quiz-certificate-export";
+  CertificateExport,
+} from "@/components/certificate-export";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +36,7 @@ function validateCertificateInputs(
   submission: SavedQuizSubmission,
   gradeName: Bi,
   lessonTitle: Bi,
-  displayData: QuizCertificateDisplayData | null,
+  displayData: CertificateDisplayData | null,
 ): string[] {
   const missing: string[] = [];
   if (!submission?.id) missing.push("submission.id");
@@ -59,7 +59,7 @@ function validateCertificateInputs(
 }
 
 /** Responsive on-screen preview only — never used for PDF capture. */
-function CertificatePreviewScaler({ data }: { data: QuizCertificateDisplayData }) {
+function CertificatePreviewScaler({ data }: { data: CertificateDisplayData }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.3);
 
@@ -101,7 +101,7 @@ function CertificatePreviewScaler({ data }: { data: QuizCertificateDisplayData }
             transformOrigin: "top left",
           }}
         >
-          <QuizCertificateDocument data={data} />
+          <CertificateDocument data={data} />
         </div>
       </div>
     </div>
@@ -113,15 +113,15 @@ function CertificatePdfSource({
   data,
   pdfRef,
 }: {
-  data: QuizCertificateDisplayData;
+  data: CertificateDisplayData;
   pdfRef: RefObject<HTMLDivElement | null>;
 }) {
   if (typeof document === "undefined") return null;
 
-  return createPortal(<QuizCertificateExport ref={pdfRef} data={data} />, document.body);
+  return createPortal(<CertificateExport ref={pdfRef} data={data} />, document.body);
 }
 
-export function QuizCertificateModal({
+export function CertificateModal({
   open,
   onOpenChange,
   submission,
@@ -137,7 +137,7 @@ export function QuizCertificateModal({
   lang: "en" | "ar";
 }) {
   const pdfRef = useRef<HTMLDivElement>(null);
-  const [displayData, setDisplayData] = useState<QuizCertificateDisplayData | null>(null);
+  const [displayData, setDisplayData] = useState<CertificateDisplayData | null>(null);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -335,7 +335,8 @@ export function QuizCertificateModal({
   );
 }
 
-export function QuizCertificateButton({
+/** Platform default certificate trigger — uses the global CertificatePageBody template. */
+export function CertificateButton({
   submission,
   gradeName,
   lessonTitle,
@@ -358,7 +359,7 @@ export function QuizCertificateButton({
         <Award className="h-4 w-4" />
         Download Certificate / تحميل الشهادة
       </button>
-      <QuizCertificateModal
+      <CertificateModal
         open={open}
         onOpenChange={setOpen}
         submission={submission}
