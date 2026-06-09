@@ -127,7 +127,20 @@ export function resolveCertificateStudentNames(
     "";
 
   const studentName = englishName || fullName || CERTIFICATE_NAME_FALLBACK_EN;
-  const studentNameAr = arabicName || fullName || CERTIFICATE_NAME_FALLBACK_AR;
+
+  let studentNameAr: string;
+  if (arabicName) {
+    studentNameAr = arabicName;
+  } else if (fullName) {
+    studentNameAr = fullName;
+  } else {
+    studentNameAr = CERTIFICATE_NAME_FALLBACK_AR;
+  }
+
+  // When english_name is set, do not echo the same Latin name on the Arabic side.
+  if (!arabicName && englishName && studentNameAr === studentName) {
+    studentNameAr = CERTIFICATE_NAME_FALLBACK_AR;
+  }
 
   return { studentName, studentNameAr };
 }

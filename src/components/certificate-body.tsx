@@ -318,21 +318,23 @@ function DetailCard({
   labelEn,
   labelAr,
   value,
+  flex = "1 1 0",
 }: {
   labelEn: string;
   labelAr: string;
   value: string;
+  flex?: string;
 }) {
   return (
     <div
       style={{
-        flex: "1 1 0",
+        flex,
         minWidth: 0,
         height: "100%",
         border: `2px solid ${CERT_COLORS.gold}`,
         borderRadius: 8,
         backgroundColor: CERT_COLORS.white,
-        padding: "6px 8px",
+        padding: "5px 6px",
         textAlign: "center",
         boxSizing: "border-box",
         boxShadow: "0 2px 8px #071A3D14",
@@ -647,16 +649,36 @@ export function CertificatePageBody({ data }: { data: CertificateDisplayData }) 
               background: `linear-gradient(90deg, ${CERT_COLORS.navy}, ${CERT_COLORS.darkGreen})`,
               border: `2px solid ${CERT_COLORS.gold}`,
               borderRadius: "8px 8px 0 0",
-              padding: "4px 12px",
-              textAlign: "center",
+              padding: "0 12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: 26,
               flexShrink: 0,
+              boxSizing: "border-box",
             }}
           >
-            <span style={{ fontSize: 11, fontWeight: 700, color: CERT_COLORS.gold, direction: "rtl" }}>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: CERT_COLORS.gold,
+                direction: "rtl",
+                lineHeight: 1,
+              }}
+            >
               بيانات الدرس
             </span>
-            <span style={{ fontSize: 10, color: CERT_COLORS.white, margin: "0 8px" }}>/</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: CERT_COLORS.white, letterSpacing: 1.2 }}>
+            <span style={{ fontSize: 10, color: CERT_COLORS.white, margin: "0 8px", lineHeight: 1 }}>/</span>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: CERT_COLORS.white,
+                letterSpacing: 1.2,
+                lineHeight: 1,
+              }}
+            >
               LESSON DETAILS
             </span>
           </div>
@@ -664,8 +686,8 @@ export function CertificatePageBody({ data }: { data: CertificateDisplayData }) 
             style={{
               flex: 1,
               display: "flex",
-              gap: 10,
-              padding: "6px",
+              gap: 6,
+              padding: "4px",
               backgroundColor: CERT_COLORS.cream,
               border: `2px solid ${CERT_COLORS.gold}`,
               borderTop: "none",
@@ -674,9 +696,19 @@ export function CertificatePageBody({ data }: { data: CertificateDisplayData }) 
               minHeight: 0,
             }}
           >
-            <DetailCard labelEn="Lesson Title" labelAr="عنوان الدرس" value={lessonDisplay} />
-            <DetailCard labelEn="Grade" labelAr="الصف" value={gradeDisplay} />
-            <DetailCard labelEn="Completion Date" labelAr="تاريخ الإنجاز" value={data.completionDate} />
+            <DetailCard
+              labelEn="Lesson Title"
+              labelAr="عنوان الدرس"
+              value={lessonDisplay}
+              flex="2.6 1 0"
+            />
+            <DetailCard labelEn="Grade" labelAr="الصف" value={gradeDisplay} flex="1 1 0" />
+            <DetailCard
+              labelEn="Completion Date"
+              labelAr="تاريخ الإنجاز"
+              value={data.completionDate}
+              flex="1 1 0"
+            />
           </div>
         </div>
 
