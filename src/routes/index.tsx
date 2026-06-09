@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ArrowRight, BookOpen, GraduationCap, Library, Video, ClipboardCheck,
   Users, Megaphone, Award, Sparkles, Play, Calendar
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero.jpg";
 import patternImg from "@/assets/pattern.jpg";
 import kgImg from "@/assets/kg.jpg";
@@ -37,6 +39,25 @@ function Home() {
   const stats = useCMSStats();
   const announcements = useAllAnnouncements();
   const featuredLessons = lessons.filter((l) => l.published).slice(0, 3);
+  const [signedIn, setSignedIn] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      setSignedIn(!!data.user);
+      setAuthReady(true);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(!!session?.user);
+      setAuthReady(true);
+    });
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   const stages: Array<{ name: TKey; grades: TKey; img: string; tint: string; to: string }> = [
     { name: "stage_kg", grades: "stage_kg_grades", img: kgImg, tint: "from-gold/40", to: "/grades" },
@@ -67,12 +88,20 @@ function Home() {
               </h1>
               <p className="mt-6 text-lg opacity-85 max-w-xl leading-relaxed">{tr("hero_desc")}</p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link to="/auth" search={{ mode: "signup" }} className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 font-semibold text-gold-foreground shadow-[var(--shadow-gold)] hover:translate-y-[-2px] transition-transform">
-                  {tr("cta_signup")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-                </Link>
-                <Link to="/auth" search={{ mode: "login" }} className="inline-flex items-center gap-2 rounded-full bg-primary-foreground text-primary px-7 py-3.5 font-semibold hover:bg-primary-foreground/90 transition-colors">
-                  {tr("cta_login")}
-                </Link>
+                {authReady && signedIn ? (
+                  <Link to="/student" className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 font-semibold text-gold-foreground shadow-[var(--shadow-gold)] hover:translate-y-[-2px] transition-transform">
+                    {tr("nav_student")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+                  </Link>
+                ) : authReady ? (
+                  <>
+                    <Link to="/auth" search={{ mode: "signup" }} className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 font-semibold text-gold-foreground shadow-[var(--shadow-gold)] hover:translate-y-[-2px] transition-transform">
+                      {tr("cta_signup")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+                    </Link>
+                    <Link to="/auth" search={{ mode: "login" }} className="inline-flex items-center gap-2 rounded-full bg-primary-foreground text-primary px-7 py-3.5 font-semibold hover:bg-primary-foreground/90 transition-colors">
+                      {tr("cta_login")}
+                    </Link>
+                  </>
+                ) : null}
                 <Link to="/grades" className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 px-7 py-3.5 font-semibold hover:bg-primary-foreground/10 transition-colors">
                   <Play className="h-4 w-4" /> {tr("cta_explore")}
                 </Link>
