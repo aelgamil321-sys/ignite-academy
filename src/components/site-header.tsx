@@ -82,13 +82,12 @@ export function SiteHeader() {
               {lang === "ar" ? "الملف الشخصي" : "Profile"}
             </Link>
           ) : (
-            <Link
-              to="/auth"
-              search={{ mode: "login" }}
+            <a
+              href="/auth?mode=login"
               className="hidden md:inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)]"
             >
               {tr("nav_login")}
-            </Link>
+            </a>
           )}
           <button
             aria-label="Toggle menu"

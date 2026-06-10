@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
@@ -22,7 +22,6 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const navigate = useNavigate();
   const { mode: initialMode } = Route.useSearch();
   const { lang } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
@@ -41,10 +40,10 @@ function AuthPage() {
     let active = true;
     void (async () => {
       const { data } = await supabase.auth.getUser();
-      if (active && data.user) navigate({ to: "/student-dashboard" });
+      if (active && data.user) window.location.replace("/student");
     })();
     return () => { active = false; };
-  }, [navigate]);
+  }, []);
 
 
   const T = {
@@ -98,13 +97,13 @@ function AuthPage() {
           return;
         }
         toast.success(T.welcome);
-        navigate({ to: "/student-dashboard" });
+        window.location.assign("/student");
         return;
       }
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast.success(T.welcome);
-      navigate({ to: "/student-dashboard" });
+      window.location.assign("/student");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : String(err));
     } finally {
