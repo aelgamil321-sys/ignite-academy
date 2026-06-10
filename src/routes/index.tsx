@@ -59,10 +59,6 @@ function Home() {
     };
   }, []);
 
-  function goToAuth(mode: "signup" | "login") {
-    window.location.assign(`/auth?mode=${mode}`);
-  }
-
   function goToStudent() {
     window.location.assign("/student");
   }
@@ -109,26 +105,20 @@ function Home() {
                   </a>
                 ) : (
                   <>
-                    <a
-                      href="/auth?mode=signup"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        goToAuth("signup");
-                      }}
+                    <Link
+                      to="/auth"
+                      search={{ mode: "signup" }}
                       className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 font-semibold text-gold-foreground shadow-[var(--shadow-gold)] hover:translate-y-[-2px] transition-transform"
                     >
                       {tr("cta_signup")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-                    </a>
-                    <a
-                      href="/auth?mode=login"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        goToAuth("login");
-                      }}
+                    </Link>
+                    <Link
+                      to="/auth"
+                      search={{ mode: "login" }}
                       className="inline-flex items-center gap-2 rounded-full bg-primary-foreground text-primary px-7 py-3.5 font-semibold hover:bg-primary-foreground/90 transition-colors"
                     >
                       {tr("cta_login")}
-                    </a>
+                    </Link>
                   </>
                 )}
                 <Link to="/grades" className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 px-7 py-3.5 font-semibold hover:bg-primary-foreground/10 transition-colors">
