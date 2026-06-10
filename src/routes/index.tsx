@@ -59,6 +59,14 @@ function Home() {
     };
   }, []);
 
+  function goToAuth(mode: "signup" | "login") {
+    window.location.assign(`/auth?mode=${mode}`);
+  }
+
+  function goToStudent() {
+    window.location.assign("/student");
+  }
+
   const stages: Array<{ name: TKey; grades: TKey; img: string; tint: string; to: string }> = [
     { name: "stage_kg", grades: "stage_kg_grades", img: kgImg, tint: "from-gold/40", to: "/grades" },
     { name: "stage_elem", grades: "stage_elem_grades", img: elemImg, tint: "from-emerald/40", to: "/grades" },
@@ -73,7 +81,7 @@ function Home() {
         {/* HERO */}
         <section className="relative overflow-hidden bg-primary text-primary-foreground">
           <div
-            className="absolute inset-0 opacity-[0.07] mix-blend-luminosity"
+            className="absolute inset-0 opacity-[0.07] mix-blend-luminosity pointer-events-none"
             style={{ backgroundImage: `url(${patternImg})`, backgroundSize: "320px" }}
             aria-hidden
           />
@@ -91,6 +99,10 @@ function Home() {
                 {authReady && signedIn ? (
                   <a
                     href="/student"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      goToStudent();
+                    }}
                     className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 font-semibold text-gold-foreground shadow-[var(--shadow-gold)] hover:translate-y-[-2px] transition-transform"
                   >
                     {tr("nav_student")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
@@ -99,12 +111,20 @@ function Home() {
                   <>
                     <a
                       href="/auth?mode=signup"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        goToAuth("signup");
+                      }}
                       className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 font-semibold text-gold-foreground shadow-[var(--shadow-gold)] hover:translate-y-[-2px] transition-transform"
                     >
                       {tr("cta_signup")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                     </a>
                     <a
                       href="/auth?mode=login"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        goToAuth("login");
+                      }}
                       className="inline-flex items-center gap-2 rounded-full bg-primary-foreground text-primary px-7 py-3.5 font-semibold hover:bg-primary-foreground/90 transition-colors"
                     >
                       {tr("cta_login")}

@@ -84,6 +84,10 @@ export function SiteHeader() {
           ) : (
             <a
               href="/auth?mode=login"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.assign("/auth?mode=login");
+              }}
               className="hidden md:inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)]"
             >
               {tr("nav_login")}
