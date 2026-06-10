@@ -105,20 +105,18 @@ function Home() {
                   </a>
                 ) : (
                   <>
-                    <Link
-                      to="/auth"
-                      search={{ mode: "signup" }}
+                    <a
+                      href="/auth?mode=signup"
                       className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 font-semibold text-gold-foreground shadow-[var(--shadow-gold)] hover:translate-y-[-2px] transition-transform"
                     >
                       {tr("cta_signup")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-                    </Link>
-                    <Link
-                      to="/auth"
-                      search={{ mode: "login" }}
+                    </a>
+                    <a
+                      href="/auth?mode=login"
                       className="inline-flex items-center gap-2 rounded-full bg-primary-foreground text-primary px-7 py-3.5 font-semibold hover:bg-primary-foreground/90 transition-colors"
                     >
                       {tr("cta_login")}
-                    </Link>
+                    </a>
                   </>
                 )}
                 <Link to="/grades" className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 px-7 py-3.5 font-semibold hover:bg-primary-foreground/10 transition-colors">
