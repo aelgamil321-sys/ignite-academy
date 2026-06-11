@@ -82,7 +82,7 @@ function Home() {
             aria-hidden
           />
           <div className="container-page relative grid gap-12 lg:grid-cols-2 items-center py-20 lg:py-28">
-            <div>
+            <div className="relative z-10">
               <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-medium text-gold">
                 <Sparkles className="h-3.5 w-3.5" />
                 {tr("hero_badge")}
@@ -91,7 +91,7 @@ function Home() {
                 {tr("hero_title_1")} <span className="text-gold italic">{tr("hero_title_2")}</span> {tr("hero_title_3")}
               </h1>
               <p className="mt-6 text-lg opacity-85 max-w-xl leading-relaxed">{tr("hero_desc")}</p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="relative z-20 mt-8 flex flex-wrap gap-3">
                 {authReady && signedIn ? (
                   <a
                     href="/student"
@@ -138,7 +138,7 @@ function Home() {
               </div>
             </div>
             <div className="relative">
-              <div className="absolute -inset-6 bg-gold/20 blur-3xl rounded-full" aria-hidden />
+              <div className="absolute -inset-6 bg-gold/20 blur-3xl rounded-full pointer-events-none" aria-hidden />
               <div className="relative rounded-3xl overflow-hidden shadow-[var(--shadow-elegant)] border border-gold/20">
                 <img src={heroImg} alt="" width={1600} height={1100} className="w-full h-auto" />
               </div>
