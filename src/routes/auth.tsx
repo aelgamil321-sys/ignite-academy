@@ -38,11 +38,16 @@ function AuthPage() {
   // If already signed in, send to student dashboard
   useEffect(() => {
     let active = true;
-    void (async () => {
-      const { data } = await supabase.auth.getUser();
-      if (active && data.user) window.location.replace("/student");
-    })();
-    return () => { active = false; };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active && session?.user) window.location.replace("/student");
+    });
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active && data.session?.user) window.location.replace("/student");
+    });
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
 
@@ -69,38 +74,75 @@ function AuthPage() {
     welcome: lang === "ar" ? "مرحبًا بك في الأكاديمية" : "Welcome to the Academy",
   };
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
     try {
+      const fd = new FormData(e.currentTarget);
+      const submitEmail = String(fd.get("email") ?? email).trim();
+      const submitPassword = String(fd.get("password") ?? password);
+      const submitFullName = String(fd.get("full_name") ?? fullName).trim();
+      const submitArabicName = String(fd.get("arabic_name") ?? arabicName).trim();
+      const submitEnglishName = String(fd.get("english_name") ?? englishName).trim();
+      const submitGrade = String(fd.get("grade") ?? grade).trim();
+
+      if (!submitEmail || !submitPassword) {
+        toast.error(lang === "ar"
+          ? "يرجى إدخال البريد الإلكتروني وكلمة المرور."
+          : "Please enter your email and password.");
+        return;
+      }
+
       if (mode === "signup") {
+        if (!submitFullName) {
+          toast.error(lang === "ar" ? "يرجى إدخال الاسم الكامل." : "Please enter your full name.");
+          return;
+        }
+
         const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: submitEmail,
+          password: submitPassword,
           options: {
             emailRedirectTo: `${window.location.origin}/student-dashboard`,
             data: {
-              full_name: fullName.trim(),
-              arabic_name: arabicName.trim() || undefined,
-              english_name: englishName.trim() || undefined,
+              full_name: submitFullName,
+              arabic_name: submitArabicName || undefined,
+              english_name: submitEnglishName || undefined,
               role_intent: "student",
-              grade,
+              grade: submitGrade,
             },
           },
         });
         if (error) throw error;
-        if (!data.session) {
-          // Email confirmation required
-          toast.success(lang === "ar"
-            ? "يرجى مراجعة بريدك الإلكتروني لتأكيد حسابك."
-            : "Please check your email to confirm your account.");
+
+        if (data.session) {
+          toast.success(T.welcome);
+          window.location.assign("/student");
           return;
         }
-        toast.success(T.welcome);
-        window.location.assign("/student");
+
+        // Account may exist but email confirmation is required — try signing in once.
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+          email: submitEmail,
+          password: submitPassword,
+        });
+        if (!loginError && loginData.session) {
+          toast.success(T.welcome);
+          window.location.assign("/student");
+          return;
+        }
+
+        toast.success(lang === "ar"
+          ? "تم إنشاء حسابك. يرجى مراجعة بريدك الإلكتروني لتأكيده ثم تسجيل الدخول."
+          : "Your account was created. Please check your email to confirm it, then sign in.");
+        setMode("login");
         return;
       }
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: submitEmail,
+        password: submitPassword,
+      });
       if (error) throw error;
       toast.success(T.welcome);
       window.location.assign("/student");
@@ -139,13 +181,15 @@ function AuthPage() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             {mode === "signup" && (
               <>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">{T.fullNameHint}</label>
                   <input
                     type="text"
+                    name="full_name"
+                    autoComplete="name"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
@@ -157,6 +201,8 @@ function AuthPage() {
                   <label className="text-xs font-medium text-muted-foreground">{T.arabicNameHint}</label>
                   <input
                     type="text"
+                    name="arabic_name"
+                    autoComplete="additional-name"
                     value={arabicName}
                     onChange={(e) => setArabicName(e.target.value)}
                     maxLength={100}
@@ -168,6 +214,8 @@ function AuthPage() {
                   <label className="text-xs font-medium text-muted-foreground">{T.englishNameHint}</label>
                   <input
                     type="text"
+                    name="english_name"
+                    autoComplete="nickname"
                     value={englishName}
                     onChange={(e) => setEnglishName(e.target.value)}
                     maxLength={100}
@@ -177,6 +225,7 @@ function AuthPage() {
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">{T.grade}</label>
                   <select
+                    name="grade"
                     required
                     value={grade}
                     onChange={(e) => setGrade(e.target.value)}
@@ -193,6 +242,8 @@ function AuthPage() {
               <label className="text-xs font-medium text-muted-foreground">{T.email}</label>
               <input
                 type="email"
+                name="email"
+                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -204,6 +255,8 @@ function AuthPage() {
               <label className="text-xs font-medium text-muted-foreground">{T.password}</label>
               <input
                 type="password"
+                name="password"
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 required
                 minLength={8}
                 value={password}
