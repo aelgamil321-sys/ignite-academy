@@ -1,5 +1,7 @@
 import type { Bi } from "@/lib/curriculum";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizeGradeSlug } from "@/lib/grade-utils";
+import { resolveParentStudentLink } from "@/lib/parent-student-link";
 import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-progress";
 
 export type ParentDashboardData = {
@@ -8,32 +10,67 @@ export type ParentDashboardData = {
   progress: StudentProgressData;
 };
 
-export async function fetchParentDashboardData(userId: string): Promise<{
+export type ParentDashboardLinkError = "none" | "multiple";
+
+export type ParentDashboardResult = {
   data: ParentDashboardData | null;
   error: string | null;
-}> {
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("full_name, arabic_name, english_name, grade")
-    .eq("user_id", userId)
+  linkError: ParentDashboardLinkError | null;
+};
+
+export async function fetchParentDashboardData(parentUserId: string): Promise<ParentDashboardResult> {
+  const { data: parentProfile, error: parentProfileError } = await supabase
+    .from("parent_profiles")
+    .select("full_name, email, student_name, student_grade")
+    .eq("user_id", parentUserId)
     .maybeSingle();
 
-  if (profileError) {
-    return { data: null, error: profileError.message };
+  if (parentProfileError) {
+    return { data: null, error: parentProfileError.message, linkError: null };
+  }
+  if (!parentProfile) {
+    return {
+      data: null,
+      error: "Parent profile not found.",
+      linkError: null,
+    };
   }
 
-  const { data: progress, error: progressError } = await fetchStudentProgress(userId);
+  const studentGrade = normalizeGradeSlug(parentProfile.student_grade) || parentProfile.student_grade;
+  const { data: studentProfiles, error: studentsError } = await supabase
+    .from("profiles")
+    .select("user_id, full_name, arabic_name, english_name, grade")
+    .eq("grade", studentGrade);
+
+  if (studentsError) {
+    return { data: null, error: studentsError.message, linkError: null };
+  }
+
+  const link = resolveParentStudentLink(
+    studentProfiles ?? [],
+    parentProfile.student_name,
+    studentGrade,
+  );
+
+  if (link.status === "none") {
+    return { data: null, error: null, linkError: "none" };
+  }
+  if (link.status === "multiple") {
+    return { data: null, error: null, linkError: "multiple" };
+  }
+
+  const { data: progress, error: progressError } = await fetchStudentProgress(link.studentUserId);
   if (progressError) {
-    return { data: null, error: progressError };
+    return { data: null, error: progressError, linkError: null };
   }
   if (!progress) {
-    return { data: null, error: "Progress data unavailable." };
+    return { data: null, error: "Progress data unavailable.", linkError: null };
   }
 
-  const fullName = profile?.full_name?.trim() || "Student";
+  const fullName = link.profile.full_name?.trim() || parentProfile.student_name.trim() || "Student";
   const studentName: Bi = {
-    en: profile?.english_name?.trim() || fullName,
-    ar: profile?.arabic_name?.trim() || fullName,
+    en: link.profile.english_name?.trim() || fullName,
+    ar: link.profile.arabic_name?.trim() || fullName,
   };
 
   return {
@@ -43,5 +80,6 @@ export async function fetchParentDashboardData(userId: string): Promise<{
       progress,
     },
     error: null,
+    linkError: null,
   };
 }

@@ -8,6 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { grades } from "@/lib/curriculum";
 import { gradeDisplayName, normalizeGradeSlug } from "@/lib/grade-utils";
 import { fetchParentDashboardData, type ParentDashboardData } from "@/lib/parent-dashboard";
+import { isParentAccount } from "@/lib/account-role";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/parent/dashboard")({
@@ -36,6 +37,11 @@ function ParentDashboardGate() {
       if (!active) return;
       if (!data.user) {
         navigate({ to: "/auth", search: { mode: "login" } });
+        return;
+      }
+      const parent = await isParentAccount(data.user.id);
+      if (!parent) {
+        navigate({ to: "/student" });
         return;
       }
       setUserId(data.user.id);
@@ -72,15 +78,18 @@ function ParentDashboardPage({ userId }: { userId: string }) {
   const [dashboard, setDashboard] = useState<ParentDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState<"none" | "multiple" | null>(null);
 
   useEffect(() => {
     let active = true;
     void (async () => {
       setLoading(true);
       setLoadError(null);
-      const { data, error } = await fetchParentDashboardData(userId);
+      setLinkError(null);
+      const { data, error, linkError: studentLinkError } = await fetchParentDashboardData(userId);
       if (!active) return;
-      if (error) setLoadError(error);
+      if (studentLinkError) setLinkError(studentLinkError);
+      else if (error) setLoadError(error);
       else setDashboard(data);
       setLoading(false);
     })();
@@ -137,6 +146,20 @@ function ParentDashboardPage({ userId }: { userId: string }) {
       {loading ? (
         <div className="text-sm text-muted-foreground py-12 text-center">
           {lang === "ar" ? "جارٍ تحميل لوحة ولي الأمر…" : "Loading parent dashboard…"}
+        </div>
+      ) : linkError === "multiple" ? (
+        <div className="rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900">
+          {L(
+            "More than one student found. Please contact the school to link your account.",
+            "تم العثور على أكثر من طالب. يرجى التواصل مع المدرسة لربط حسابك.",
+          )[lang]}
+        </div>
+      ) : linkError === "none" ? (
+        <div className="rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900">
+          {L(
+            "No matching student found. Please check the student name and grade.",
+            "لم يتم العثور على طالب مطابق. يرجى التحقق من اسم الطالب والصف.",
+          )[lang]}
         </div>
       ) : loadError ? (
         <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-sm text-destructive">
