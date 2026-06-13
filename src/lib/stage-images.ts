@@ -3,7 +3,7 @@ export const STAGE_CARD_IMAGES = {
   kg: "/images/stage-kg.jpg",
   elementary: "/images/stage-elementary.jpg",
   middle: "/images/stage-middle.jpg",
-  high: "/images/stage-high.jpg",
+  high: "/images/الثانوية.jpg",
 } as const;
 
 export type StageCardKey = keyof typeof STAGE_CARD_IMAGES;
