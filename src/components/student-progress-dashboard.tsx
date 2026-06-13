@@ -8,6 +8,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { StudentBadgesSection } from "@/components/student-badges-section";
 import { useI18n } from "@/lib/i18n";
 import type { StudentProgressData } from "@/lib/student-progress";
 
@@ -146,6 +147,8 @@ export function StudentProgressDashboard({
           )[lang]}
         </p>
       </div>
+
+      <StudentBadgesSection progress={progress} />
 
       <section className="rounded-2xl border border-border bg-card p-6 md:p-7 shadow-[var(--shadow-soft)]">
         <div className="flex items-center gap-3 mb-5">
