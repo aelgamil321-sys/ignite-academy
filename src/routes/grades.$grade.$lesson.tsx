@@ -11,9 +11,10 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { getGrade } from "@/lib/curriculum";
 import { useResolveLesson, lessonVideoEmbeds, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
-import { studentDownloadItems, fileNameFromUrl } from "@/lib/lesson-bilingual-files";
+import { studentDownloadItems, fileNameFromUrl, type StudentDownloadItem } from "@/lib/lesson-bilingual-files";
 import { LessonQuizStudent } from "@/components/lesson-quiz-student";
 import { normalizeQuizList } from "@/lib/lesson-quiz";
+import { useLessonHashScroll } from "@/lib/lesson-hash-scroll";
 import videoPlaceholder from "@/assets/video-placeholder.jpg";
 
 export const Route = createFileRoute("/grades/$grade/$lesson")({
@@ -34,6 +35,8 @@ function LessonPage() {
   const { loading: cmsLoading } = useCMS();
   const resolved = useResolveLesson(gradeSlug, lessonSlug);
   const { tr, lang, dir } = useI18n();
+  const lessonReady = !cmsLoading && Boolean(resolved?.lesson);
+  useLessonHashScroll(lessonReady, lessonSlug);
 
   if (cmsLoading) {
     return (
@@ -148,7 +151,11 @@ function LessonPage() {
               </div>
             )}
 
-            <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
+            <div
+              id="lesson-video"
+              tabIndex={-1}
+              className="scroll-mt-28 rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] outline-none"
+            >
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Video className="h-5 w-5" />
@@ -189,12 +196,14 @@ function LessonPage() {
             <LessonDownloads custom={custom} />
 
             {custom && normalizeQuizList(custom.quiz).length > 0 && (
-              <LessonQuizStudent
-                lessonId={custom.id}
-                questions={custom.quiz}
-                gradeName={grade.name}
-                lessonTitle={lesson.title}
-              />
+              <div id="lesson-quiz" tabIndex={-1} className="scroll-mt-28 outline-none">
+                <LessonQuizStudent
+                  lessonId={custom.id}
+                  questions={custom.quiz}
+                  gradeName={grade.name}
+                  lessonTitle={lesson.title}
+                />
+              </div>
             )}
           </div>
 
@@ -223,41 +232,112 @@ function LessonPage() {
 
 function LessonDownloads({ custom }: { custom?: CustomLesson }) {
   const items = custom ? studentDownloadItems(custom) : [];
+  const pdfItems = items.filter(
+    (item) =>
+      item.key === "pdfArUrl" ||
+      item.key === "pdfEnUrl" ||
+      item.key === "pptArUrl" ||
+      item.key === "pptEnUrl",
+  );
+  const worksheetItems = items.filter(
+    (item) => item.key === "worksheetArUrl" || item.key === "worksheetEnUrl",
+  );
+
+  if (items.length === 0) {
+    return (
+      <div className="space-y-6">
+        <LessonFileSection
+          id="lesson-pdf"
+          title="PDF"
+          items={[]}
+          emptyEn="No PDF attached to this lesson."
+          emptyAr="لا يوجد PDF مرفق لهذا الدرس."
+        />
+        <LessonFileSection
+          id="lesson-worksheet"
+          title="Worksheet / ورقة العمل"
+          items={[]}
+          emptyEn="No worksheet attached to this lesson."
+          emptyAr="لا توجد ورقة عمل مرفقة لهذا الدرس."
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
+    <div className="space-y-6">
+      <LessonFileSection
+        id="lesson-pdf"
+        title="PDF"
+        items={pdfItems}
+        emptyEn="No PDF attached to this lesson."
+        emptyAr="لا يوجد PDF مرفق لهذا الدرس."
+      />
+      <LessonFileSection
+        id="lesson-worksheet"
+        title="Worksheet / ورقة العمل"
+        items={worksheetItems}
+        emptyEn="No worksheet attached to this lesson."
+        emptyAr="لا توجد ورقة عمل مرفقة لهذا الدرس."
+      />
+    </div>
+  );
+}
+
+function LessonFileSection({
+  id,
+  title,
+  items,
+  emptyEn,
+  emptyAr,
+}: {
+  id: string;
+  title: string;
+  items: StudentDownloadItem[];
+  emptyEn: string;
+  emptyAr: string;
+}) {
+  return (
+    <div
+      id={id}
+      tabIndex={-1}
+      className="scroll-mt-28 rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] outline-none"
+    >
       <div className="flex items-center gap-3 mb-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Download className="h-5 w-5" />
+          <FileText className="h-5 w-5" />
         </div>
-        <h2 className="font-display text-xl font-semibold text-foreground">
-          Downloads / الملفات
-        </h2>
+        <h2 className="font-display text-xl font-semibold text-foreground">{title}</h2>
       </div>
-
       {items.length > 0 ? (
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          {items.map((item) => (
-            <a
-              key={item.key}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              download={fileNameFromUrl(item.url)}
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-primary hover:text-primary transition-colors"
-            >
-              <Download className="h-4 w-4 shrink-0" />
-              <span>{item.label}</span>
-            </a>
-          ))}
-        </div>
+        <DownloadGrid items={items} />
       ) : (
         <p className="text-sm text-muted-foreground leading-relaxed">
-          لا توجد ملفات مرفقة لهذا الدرس
+          {emptyAr}
           <br />
-          No files attached to this lesson
+          {emptyEn}
         </p>
       )}
+    </div>
+  );
+}
+
+function DownloadGrid({ items }: { items: StudentDownloadItem[] }) {
+  return (
+    <div className="grid gap-2.5 sm:grid-cols-2">
+      {items.map((item) => (
+        <a
+          key={item.key}
+          href={item.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          download={fileNameFromUrl(item.url)}
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-primary hover:text-primary transition-colors"
+        >
+          <Download className="h-4 w-4 shrink-0" />
+          <span>{item.label}</span>
+        </a>
+      ))}
     </div>
   );
 }

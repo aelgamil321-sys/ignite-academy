@@ -105,6 +105,7 @@ function StatusBadge({ status, lang }: { status: LessonStatus; lang: "en" | "ar"
 function ActionButton({
   to,
   params,
+  hash,
   href,
   onClick,
   icon: Icon,
@@ -114,6 +115,7 @@ function ActionButton({
 }: {
   to?: "/grades/$grade/$lesson";
   params?: { grade: string; lesson: string };
+  hash?: string;
   href?: string;
   onClick?: () => void;
   icon: typeof PlayCircle;
@@ -151,7 +153,7 @@ function ActionButton({
 
   if (to && params) {
     return (
-      <Link to={to} params={params} onClick={onClick} className={base}>
+      <Link to={to} params={params} hash={hash} onClick={onClick} className={base}>
         <Icon className="h-4 w-4 shrink-0 text-primary" />
         <span className="truncate">{label}</span>
       </Link>
@@ -306,6 +308,7 @@ export function GradeLessonsSection({
                   <ActionButton
                     to="/grades/$grade/$lesson"
                     params={{ grade: gradeSlug, lesson: custom.id }}
+                    hash="lesson-video"
                     onClick={() => touchLesson(custom.id)}
                     icon={PlayCircle}
                     label={L("Watch Lesson Video", "مشاهدة فيديو الدرس")[lang]}
@@ -332,6 +335,7 @@ export function GradeLessonsSection({
                   <ActionButton
                     to="/grades/$grade/$lesson"
                     params={{ grade: gradeSlug, lesson: custom.id }}
+                    hash="lesson-quiz"
                     onClick={() => touchLesson(custom.id)}
                     icon={ClipboardCheck}
                     label={quizLabel}
@@ -340,6 +344,7 @@ export function GradeLessonsSection({
                   <ActionButton
                     to="/grades/$grade/$lesson"
                     params={{ grade: gradeSlug, lesson: custom.id }}
+                    hash="lesson-result"
                     onClick={() => touchLesson(custom.id)}
                     icon={submission ? Award : BookOpen}
                     label={L("View Result", "عرض النتيجة")[lang]}
