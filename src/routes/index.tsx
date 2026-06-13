@@ -72,7 +72,7 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
+      <SiteHeader showPartnerLogos />
       <main>
         {/* HERO */}
         <section className="relative overflow-hidden bg-primary text-primary-foreground">
@@ -81,17 +81,21 @@ function Home() {
             style={{ backgroundImage: `url(${patternImg})`, backgroundSize: "320px" }}
             aria-hidden
           />
-          <div className="container-page relative grid gap-12 lg:grid-cols-2 items-center py-20 lg:py-28">
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-medium text-gold">
-                <Sparkles className="h-3.5 w-3.5" />
-                {tr("hero_badge")}
+          <div className="container-page relative grid items-center gap-10 py-16 sm:gap-12 sm:py-20 md:py-24 lg:grid-cols-2 lg:gap-16 lg:py-28 xl:py-32">
+            <div className="relative z-10 flex flex-col justify-center">
+              <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-2 text-xs font-medium tracking-wide text-gold sm:text-sm">
+                <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                <span>{tr("hero_badge")}</span>
               </div>
-              <h1 className="mt-6 font-display text-5xl md:text-6xl lg:text-7xl font-semibold leading-[1.05]">
-                {tr("hero_title_1")} <span className="text-gold italic">{tr("hero_title_2")}</span> {tr("hero_title_3")}
+              <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.08] tracking-tight sm:mt-6 sm:text-5xl md:text-6xl lg:text-[4.25rem] lg:leading-[1.05] xl:text-7xl">
+                {tr("hero_title_1")}{" "}
+                <span className="text-gold italic">{tr("hero_title_2")}</span>{" "}
+                {tr("hero_title_3")}
               </h1>
-              <p className="mt-6 text-lg opacity-85 max-w-xl leading-relaxed">{tr("hero_desc")}</p>
-              <div className="relative z-20 mt-8 flex flex-wrap gap-3">
+              <p className="mt-5 max-w-xl text-base leading-relaxed opacity-90 sm:mt-6 sm:text-lg sm:leading-relaxed">
+                {tr("hero_desc")}
+              </p>
+              <div className="relative z-20 mt-7 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
                 {authReady && signedIn ? (
                   <a
                     href="/student"
@@ -124,20 +128,20 @@ function Home() {
                 </Link>
               </div>
 
-              <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
+              <div className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-primary-foreground/15 pt-8 sm:mt-12 sm:gap-6 sm:pt-10">
                 {[
                   { n: String(stats.lessonCount), l: tr("stat_lessons") },
                   { n: String(stats.gradeCount), l: tr("stat_grades") },
                   { n: String(stats.subjectCount), l: tr("stat_subjects") },
                 ].map((s) => (
-                  <div key={s.l}>
-                    <div className="font-display text-3xl text-gold">{s.n}</div>
-                    <div className="text-xs uppercase tracking-wider opacity-70 mt-1">{s.l}</div>
+                  <div key={s.l} className="text-center sm:text-start">
+                    <div className="font-display text-2xl text-gold sm:text-3xl">{s.n}</div>
+                    <div className="mt-1 text-[10px] uppercase tracking-wider opacity-75 sm:text-xs">{s.l}</div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="relative">
+            <div className="relative mx-auto w-full max-w-xl lg:max-w-none lg:mx-0">
               <div className="absolute -inset-6 bg-gold/20 blur-3xl rounded-full pointer-events-none" aria-hidden />
               <div className="relative rounded-3xl overflow-hidden shadow-[var(--shadow-elegant)] border border-gold/20">
                 <img src={heroImg} alt="" width={1600} height={1100} className="w-full h-auto" />
