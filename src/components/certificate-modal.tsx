@@ -89,23 +89,32 @@ function CertificatePreviewScaler({ data }: { data: CertificateDisplayData }) {
   }, [data]);
 
   const scaledHeight = CERTIFICATE_HEIGHT_PX * scale;
+  const scaledWidth = CERTIFICATE_WIDTH_PX * scale;
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
       <div
         ref={containerRef}
-        className="w-full max-w-full rounded-lg border border-border bg-muted/30 overflow-hidden"
+        className="w-full max-w-full mx-auto overflow-hidden rounded-lg border border-border bg-muted/30"
         style={{ height: scaledHeight }}
       >
         <div
+          className="mx-auto overflow-hidden"
           style={{
-            width: CERTIFICATE_WIDTH_PX,
-            height: CERTIFICATE_HEIGHT_PX,
-            transform: `scale(${scale})`,
-            transformOrigin: "top left",
+            width: scaledWidth,
+            height: scaledHeight,
           }}
         >
-          <CertificateDocument data={data} />
+          <div
+            style={{
+              width: CERTIFICATE_WIDTH_PX,
+              height: CERTIFICATE_HEIGHT_PX,
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
+            }}
+          >
+            <CertificateDocument data={data} />
+          </div>
         </div>
       </div>
     </div>
@@ -243,11 +252,9 @@ export function CertificateModal({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
           className={[
-            "fixed z-50 flex flex-col gap-3 p-4 sm:p-6",
-            "left-[2.5vw] top-[5vh] translate-x-0 translate-y-0",
-            "w-[95vw] max-w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden",
-            "sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]",
-            "sm:w-[95vw] sm:max-h-[90vh]",
+            "flex flex-col gap-3 p-4 sm:p-6",
+            "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            "w-[95vw] max-w-[420px] max-h-[90vh] overflow-hidden",
           ].join(" ")}
         >
           <DialogHeader className="shrink-0 pr-8">
@@ -293,28 +300,32 @@ export function CertificateModal({
               )}
             </div>
           ) : displayData ? (
-            <div className="flex flex-col gap-4 min-h-0 w-full max-w-full overflow-x-hidden">
-              <CertificatePreviewScaler data={displayData} />
+            <>
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full max-w-full">
+                <div className="flex flex-col gap-4 w-full max-w-full">
+                  <CertificatePreviewScaler data={displayData} />
 
-              {downloading && (
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating PDF...
+                  {downloading && (
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating PDF...
+                    </div>
+                  )}
+
+                  {pdfError && (
+                    <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive font-mono text-xs break-all">
+                      {pdfError}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {pdfError && (
-                <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive font-mono text-xs break-all">
-                  {pdfError}
-                </div>
-              )}
-
-              <div className="flex flex-col sm:flex-row gap-2 shrink-0 pt-1">
+              <div className="flex flex-col gap-2 shrink-0 pt-1 w-full">
                 <button
                   type="button"
                   disabled={downloading}
                   onClick={() => void handleDownloadPdf()}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-50 flex-1"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-50 w-full"
                 >
                   {downloading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -327,13 +338,13 @@ export function CertificateModal({
                   type="button"
                   disabled={downloading}
                   onClick={() => onOpenChange(false)}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold hover:border-emerald hover:text-emerald transition-colors flex-1 disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold hover:border-emerald hover:text-emerald transition-colors w-full disabled:opacity-50"
                 >
                   <X className="h-4 w-4" />
                   Close / إغلاق
                 </button>
               </div>
-            </div>
+            </>
           ) : (
             <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
               {L("No certificate data available.", "لا توجد بيانات للشهادة.")[lang]}
