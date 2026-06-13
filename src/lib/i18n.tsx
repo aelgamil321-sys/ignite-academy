@@ -19,15 +19,19 @@ export const t = {
   nav_login: { en: "Student Login", ar: "دخول الطالب" },
 
   // Brand
-  brand_name: { en: "Ignite School", ar: "مدرسة اجنايت" },
-  brand_sub: { en: "Department of Islamic Education", ar: "قسم التربية الإسلامية" },
+  brand_name: { en: "Ignite Islamic Academy", ar: "أكاديمية اجنايت الإسلامية" },
+  brand_org: {
+    en: "Department of Islamic Education – Ignite School",
+    ar: "قسم التربية الإسلامية – مدرسة اجنايت",
+  },
   tagline: { en: "Igniting Knowledge, Faith, and Character", ar: "نُشعل المعرفة والإيمان والأخلاق" },
 
   // Hero
   hero_badge: { en: "Online Islamic Education · KG1 to Grade 12", ar: "تعليم إسلامي عبر الإنترنت · من الروضة إلى الصف الثاني عشر" },
-  hero_title_1: { en: "Igniting", ar: "نُشعل" },
-  hero_title_2: { en: "Knowledge,", ar: "المعرفة" },
-  hero_title_3: { en: "Faith & Character", ar: "والإيمان والأخلاق" },
+  hero_subtitle: {
+    en: "Department of Islamic Education – Ignite School",
+    ar: "قسم التربية الإسلامية – مدرسة اجنايت",
+  },
   hero_desc: {
     en: "A modern platform for students, parents, and teachers — bringing classical Islamic Studies to life with beautiful lessons, videos, worksheets, and interactive assessments.",
     ar: "منصة عصرية للطلاب وأولياء الأمور والمعلمين، تُحيي الدراسات الإسلامية الأصيلة من خلال دروس راقية ومقاطع فيديو وأوراق عمل وتقييمات تفاعلية.",
@@ -193,7 +197,7 @@ export const t = {
   stage_overview: { en: "Stage Overview", ar: "نظرة عامة على المرحلة" },
 
   // About
-  about_title: { en: "About Ignite School", ar: "عن مدرسة اجنايت" },
+  about_title: { en: "About Ignite Islamic Academy", ar: "عن أكاديمية اجنايت الإسلامية" },
   about_lead: { en: "An online Islamic education platform serving students, parents, and teachers from KG1 to Grade 12.", ar: "منصة تعليم إسلامي عبر الإنترنت تخدم الطلاب وأولياء الأمور والمعلمين من رياض الأطفال إلى الصف الثاني عشر." },
   about_mission_t: { en: "Our Mission", ar: "رسالتنا" },
   about_mission_d: { en: "To ignite knowledge, faith, and character in every learner through authentic, modern, and engaging Islamic Studies.", ar: "أن نُشعل المعرفة والإيمان والأخلاق في كل متعلّم من خلال دراسات إسلامية أصيلة وعصرية وجذّابة." },

@@ -59,7 +59,7 @@ export function SiteFooter({ igniteBrand = false }: SiteFooterProps) {
             </div>
             <div>
               <div className="font-display text-lg">{tr("brand_name")}</div>
-              <div className="text-[11px] uppercase tracking-[0.18em] opacity-70">{tr("brand_sub")}</div>
+              <div className="text-[11px] uppercase tracking-[0.18em] opacity-70">{tr("brand_org")}</div>
             </div>
           </div>
           <p className="mt-4 text-sm opacity-80 leading-relaxed">{tr("ft_desc")}</p>
@@ -97,7 +97,7 @@ export function SiteFooter({ igniteBrand = false }: SiteFooterProps) {
       </div>
       <div className="border-t border-white/10">
         <div className="container-page py-5 text-xs opacity-70 flex flex-col md:flex-row gap-2 justify-between">
-          <span>© {new Date().getFullYear()} {tr("brand_name")} {tr("brand_sub")}. {tr("ft_rights")}</span>
+          <span>© {new Date().getFullYear()} {tr("brand_name")}. {tr("ft_rights")}</span>
           <span>{tr("ft_built")}</span>
         </div>
       </div>

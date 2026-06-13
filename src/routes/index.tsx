@@ -19,13 +19,16 @@ import { SUBJECT_CATEGORIES } from "@/lib/categories";
 import { useCMS, useCMSStats, useAllAnnouncements } from "@/lib/cms";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { SITE_NAME } from "@/lib/site-branding";
+import { certificateIslamicLogoUrl } from "@/lib/certificate-branding";
+import { BrandLogo } from "@/components/brand-logo";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `${SITE_NAME} — Department of Islamic Education` },
+      { title: SITE_NAME },
       { name: "description", content: "Bilingual online Islamic education for KG1–Grade 12. Explore lessons, videos, quizzes, worksheets and parent resources in English and Arabic." },
-      { property: "og:title", content: `${SITE_NAME} — Department of Islamic Education` },
+      { property: "og:title", content: SITE_NAME },
       { property: "og:description", content: "Bilingual Islamic education for KG1–Grade 12: lessons, videos, quizzes, worksheets and parent resources." },
       { property: "og:url", content: "https://ignite-faith-learn.lovable.app/" },
     ],
@@ -73,7 +76,7 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-ignite-bg text-ignite-dark">
-      <SiteHeader showPartnerLogos />
+      <SiteHeader showSchoolLogo />
       <main>
         {/* HERO */}
         <section className="relative overflow-hidden bg-ignite-dark text-white">
@@ -88,11 +91,12 @@ function Home() {
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
                 <span>{tr("hero_badge")}</span>
               </div>
-              <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.08] tracking-tight sm:mt-6 sm:text-5xl md:text-6xl lg:text-[4.25rem] lg:leading-[1.05] xl:text-7xl">
-                {tr("hero_title_1")}{" "}
-                <span className="text-ignite-gold italic">{tr("hero_title_2")}</span>{" "}
-                {tr("hero_title_3")}
+              <h1 className="mt-5 font-display text-3xl font-semibold leading-[1.12] tracking-tight sm:mt-6 sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.08] xl:text-6xl">
+                {tr("brand_name")}
               </h1>
+              <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-ignite-gold/95 sm:mt-4 sm:text-base md:text-lg">
+                {tr("hero_subtitle")}
+              </p>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90 sm:mt-6 sm:text-lg sm:leading-relaxed">
                 {tr("hero_desc")}
               </p>
@@ -142,19 +146,33 @@ function Home() {
                 ))}
               </div>
             </div>
-            <div className="relative mx-auto w-full max-w-xl lg:max-w-none lg:mx-0">
+            <div className="relative mx-auto w-full max-w-xl pb-4 lg:max-w-none lg:mx-0 lg:pb-36">
               <div className="absolute -inset-6 bg-ignite-gold/20 blur-3xl rounded-full pointer-events-none" aria-hidden />
               <div className="relative rounded-3xl overflow-hidden shadow-[var(--shadow-elegant)] border border-ignite-gold/25">
                 <img src={heroImg} alt="" width={1600} height={1100} className="w-full h-auto" />
               </div>
-              <div className={`absolute -bottom-6 ${dir === "rtl" ? "-right-6" : "-left-6"} rounded-2xl bg-white text-ignite-dark p-4 shadow-[var(--shadow-elegant)] hidden md:flex items-center gap-3`}>
-                <div className="h-12 w-12 rounded-xl bg-ignite-gold flex items-center justify-center text-ignite-dark">
-                  <Award className="h-6 w-6" />
+              <div
+                className={cn(
+                  "mt-5 flex flex-col gap-4 sm:gap-5",
+                  "lg:absolute lg:mt-0 lg:top-full lg:pt-5",
+                  dir === "rtl" ? "lg:items-end lg:-right-2" : "lg:items-start lg:-left-2",
+                )}
+              >
+                <div className="flex w-full max-w-sm items-center gap-3 rounded-2xl bg-white p-4 text-ignite-dark shadow-[var(--shadow-elegant)] sm:max-w-md lg:max-w-xs">
+                  <div className="h-12 w-12 shrink-0 rounded-xl bg-ignite-gold flex items-center justify-center text-ignite-dark">
+                    <Award className="h-6 w-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm">{tr("badge_certified")}</div>
+                    <div className="text-xs text-ignite-dark/65">{tr("badge_certified_sub")}</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-semibold text-sm">{tr("badge_certified")}</div>
-                  <div className="text-xs text-ignite-dark/65">{tr("badge_certified_sub")}</div>
-                </div>
+                <BrandLogo
+                  src={certificateIslamicLogoUrl()}
+                  alt={lang === "ar" ? "قسم التربية الإسلامية" : "Department of Islamic Education"}
+                  size="hero"
+                  className={dir === "rtl" ? "self-end" : "self-start"}
+                />
               </div>
             </div>
           </div>

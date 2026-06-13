@@ -4,39 +4,18 @@ import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccountRole } from "@/hooks/use-account-role";
-import {
-  certificateIslamicLogoUrl,
-  certificateSchoolLogoUrl,
-} from "@/lib/certificate-branding";
+import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
+import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
-
-function PartnerLogo({ src, alt }: { src: string; alt: string }) {
-  return (
-    <div
-      className="flex h-9 w-[3.25rem] shrink-0 items-center justify-center sm:h-11 sm:w-[4.25rem] md:h-12 md:w-24 lg:h-14 lg:w-28"
-      aria-hidden={false}
-    >
-      <img
-        src={src}
-        alt={alt}
-        width={112}
-        height={56}
-        className="max-h-full max-w-full object-contain object-center"
-        loading="eager"
-        decoding="async"
-      />
-    </div>
-  );
-}
 
 const STUDENT_ONLY_PATHS = new Set(["/grades", "/quizzes", "/student"]);
 
 type SiteHeaderProps = {
-  /** Show Ignite School + Islamic Education Department logos (homepage). */
-  showPartnerLogos?: boolean;
+  /** Homepage header: Ignite School logo top-right + Ignite palette. */
+  showSchoolLogo?: boolean;
 };
 
-export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
+export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const { tr, toggle, lang } = useI18n();
@@ -87,11 +66,9 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
     ? (lang === "ar" ? "ملف ولي الأمر" : "Parent Profile")
     : (lang === "ar" ? "الملف الشخصي" : "Profile");
 
-  const islamicLogoUrl = certificateIslamicLogoUrl();
   const schoolLogoUrl = certificateSchoolLogoUrl();
-  const islamicLogoAlt = lang === "ar" ? "قسم التربية الإسلامية" : "Department of Islamic Education";
   const schoolLogoAlt = lang === "ar" ? "مدرسة اجنايت" : "Ignite School";
-  const igniteHome = showPartnerLogos;
+  const igniteHome = showSchoolLogo;
 
   const brandLink = (
     <Link to="/" className="group flex min-w-0 items-center gap-2 sm:gap-3">
@@ -108,22 +85,23 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
       <div className="min-w-0 leading-tight">
         <div
           className={cn(
-            "truncate font-display text-base font-semibold sm:text-lg",
-            igniteHome ? "text-ignite-dark" : "text-primary",
+            "font-display text-base font-semibold sm:text-lg",
+            igniteHome ? "text-ignite-dark line-clamp-2" : "truncate text-primary",
           )}
         >
           {tr("brand_name")}
         </div>
-        <div
-          className={cn(
-            "truncate text-[10px] uppercase tracking-[0.16em] sm:text-[11px] sm:tracking-[0.18em]",
-            igniteHome ? "text-ignite-dark/65" : "text-muted-foreground",
-          )}
-        >
-          {tr("brand_sub")}
-        </div>
+        {!igniteHome && (
+          <div className="truncate text-[10px] uppercase tracking-[0.16em] text-muted-foreground sm:text-[11px] sm:tracking-[0.18em]">
+            {tr("brand_org")}
+          </div>
+        )}
       </div>
     </Link>
+  );
+
+  const schoolLogo = (
+    <BrandLogo src={schoolLogoUrl} alt={schoolLogoAlt} size="header" />
   );
 
   const headerActions = (
@@ -228,24 +206,20 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
       <div
         className={cn(
           "container-page py-3 md:py-4",
-          showPartnerLogos
-            ? "space-y-2.5 xl:space-y-0"
-            : "flex h-18 items-center justify-between",
+          showSchoolLogo ? "space-y-2.5 xl:space-y-0" : "flex h-18 items-center justify-between",
         )}
       >
-        {showPartnerLogos ? (
+        {showSchoolLogo ? (
           <>
-            <div className="flex items-center gap-2 sm:gap-3 xl:hidden">
-              <PartnerLogo src={islamicLogoUrl} alt={islamicLogoAlt} />
-              <div className="flex min-w-0 flex-1 justify-center px-0.5 sm:px-1">{brandLink}</div>
-              <PartnerLogo src={schoolLogoUrl} alt={schoolLogoAlt} />
+            <div className="flex items-center gap-3 xl:hidden">
+              <div className="min-w-0 flex-1">{brandLink}</div>
+              {schoolLogo}
             </div>
             <div className="flex items-center justify-end xl:hidden">{headerActions}</div>
-            <div className="hidden xl:grid xl:grid-cols-[auto_auto_1fr_auto_auto] xl:items-center xl:gap-4">
-              <PartnerLogo src={islamicLogoUrl} alt={islamicLogoAlt} />
+            <div className="hidden xl:grid xl:grid-cols-[auto_1fr_auto_auto] xl:items-center xl:gap-4">
               {brandLink}
               {desktopNavEl}
-              <PartnerLogo src={schoolLogoUrl} alt={schoolLogoAlt} />
+              {schoolLogo}
               {headerActions}
             </div>
           </>
