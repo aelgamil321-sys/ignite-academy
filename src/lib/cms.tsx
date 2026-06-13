@@ -22,6 +22,8 @@ export interface CustomLesson {
   activity: Bi;
   worksheetText: Bi;
   youtubeUrl: string;
+  youtubeArUrl?: string;
+  youtubeEnUrl?: string;
   pdfUrl?: string; pdfName?: string;
   pptUrl?: string; pptName?: string;
   worksheetUrl?: string; worksheetName?: string;
@@ -130,6 +132,8 @@ function parseBi(raw: unknown): Bi {
 type LessonRow = {
   id: string; grade: string; unit: Bi; title: Bi; outcome: Bi; explanation: Bi;
   vocab: Bi; activity: Bi; youtube_url: string;
+  youtube_url_ar?: string | null;
+  youtube_url_en?: string | null;
   pdf_url: string | null; pdf_name: string | null;
   ppt_url: string | null; ppt_name: string | null;
   worksheet_url: string | null; worksheet_name: string | null;
@@ -163,6 +167,8 @@ const lessonFromRow = (r: LessonRow): CustomLesson => ({
   activity: parseBi(r.activity),
   worksheetText: parseBi(r.worksheet_text),
   youtubeUrl: r.youtube_url ?? "",
+  youtubeArUrl: r.youtube_url_ar ?? undefined,
+  youtubeEnUrl: r.youtube_url_en ?? undefined,
   pdfUrl: r.pdf_url ?? undefined, pdfName: r.pdf_name ?? undefined,
   pptUrl: r.ppt_url ?? undefined, pptName: r.ppt_name ?? undefined,
   worksheetUrl: r.worksheet_url ?? undefined, worksheetName: r.worksheet_name ?? undefined,
@@ -185,6 +191,8 @@ const lessonToRow = (l: Partial<CustomLesson>) => {
   if (l.activity !== undefined) o.activity = l.activity;
   if (l.worksheetText !== undefined) o.worksheet_text = l.worksheetText;
   if (l.youtubeUrl !== undefined) o.youtube_url = l.youtubeUrl;
+  if (l.youtubeArUrl !== undefined) o.youtube_url_ar = l.youtubeArUrl ?? "";
+  if (l.youtubeEnUrl !== undefined) o.youtube_url_en = l.youtubeEnUrl ?? "";
   if (l.pdfUrl !== undefined) o.pdf_url = l.pdfUrl ?? null;
   if (l.pdfName !== undefined) o.pdf_name = l.pdfName ?? null;
   if (l.pptUrl !== undefined) o.ppt_url = l.pptUrl ?? null;
@@ -455,6 +463,25 @@ export function ytId(url: string): string {
   if (!url) return "";
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
   return m ? m[1] : url.trim();
+}
+
+export function lessonVideoEmbeds(
+  custom: CustomLesson | undefined,
+  lang: "ar" | "en",
+): Array<{ label: string; ytId: string }> {
+  if (!custom) return [];
+  const arId = ytId(custom.youtubeArUrl ?? "");
+  const enId = ytId(custom.youtubeEnUrl ?? "");
+  const legacyId = ytId(custom.youtubeUrl ?? "");
+  const items: Array<{ label: string; ytId: string }> = [];
+  const arLabel = lang === "ar" ? "الفيديو العربي" : "Arabic Video";
+  const enLabel = lang === "ar" ? "الفيديو الإنجليزي" : "English Video";
+  if (arId) items.push({ label: arLabel, ytId: arId });
+  if (enId) items.push({ label: enLabel, ytId: enId });
+  if (!arId && !enId && legacyId) {
+    items.push({ label: lang === "ar" ? "فيديو الدرس" : "Lesson Video", ytId: legacyId });
+  }
+  return items;
 }
 
 function vocabFromBi(b: Bi): Array<{ term: Bi; def: Bi }> {

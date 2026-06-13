@@ -73,6 +73,8 @@ function AdminLessonEditPage() {
         activity: parseBi(row.activity),
         worksheetText: parseBi(row.worksheet_text),
         youtubeUrl: String(row.youtube_url ?? ""),
+        youtubeArUrl: row.youtube_url_ar ? String(row.youtube_url_ar) : undefined,
+        youtubeEnUrl: row.youtube_url_en ? String(row.youtube_url_en) : undefined,
         pdfUrl: row.pdf_url ? String(row.pdf_url) : undefined,
         pdfName: row.pdf_name ? String(row.pdf_name) : undefined,
         pptUrl: row.ppt_url ? String(row.ppt_url) : undefined,

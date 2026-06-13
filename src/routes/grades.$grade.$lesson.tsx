@@ -9,7 +9,7 @@ import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { getGrade } from "@/lib/curriculum";
-import { useResolveLesson, ytId, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
+import { useResolveLesson, lessonVideoEmbeds, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
 import { studentDownloadItems, fileNameFromUrl } from "@/lib/lesson-bilingual-files";
 import { LessonQuizStudent } from "@/components/lesson-quiz-student";
 import { normalizeQuizList } from "@/lib/lesson-quiz";
@@ -75,7 +75,7 @@ function LessonPage() {
     { icon: ClipboardList, key: "ls_worksheet", body: worksheetBody },
   ];
 
-  const ytUrl = custom?.youtubeUrl ? ytId(custom.youtubeUrl) : "";
+  const lessonVideos = lessonVideoEmbeds(custom, lang);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -153,9 +153,23 @@ function LessonPage() {
                 </div>
                 <h2 className="font-display text-xl font-semibold text-primary">{tr("ls_video")}</h2>
               </div>
-              {ytUrl ? (
-                <div className="aspect-video w-full rounded-xl overflow-hidden">
-                  <iframe className="h-full w-full" src={`https://www.youtube.com/embed/${ytUrl}`} title={lesson.title[lang]} allowFullScreen />
+              {lessonVideos.length > 0 ? (
+                <div className="space-y-6">
+                  {lessonVideos.map((video) => (
+                    <div key={video.ytId + video.label}>
+                      {lessonVideos.length > 1 && (
+                        <div className="text-sm font-semibold text-emerald mb-2">{video.label}</div>
+                      )}
+                      <div className="aspect-video w-full rounded-xl overflow-hidden">
+                        <iframe
+                          className="h-full w-full"
+                          src={`https://www.youtube.com/embed/${video.ytId}`}
+                          title={`${lesson.title[lang]} — ${video.label}`}
+                          allowFullScreen
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="relative aspect-video w-full rounded-xl overflow-hidden">

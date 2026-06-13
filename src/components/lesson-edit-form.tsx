@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
 import { grades } from "@/lib/curriculum";
 import { useCMS, type CustomLesson } from "@/lib/cms";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
-import { uploadToStorage, formatError } from "@/lib/upload";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
 import { LessonQuizBuilder } from "@/components/lesson-quiz-builder";
 import {
@@ -61,15 +60,9 @@ export function LessonEditForm({
   const [actAr, setActAr] = useState(lesson.activity.ar);
   const [wsEn, setWsEn] = useState(lesson.worksheetText.en);
   const [wsAr, setWsAr] = useState(lesson.worksheetText.ar);
-  const [yt, setYt] = useState(lesson.youtubeUrl);
-  const [pdf, setPdf] = useState<{ url: string; name: string } | null>(
-    lesson.pdfUrl ? { url: lesson.pdfUrl, name: lesson.pdfName ?? "PDF" } : null,
-  );
-  const [ppt, setPpt] = useState<{ url: string; name: string } | null>(
-    lesson.pptUrl ? { url: lesson.pptUrl, name: lesson.pptName ?? "PowerPoint" } : null,
-  );
-  const [ws, setWs] = useState<{ url: string; name: string } | null>(
-    lesson.worksheetUrl ? { url: lesson.worksheetUrl, name: lesson.worksheetName ?? "Worksheet" } : null,
+  const [ytAr, setYtAr] = useState((lesson.youtubeArUrl ?? "").trim());
+  const [ytEn, setYtEn] = useState(
+    (lesson.youtubeEnUrl ?? "").trim() || (!(lesson.youtubeArUrl ?? "").trim() ? (lesson.youtubeUrl ?? "").trim() : ""),
   );
   const [pub, setPub] = useState(lesson.published);
   const [bilingualFiles, setBilingualFiles] = useState<BilingualLessonFiles>(
@@ -96,10 +89,10 @@ export function LessonEditForm({
     setActAr(lesson.activity.ar);
     setWsEn(lesson.worksheetText.en);
     setWsAr(lesson.worksheetText.ar);
-    setYt(lesson.youtubeUrl);
-    setPdf(lesson.pdfUrl ? { url: lesson.pdfUrl, name: lesson.pdfName ?? "PDF" } : null);
-    setPpt(lesson.pptUrl ? { url: lesson.pptUrl, name: lesson.pptName ?? "PowerPoint" } : null);
-    setWs(lesson.worksheetUrl ? { url: lesson.worksheetUrl, name: lesson.worksheetName ?? "Worksheet" } : null);
+    setYtAr((lesson.youtubeArUrl ?? "").trim());
+    setYtEn(
+      (lesson.youtubeEnUrl ?? "").trim() || (!(lesson.youtubeArUrl ?? "").trim() ? (lesson.youtubeUrl ?? "").trim() : ""),
+    );
     setPub(lesson.published);
   }, [lesson]);
 
@@ -115,20 +108,6 @@ export function LessonEditForm({
     setQuiz(quizQuestionsForForm(lesson.quiz));
   }, [lesson.id]);
 
-  const onFile = (setter: (v: { url: string; name: string } | null) => void, folder: string) =>
-    async (e: ChangeEvent<HTMLInputElement>) => {
-      const f = e.target.files?.[0];
-      if (!f) return;
-      try {
-        toast.message(L("Uploading file…", "جارٍ رفع الملف…")[lang]);
-        const up = await uploadToStorage(f, folder);
-        setter({ url: up.url, name: up.name });
-        toast.success(L("File uploaded", "تم رفع الملف")[lang]);
-      } catch (err) {
-        toast.error(formatError(err));
-      }
-    };
-
   const submit = async () => {
     if (!titleEn.trim() || !titleAr.trim()) {
       toast.error(L("Title (English) and Title (Arabic) are required", "العنوان (إنجليزي) والعنوان (عربي) مطلوبان")[lang]);
@@ -141,6 +120,9 @@ export function LessonEditForm({
 
     setSaving(true);
     const gradeSlug = normalizeGradeSlug(grade);
+    const ytArTrim = ytAr.trim();
+    const ytEnTrim = ytEn.trim();
+    const legacyYoutube = ytEnTrim || ytArTrim;
 
     const baselineFiles = bilingualFilesFromLesson(lesson);
     const mergedFiles = mergeBilingualFiles(bilingualFiles, baselineFiles);
@@ -155,13 +137,9 @@ export function LessonEditForm({
         vocab: { en: vocEn, ar: vocAr },
         activity: { en: actEn, ar: actAr },
         worksheetText: { en: wsEn, ar: wsAr },
-        youtubeUrl: yt,
-        pdfUrl: pdf?.url ?? lesson.pdfUrl,
-        pdfName: pdf?.name ?? lesson.pdfName,
-        pptUrl: ppt?.url ?? lesson.pptUrl,
-        pptName: ppt?.name ?? lesson.pptName,
-        worksheetUrl: ws?.url ?? lesson.worksheetUrl,
-        worksheetName: ws?.name ?? lesson.worksheetName,
+        youtubeUrl: legacyYoutube,
+        youtubeArUrl: ytArTrim,
+        youtubeEnUrl: ytEnTrim,
         published: pub,
         quiz: serializeQuizForSave(quiz),
         ...bilingualFilesSavePayload(mergedFiles, baselineFiles),
@@ -251,23 +229,14 @@ export function LessonEditForm({
           <textarea className="lesson-input" dir="rtl" rows={3} value={wsAr} onChange={(e) => setWsAr(e.target.value)} />
         </Field>
       </Row>
-      <Field label={L("YouTube Video Link", "رابط فيديو يوتيوب")[lang]}>
-        <input className="lesson-input" placeholder="https://www.youtube.com/watch?v=..." value={yt} onChange={(e) => setYt(e.target.value)} />
-      </Field>
       <Row>
-        <Field label={L("PDF Upload", "ملف PDF")[lang]}>
-          <input type="file" accept=".pdf" onChange={onFile(setPdf, "lessons/pdf")} className="lesson-input" />
-          {pdf && <div className="text-xs text-emerald mt-1">✓ {pdf.name}</div>}
+        <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[lang]}>
+          <input className="lesson-input" dir="rtl" placeholder="https://www.youtube.com/watch?v=..." value={ytAr} onChange={(e) => setYtAr(e.target.value)} />
         </Field>
-        <Field label={L("PowerPoint Upload", "ملف PowerPoint")[lang]}>
-          <input type="file" accept=".ppt,.pptx" onChange={onFile(setPpt, "lessons/ppt")} className="lesson-input" />
-          {ppt && <div className="text-xs text-emerald mt-1">✓ {ppt.name}</div>}
+        <Field label={L("YouTube Video Link (English)", "رابط فيديو يوتيوب (إنجليزي)")[lang]}>
+          <input className="lesson-input" placeholder="https://www.youtube.com/watch?v=..." value={ytEn} onChange={(e) => setYtEn(e.target.value)} />
         </Field>
       </Row>
-      <Field label={L("Worksheet Upload", "ورقة العمل")[lang]}>
-        <input type="file" onChange={onFile(setWs, "lessons/worksheet")} className="lesson-input" />
-        {ws && <div className="text-xs text-emerald mt-1">✓ {ws.name}</div>}
-      </Field>
 
       <LessonBilingualFileFields
         files={bilingualFiles}
