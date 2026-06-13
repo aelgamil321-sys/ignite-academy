@@ -7,7 +7,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero.jpg";
 import patternImg from "@/assets/pattern.jpg";
-import { STAGE_CARD_IMAGES } from "@/lib/stage-images";
+import { HOMEPAGE_STAGE_CARDS, STAGE_CARD_CONFIG, STAGE_CARD_IMAGES } from "@/lib/stage-images";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
@@ -63,12 +63,11 @@ function Home() {
     window.location.assign("/student");
   }
 
-  const stages: Array<{ name: TKey; grades: TKey; img: string; tint: string; to: string }> = [
-    { name: "stage_kg", grades: "stage_kg_grades", img: STAGE_CARD_IMAGES.kg, tint: "from-primary/50", to: "/grades" },
-    { name: "stage_elem", grades: "stage_elem_grades", img: STAGE_CARD_IMAGES.elementary, tint: "from-primary/35", to: "/grades" },
-    { name: "stage_mid", grades: "stage_mid_grades", img: STAGE_CARD_IMAGES.middle, tint: "from-brand-dark/40", to: "/grades" },
-    { name: "stage_high", grades: "stage_high_grades", img: STAGE_CARD_IMAGES.high, tint: "from-primary/45", to: "/grades" },
-  ];
+  const stages = HOMEPAGE_STAGE_CARDS.map((card) => ({
+    ...card,
+    img: STAGE_CARD_IMAGES[card.key],
+    ...STAGE_CARD_CONFIG[card.key],
+  }));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -182,10 +181,18 @@ function Home() {
                 className="group relative overflow-hidden rounded-3xl bg-white border border-foreground/10 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all hover:-translate-y-1"
               >
                 <div className="aspect-[4/5] overflow-hidden">
-                  <img src={s.img} alt="" width={800} height={600} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img
+                    src={s.img}
+                    alt=""
+                    width={800}
+                    height={1000}
+                    loading="lazy"
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    style={{ objectPosition: s.objectPosition }}
+                  />
                 </div>
-                <div className={`absolute inset-0 bg-gradient-to-t ${s.tint} via-brand-dark/75 to-brand-dark/95`} />
-                <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
+                <div className={`absolute inset-0 ${s.overlayClass}`} />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 text-white [text-shadow:0_1px_12px_rgba(47,53,66,0.55)]">
                   <div className="text-xs uppercase tracking-wider text-primary">{tr(s.grades)}</div>
                   <div className="font-display text-2xl mt-1">{tr(s.name)}</div>
                   <div className="mt-3 inline-flex items-center gap-1 text-sm opacity-90 group-hover:gap-2 transition-all">
