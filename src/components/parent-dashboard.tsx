@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import {
   Award,
   BookOpenCheck,
@@ -135,13 +134,6 @@ export function ParentDashboardView({
               </div>
             </div>
           </div>
-          <Link
-            to="/grades/$grade"
-            params={{ grade: data.gradeSlug }}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors"
-          >
-            {L("View grade lessons", "عرض دروس الصف")[lang]}
-          </Link>
         </div>
       </section>
 
@@ -191,13 +183,9 @@ export function ParentDashboardView({
                   className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3"
                 >
                   <div className="min-w-0 flex-1">
-                    <Link
-                      to="/grades/$grade/$lesson"
-                      params={{ grade: data.gradeSlug, lesson: certificate.lessonId }}
-                      className="font-display text-lg text-primary hover:text-emerald truncate block"
-                    >
+                    <div className="font-display text-lg text-primary truncate">
                       {certificate.lessonTitle[lang] || certificate.lessonTitle.en}
-                    </Link>
+                    </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {formatDate(certificate.issuedAt, lang)}
                       <span className="ms-2 font-mono text-emerald">{certificate.certificateId}</span>

@@ -226,6 +226,12 @@ export const t = {
   },
   parent_corner_parent_login: { en: "Sign out & parent sign in", ar: "تسجيل الخروج ودخول ولي الأمر" },
   parent_corner_parent_signup: { en: "Create parent account", ar: "إنشاء حساب ولي أمر" },
+  parent_profile_title: { en: "Parent Profile", ar: "ملف ولي الأمر" },
+  parent_profile_lead: {
+    en: "View your parent account details and linked student information.",
+    ar: "اعرض تفاصيل حساب ولي الأمر والطالب المرتبط.",
+  },
+  parent_profile_loading: { en: "Loading parent profile…", ar: "جارٍ تحميل ملف ولي الأمر…" },
 
   // Resources
   res_title: { en: "Resource Library", ar: "المكتبة التعليمية" },

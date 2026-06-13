@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import {
   ChevronLeft, Clock, Target, BookOpen, Sparkles, ClipboardList,
   FileText, Video, HelpCircle, Download,
@@ -16,6 +17,7 @@ import { normalizeQuizList } from "@/lib/lesson-quiz";
 import videoPlaceholder from "@/assets/video-placeholder.jpg";
 
 export const Route = createFileRoute("/grades/$grade/$lesson")({
+  beforeLoad: () => blockParentFromStudentRoutes(),
   loader: ({ params }) => {
     const grade = getGrade(params.grade);
     if (!grade) throw notFound();

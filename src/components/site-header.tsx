@@ -1,13 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, BookOpen, Languages, User } from "lucide-react";
+import { Menu, X, BookOpen, Languages, User, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { useAccountRole } from "@/hooks/use-account-role";
+
+const STUDENT_ONLY_PATHS = new Set(["/grades", "/quizzes", "/student"]);
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const { tr, toggle, lang } = useI18n();
+  const { isParent, loading: roleLoading } = useAccountRole();
 
   useEffect(() => {
     let active = true;
@@ -23,7 +27,7 @@ export function SiteHeader() {
     };
   }, []);
 
-  const nav: Array<{ label: string; to: string }> = [
+  const allNav: Array<{ label: string; to: string }> = [
     { label: tr("nav_home"), to: "/" },
     { label: tr("nav_about"), to: "/about" },
     { label: tr("nav_stages"), to: "/grades" },
@@ -36,6 +40,23 @@ export function SiteHeader() {
     { label: tr("nav_contact"), to: "/contact" },
     { label: lang === "ar" ? "الإدارة" : "Admin", to: "/admin" },
   ];
+
+  const parentNav: Array<{ label: string; to: string }> = [
+    { label: tr("nav_home"), to: "/" },
+    { label: tr("nav_about"), to: "/about" },
+    { label: tr("nav_announcements"), to: "/announcements" },
+    { label: tr("nav_parent"), to: "/parent" },
+    { label: tr("parent_dashboard_title"), to: "/parent/dashboard" },
+    { label: tr("nav_contact"), to: "/contact" },
+    { label: lang === "ar" ? "الإدارة" : "Admin", to: "/admin" },
+  ];
+
+  const nav = signedIn && isParent ? parentNav : allNav.filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
+  const desktopNav = signedIn && isParent ? parentNav : allNav.slice(0, 8).filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
+  const profilePath = signedIn && isParent ? "/parent/settings" : "/student/profile";
+  const profileLabel = signedIn && isParent
+    ? (lang === "ar" ? "ملف ولي الأمر" : "Parent Profile")
+    : (lang === "ar" ? "الملف الشخصي" : "Profile");
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-lg">
@@ -51,7 +72,7 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden xl:flex items-center gap-1">
-          {nav.slice(0, 8).map((item) => (
+          {!roleLoading && desktopNav.map((item) => (
             <Link
               key={item.to + item.label}
               to={item.to}
@@ -73,13 +94,22 @@ export function SiteHeader() {
             <Languages className="h-4 w-4" />
             <span>{lang === "en" ? "العربية" : "English"}</span>
           </button>
+          {signedIn && isParent && (
+            <Link
+              to="/parent/dashboard"
+              className="hidden md:inline-flex items-center gap-1.5 justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)]"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              {tr("parent_dashboard_title")}
+            </Link>
+          )}
           {signedIn ? (
             <Link
-              to="/student/profile"
+              to={profilePath}
               className="hidden md:inline-flex items-center gap-1.5 justify-center rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground hover:border-emerald hover:text-emerald transition-colors"
             >
               <User className="h-4 w-4" />
-              {lang === "ar" ? "الملف الشخصي" : "Profile"}
+              {profileLabel}
             </Link>
           ) : (
             <a
@@ -106,7 +136,7 @@ export function SiteHeader() {
       {open && (
         <div className="xl:hidden border-t border-border bg-background">
           <div className="container-page py-4 flex flex-col gap-1">
-            {nav.map((item) => (
+            {!roleLoading && nav.map((item) => (
               <Link
                 key={item.to + item.label}
                 to={item.to}
@@ -116,14 +146,24 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            {signedIn && isParent && (
+              <Link
+                to="/parent/dashboard"
+                onClick={() => setOpen(false)}
+                className="px-3 py-2.5 text-sm font-medium rounded-md hover:bg-muted inline-flex items-center gap-2"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                {tr("parent_dashboard_title")}
+              </Link>
+            )}
             {signedIn && (
               <Link
-                to="/student/profile"
+                to={profilePath}
                 onClick={() => setOpen(false)}
                 className="px-3 py-2.5 text-sm font-medium rounded-md hover:bg-muted inline-flex items-center gap-2"
               >
                 <User className="h-4 w-4" />
-                {lang === "ar" ? "الملف الشخصي" : "Profile"}
+                {profileLabel}
               </Link>
             )}
           </div>

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import { useMemo, useState } from "react";
 import { ArrowRight, Clock, BookOpen, ChevronLeft, Search, Layers, Video as VideoIcon, FileText, ClipboardCheck } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
@@ -13,6 +14,7 @@ import { gradeMatches } from "@/lib/grade-utils";
 import { slugifyUnit } from "./grades.$grade.units.$unit";
 
 export const Route = createFileRoute("/grades/$grade/")({
+  beforeLoad: () => blockParentFromStudentRoutes(),
   loader: ({ params }) => {
     const grade = getGrade(params.grade);
     if (!grade) throw notFound();

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import { useMemo, useState } from "react";
 import { ArrowRight, GraduationCap, BookOpen, Search } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
@@ -7,6 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { grades, stages } from "@/lib/curriculum";
 
 export const Route = createFileRoute("/grades/")({
+  beforeLoad: () => blockParentFromStudentRoutes(),
   head: () => ({
     meta: [
       { title: "Academic Stages — Ignite Islamic Academy" },

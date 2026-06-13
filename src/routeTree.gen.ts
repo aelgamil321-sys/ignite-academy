@@ -28,6 +28,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
 import { Route as StudentProfileRouteImport } from './routes/student.profile'
 import { Route as QuizzesSlugRouteImport } from './routes/quizzes.$slug'
+import { Route as ParentSettingsRouteImport } from './routes/parent.settings'
 import { Route as ParentDashboardRouteImport } from './routes/parent.dashboard'
 import { Route as ParentSlugRouteImport } from './routes/parent.$slug'
 import { Route as CategoriesCategoryRouteImport } from './routes/categories.$category'
@@ -135,6 +136,11 @@ const QuizzesSlugRoute = QuizzesSlugRouteImport.update({
   path: '/quizzes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParentSettingsRoute = ParentSettingsRouteImport.update({
+  id: '/parent/settings',
+  path: '/parent/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParentDashboardRoute = ParentDashboardRouteImport.update({
   id: '/parent/dashboard',
   path: '/parent/dashboard',
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/parent/dashboard': typeof ParentDashboardRoute
+  '/parent/settings': typeof ParentSettingsRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
   '/student/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/parent/dashboard': typeof ParentDashboardRoute
+  '/parent/settings': typeof ParentSettingsRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
   '/student/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/parent/dashboard': typeof ParentDashboardRoute
+  '/parent/settings': typeof ParentSettingsRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
   '/student/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
@@ -305,6 +314,7 @@ export interface FileRouteTypes {
     | '/categories/$category'
     | '/parent/$slug'
     | '/parent/dashboard'
+    | '/parent/settings'
     | '/quizzes/$slug'
     | '/student/profile'
     | '/videos/$slug'
@@ -335,6 +345,7 @@ export interface FileRouteTypes {
     | '/categories/$category'
     | '/parent/$slug'
     | '/parent/dashboard'
+    | '/parent/settings'
     | '/quizzes/$slug'
     | '/student/profile'
     | '/videos/$slug'
@@ -367,6 +378,7 @@ export interface FileRouteTypes {
     | '/categories/$category'
     | '/parent/$slug'
     | '/parent/dashboard'
+    | '/parent/settings'
     | '/quizzes/$slug'
     | '/student/profile'
     | '/videos/$slug'
@@ -399,6 +411,7 @@ export interface RootRouteChildren {
   CategoriesCategoryRoute: typeof CategoriesCategoryRoute
   ParentSlugRoute: typeof ParentSlugRoute
   ParentDashboardRoute: typeof ParentDashboardRoute
+  ParentSettingsRoute: typeof ParentSettingsRoute
   QuizzesSlugRoute: typeof QuizzesSlugRoute
   VideosSlugRoute: typeof VideosSlugRoute
   AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
@@ -546,6 +559,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuizzesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/parent/settings': {
+      id: '/parent/settings'
+      path: '/parent/settings'
+      fullPath: '/parent/settings'
+      preLoaderRoute: typeof ParentSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/parent/dashboard': {
       id: '/parent/dashboard'
       path: '/parent/dashboard'
@@ -673,6 +693,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesCategoryRoute: CategoriesCategoryRoute,
   ParentSlugRoute: ParentSlugRoute,
   ParentDashboardRoute: ParentDashboardRoute,
+  ParentSettingsRoute: ParentSettingsRoute,
   QuizzesSlugRoute: QuizzesSlugRoute,
   VideosSlugRoute: VideosSlugRoute,
   AnnouncementsIndexRoute: AnnouncementsIndexRoute,

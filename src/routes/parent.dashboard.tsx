@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard, User } from "lucide-react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
 import { ParentAccountRequired } from "@/components/parent-account-required";
@@ -138,6 +138,13 @@ function ParentDashboardPage({ userId }: { userId: string }) {
           )[lang]}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            to="/parent/settings"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
+          >
+            <User className="h-3.5 w-3.5" />
+            {tr("parent_profile_title")}
+          </Link>
           <Link
             to="/parent"
             className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"

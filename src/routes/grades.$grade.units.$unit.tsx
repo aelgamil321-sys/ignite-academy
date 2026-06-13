@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { ChevronLeft, Plus, Trash2, Eye, EyeOff, Save, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ const emptyQ: QuizQuestion = {
 
 // ---------- route ----------
 export const Route = createFileRoute("/grades/$grade/units/$unit")({
+  beforeLoad: () => blockParentFromStudentRoutes(),
   loader: ({ params }) => {
     const grade = getGrade(params.grade);
     if (!grade) throw notFound();
