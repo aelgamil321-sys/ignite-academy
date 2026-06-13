@@ -156,7 +156,7 @@ export function LessonEditForm({
   return (
     <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-2xl text-primary">{L("Edit Lesson", "تعديل الدرس")[lang]}</h2>
+        <h2 className="font-display text-2xl text-foreground">{L("Edit Lesson", "تعديل الدرس")[lang]}</h2>
         <button
           type="button"
           onClick={onCancel}
@@ -249,21 +249,21 @@ export function LessonEditForm({
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
         <label className="inline-flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-emerald h-4 w-4" />
+          <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
           {L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[lang]}
         </label>
         <button
           type="button"
           disabled={saving}
           onClick={() => { void submit(); }}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <Save className="h-4 w-4" />
           {saving ? L("Saving…", "جارٍ الحفظ…")[lang] : L("Save Changes", "حفظ التغييرات")[lang]}
         </button>
       </div>
 
-      <style>{`.lesson-input{display:block;width:100%;border-radius:.5rem;border:1px solid var(--border);background:var(--background);padding:.55rem .75rem;font-size:.875rem;color:var(--foreground);}.lesson-input:focus{outline:none;border-color:var(--emerald)}`}</style>
+      <style>{`.lesson-input{display:block;width:100%;border-radius:.5rem;border:1px solid var(--border);background:var(--background);padding:.55rem .75rem;font-size:.875rem;color:var(--foreground);}.lesson-input:focus{outline:none;border-color:var(--primary)}`}</style>
     </div>
   );
 }

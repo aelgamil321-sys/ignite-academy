@@ -14,8 +14,8 @@ export function PageShell({
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
           <div className="container-page py-12">
             {crumbs && crumbs.length > 0 && <div className="mb-5"><Breadcrumbs items={crumbs} /></div>}
-            {eyebrow && <div className="text-xs uppercase tracking-[0.22em] text-emerald mb-3">{eyebrow}</div>}
-            <h1 className="font-display text-4xl md:text-5xl font-semibold text-primary">{title}</h1>
+            {eyebrow && <div className="text-xs uppercase tracking-[0.22em] text-primary mb-3">{eyebrow}</div>}
+            <h1 className="font-display text-4xl md:text-5xl font-semibold text-foreground">{title}</h1>
             {lead && <p className="mt-4 max-w-2xl text-muted-foreground text-lg">{lead}</p>}
           </div>
         </section>

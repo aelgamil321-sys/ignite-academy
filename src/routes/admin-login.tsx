@@ -84,7 +84,7 @@ function AdminLoginPage() {
   return (
     <PageShell eyebrow="Admin" title="Admin Sign In" lead="Restricted area. Only authorized administrators can manage content." crumbs={[{ label: "Admin Login" }]}>
       <div className="max-w-md mx-auto rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-        <div className="flex items-center gap-2 mb-4 text-emerald">
+        <div className="flex items-center gap-2 mb-4 text-primary">
           <Lock className="h-5 w-5" /> <span className="font-semibold">{mode === "login" ? "Sign in" : "Create admin account"}</span>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -99,7 +99,7 @@ function AdminLoginPage() {
               className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
           </div>
           <button type="submit" disabled={busy}
-            className="w-full rounded-lg bg-emerald text-emerald-foreground py-2.5 text-sm font-semibold disabled:opacity-60">
+            className="w-full rounded-lg bg-primary text-primary-foreground py-2.5 text-sm font-semibold disabled:opacity-60">
             {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
           </button>
         </form>

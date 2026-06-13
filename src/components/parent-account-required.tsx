@@ -21,7 +21,7 @@ export function ParentAccountRequired() {
           onClick={() => {
             void signOutForParentLogin();
           }}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-emerald transition-colors"
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
         >
           <LogIn className="h-3.5 w-3.5" />
           {tr("parent_corner_parent_login")}
@@ -36,7 +36,7 @@ export function ParentAccountRequired() {
               navigate({ to: "/auth", search: { mode: "signup", accountType: "parent" } });
             })();
           }}
-          className="inline-flex items-center gap-2 rounded-full border border-amber-400/80 bg-white px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
+          className="inline-flex items-center gap-2 rounded-full border border-amber-400/80 bg-white px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
         >
           <UserPlus className="h-3.5 w-3.5" />
           {tr("parent_corner_parent_signup")}

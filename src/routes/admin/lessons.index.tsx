@@ -19,7 +19,7 @@ function AdminLessonsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl text-primary">Manage Lessons Page Loaded</h1>
+      <h1 className="font-display text-2xl text-foreground">Manage Lessons Page Loaded</h1>
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading lessons…</p>
@@ -41,7 +41,7 @@ function AdminLessonsPage() {
               <Link
                 to="/admin/lessons/edit/$lessonId"
                 params={{ lessonId: lesson.id }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-emerald hover:text-emerald"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
               >
                 <Pencil className="h-3.5 w-3.5" />
                 Edit

@@ -67,18 +67,18 @@ function Home() {
   }
 
   const stages: Array<{ name: TKey; grades: TKey; img: string; tint: string; to: string }> = [
-    { name: "stage_kg", grades: "stage_kg_grades", img: kgImg, tint: "from-ignite-gold/50", to: "/grades" },
-    { name: "stage_elem", grades: "stage_elem_grades", img: elemImg, tint: "from-ignite-gold/35", to: "/grades" },
-    { name: "stage_mid", grades: "stage_mid_grades", img: midImg, tint: "from-ignite-dark/40", to: "/grades" },
-    { name: "stage_high", grades: "stage_high_grades", img: highImg, tint: "from-ignite-gold/45", to: "/grades" },
+    { name: "stage_kg", grades: "stage_kg_grades", img: kgImg, tint: "from-primary/50", to: "/grades" },
+    { name: "stage_elem", grades: "stage_elem_grades", img: elemImg, tint: "from-primary/35", to: "/grades" },
+    { name: "stage_mid", grades: "stage_mid_grades", img: midImg, tint: "from-brand-dark/40", to: "/grades" },
+    { name: "stage_high", grades: "stage_high_grades", img: highImg, tint: "from-primary/45", to: "/grades" },
   ];
 
   return (
-    <div className="min-h-screen bg-ignite-bg text-ignite-dark">
+    <div className="min-h-screen bg-background text-foreground">
       <SiteHeader showSchoolLogo />
       <main>
         {/* HERO */}
-        <section className="relative overflow-hidden bg-ignite-dark text-white">
+        <section className="relative overflow-hidden bg-brand-dark text-white">
           <div
             className="absolute inset-0 opacity-[0.07] mix-blend-luminosity pointer-events-none"
             style={{ backgroundImage: `url(${patternImg})`, backgroundSize: "320px" }}
@@ -86,14 +86,14 @@ function Home() {
           />
           <div className="container-page relative grid items-start gap-10 py-16 sm:gap-12 sm:py-20 md:py-24 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-24 xl:gap-16 xl:py-28">
             <div className="relative z-10 flex flex-col justify-center">
-              <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-ignite-gold/50 bg-ignite-gold/15 px-4 py-2 text-xs font-medium tracking-wide text-ignite-gold sm:text-sm">
+              <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-primary/50 bg-primary/15 px-4 py-2 text-xs font-medium tracking-wide text-primary sm:text-sm">
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
                 <span>{tr("hero_badge")}</span>
               </div>
               <h1 className="mt-5 font-display text-3xl font-semibold leading-[1.12] tracking-tight sm:mt-6 sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.08] xl:text-6xl">
                 {tr("brand_name")}
               </h1>
-              <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-ignite-gold/95 sm:mt-4 sm:text-base md:text-lg">
+              <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-primary/90 sm:mt-4 sm:text-base md:text-lg">
                 {tr("hero_subtitle")}
               </p>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90 sm:mt-6 sm:text-lg sm:leading-relaxed">
@@ -107,7 +107,7 @@ function Home() {
                       e.preventDefault();
                       goToStudent();
                     }}
-                    className="inline-flex items-center gap-2 rounded-full bg-ignite-gold px-7 py-3.5 font-semibold text-ignite-dark shadow-[0_10px_30px_-10px_rgba(242,178,27,0.45)] hover:translate-y-[-2px] transition-transform"
+                    className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-foreground shadow-[0_10px_30px_-10px_rgba(242,178,27,0.45)] hover:translate-y-[-2px] transition-transform"
                   >
                     {tr("nav_student")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                   </a>
@@ -115,13 +115,13 @@ function Home() {
                   <>
                     <a
                       href="/auth?mode=signup"
-                      className="inline-flex items-center gap-2 rounded-full bg-ignite-gold px-7 py-3.5 font-semibold text-ignite-dark shadow-[0_10px_30px_-10px_rgba(242,178,27,0.45)] hover:translate-y-[-2px] transition-transform"
+                      className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-foreground shadow-[0_10px_30px_-10px_rgba(242,178,27,0.45)] hover:translate-y-[-2px] transition-transform"
                     >
                       {tr("cta_signup")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                     </a>
                     <a
                       href="/auth?mode=login"
-                      className="inline-flex items-center gap-2 rounded-full bg-white text-ignite-dark px-7 py-3.5 font-semibold hover:bg-white/90 transition-colors"
+                      className="inline-flex items-center gap-2 rounded-full bg-white text-foreground px-7 py-3.5 font-semibold hover:bg-white/90 transition-colors"
                     >
                       {tr("cta_login")}
                     </a>
@@ -139,7 +139,7 @@ function Home() {
                   { n: String(stats.subjectCount), l: tr("stat_subjects") },
                 ].map((s) => (
                   <div key={s.l} className="text-center sm:text-start">
-                    <div className="font-display text-2xl text-ignite-gold sm:text-3xl">{s.n}</div>
+                    <div className="font-display text-2xl text-primary sm:text-3xl">{s.n}</div>
                     <div className="mt-1 text-[10px] uppercase tracking-wider text-white/75 sm:text-xs">{s.l}</div>
                   </div>
                 ))}
@@ -147,20 +147,20 @@ function Home() {
             </div>
             <div className="relative z-10 flex w-full flex-col items-center lg:items-stretch">
               <div className="relative w-full">
-                <div className="absolute -inset-4 bg-ignite-gold/20 blur-3xl rounded-full pointer-events-none sm:-inset-6" aria-hidden />
-                <div className="relative overflow-hidden rounded-3xl border border-ignite-gold/25 shadow-[var(--shadow-elegant)]">
+                <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full pointer-events-none sm:-inset-6" aria-hidden />
+                <div className="relative overflow-hidden rounded-3xl border border-primary/25 shadow-[var(--shadow-elegant)]">
                   <img src={heroImg} alt="" width={1600} height={1100} className="w-full h-auto" />
                 </div>
               </div>
 
               <div className="mt-6 flex w-full max-w-[340px] flex-col items-center gap-4 sm:mt-8 sm:gap-5 lg:mx-auto">
-                <div className="flex w-full min-w-[260px] max-w-[340px] items-center gap-3 rounded-2xl bg-white p-4 text-ignite-dark shadow-[var(--shadow-elegant)] sm:p-5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ignite-gold text-ignite-dark">
+                <div className="flex w-full min-w-[260px] max-w-[340px] items-center gap-3 rounded-2xl bg-white p-4 text-foreground shadow-[var(--shadow-elegant)] sm:p-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-foreground">
                     <Award className="h-6 w-6" />
                   </div>
                   <div className="min-w-0 text-start">
                     <div className="font-semibold text-sm leading-snug">{tr("badge_certified")}</div>
-                    <div className="mt-0.5 text-xs leading-relaxed text-ignite-dark/65">{tr("badge_certified_sub")}</div>
+                    <div className="mt-0.5 text-xs leading-relaxed text-foreground/65">{tr("badge_certified_sub")}</div>
                   </div>
                 </div>
 
@@ -182,14 +182,14 @@ function Home() {
               <Link
                 key={s.name}
                 to={s.to}
-                className="group relative overflow-hidden rounded-3xl bg-white border border-ignite-dark/10 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all hover:-translate-y-1"
+                className="group relative overflow-hidden rounded-3xl bg-white border border-foreground/10 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all hover:-translate-y-1"
               >
                 <div className="aspect-[4/5] overflow-hidden">
                   <img src={s.img} alt="" width={800} height={600} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
-                <div className={`absolute inset-0 bg-gradient-to-t ${s.tint} via-ignite-dark/75 to-ignite-dark/95`} />
+                <div className={`absolute inset-0 bg-gradient-to-t ${s.tint} via-brand-dark/75 to-brand-dark/95`} />
                 <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-                  <div className="text-xs uppercase tracking-wider text-ignite-gold">{tr(s.grades)}</div>
+                  <div className="text-xs uppercase tracking-wider text-primary">{tr(s.grades)}</div>
                   <div className="font-display text-2xl mt-1">{tr(s.name)}</div>
                   <div className="mt-3 inline-flex items-center gap-1 text-sm opacity-90 group-hover:gap-2 transition-all">
                     {tr("explore")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
@@ -201,7 +201,7 @@ function Home() {
         </section>
 
         {/* SUBJECT CATEGORIES */}
-        <section className="bg-white py-20 border-y border-ignite-dark/8">
+        <section className="bg-white py-20 border-y border-foreground/8">
           <div className="container-page">
             <SectionHeader eyebrow={tr("cat_eyebrow")} title={tr("cat_title")} desc={tr("cat_desc")} />
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -210,13 +210,13 @@ function Home() {
                   key={c.slug}
                   to="/categories/$category"
                   params={{ category: c.slug }}
-                  className="group rounded-2xl bg-ignite-bg border border-ignite-dark/10 p-6 hover:border-ignite-gold/60 hover:shadow-[var(--shadow-soft)] transition-all"
+                  className="group rounded-2xl bg-background border border-foreground/10 p-6 hover:border-primary/60 hover:shadow-[var(--shadow-soft)] transition-all"
                 >
-                  <div className="h-11 w-11 rounded-xl bg-ignite-gold flex items-center justify-center text-ignite-dark font-display text-lg">
+                  <div className="h-11 w-11 rounded-xl bg-primary flex items-center justify-center text-foreground font-display text-lg">
                     {i + 1}
                   </div>
-                  <div className="mt-4 font-display text-xl text-ignite-dark group-hover:text-ignite-gold">{c.name[lang]}</div>
-                  <div className="mt-1 text-sm text-ignite-dark/65">{c.desc[lang]}</div>
+                  <div className="mt-4 font-display text-xl text-foreground group-hover:text-primary">{c.name[lang]}</div>
+                  <div className="mt-1 text-sm text-foreground/65">{c.desc[lang]}</div>
                 </Link>
               ))}
             </div>
@@ -235,19 +235,19 @@ function Home() {
                   key={l.id}
                   to="/grades/$grade/$lesson"
                   params={{ grade: l.grade, lesson: l.id }}
-                  className="group flex items-center gap-6 rounded-2xl bg-white border border-ignite-dark/10 p-5 hover:border-ignite-gold hover:shadow-[var(--shadow-soft)] transition-all"
+                  className="group flex items-center gap-6 rounded-2xl bg-white border border-foreground/10 p-5 hover:border-primary hover:shadow-[var(--shadow-soft)] transition-all"
                 >
-                  <div className="h-16 w-16 rounded-2xl bg-ignite-gold/20 flex items-center justify-center text-ignite-dark shrink-0">
+                  <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center text-foreground shrink-0">
                     <BookOpen className="h-7 w-7" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs uppercase tracking-wider text-ignite-gold font-semibold">
+                    <div className="text-xs uppercase tracking-wider text-primary font-semibold">
                       {gradeDisplayName(l.grade, lang)} · {l.unit[lang]}
                     </div>
-                    <div className="mt-1 font-display text-xl text-ignite-dark truncate">{l.title[lang]}</div>
-                    <div className="text-xs text-ignite-dark/60 mt-1">{l.quiz.length} {tr("questions")} · {tr("lesson_meta")}</div>
+                    <div className="mt-1 font-display text-xl text-foreground truncate">{l.title[lang]}</div>
+                    <div className="text-xs text-foreground/60 mt-1">{l.quiz.length} {tr("questions")} · {tr("lesson_meta")}</div>
                   </div>
-                  <ArrowRight className={`h-5 w-5 text-ignite-dark/40 group-hover:text-ignite-gold transition-all ${dir === "rtl" ? "rotate-180 group-hover:-translate-x-1" : "group-hover:translate-x-1"}`} />
+                  <ArrowRight className={`h-5 w-5 text-foreground/40 group-hover:text-primary transition-all ${dir === "rtl" ? "rotate-180 group-hover:-translate-x-1" : "group-hover:translate-x-1"}`} />
                 </Link>
               ))}
             </div>
@@ -256,8 +256,8 @@ function Home() {
           {/* Announcements */}
           <div>
             <SectionHeader eyebrow={tr("ann_eyebrow")} title={tr("ann_title")} align="left" />
-            <div className="mt-10 rounded-3xl bg-ignite-dark text-white p-6 shadow-[var(--shadow-soft)]">
-              <div className="flex items-center gap-2 text-ignite-gold">
+            <div className="mt-10 rounded-3xl bg-brand-dark text-white p-6 shadow-[var(--shadow-soft)]">
+              <div className="flex items-center gap-2 text-primary">
                 <Megaphone className="h-5 w-5" />
                 <span className="text-sm font-semibold uppercase tracking-wider">{tr("ann_school")}</span>
               </div>
@@ -268,9 +268,9 @@ function Home() {
                   <li key={a.slug} className="border-b border-white/10 last:border-0 pb-5 last:pb-0">
                     <Link to="/announcements/$slug" params={{ slug: a.slug }} className="block hover:opacity-90">
                       <div className="flex items-center gap-2 text-xs">
-                        <Calendar className="h-3.5 w-3.5 text-ignite-gold" />
+                        <Calendar className="h-3.5 w-3.5 text-primary" />
                         <span className="opacity-80">{a.date}</span>
-                        <span className="ms-auto rounded-full bg-ignite-gold/20 text-ignite-gold px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{a.tag[lang]}</span>
+                        <span className="ms-auto rounded-full bg-primary/20 text-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{a.tag[lang]}</span>
                       </div>
                       <div className="mt-2 font-medium leading-snug">{a.title[lang]}</div>
                     </Link>
@@ -282,7 +282,7 @@ function Home() {
         </section>
 
         {/* FEATURES strip */}
-        <section className="bg-ignite-dark text-white relative overflow-hidden">
+        <section className="bg-brand-dark text-white relative overflow-hidden">
           <div
             className="absolute inset-0 opacity-[0.05]"
             style={{ backgroundImage: `url(${patternImg})`, backgroundSize: "240px" }}
@@ -298,7 +298,7 @@ function Home() {
                 { icon: Users, t: tr("feat_par_t"), d: tr("feat_par_d") },
               ].map((f) => (
                 <div key={f.t} className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:bg-white/10 transition-colors">
-                  <div className="h-12 w-12 rounded-xl bg-ignite-gold text-ignite-dark flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-xl bg-primary text-foreground flex items-center justify-center">
                     <f.icon className="h-6 w-6" />
                   </div>
                   <div className="mt-4 font-display text-xl">{f.t}</div>
@@ -311,7 +311,7 @@ function Home() {
 
         {/* STATS */}
         <section className="container-page py-20">
-          <div className="rounded-3xl bg-white border border-ignite-dark/10 p-10 md:p-16 shadow-[var(--shadow-soft)]">
+          <div className="rounded-3xl bg-white border border-foreground/10 p-10 md:p-16 shadow-[var(--shadow-soft)]">
             <div className="grid gap-10 md:grid-cols-4 text-center">
               {[
                 { n: String(stats.lessonCount), l: tr("stat_lessons") },
@@ -320,8 +320,8 @@ function Home() {
                 { n: String(stats.articleCount), l: tr("stat_assessments") },
               ].map((s) => (
                 <div key={s.l}>
-                  <div className="font-display text-5xl md:text-6xl text-ignite-gold">{s.n}</div>
-                  <div className="mt-2 text-sm uppercase tracking-wider text-ignite-dark/65">{s.l}</div>
+                  <div className="font-display text-5xl md:text-6xl text-primary">{s.n}</div>
+                  <div className="mt-2 text-sm uppercase tracking-wider text-foreground/65">{s.l}</div>
                 </div>
               ))}
             </div>
@@ -331,27 +331,27 @@ function Home() {
         {/* PARENT / STUDENT CTA */}
         <section className="container-page pb-20">
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="rounded-3xl bg-ignite-dark text-white p-10 relative overflow-hidden">
-              <div className={`absolute ${dir === "rtl" ? "-left-10" : "-right-10"} -bottom-10 h-48 w-48 rounded-full bg-ignite-gold/20 blur-3xl`} />
-              <Users className="h-10 w-10 text-ignite-gold" />
+            <div className="rounded-3xl bg-brand-dark text-white p-10 relative overflow-hidden">
+              <div className={`absolute ${dir === "rtl" ? "-left-10" : "-right-10"} -bottom-10 h-48 w-48 rounded-full bg-primary/20 blur-3xl`} />
+              <Users className="h-10 w-10 text-primary" />
               <h3 className="mt-4 font-display text-3xl">{tr("for_parents")}</h3>
               <p className="mt-2 opacity-90 max-w-md">{tr("for_parents_d")}</p>
-              <Link to="/parent" className="mt-6 inline-flex items-center gap-2 rounded-full bg-ignite-gold text-ignite-dark px-6 py-3 font-semibold hover:translate-y-[-2px] transition-transform">
+              <Link to="/parent" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-foreground px-6 py-3 font-semibold hover:translate-y-[-2px] transition-transform">
                 {tr("visit_parent")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               </Link>
             </div>
-            <div className="rounded-3xl bg-white border border-ignite-dark/10 p-10 relative overflow-hidden">
-              <GraduationCap className="h-10 w-10 text-ignite-gold" />
-              <h3 className="mt-4 font-display text-3xl text-ignite-dark">{tr("for_students")}</h3>
-              <p className="mt-2 text-ignite-dark/65 max-w-md">{tr("for_students_d")}</p>
-              <Link to="/student" className="mt-6 inline-flex items-center gap-2 rounded-full bg-ignite-gold text-ignite-dark px-6 py-3 font-semibold hover:bg-ignite-gold/90 transition-colors">
+            <div className="rounded-3xl bg-white border border-foreground/10 p-10 relative overflow-hidden">
+              <GraduationCap className="h-10 w-10 text-primary" />
+              <h3 className="mt-4 font-display text-3xl text-foreground">{tr("for_students")}</h3>
+              <p className="mt-2 text-foreground/65 max-w-md">{tr("for_students_d")}</p>
+              <Link to="/student" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-foreground px-6 py-3 font-semibold hover:bg-primary/90 transition-colors">
                 {tr("open_portal")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               </Link>
             </div>
           </div>
         </section>
       </main>
-      <SiteFooter igniteBrand />
+      <SiteFooter />
       <AskMrAhmed />
     </div>
   );
@@ -362,9 +362,9 @@ function SectionHeader({
 }: { eyebrow: string; title: string; desc?: string; align?: "center" | "left"; tone?: "dark" | "light" }) {
   return (
     <div className={align === "center" ? "text-center max-w-2xl mx-auto" : "max-w-2xl"}>
-      <div className={`text-xs uppercase tracking-[0.22em] font-semibold text-ignite-gold`}>{eyebrow}</div>
-      <h2 className={`mt-3 font-display text-4xl md:text-5xl ${tone === "light" ? "text-white" : "text-ignite-dark"}`}>{title}</h2>
-      {desc && <p className={`mt-4 text-base ${tone === "light" ? "text-white/80" : "text-ignite-dark/65"}`}>{desc}</p>}
+      <div className={`text-xs uppercase tracking-[0.22em] font-semibold text-primary`}>{eyebrow}</div>
+      <h2 className={`mt-3 font-display text-4xl md:text-5xl ${tone === "light" ? "text-white" : "text-foreground"}`}>{title}</h2>
+      {desc && <p className={`mt-4 text-base ${tone === "light" ? "text-white/80" : "text-foreground/65"}`}>{desc}</p>}
     </div>
   );
 }

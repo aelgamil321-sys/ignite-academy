@@ -177,10 +177,10 @@ export function LessonQuizStudent({
   return (
     <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
       <div className="flex items-center gap-3 mb-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <HelpCircle className="h-5 w-5" />
         </div>
-        <h2 className="font-display text-xl font-semibold text-primary">{tr("ls_quiz")}</h2>
+        <h2 className="font-display text-xl font-semibold text-foreground">{tr("ls_quiz")}</h2>
       </div>
 
       {!authReady || loadingSubmission ? (
@@ -205,13 +205,13 @@ export function LessonQuizStudent({
               return (
                 <div key={i} className="rounded-xl border border-border bg-background p-5">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="text-xs uppercase tracking-[0.18em] text-emerald">
+                    <span className="text-xs uppercase tracking-[0.18em] text-primary">
                       {tr("question")} {i + 1}
                     </span>
                     <span className="text-[10px] rounded-full border border-border px-2 py-0.5 text-muted-foreground">
                       {typeLabel(q.type)}
                     </span>
-                    <span className="text-[10px] rounded-full border border-emerald/30 bg-emerald/5 px-2 py-0.5 text-emerald">
+                    <span className="text-[10px] rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-primary">
                       {q.points} {lang === "ar" ? "نقطة" : q.points === 1 ? "pt" : "pts"}
                     </span>
                   </div>
@@ -221,7 +221,7 @@ export function LessonQuizStudent({
 
                   {isEssay ? (
                     <textarea
-                      className="w-full min-h-[140px] rounded-lg border border-border bg-background px-4 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-emerald/30"
+                      className="w-full min-h-[140px] rounded-lg border border-border bg-background px-4 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/30"
                       dir={lang === "ar" ? "rtl" : "ltr"}
                       placeholder={
                         lang === "ar" ? "اكتب إجابتك هنا..." : "Write your answer here..."
@@ -244,7 +244,7 @@ export function LessonQuizStudent({
                               "text-start rounded-lg border px-4 py-2.5 text-sm transition-colors",
                               chosen
                                 ? "border-primary bg-primary/5 text-primary"
-                                : "border-border hover:border-emerald hover:text-emerald",
+                                : "border-border hover:border-primary hover:text-primary",
                             ].join(" ")}
                           >
                             {opt[lang] || opt.en || opt.ar}
@@ -279,7 +279,7 @@ export function LessonQuizStudent({
               type="button"
               onClick={() => void handleSubmit()}
               disabled={!allAnswered || submitting || !userId}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {tr("submit_quiz")}

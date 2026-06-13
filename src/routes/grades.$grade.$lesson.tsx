@@ -54,7 +54,7 @@ function LessonPage() {
       <div className="min-h-screen flex flex-col">
         <SiteHeader />
         <main className="flex-1 container-page py-20">
-          <Link to="/grades/$grade" params={{ grade: grade.slug }} className="text-primary hover:text-emerald inline-flex items-center gap-2">
+          <Link to="/grades/$grade" params={{ grade: grade.slug }} className="text-primary hover:text-primary inline-flex items-center gap-2">
             <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
             {tr("back_to_grade")} · {grade.name[lang]}
           </Link>
@@ -94,10 +94,10 @@ function LessonPage() {
               <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               {tr("back_to_grade")} · {grade.name[lang]}
             </Link>
-            <div className="text-xs uppercase tracking-[0.22em] text-emerald mb-2">
+            <div className="text-xs uppercase tracking-[0.22em] text-primary mb-2">
               {lesson.subject[lang]} · {lesson.unit[lang]}
             </div>
-            <h1 className="font-display text-3xl md:text-5xl font-semibold text-primary leading-tight">{lesson.title[lang]}</h1>
+            <h1 className="font-display text-3xl md:text-5xl font-semibold text-foreground leading-tight">{lesson.title[lang]}</h1>
             <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5"><Clock className="h-4 w-4" /> {lesson.duration} {tr("minutes")}</span>
               <span className="inline-flex items-center gap-1.5"><HelpCircle className="h-4 w-4" /> {normalizeQuizList(custom?.quiz ?? lesson.quiz).length} Q</span>
@@ -115,10 +115,10 @@ function LessonPage() {
               return (
                 <div key={s.key} className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <h2 className="font-display text-xl font-semibold text-primary">{tr(s.key)}</h2>
+                    <h2 className="font-display text-xl font-semibold text-foreground">{tr(s.key)}</h2>
                   </div>
                   {body ? (
                     <p className="text-foreground/85 leading-relaxed whitespace-pre-line">{body}</p>
@@ -135,12 +135,12 @@ function LessonPage() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/15 text-gold">
                     <FileText className="h-5 w-5" />
                   </div>
-                  <h2 className="font-display text-xl font-semibold text-primary">{tr("vocab")}</h2>
+                  <h2 className="font-display text-xl font-semibold text-foreground">{tr("vocab")}</h2>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {lesson.vocab.map((vw, i) => (
                     <div key={i} className="rounded-xl border border-border bg-background p-4">
-                      <div className="font-display text-lg text-primary">{vw.term[lang]}</div>
+                      <div className="font-display text-lg text-foreground">{vw.term[lang]}</div>
                       {vw.def[lang] && <div className="text-sm text-muted-foreground mt-1">{vw.def[lang]}</div>}
                     </div>
                   ))}
@@ -153,14 +153,14 @@ function LessonPage() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Video className="h-5 w-5" />
                 </div>
-                <h2 className="font-display text-xl font-semibold text-primary">{tr("ls_video")}</h2>
+                <h2 className="font-display text-xl font-semibold text-foreground">{tr("ls_video")}</h2>
               </div>
               {lessonVideos.length > 0 ? (
                 <div className="space-y-6">
                   {lessonVideos.map((video) => (
                     <div key={video.ytId + video.label}>
                       {lessonVideos.length > 1 && (
-                        <div className="text-sm font-semibold text-emerald mb-2">{video.label}</div>
+                        <div className="text-sm font-semibold text-primary mb-2">{video.label}</div>
                       )}
                       <div className="aspect-video w-full rounded-xl overflow-hidden">
                         <iframe
@@ -205,7 +205,7 @@ function LessonPage() {
                 <div className="space-y-2">
                   {lessonFiles.map((f: CustomFile) => (
                     <a key={f.id} href={f.fileUrl} download={f.fileName}
-                      className="block rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-emerald hover:text-emerald">
+                      className="block rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-primary hover:text-primary">
                       {f.title[lang]} <span className="opacity-60">· {f.type.toUpperCase()}</span>
                     </a>
                   ))}
@@ -227,10 +227,10 @@ function LessonDownloads({ custom }: { custom?: CustomLesson }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
       <div className="flex items-center gap-3 mb-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Download className="h-5 w-5" />
         </div>
-        <h2 className="font-display text-xl font-semibold text-primary">
+        <h2 className="font-display text-xl font-semibold text-foreground">
           Downloads / الملفات
         </h2>
       </div>
@@ -244,7 +244,7 @@ function LessonDownloads({ custom }: { custom?: CustomLesson }) {
               target="_blank"
               rel="noopener noreferrer"
               download={fileNameFromUrl(item.url)}
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-emerald hover:text-emerald transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-primary hover:text-primary transition-colors"
             >
               <Download className="h-4 w-4 shrink-0" />
               <span>{item.label}</span>

@@ -96,7 +96,7 @@ function ParentSettingsPage() {
                   <div className="text-xs uppercase tracking-wider text-muted-foreground">
                     {lang === "ar" ? "اسم ولي الأمر" : "Parent name"}
                   </div>
-                  <div className="font-display text-xl text-primary mt-1">{fullName || "—"}</div>
+                  <div className="font-display text-xl text-foreground mt-1">{fullName || "—"}</div>
                 </div>
                 <div>
                   <div className="text-xs uppercase tracking-wider text-muted-foreground">{tr("your_email")}</div>
@@ -117,7 +117,7 @@ function ParentSettingsPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/parent/dashboard"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
             >
               {tr("parent_dashboard_cta")}
             </Link>
@@ -126,7 +126,7 @@ function ParentSettingsPage() {
               onClick={() => {
                 void signOut();
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:border-emerald hover:text-emerald transition-colors"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors"
             >
               <LogOut className="h-4 w-4" />
               {lang === "ar" ? "تسجيل الخروج" : "Sign out"}

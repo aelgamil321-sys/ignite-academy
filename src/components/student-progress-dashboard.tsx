@@ -28,7 +28,7 @@ function formatDate(iso: string, lang: "en" | "ar"): string {
 }
 
 function learningLevelClass(label: string): string {
-  if (label === "Excellent" || label === "ممتاز") return "bg-emerald/15 text-emerald border-emerald/30";
+  if (label === "Excellent" || label === "ممتاز") return "bg-primary/15 text-primary border-primary/30";
   if (label === "Very Good" || label === "جيد جدًا") return "bg-primary/10 text-primary border-primary/25";
   if (label === "Good" || label === "جيد") return "bg-sky-500/10 text-sky-700 border-sky-500/25";
   if (label === "Pass" || label === "مقبول") return "bg-amber-500/10 text-amber-800 border-amber-500/25";
@@ -107,10 +107,10 @@ export function StudentProgressDashboard({
               key={card.key}
               className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary mb-3">
                 <Icon className="h-5 w-5" />
               </div>
-              <div className="font-display text-2xl md:text-3xl text-primary leading-tight">
+              <div className="font-display text-2xl md:text-3xl text-foreground leading-tight">
                 {card.key === "level" ? (
                   card.sub
                 ) : (
@@ -127,15 +127,15 @@ export function StudentProgressDashboard({
       <div className="rounded-2xl border border-border bg-card p-6 md:p-7 shadow-[var(--shadow-soft)]">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-emerald mb-1">
+            <div className="text-xs uppercase tracking-[0.2em] text-primary mb-1">
               {L("My Grade", "صفّي")[lang]}
             </div>
-            <h2 className="font-display text-2xl text-primary">{gradeName}</h2>
+            <h2 className="font-display text-2xl text-foreground">{gradeName}</h2>
           </div>
           <Link
             to="/grades/$grade"
             params={{ grade: gradeSlug }}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
           >
             {L("Browse lessons", "تصفّح الدروس")[lang]}
           </Link>
@@ -155,7 +155,7 @@ export function StudentProgressDashboard({
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/15 text-gold">
             <Award className="h-5 w-5" />
           </div>
-          <h2 className="font-display text-xl text-primary">
+          <h2 className="font-display text-xl text-foreground">
             {L("Certificates", "الشهادات")[lang]}
           </h2>
         </div>
@@ -188,12 +188,12 @@ export function StudentProgressDashboard({
               <tbody>
                 {progress.certificates.map((c) => (
                   <tr key={c.certificateId} className="border-b border-border/60 last:border-0">
-                    <td className="py-3 pe-4 font-mono text-xs text-emerald">{c.certificateId}</td>
+                    <td className="py-3 pe-4 font-mono text-xs text-primary">{c.certificateId}</td>
                     <td className="py-3 pe-4">
                       <Link
                         to="/grades/$grade/$lesson"
                         params={{ grade: gradeSlug, lesson: c.lessonId }}
-                        className="font-medium text-primary hover:text-emerald"
+                        className="font-medium text-primary hover:text-primary"
                       >
                         {c.lessonTitle[lang] || c.lessonTitle.en}
                       </Link>
@@ -210,10 +210,10 @@ export function StudentProgressDashboard({
 
       <section className="rounded-2xl border border-border bg-card p-6 md:p-7 shadow-[var(--shadow-soft)]">
         <div className="flex items-center gap-3 mb-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Trophy className="h-5 w-5" />
           </div>
-          <h2 className="font-display text-xl text-primary">
+          <h2 className="font-display text-xl text-foreground">
             {L("Recent Achievements", "الإنجازات الأخيرة")[lang]}
           </h2>
         </div>
@@ -232,7 +232,7 @@ export function StudentProgressDashboard({
                 className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-emerald">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-primary">
                     {item.kind === "certificate"
                       ? L("Certificate earned", "شهادة مكتسبة")[lang]
                       : L("Quiz submitted", "اختبار مُرسَل")[lang]}
@@ -240,7 +240,7 @@ export function StudentProgressDashboard({
                   <Link
                     to="/grades/$grade/$lesson"
                     params={{ grade: gradeSlug, lesson: item.lessonId }}
-                    className="mt-0.5 block font-display text-lg text-primary hover:text-emerald truncate"
+                    className="mt-0.5 block font-display text-lg text-foreground hover:text-primary truncate"
                   >
                     {item.lessonTitle[lang] || item.lessonTitle.en}
                   </Link>
@@ -252,7 +252,7 @@ export function StudentProgressDashboard({
                   </div>
                 </div>
                 <div className="text-end shrink-0">
-                  <div className="font-display text-2xl text-primary">{item.scorePct}%</div>
+                  <div className="font-display text-2xl text-foreground">{item.scorePct}%</div>
                 </div>
               </li>
             ))}

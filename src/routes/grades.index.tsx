@@ -62,8 +62,8 @@ function GradesIndex() {
             <section key={s.slug}>
               <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <div className="text-xs uppercase tracking-[0.22em] text-emerald mb-1">{tr("stage_overview")}</div>
-                  <h2 className="font-display text-3xl text-primary">{s.name[lang]}</h2>
+                  <div className="text-xs uppercase tracking-[0.22em] text-primary mb-1">{tr("stage_overview")}</div>
+                  <h2 className="font-display text-3xl text-foreground">{s.name[lang]}</h2>
                   <p className="text-sm text-muted-foreground mt-1">{s.desc[lang]}</p>
                 </div>
               </div>
@@ -73,16 +73,16 @@ function GradesIndex() {
                     key={g.slug}
                     to="/grades/$grade"
                     params={{ grade: g.slug }}
-                    className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] hover:border-emerald transition-all"
+                    className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] hover:border-primary transition-all"
                   >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-emerald text-primary-foreground mb-4">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-dark to-primary text-primary-foreground mb-4">
                       <GraduationCap className="h-5 w-5" />
                     </div>
-                    <div className="font-display text-xl text-primary">{g.name[lang]}</div>
+                    <div className="font-display text-xl text-foreground">{g.name[lang]}</div>
                     <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
                       <BookOpen className="h-3.5 w-3.5" /> {g.lessons.length} {tr("lesson")}
                     </div>
-                    <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:text-emerald">
+                    <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:text-primary">
                       {tr("view_lessons")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                     </div>
                   </Link>

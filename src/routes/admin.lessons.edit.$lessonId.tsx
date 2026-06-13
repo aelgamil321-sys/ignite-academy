@@ -116,7 +116,7 @@ function AdminLessonEditPage() {
 
       <div className="rounded-xl border border-border bg-card p-4 text-xs font-mono space-y-1">
         <div className="font-sans text-sm font-semibold mb-2">Debug</div>
-        <div>Current lesson id: <span className="text-emerald break-all">{lessonId}</span></div>
+        <div>Current lesson id: <span className="text-primary break-all">{lessonId}</span></div>
         <div>Current user email: <span className="break-all">{email || "—"}</span></div>
       </div>
 

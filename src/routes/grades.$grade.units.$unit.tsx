@@ -174,8 +174,8 @@ function UnitPage() {
             onClick={() => setTab(t.key)}
             className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               tab === t.key
-                ? "bg-emerald text-emerald-foreground"
-                : "border border-border text-foreground/70 hover:border-emerald hover:text-emerald"
+                ? "bg-primary text-primary-foreground"
+                : "border border-border text-foreground/70 hover:border-primary hover:text-primary"
             }`}
           >
             {t.label[lang]}
@@ -294,7 +294,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 const inputCls =
-  "block w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:border-emerald";
+  "block w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary";
 
 function PublishBar({
   pub, setPub, onSave, saving, lang,
@@ -302,14 +302,14 @@ function PublishBar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
       <label className="inline-flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-emerald h-4 w-4" />
+        <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
         {L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[lang]}
       </label>
       <button
         type="button"
         onClick={onSave}
         disabled={saving}
-        className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <Save className="h-4 w-4" />
         {saving
@@ -330,7 +330,7 @@ function ItemActions({
       <button
         onClick={onToggle}
         className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${
-          published ? "border-emerald text-emerald" : "border-border text-muted-foreground"
+          published ? "border-primary text-primary" : "border-border text-muted-foreground"
         }`}
       >
         {published ? <><Eye className="h-3.5 w-3.5" /> Published</> : <><EyeOff className="h-3.5 w-3.5" /> Draft</>}
@@ -382,7 +382,7 @@ function OverviewTab({
       {items.map((it) => (
         <Card key={it.k}>
           <div className="text-xs uppercase tracking-wider text-muted-foreground">{it.label[lang]}</div>
-          <div className="font-display text-3xl text-primary mt-1">{counts[it.k]}</div>
+          <div className="font-display text-3xl text-foreground mt-1">{counts[it.k]}</div>
         </Card>
       ))}
     </div>
@@ -425,7 +425,7 @@ function LessonsTab({
           "لإضافة درس لهذه الوحدة، استخدم لوحة الإدارة → إضافة درس جديد. اضبط الوحدة على ")[lang]}
         <span className="font-semibold text-foreground">“{unitName[lang]}”</span>
         {L(` and Grade to the current grade.`, ` والصف على الصف الحالي.`)[lang]}
-        <Link to="/admin" className="ms-2 inline-flex items-center gap-1 text-primary hover:text-emerald">
+        <Link to="/admin" className="ms-2 inline-flex items-center gap-1 text-primary hover:text-primary">
           <ExternalLink className="h-3.5 w-3.5" /> Admin
         </Link>
       </div>
@@ -438,7 +438,7 @@ function LessonsTab({
               <Link
                 to="/grades/$grade/$lesson"
                 params={{ grade: gradeSlug, lesson: l.id }}
-                className="font-medium text-foreground hover:text-emerald"
+                className="font-medium text-foreground hover:text-primary"
               >
                 {l.title[lang]}
               </Link>
@@ -524,7 +524,7 @@ function InfoTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-primary mb-4">{L("Add Information", "إضافة معلومات")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Information", "إضافة معلومات")[lang]}</h3>
         <div className="space-y-4">
           <Row>
             <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
@@ -547,7 +547,7 @@ function InfoTab({
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-primary">{L("Information", "المعلومات")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Information", "المعلومات")[lang]}</h3>
         {loading ? (
           <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</div>
         ) : infos.length === 0 ? (
@@ -652,7 +652,7 @@ function ArticlesTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-primary mb-4">{L("Add Article", "إضافة مقال")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Article", "إضافة مقال")[lang]}</h3>
         <div className="space-y-4">
           <Row>
             <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
@@ -678,7 +678,7 @@ function ArticlesTab({
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-primary">{L("Articles", "المقالات")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Articles", "المقالات")[lang]}</h3>
         {articles.length === 0 ? (
           <Empty lang={lang} kind="articles" />
         ) : (
@@ -771,7 +771,7 @@ function FilesTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-primary mb-4">{L("Add File", "إضافة ملف")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add File", "إضافة ملف")[lang]}</h3>
         <div className="space-y-4">
           <Row>
             <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
@@ -788,7 +788,7 @@ function FilesTab({
           </Field>
           <Field label={L("File", "الملف")[lang]} required>
             <input type="file" onChange={onFile} className={inputCls} />
-            {uploaded && <div className="text-xs text-emerald mt-1">✓ {uploaded.name} ({uploaded.size})</div>}
+            {uploaded && <div className="text-xs text-primary mt-1">✓ {uploaded.name} ({uploaded.size})</div>}
           </Field>
           <Field label={L("Short Description", "وصف مختصر")[lang]}>
             <textarea className={inputCls} rows={2} value={desc} onChange={(e) => setDesc(e.target.value)} />
@@ -798,11 +798,11 @@ function FilesTab({
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-primary">{L("Files", "الملفات")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Files", "الملفات")[lang]}</h3>
         {files.length === 0 ? <Empty lang={lang} kind="files" /> : files.map((f) => (
           <div key={f.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
             <div className="flex-1 min-w-0">
-              <a href={f.fileUrl} target="_blank" rel="noreferrer" className="font-semibold text-foreground hover:text-emerald">{f.title[lang] || f.fileName}</a>
+              <a href={f.fileUrl} target="_blank" rel="noreferrer" className="font-semibold text-foreground hover:text-primary">{f.title[lang] || f.fileName}</a>
               <div className="text-xs text-muted-foreground">{f.type.toUpperCase()} · {f.size} · {f.fileName}</div>
             </div>
             <ItemActions published={f.published} onToggle={() => void togglePub(f.id, !f.published)} onDelete={() => void onDelete(f.id)} />
@@ -888,7 +888,7 @@ function VideosTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-primary mb-4">{L("Add Video", "إضافة فيديو")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Video", "إضافة فيديو")[lang]}</h3>
         <div className="space-y-4">
           <Row>
             <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
@@ -913,7 +913,7 @@ function VideosTab({
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-primary">{L("Videos", "الفيديوهات")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Videos", "الفيديوهات")[lang]}</h3>
         {videos.length === 0 ? <Empty lang={lang} kind="videos" /> : videos.map((v) => {
           const id = ytId(v.youtubeUrl);
           return (
@@ -987,7 +987,7 @@ function QuizzesTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-primary mb-4">{L("Add Quiz", "إضافة اختبار")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Quiz", "إضافة اختبار")[lang]}</h3>
         <div className="space-y-4">
           <Row>
             <Field label={L("Quiz Title (EN)", "عنوان الاختبار (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
@@ -996,9 +996,9 @@ function QuizzesTab({
 
           <div className="rounded-xl border border-border bg-background p-4">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-display text-lg text-primary">{L("Questions", "الأسئلة")[lang]}</h4>
+              <h4 className="font-display text-lg text-foreground">{L("Questions", "الأسئلة")[lang]}</h4>
               <button type="button" onClick={() => setQs((q) => [...q, { ...emptyQ, options: emptyQ.options.map((o) => ({ ...o })) }])}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-emerald hover:text-emerald">
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary">
                 <Plus className="h-3.5 w-3.5" /> {L("Add Question", "إضافة سؤال")[lang]}
               </button>
             </div>
@@ -1006,7 +1006,7 @@ function QuizzesTab({
               {qs.map((q, i) => (
                 <div key={i} className="rounded-lg border border-border p-3 bg-card">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs uppercase tracking-wider text-emerald font-semibold">Q{i + 1}</div>
+                    <div className="text-xs uppercase tracking-wider text-primary font-semibold">Q{i + 1}</div>
                     <button type="button" onClick={() => setQs((qq) => qq.filter((_, j) => j !== i))} className="text-destructive hover:text-destructive/70"><Trash2 className="h-4 w-4" /></button>
                   </div>
                   <Row>
@@ -1018,7 +1018,7 @@ function QuizzesTab({
                   {q.options.map((opt, oi) => (
                     <div key={oi} className="flex items-center gap-2 mt-2">
                       <input type="radio" name={`uq-ans-${i}`} checked={q.answer === oi}
-                        onChange={() => setQs((qq) => qq.map((x, j) => j === i ? { ...x, answer: oi } : x))} className="accent-emerald" />
+                        onChange={() => setQs((qq) => qq.map((x, j) => j === i ? { ...x, answer: oi } : x))} className="accent-primary" />
                       <input className={`${inputCls} flex-1`} placeholder={`Option ${oi + 1} (EN)`} value={opt.en}
                         onChange={(e) => setQs((qq) => qq.map((x, j) => j === i ? { ...x, options: x.options.map((o, k) => k === oi ? { ...o, en: e.target.value } : o) } : x))} />
                       <input className={`${inputCls} flex-1`} dir="rtl" placeholder={`خيار ${oi + 1}`} value={opt.ar}
@@ -1035,7 +1035,7 @@ function QuizzesTab({
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-primary">{L("Quizzes", "الاختبارات")[lang]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Quizzes", "الاختبارات")[lang]}</h3>
         {loading ? (
           <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</div>
         ) : quizzes.length === 0 ? (

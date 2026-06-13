@@ -57,14 +57,14 @@ function CategoryPage() {
                     key={l.id}
                     to="/grades/$grade/$lesson"
                     params={{ grade: l.grade, lesson: l.id }}
-                    className="group rounded-2xl border border-border bg-card p-5 hover:border-emerald transition-colors"
+                    className="group rounded-2xl border border-border bg-card p-5 hover:border-primary transition-colors"
                   >
-                    <div className="text-xs text-emerald font-semibold uppercase tracking-wider">
+                    <div className="text-xs text-primary font-semibold uppercase tracking-wider">
                       {gradeDisplayName(l.grade, lang)}
                     </div>
-                    <h3 className="mt-1 font-display text-lg text-primary">{l.title[lang]}</h3>
+                    <h3 className="mt-1 font-display text-lg text-foreground">{l.title[lang]}</h3>
                     <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{l.outcome[lang]}</p>
-                    <div className="mt-3 inline-flex items-center gap-1 text-sm text-primary group-hover:text-emerald">
+                    <div className="mt-3 inline-flex items-center gap-1 text-sm text-primary group-hover:text-primary">
                       {tr("open")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                     </div>
                   </Link>
@@ -81,16 +81,16 @@ function CategoryPage() {
                     key={v.id}
                     to="/videos/$slug"
                     params={{ slug: v.id }}
-                    className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-emerald transition-colors"
+                    className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary transition-colors"
                   >
-                    <div className="aspect-video bg-gradient-to-br from-primary to-emerald grid place-content-center text-primary-foreground relative">
+                    <div className="aspect-video bg-gradient-to-br from-brand-dark to-primary grid place-content-center text-primary-foreground relative">
                       {v.thumbnailUrl ? (
                         <img src={v.thumbnailUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
                       ) : null}
                       <Play className="h-10 w-10 relative" />
                     </div>
                     <div className="p-4">
-                      <h3 className="font-display text-lg text-primary">{v.title[lang]}</h3>
+                      <h3 className="font-display text-lg text-foreground">{v.title[lang]}</h3>
                       <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{v.description[lang]}</p>
                     </div>
                   </Link>
@@ -107,9 +107,9 @@ function CategoryPage() {
                     key={f.id}
                     href={f.fileUrl}
                     download={f.fileName}
-                    className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 hover:border-emerald transition-colors"
+                    className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 hover:border-primary transition-colors"
                   >
-                    <Download className="h-5 w-5 text-emerald shrink-0" />
+                    <Download className="h-5 w-5 text-primary shrink-0" />
                     <div className="min-w-0">
                       <div className="font-medium text-primary truncate">{f.title[lang]}</div>
                       <div className="text-xs text-muted-foreground">{f.type.toUpperCase()} · {f.size}</div>
@@ -128,9 +128,9 @@ function CategoryPage() {
                     key={a.id}
                     to={a.category === "announcement" ? "/announcements/$slug" : "/parent/$slug"}
                     params={{ slug: a.id }}
-                    className="rounded-2xl border border-border bg-card p-5 hover:border-emerald transition-colors"
+                    className="rounded-2xl border border-border bg-card p-5 hover:border-primary transition-colors"
                   >
-                    <h3 className="font-display text-lg text-primary">{a.title[lang]}</h3>
+                    <h3 className="font-display text-lg text-foreground">{a.title[lang]}</h3>
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{a.content[lang]}</p>
                   </Link>
                 ))}
@@ -146,8 +146,8 @@ function CategoryPage() {
 function Section({ title, icon: Icon, children }: { title: string; icon: typeof BookOpen; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="font-display text-2xl text-primary mb-5 inline-flex items-center gap-2">
-        <Icon className="h-6 w-6 text-emerald" /> {title}
+      <h2 className="font-display text-2xl text-foreground mb-5 inline-flex items-center gap-2">
+        <Icon className="h-6 w-6 text-primary" /> {title}
       </h2>
       {children}
     </section>

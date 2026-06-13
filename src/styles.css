@@ -20,6 +20,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -31,91 +32,123 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
 
+  /* Brand primitives (Ignite Islamic Academy) */
+  --color-ignite-gold: var(--ignite-gold);
+  --color-ignite-dark: var(--ignite-dark);
+  --color-ignite-bg: var(--ignite-bg);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-dark-foreground: var(--brand-dark-foreground);
+
+  /* Legacy aliases — emerald/gold map to Ignite Gold site-wide */
   --color-emerald: var(--emerald);
   --color-emerald-foreground: var(--emerald-foreground);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
   --color-cream: var(--cream);
 
-  --color-ignite-gold: #F2B21B;
-  --color-ignite-dark: #2F3542;
-  --color-ignite-bg: #F8F8F6;
-
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-arabic: "Tajawal", "Inter", system-ui, sans-serif;
 
+  --shadow-soft: 0 4px 20px -4px color-mix(in oklab, var(--ignite-dark) 12%, transparent);
+  --shadow-elegant: 0 20px 50px -20px color-mix(in oklab, var(--ignite-dark) 18%, transparent);
+  --shadow-gold: 0 10px 30px -10px color-mix(in oklab, var(--ignite-gold) 40%, transparent);
 
-  --shadow-soft: 0 4px 20px -4px color-mix(in oklab, var(--primary) 15%, transparent);
-  --shadow-elegant: 0 20px 50px -20px color-mix(in oklab, var(--primary) 35%, transparent);
-  --shadow-gold: 0 10px 30px -10px color-mix(in oklab, var(--gold) 40%, transparent);
-
-  --gradient-hero: linear-gradient(135deg, var(--primary) 0%, var(--emerald) 100%);
-  --gradient-gold: linear-gradient(135deg, var(--gold) 0%, oklch(0.78 0.13 80) 100%);
+  --gradient-hero: linear-gradient(135deg, var(--brand-dark) 0%, color-mix(in srgb, var(--ignite-gold) 35%, var(--brand-dark)) 100%);
+  --gradient-gold: linear-gradient(135deg, var(--ignite-gold) 0%, var(--primary-hover) 100%);
 }
 
 :root {
   --radius: 0.875rem;
 
-  /* Light base, cream warm */
-  --background: oklch(0.99 0.012 95);
-  --foreground: oklch(0.22 0.04 160);
+  /* —— Brand primitives —— */
+  --ignite-gold: #F2B21B;
+  --ignite-gold-hover: #D9A015;
+  --ignite-dark: #2F3542;
+  --ignite-bg: #F8F8F6;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.04 160);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.04 160);
+  /* —— Semantic tokens —— */
+  --background: #F8F8F6;
+  --foreground: #2F3542;
 
-  /* Dark Green = primary */
-  --primary: oklch(0.32 0.08 155);
-  --primary-foreground: oklch(0.98 0.01 95);
+  --card: #FFFFFF;
+  --card-foreground: #2F3542;
+  --popover: #FFFFFF;
+  --popover-foreground: #2F3542;
 
-  /* Emerald */
-  --emerald: oklch(0.52 0.14 158);
-  --emerald-foreground: oklch(0.99 0.01 95);
+  /* Primary actions: Ignite Gold */
+  --primary: #F2B21B;
+  --primary-hover: #D9A015;
+  --primary-foreground: #2F3542;
 
-  /* Gold */
-  --gold: oklch(0.78 0.14 78);
-  --gold-foreground: oklch(0.25 0.05 80);
+  /* Secondary: white surfaces with dark text */
+  --secondary: #FFFFFF;
+  --secondary-foreground: #2F3542;
 
-  --cream: oklch(0.97 0.02 90);
+  --muted: #EFEFED;
+  --muted-foreground: #5A6170;
 
-  --secondary: oklch(0.95 0.02 150);
-  --secondary-foreground: oklch(0.28 0.06 155);
-  --muted: oklch(0.95 0.015 120);
-  --muted-foreground: oklch(0.48 0.03 155);
-  --accent: oklch(0.93 0.05 90);
-  --accent-foreground: oklch(0.28 0.06 80);
-  --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: oklch(0.98 0.01 95);
-  --border: oklch(0.9 0.02 150);
-  --input: oklch(0.92 0.02 150);
-  --ring: oklch(0.52 0.14 158);
+  --accent: #F7F0DC;
+  --accent-foreground: #2F3542;
+
+  --destructive: #C53030;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #E2E2DE;
+  --input: #E2E2DE;
+  --ring: #F2B21B;
+
+  --success: #2F7D4A;
+  --warning: #F2B21B;
+
+  /* Dark brand surfaces (footer, hero bands) */
+  --brand-dark: #2F3542;
+  --brand-dark-foreground: #FFFFFF;
+
+  /* Accent aliases (replaces legacy green) */
+  --gold: #F2B21B;
+  --gold-foreground: #2F3542;
+  --emerald: #F2B21B;
+  --emerald-foreground: #2F3542;
+  --cream: #F8F8F6;
 }
 
 .dark {
-  --background: oklch(0.18 0.03 160);
-  --foreground: oklch(0.96 0.01 95);
-  --card: oklch(0.22 0.04 160);
-  --card-foreground: oklch(0.96 0.01 95);
-  --popover: oklch(0.22 0.04 160);
-  --popover-foreground: oklch(0.96 0.01 95);
-  --primary: oklch(0.52 0.14 158);
-  --primary-foreground: oklch(0.12 0.02 160);
-  --emerald: oklch(0.62 0.16 158);
-  --emerald-foreground: oklch(0.12 0.02 160);
-  --gold: oklch(0.82 0.14 80);
-  --gold-foreground: oklch(0.2 0.04 80);
-  --secondary: oklch(0.26 0.04 160);
-  --secondary-foreground: oklch(0.96 0.01 95);
-  --muted: oklch(0.26 0.04 160);
-  --muted-foreground: oklch(0.7 0.02 150);
-  --accent: oklch(0.3 0.06 80);
-  --accent-foreground: oklch(0.96 0.01 95);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.62 0.16 158);
+  --background: #1E2229;
+  --foreground: #F8F8F6;
+
+  --card: #2F3542;
+  --card-foreground: #F8F8F6;
+  --popover: #2F3542;
+  --popover-foreground: #F8F8F6;
+
+  --primary: #F2B21B;
+  --primary-hover: #E5C04A;
+  --primary-foreground: #2F3542;
+
+  --secondary: #3A4150;
+  --secondary-foreground: #F8F8F6;
+
+  --muted: #3A4150;
+  --muted-foreground: #B8BCC4;
+
+  --accent: #3A4150;
+  --accent-foreground: #F8F8F6;
+
+  --border: #FFFFFF1F;
+  --input: #FFFFFF26;
+  --ring: #F2B21B;
+
+  --brand-dark: #1E2229;
+  --brand-dark-foreground: #F8F8F6;
+
+  --gold: #F2B21B;
+  --gold-foreground: #2F3542;
+  --emerald: #F2B21B;
+  --emerald-foreground: #2F3542;
 }
 
 @layer base {
@@ -128,6 +161,7 @@
   h1, h2, h3, h4, h5 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
+    color: var(--color-foreground);
   }
   html[dir="rtl"] body,
   html[lang="ar"] body {
@@ -143,7 +177,6 @@
     font-weight: 800;
   }
 }
-
 
 @utility container-page {
   margin-inline: auto;

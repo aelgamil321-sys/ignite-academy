@@ -195,7 +195,7 @@ function AdminQuizSubmissionsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl text-primary">
+        <h1 className="font-display text-2xl text-foreground">
           {L("Quiz Submissions", "إرسالات الاختبارات")[lang]}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -255,7 +255,7 @@ function AdminQuizSubmissionsPage() {
                       className={`text-xs rounded-full px-2.5 py-1 font-semibold ${
                         row.status === "pending_review"
                           ? "bg-amber-100 text-amber-800"
-                          : "bg-emerald/10 text-emerald"
+                          : "bg-primary/10 text-primary"
                       }`}
                     >
                       {row.status === "pending_review"
@@ -286,7 +286,7 @@ function AdminQuizSubmissionsPage() {
                       </div>
                       <div>
                         <span className="text-muted-foreground">{L("Final score", "الدرجة النهائية")[lang]}: </span>
-                        <span className="font-semibold text-emerald">
+                        <span className="font-semibold text-primary">
                           {finalScore}/{row.total_points} ({row.percentage}%)
                         </span>
                       </div>
@@ -301,7 +301,7 @@ function AdminQuizSubmissionsPage() {
                             key={`essay-${a.questionIndex}`}
                             className="rounded-lg border border-border p-4 space-y-3"
                           >
-                            <div className="text-xs uppercase tracking-wider text-emerald font-semibold">
+                            <div className="text-xs uppercase tracking-wider text-primary font-semibold">
                               {L("Essay", "سؤال مقالي")[lang]} #{a.questionIndex + 1}
                               <span className="text-muted-foreground font-normal ms-2">
                                 ({a.points} {L("pts max", "نقطة كحد أقصى")[lang]})
@@ -400,7 +400,7 @@ function AdminQuizSubmissionsPage() {
                               <div className="font-medium mt-0.5">{q.q[lang] || q.q.en}</div>
                             )}
                           </div>
-                          <span className={correct ? "text-emerald font-semibold" : "text-destructive font-semibold"}>
+                          <span className={correct ? "text-primary font-semibold" : "text-destructive font-semibold"}>
                             {a.earned}/{a.points}
                           </span>
                         </div>
@@ -412,7 +412,7 @@ function AdminQuizSubmissionsPage() {
                         type="button"
                         disabled={savingId === row.id}
                         onClick={() => void handleSaveReview(row)}
-                        className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-emerald disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
                       >
                         {savingId === row.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />

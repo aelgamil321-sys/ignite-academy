@@ -26,7 +26,7 @@ function QuizDetail() {
     return (
       <PageShell eyebrow={tr("nav_quizzes")} title="Quiz not found" crumbs={[{ label: tr("nav_quizzes"), to: "/quizzes" }]}>
         <p className="text-muted-foreground">This quiz is not available.</p>
-        <Link to="/quizzes" className="text-emerald hover:underline mt-4 inline-block">Back to quizzes</Link>
+        <Link to="/quizzes" className="text-primary hover:underline mt-4 inline-block">Back to quizzes</Link>
       </PageShell>
     );
   }
@@ -46,7 +46,7 @@ function QuizDetail() {
           const isCorrect = submitted && sel === q.answer;
           return (
             <div key={i} className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-emerald mb-2">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-primary mb-2">
                 <HelpCircle className="h-4 w-4" /> {tr("question")} {i + 1}
               </div>
               <div className="font-medium mb-3">{q.q[lang]}</div>
@@ -62,10 +62,10 @@ function QuizDetail() {
                       onClick={() => setAnswers((a) => ({ ...a, [i]: oi }))}
                       className={[
                         "text-start rounded-lg border px-4 py-2.5 text-sm transition-colors",
-                        correctChoice ? "border-emerald bg-emerald/10 text-emerald"
+                        correctChoice ? "border-primary bg-primary/10 text-primary"
                           : wrongChoice ? "border-destructive bg-destructive/10 text-destructive"
                           : chosen ? "border-primary bg-primary/5 text-primary"
-                          : "border-border hover:border-emerald hover:text-emerald",
+                          : "border-border hover:border-primary hover:text-primary",
                       ].join(" ")}
                     >
                       {opt[lang]}
@@ -74,7 +74,7 @@ function QuizDetail() {
                 })}
               </div>
               {submitted && sel !== undefined && (
-                <div className={`mt-3 inline-flex items-center gap-2 text-sm font-medium ${isCorrect ? "text-emerald" : "text-destructive"}`}>
+                <div className={`mt-3 inline-flex items-center gap-2 text-sm font-medium ${isCorrect ? "text-primary" : "text-destructive"}`}>
                   {isCorrect ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
                   {isCorrect ? tr("correct") : tr("incorrect")}
                 </div>
@@ -88,18 +88,18 @@ function QuizDetail() {
             <button
               onClick={() => setSubmitted(true)}
               disabled={Object.keys(answers).length !== quiz.questions.length}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-50"
             >
               {tr("submit_quiz")}
             </button>
           ) : (
             <>
-              <div className="font-display text-xl text-primary">
-                {tr("your_score")}: <span className="text-emerald">{score}/{quiz.questions.length}</span>
+              <div className="font-display text-xl text-foreground">
+                {tr("your_score")}: <span className="text-primary">{score}/{quiz.questions.length}</span>
               </div>
               <button
                 onClick={() => { setAnswers({}); setSubmitted(false); }}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-sm font-semibold hover:border-emerald hover:text-emerald"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-sm font-semibold hover:border-primary hover:text-primary"
               >
                 <RotateCcw className="h-4 w-4" /> {tr("retry_quiz")}
               </button>

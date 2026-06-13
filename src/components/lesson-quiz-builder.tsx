@@ -73,7 +73,7 @@ export function LessonQuizBuilder({
     <div className="rounded-xl border border-border bg-background p-4 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h4 className="font-display text-lg text-primary">
+          <h4 className="font-display text-lg text-foreground">
             {L("Quiz Builder", "منشئ الاختبار")[lang]}
           </h4>
           <p className="text-xs text-muted-foreground mt-1">
@@ -87,7 +87,7 @@ export function LessonQuizBuilder({
           <button
             type="button"
             onClick={() => addQuestion("multiple_choice")}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-emerald hover:text-emerald"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
           >
             <Plus className="h-3.5 w-3.5" />
             {L("Multiple Choice", "اختيار من متعدد")[lang]}
@@ -95,7 +95,7 @@ export function LessonQuizBuilder({
           <button
             type="button"
             onClick={() => addQuestion("true_false")}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-emerald hover:text-emerald"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
           >
             <Plus className="h-3.5 w-3.5" />
             {L("True / False", "صح / خطأ")[lang]}
@@ -103,7 +103,7 @@ export function LessonQuizBuilder({
           <button
             type="button"
             onClick={() => addQuestion(ESSAY_TYPE)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-emerald hover:text-emerald"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
           >
             <Plus className="h-3.5 w-3.5" />
             {ESSAY_LABEL}
@@ -124,7 +124,7 @@ export function LessonQuizBuilder({
             return (
               <div key={i} className="rounded-lg border border-border p-4 bg-card space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-xs uppercase tracking-wider text-emerald font-semibold">
+                  <div className="text-xs uppercase tracking-wider text-primary font-semibold">
                     {L("Question", "سؤال")[lang]} {i + 1}
                   </div>
                   <button
@@ -255,7 +255,7 @@ export function LessonQuizBuilder({
                           name={`quiz-ans-${i}`}
                           checked={q.answer === oi}
                           onChange={() => updateQuestion(i, { answer: oi })}
-                          className="accent-emerald shrink-0"
+                          className="accent-primary shrink-0"
                         />
                         {qType === "true_false" ? (
                           <span className="text-sm">{lang === "ar" ? opt.ar : opt.en}</span>
@@ -313,7 +313,7 @@ export function LessonQuizBuilder({
                             options: [...q.options, { en: "", ar: "" }],
                           })
                         }
-                        className="text-xs text-primary hover:text-emerald font-semibold"
+                        className="text-xs text-primary hover:text-primary font-semibold"
                       >
                         + {L("Add option", "إضافة خيار")[lang]}
                       </button>

@@ -2,13 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { BookOpen, Mail, MapPin, Phone } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAccountRole } from "@/hooks/use-account-role";
-import { cn } from "@/lib/utils";
 
-type SiteFooterProps = {
-  igniteBrand?: boolean;
-};
-
-export function SiteFooter({ igniteBrand = false }: SiteFooterProps) {
+export function SiteFooter() {
   const { tr } = useI18n();
   const { isParent } = useAccountRole();
 
@@ -38,23 +33,11 @@ export function SiteFooter({ igniteBrand = false }: SiteFooterProps) {
       ];
 
   return (
-    <footer
-      className={cn(
-        "mt-24 border-t",
-        igniteBrand
-          ? "border-ignite-dark/10 bg-ignite-dark text-white"
-          : "border-border bg-primary text-primary-foreground",
-      )}
-    >
+    <footer className="mt-24 border-t border-brand-dark/20 bg-brand-dark text-brand-dark-foreground">
       <div className="container-page py-16 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-1">
           <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "flex h-11 w-11 items-center justify-center rounded-xl",
-                igniteBrand ? "bg-ignite-gold text-ignite-dark" : "bg-gold text-gold-foreground",
-              )}
-            >
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
@@ -67,31 +50,31 @@ export function SiteFooter({ igniteBrand = false }: SiteFooterProps) {
 
         {!isParent && (
           <div>
-            <h4 className={cn("text-sm font-semibold uppercase tracking-wider mb-4", igniteBrand ? "text-ignite-gold" : "text-gold")}>{tr("ft_learn")}</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">{tr("ft_learn")}</h4>
             <ul className="space-y-2 text-sm opacity-85">
               {learn.map((l, i) => (
-                <li key={i}><Link to={l.to} className={cn("transition-colors", igniteBrand ? "hover:text-ignite-gold" : "hover:text-gold")}>{l.label}</Link></li>
+                <li key={i}><Link to={l.to} className="transition-colors hover:text-primary">{l.label}</Link></li>
               ))}
             </ul>
           </div>
         )}
 
         <div className={isParent ? "md:col-start-2" : ""}>
-          <h4 className={cn("text-sm font-semibold uppercase tracking-wider mb-4", igniteBrand ? "text-ignite-gold" : "text-gold")}>{tr("ft_explore")}</h4>
+          <h4 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">{tr("ft_explore")}</h4>
           <ul className="space-y-2 text-sm opacity-85">
             {explore.map((l, i) => (
-              <li key={i}><Link to={l.to} className={cn("transition-colors", igniteBrand ? "hover:text-ignite-gold" : "hover:text-gold")}>{l.label}</Link></li>
+              <li key={i}><Link to={l.to} className="transition-colors hover:text-primary">{l.label}</Link></li>
             ))}
           </ul>
         </div>
 
         <div>
-          <h4 className={cn("text-sm font-semibold uppercase tracking-wider mb-4", igniteBrand ? "text-ignite-gold" : "text-gold")}>{tr("ft_contact")}</h4>
+          <h4 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">{tr("ft_contact")}</h4>
           <ul className="space-y-3 text-sm opacity-85">
             <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hello@igniteislamic.academy</li>
             <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +1 (555) 010-2030</li>
             <li className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {tr("ft_online")}</li>
-            <li><Link to="/contact" className={cn("underline", igniteBrand ? "hover:text-ignite-gold" : "hover:text-gold")}>{tr("nav_contact")}</Link></li>
+            <li><Link to="/contact" className="underline hover:text-primary">{tr("nav_contact")}</Link></li>
           </ul>
         </div>
       </div>

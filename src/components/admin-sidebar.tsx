@@ -30,7 +30,7 @@ const manageTabItems: Array<{ key: AdminTab; label: ReturnType<typeof L>; icon: 
 
 function sideClass(active: boolean) {
   return `w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-    active ? "bg-emerald text-emerald-foreground" : "text-foreground/80 hover:bg-muted"
+    active ? "bg-primary text-primary-foreground" : "text-foreground/80 hover:bg-muted"
   }`;
 }
 

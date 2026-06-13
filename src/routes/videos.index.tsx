@@ -103,10 +103,10 @@ function VideosIndex() {
             <section key={c.slug} className="rounded-2xl border border-border bg-card overflow-hidden shadow-[var(--shadow-soft)]">
               <header className="flex items-center justify-between gap-4 px-6 py-4 border-b border-border bg-gradient-to-r from-primary/5 to-transparent">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <Link to="/categories/$category" params={{ category: c.slug }} className="font-display text-xl text-primary hover:text-emerald">
+                  <Link to="/categories/$category" params={{ category: c.slug }} className="font-display text-xl text-foreground hover:text-primary">
                     {c.name[lang]}
                   </Link>
                 </div>
@@ -129,8 +129,8 @@ function VideosIndex() {
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 p-6">
                   {list.map((v) => (
                     <Link key={v.slug} to="/videos/$slug" params={{ slug: v.slug }}
-                      className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-[var(--shadow-elegant)] hover:border-emerald transition-all">
-                      <div className="aspect-video bg-gradient-to-br from-primary via-emerald to-primary/60 grid place-content-center text-primary-foreground relative">
+                      className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-[var(--shadow-elegant)] hover:border-primary transition-all">
+                      <div className="aspect-video bg-gradient-to-br from-primary via-primary to-brand-dark/60 grid place-content-center text-primary-foreground relative">
                         {v._custom?.thumbnailUrl ? (
                           <img src={v._custom.thumbnailUrl} alt={v.title[lang]} className="absolute inset-0 h-full w-full object-cover" />
                         ) : null}
@@ -140,8 +140,8 @@ function VideosIndex() {
                         {v.duration && <span className="absolute bottom-2 end-2 rounded bg-black/50 px-2 py-0.5 text-xs">{v.duration}</span>}
                       </div>
                       <div className="p-5">
-                        <div className="text-xs uppercase tracking-wider text-emerald font-semibold">{v.grade[lang]}</div>
-                        <h3 className="mt-1 font-display text-lg text-primary leading-snug">{v.title[lang]}</h3>
+                        <div className="text-xs uppercase tracking-wider text-primary font-semibold">{v.grade[lang]}</div>
+                        <h3 className="mt-1 font-display text-lg text-foreground leading-snug">{v.title[lang]}</h3>
                         <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{v.description[lang]}</p>
                         {v.duration && (
                           <div className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">

@@ -136,7 +136,7 @@ function StudentDashboardPage({
         <div className="flex items-center gap-2 flex-wrap">
           <Link
             to="/student/profile"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
           >
             <User className="h-3.5 w-3.5" />
             {lang === "ar" ? "الملف الشخصي" : "Profile"}
@@ -144,7 +144,7 @@ function StudentDashboardPage({
           <button
             type="button"
             onClick={() => { void signOut(); }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
           >
             <LogOut className="h-3.5 w-3.5" /> {lang === "ar" ? "تسجيل الخروج" : "Sign out"}
           </button>
@@ -160,7 +160,7 @@ function StudentDashboardPage({
           </p>
           <Link
             to="/student/profile"
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-emerald transition-colors"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
           >
             <User className="h-3.5 w-3.5" />
             {lang === "ar" ? "الملف الشخصي" : "Profile"}

@@ -181,7 +181,7 @@ export function AdminDashboard() {
 
 function DebugPanel() {
   const { debug, refresh, lessons, videos, files, articles } = useCMS();
-  const dotClass = debug.lastStatus === "error" ? "bg-red-500" : debug.lastStatus === "success" ? "bg-emerald" : "bg-muted-foreground";
+  const dotClass = debug.lastStatus === "error" ? "bg-red-500" : debug.lastStatus === "success" ? "bg-primary" : "bg-muted-foreground";
   return (
     <div className="rounded-xl border border-border bg-card p-4 text-xs font-mono">
       <div className="flex items-center justify-between mb-2">
@@ -189,7 +189,7 @@ function DebugPanel() {
         <button onClick={() => void refresh()} className="px-2 py-1 rounded border border-border hover:bg-muted text-[11px]">Refetch</button>
       </div>
       <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1">
-        <div>Supabase connected: <span className={debug.connected ? "text-emerald" : "text-red-500"}>{debug.connected ? "yes" : "no"}</span></div>
+        <div>Supabase connected: <span className={debug.connected ? "text-primary" : "text-red-500"}>{debug.connected ? "yes" : "no"}</span></div>
         <div>Current table: lessons</div>
         <div className="flex items-center gap-2">Last status: <span className={`inline-block w-2 h-2 rounded-full ${dotClass}`} /> {debug.lastAction} {debug.lastTable} → {debug.lastStatus}</div>
         <div>Last inserted ID: <span className="break-all">{debug.lastId || "—"}</span></div>
@@ -219,7 +219,7 @@ function Overview() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((s) => (
           <div key={s.label} className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-            <div className="font-display text-3xl text-primary">{s.value}</div>
+            <div className="font-display text-3xl text-foreground">{s.value}</div>
             <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
           </div>
         ))}
@@ -510,7 +510,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
         <label className="inline-flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-emerald h-4 w-4" />
+          <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
           {isEditing
             ? L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[lang]
             : L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[lang]}
@@ -530,7 +530,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
             type="button"
             disabled={saving}
             onClick={() => { void submit(pub); }}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <Save className="h-4 w-4" />
             {saving
@@ -544,11 +544,11 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
 
       <div className="rounded-lg border border-border bg-background/60 p-3 text-xs font-mono space-y-1">
         <div className="font-semibold text-muted-foreground uppercase tracking-wider mb-1">Debug</div>
-        <div>Button clicked: <span className={dbg.clicked ? "text-emerald" : ""}>{dbg.clicked ? "yes" : "no"}</span></div>
-        <div>Form valid: <span className={dbg.valid ? "text-emerald" : "text-destructive"}>{dbg.clicked ? (dbg.valid ? "yes" : "no") : "—"}</span></div>
-        <div>Supabase {isEditing ? "update" : "insert"}: <span className={dbg.status === "success" ? "text-emerald" : dbg.status === "error" ? "text-destructive" : ""}>{dbg.status || "—"}</span></div>
+        <div>Button clicked: <span className={dbg.clicked ? "text-primary" : ""}>{dbg.clicked ? "yes" : "no"}</span></div>
+        <div>Form valid: <span className={dbg.valid ? "text-primary" : "text-destructive"}>{dbg.clicked ? (dbg.valid ? "yes" : "no") : "—"}</span></div>
+        <div>Supabase {isEditing ? "update" : "insert"}: <span className={dbg.status === "success" ? "text-primary" : dbg.status === "error" ? "text-destructive" : ""}>{dbg.status || "—"}</span></div>
         <div className="break-all">Last error: <span className="text-destructive">{dbg.error || "—"}</span></div>
-        <div className="break-all">Last {isEditing ? "updated" : "inserted"} ID: <span className="text-emerald">{dbg.id || "—"}</span></div>
+        <div className="break-all">Last {isEditing ? "updated" : "inserted"} ID: <span className="text-primary">{dbg.id || "—"}</span></div>
       </div>
     </FormCard>
   );
@@ -773,7 +773,7 @@ function FileForm() {
       </Row>
       <Field label={L("Upload File", "ارفع الملف")[lang]} required>
         <input type="file" onChange={onFile} className="input" />
-        {file && <div className="text-xs text-emerald mt-1">✓ {file.name} ({file.size})</div>}
+        {file && <div className="text-xs text-primary mt-1">✓ {file.name} ({file.size})</div>}
       </Field>
       <PublishActions pub={pub} setPub={setPub} onSave={submit} lang={lang} />
     </FormCard>
@@ -796,9 +796,9 @@ function ItemRow({
     <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
       <div className="flex-1 min-w-0">{children}</div>
       {viewHref && (
-        <Link to={viewHref} className="inline-flex items-center gap-1 text-xs text-primary hover:text-emerald"><ExternalLink className="h-3.5 w-3.5" /></Link>
+        <Link to={viewHref} className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary"><ExternalLink className="h-3.5 w-3.5" /></Link>
       )}
-      <button onClick={onPublish} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${published ? "border-emerald text-emerald" : "border-border text-muted-foreground"}`}>
+      <button onClick={onPublish} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${published ? "border-primary text-primary" : "border-border text-muted-foreground"}`}>
         {published ? <><Eye className="h-3.5 w-3.5" /> Published</> : <><EyeOff className="h-3.5 w-3.5" /> Draft</>}
       </button>
       {lessonDelete ? (
@@ -870,7 +870,7 @@ function ManageGrades() {
                 <td className="py-3 pe-4">{g.lessons.length}</td>
                 <td className="py-3 pe-4">{lessons.filter(l => l.grade === g.slug).length}</td>
                 <td className="py-3 pe-4 text-end">
-                  <Link to="/grades/$grade" params={{ grade: g.slug }} className="text-xs text-primary hover:text-emerald inline-flex items-center gap-1"><ExternalLink className="h-3.5 w-3.5" /> View</Link>
+                  <Link to="/grades/$grade" params={{ grade: g.slug }} className="text-xs text-primary hover:text-primary inline-flex items-center gap-1"><ExternalLink className="h-3.5 w-3.5" /> View</Link>
                 </td>
               </tr>
             ))}
@@ -960,16 +960,16 @@ function ManageAnnouncements() {
 function FormCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] space-y-5">
-      <h2 className="font-display text-2xl text-primary">{title}</h2>
+      <h2 className="font-display text-2xl text-foreground">{title}</h2>
       {children}
-      <style>{`.input{display:block;width:100%;border-radius:.5rem;border:1px solid var(--border);background:var(--background);padding:.55rem .75rem;font-size:.875rem;color:var(--foreground);}.input:focus{outline:none;border-color:var(--emerald)}`}</style>
+      <style>{`.input{display:block;width:100%;border-radius:.5rem;border:1px solid var(--border);background:var(--background);padding:.55rem .75rem;font-size:.875rem;color:var(--foreground);}.input:focus{outline:none;border-color:var(--primary)}`}</style>
     </div>
   );
 }
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-      <h2 className="font-display text-xl text-primary mb-4">{title}</h2>
+      <h2 className="font-display text-xl text-foreground mb-4">{title}</h2>
       <div className="space-y-2.5">{children}</div>
     </div>
   );
@@ -987,10 +987,10 @@ function PublishActions({ pub, setPub, onSave, lang }: { pub: boolean; setPub: (
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
       <label className="inline-flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-emerald h-4 w-4" />
+        <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
         {L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[lang]}
       </label>
-      <button onClick={onSave} className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)]">
+      <button onClick={onSave} className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)]">
         <Save className="h-4 w-4" /> {pub ? L("Publish", "نشر")[lang] : L("Save Draft", "حفظ كمسودة")[lang]}
       </button>
     </div>
@@ -1071,7 +1071,7 @@ function ManageUsers() {
             value={promoteEmail}
             onChange={(e) => setPromoteEmail(e.target.value)}
           />
-          <button onClick={() => void promoteByEmail()} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-emerald">
+          <button onClick={() => void promoteByEmail()} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">
             {L("Grant Admin", "منح المدير")[lang]}
           </button>
         </div>
@@ -1096,7 +1096,7 @@ function ManageUsers() {
                   {L("Revoke Admin", "إلغاء المدير")[lang]}
                 </button>
               ) : (
-                <button onClick={() => void grantAdmin(p.user_id)} className="text-xs text-emerald hover:underline">
+                <button onClick={() => void grantAdmin(p.user_id)} className="text-xs text-primary hover:underline">
                   {L("Make Admin", "تعيين مدير")[lang]}
                 </button>
               )}

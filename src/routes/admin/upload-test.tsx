@@ -167,7 +167,7 @@ function AdminUploadTestPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <h1 className="font-display text-2xl text-primary">Storage Upload Test</h1>
+      <h1 className="font-display text-2xl text-foreground">Storage Upload Test</h1>
       <p className="text-sm text-muted-foreground">
         Temporary page to test Supabase Storage uploads to the{" "}
         <code className="font-mono">{BUCKET}</code> bucket.
@@ -176,21 +176,21 @@ function AdminUploadTestPage() {
       <div className="rounded-xl border border-border bg-card p-4 space-y-2 text-sm font-mono">
         <div>
           <span className="text-muted-foreground">Current logged-in user email: </span>
-          <span className="text-emerald break-all">{email}</span>
+          <span className="text-primary break-all">{email}</span>
         </div>
         <div>
           <span className="text-muted-foreground">Is authenticated: </span>
-          <span className={isAuthenticated ? "text-emerald" : "text-destructive"}>
+          <span className={isAuthenticated ? "text-primary" : "text-destructive"}>
             {String(isAuthenticated)}
           </span>
         </div>
         <div>
           <span className="text-muted-foreground">Supabase URL exists: </span>
-          <span className={supabaseUrl ? "text-emerald" : "text-destructive"}>{String(supabaseUrl)}</span>
+          <span className={supabaseUrl ? "text-primary" : "text-destructive"}>{String(supabaseUrl)}</span>
         </div>
         <div>
           <span className="text-muted-foreground">Supabase anon key exists: </span>
-          <span className={supabaseAnonKey ? "text-emerald" : "text-destructive"}>
+          <span className={supabaseAnonKey ? "text-primary" : "text-destructive"}>
             {String(supabaseAnonKey)}
           </span>
         </div>
@@ -218,7 +218,7 @@ function AdminUploadTestPage() {
 
       {debug && (
         <div className="rounded-xl border border-border bg-card p-4 space-y-4 text-sm">
-          <h2 className="font-display text-lg text-primary">Upload debug result</h2>
+          <h2 className="font-display text-lg text-foreground">Upload debug result</h2>
 
           <div className="grid gap-2 font-mono text-xs sm:grid-cols-2">
             <div>
@@ -235,7 +235,7 @@ function AdminUploadTestPage() {
             </div>
             <div>
               <span className="text-muted-foreground">Is authenticated (at upload): </span>
-              <span className={debug.isAuthenticated ? "text-emerald" : "text-destructive"}>
+              <span className={debug.isAuthenticated ? "text-primary" : "text-destructive"}>
                 {String(debug.isAuthenticated)}
               </span>
             </div>
@@ -289,13 +289,13 @@ function AdminUploadTestPage() {
           )}
 
           {debug.publicUrl && !uploadErrorMsg && (
-            <div className="rounded-lg border-2 border-emerald bg-emerald/10 p-3">
-              <div className="font-semibold text-emerald">Upload success — public URL</div>
+            <div className="rounded-lg border-2 border-primary bg-primary/10 p-3">
+              <div className="font-semibold text-primary">Upload success — public URL</div>
               <a
                 href={debug.publicUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1 block font-mono text-sm text-emerald break-all underline"
+                className="mt-1 block font-mono text-sm text-primary break-all underline"
               >
                 {debug.publicUrl}
               </a>

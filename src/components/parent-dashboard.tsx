@@ -31,7 +31,7 @@ function formatDate(iso: string, lang: "en" | "ar"): string {
 }
 
 function learningLevelClass(label: string): string {
-  if (label === "Excellent" || label === "ممتاز") return "bg-emerald/15 text-emerald border-emerald/30";
+  if (label === "Excellent" || label === "ممتاز") return "bg-primary/15 text-primary border-primary/30";
   if (label === "Very Good" || label === "جيد جدًا") return "bg-primary/10 text-primary border-primary/25";
   if (label === "Good" || label === "جيد") return "bg-sky-500/10 text-sky-700 border-sky-500/25";
   if (label === "Pass" || label === "مقبول") return "bg-amber-500/10 text-amber-800 border-amber-500/25";
@@ -115,15 +115,15 @@ export function ParentDashboardView({
               <UserRound className="h-7 w-7" />
             </div>
             <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-emerald mb-1">
+              <div className="text-xs uppercase tracking-[0.2em] text-primary mb-1">
                 {L("Student Name", "اسم الطالب")[lang]}
               </div>
-              <h2 className="font-display text-2xl md:text-3xl text-primary leading-tight">
+              <h2 className="font-display text-2xl md:text-3xl text-foreground leading-tight">
                 {studentName[lang] || studentName.en}
               </h2>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5">
-                  <GraduationCap className="h-4 w-4 text-emerald" />
+                  <GraduationCap className="h-4 w-4 text-primary" />
                   <span className="font-semibold text-primary">{gradeName}</span>
                 </span>
                 <span
@@ -145,10 +145,10 @@ export function ParentDashboardView({
               key={card.key}
               className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary mb-3">
                 <Icon className="h-5 w-5" />
               </div>
-              <div className="font-display text-2xl md:text-3xl text-primary leading-tight">
+              <div className="font-display text-2xl md:text-3xl text-foreground leading-tight">
                 {card.key === "level" ? card.sub : card.value}
               </div>
               <div className="text-sm text-muted-foreground mt-1">{card.label}</div>
@@ -164,7 +164,7 @@ export function ParentDashboardView({
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/15 text-gold">
               <Award className="h-5 w-5" />
             </div>
-            <h2 className="font-display text-xl text-primary">
+            <h2 className="font-display text-xl text-foreground">
               {L("Latest Certificates", "أحدث الشهادات")[lang]}
             </h2>
           </div>
@@ -183,15 +183,15 @@ export function ParentDashboardView({
                   className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-display text-lg text-primary truncate">
+                    <div className="font-display text-lg text-foreground truncate">
                       {certificate.lessonTitle[lang] || certificate.lessonTitle.en}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {formatDate(certificate.issuedAt, lang)}
-                      <span className="ms-2 font-mono text-emerald">{certificate.certificateId}</span>
+                      <span className="ms-2 font-mono text-primary">{certificate.certificateId}</span>
                     </div>
                   </div>
-                  <div className="font-display text-2xl text-primary shrink-0">
+                  <div className="font-display text-2xl text-foreground shrink-0">
                     {certificate.percentage}%
                   </div>
                 </li>
@@ -205,7 +205,7 @@ export function ParentDashboardView({
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Sparkles className="h-5 w-5" />
             </div>
-            <h2 className="font-display text-xl text-primary">
+            <h2 className="font-display text-xl text-foreground">
               {L("Latest Badges", "أحدث الشارات")[lang]}
             </h2>
           </div>
@@ -234,14 +234,14 @@ export function ParentDashboardView({
               ).map((badge) => (
                 <article
                   key={badge.id}
-                  className="rounded-xl border border-emerald/25 bg-gradient-to-br from-emerald/5 to-background p-4"
+                  className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/5 to-background p-4"
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/80 text-2xl shadow-sm">
                       {badge.icon}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-base text-primary leading-snug">
+                      <h3 className="font-display text-base text-foreground leading-snug">
                         {badge.title[lang]}
                       </h3>
                       {badge.at ? (
@@ -260,11 +260,11 @@ export function ParentDashboardView({
 
       <section className="rounded-2xl border border-border bg-card p-6 md:p-7 shadow-[var(--shadow-soft)]">
         <div className="flex items-center gap-3 mb-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald/10 text-emerald">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Clock3 className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-display text-xl text-primary">
+            <h2 className="font-display text-xl text-foreground">
               {L("Recent Activity", "النشاط الأخير")[lang]}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
@@ -295,7 +295,7 @@ export function ParentDashboardView({
                 <div
                   className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${
                     item.kind === "badge_unlocked"
-                      ? "border-emerald/30 bg-emerald/10 text-lg"
+                      ? "border-primary/30 bg-primary/10 text-lg"
                       : item.kind === "certificate_earned"
                         ? "border-gold/30 bg-gold/10 text-gold"
                         : "border-primary/20 bg-primary/10 text-primary"
@@ -310,14 +310,14 @@ export function ParentDashboardView({
                   )}
                 </div>
                 <div className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-3">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-emerald">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-primary">
                     {item.kind === "badge_unlocked"
                       ? L("Badge unlocked", "شارة مفتوحة")[lang]
                       : item.kind === "certificate_earned"
                         ? L("Certificate earned", "شهادة مكتسبة")[lang]
                         : L("Quiz completed", "اختبار مكتمل")[lang]}
                   </div>
-                  <div className="mt-1 font-display text-lg text-primary leading-snug">
+                  <div className="mt-1 font-display text-lg text-foreground leading-snug">
                     {item.kind === "badge_unlocked"
                       ? item.badgeTitle[lang]
                       : item.lessonTitle[lang] || item.lessonTitle.en}
@@ -325,7 +325,7 @@ export function ParentDashboardView({
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span>{formatDate(item.at, lang)}</span>
                     {item.kind !== "badge_unlocked" && (
-                      <span className="rounded-full bg-emerald/10 px-2 py-0.5 font-semibold text-emerald">
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary">
                         {item.scorePct}%
                       </span>
                     )}

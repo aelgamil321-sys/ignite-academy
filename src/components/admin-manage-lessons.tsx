@@ -84,7 +84,7 @@ export function DeleteLessonButton({
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-      <h2 className="font-display text-xl text-primary mb-4">{title}</h2>
+      <h2 className="font-display text-xl text-foreground mb-4">{title}</h2>
       <div className="space-y-2.5">{children}</div>
     </div>
   );
@@ -146,7 +146,7 @@ export function AdminManageLessons() {
                     <td className="py-3 px-2 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${
-                          l.published ? "border-emerald text-emerald" : "border-border text-muted-foreground"
+                          l.published ? "border-primary text-primary" : "border-border text-muted-foreground"
                         }`}
                       >
                         {l.published ? L("Published", "منشور")[lang] : L("Draft", "مسودة")[lang]}
@@ -157,14 +157,14 @@ export function AdminManageLessons() {
                         <Link
                           to="/grades/$grade/$lesson"
                           params={{ grade: l.grade, lesson: l.id }}
-                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-semibold hover:border-emerald hover:text-emerald"
+                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-semibold hover:border-primary hover:text-primary"
                         >
                           <Eye className="h-3.5 w-3.5" /> {L("View", "عرض")[lang]}
                         </Link>
                         <Link
                           to="/admin/lessons/edit/$lessonId"
                           params={{ lessonId: l.id }}
-                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-semibold hover:border-emerald hover:text-emerald"
+                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-semibold hover:border-primary hover:text-primary"
                         >
                           <Pencil className="h-3.5 w-3.5" /> {L("Edit", "تعديل")[lang]}
                         </Link>
@@ -201,7 +201,7 @@ export function AdminManageLessons() {
                 <button
                   type="button"
                   onClick={() => void handleRestore(l)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-emerald px-3 py-1.5 text-xs font-semibold text-emerald hover:bg-emerald/10"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary-hover/10"
                 >
                   <RotateCcw className="h-3.5 w-3.5" /> {L("Restore", "استعادة")[lang]}
                 </button>

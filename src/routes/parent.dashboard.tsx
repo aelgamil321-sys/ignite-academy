@@ -140,14 +140,14 @@ function ParentDashboardPage({ userId }: { userId: string }) {
         <div className="flex items-center gap-2 flex-wrap">
           <Link
             to="/parent/settings"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
           >
             <User className="h-3.5 w-3.5" />
             {tr("parent_profile_title")}
           </Link>
           <Link
             to="/parent"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
           >
             <LayoutDashboard className="h-3.5 w-3.5" />
             {tr("nav_parent")}
@@ -157,7 +157,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
             onClick={() => {
               void signOut();
             }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
           >
             <LogOut className="h-3.5 w-3.5" />
             {lang === "ar" ? "تسجيل الخروج" : "Sign out"}

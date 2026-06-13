@@ -44,8 +44,8 @@ export function LessonQuizResults({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-emerald/30 bg-emerald/5 p-5 space-y-3">
-        <h3 className="font-display text-lg text-primary">
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 space-y-3">
+        <h3 className="font-display text-lg text-foreground">
           {L("Quiz Results", "نتيجة الاختبار")[lang]}
         </h3>
 
@@ -56,18 +56,18 @@ export function LessonQuizResults({
           </div>
         ) : (
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 text-sm font-semibold text-emerald">
+            <div className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
               <CheckCircle2 className="h-4 w-4" />
               {L("Your answer has been reviewed", "تمت مراجعة إجابتك")[lang]}
             </div>
-            <div className="font-display text-xl text-primary">
+            <div className="font-display text-xl text-foreground">
               {L("Final score", "الدرجة النهائية")[lang]}:{" "}
-              <span className="text-emerald">
+              <span className="text-primary">
                 {finalScore}/{submission.total_points}
               </span>
               <span className="text-muted-foreground text-base ms-2">({percentage}%)</span>
             </div>
-            <div className="text-sm font-semibold text-emerald">
+            <div className="text-sm font-semibold text-primary">
               {L("Grade", "التقدير")[lang]}: {gradeLabel}
             </div>
           </div>
@@ -85,7 +85,7 @@ export function LessonQuizResults({
           <div>
             <span className="text-muted-foreground">{L("Status", "الحالة")[lang]}: </span>
             <span
-              className={`font-semibold ${pending ? "text-amber-700" : "text-emerald"}`}
+              className={`font-semibold ${pending ? "text-amber-700" : "text-primary"}`}
             >
               {pending
                 ? L("Pending review", "قيد المراجعة")[lang]
@@ -114,13 +114,13 @@ export function LessonQuizResults({
           return (
             <div key={i} className="rounded-xl border border-border bg-background p-5 space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs uppercase tracking-[0.18em] text-emerald">
+                <span className="text-xs uppercase tracking-[0.18em] text-primary">
                   {tr("question")} {i + 1}
                 </span>
                 <span className="text-[10px] rounded-full border border-border px-2 py-0.5 text-muted-foreground">
                   {typeLabel(q.type)}
                 </span>
-                <span className="text-[10px] rounded-full border border-emerald/30 bg-emerald/5 px-2 py-0.5 text-emerald">
+                <span className="text-[10px] rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-primary">
                   {q.points} {lang === "ar" ? "نقطة" : q.points === 1 ? "pt" : "pts"}
                 </span>
               </div>
@@ -140,7 +140,7 @@ export function LessonQuizResults({
 
                   {saved.status === "reviewed" ? (
                     <>
-                      <div className="inline-flex items-center gap-2 text-emerald font-medium">
+                      <div className="inline-flex items-center gap-2 text-primary font-medium">
                         <CheckCircle2 className="h-4 w-4" />
                         {L("Reviewed", "تمت المراجعة")[lang]}
                       </div>
@@ -158,7 +158,7 @@ export function LessonQuizResults({
                             <div className="text-xs text-muted-foreground mb-1">
                               {L("Teacher feedback", "ملاحظات المعلّم")[lang]}
                             </div>
-                            <div className="rounded-lg border border-dashed border-emerald/40 bg-emerald/5 px-3 py-2 whitespace-pre-wrap">
+                            <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-2 whitespace-pre-wrap">
                               {saved.teacherFeedback[lang] ||
                                 saved.teacherFeedback.en ||
                                 saved.teacherFeedback.ar}
@@ -192,7 +192,7 @@ export function LessonQuizResults({
                     </span>
                   </div>
                   <div
-                    className={`inline-flex items-center gap-2 font-medium ${saved.earned > 0 ? "text-emerald" : "text-destructive"}`}
+                    className={`inline-flex items-center gap-2 font-medium ${saved.earned > 0 ? "text-primary" : "text-destructive"}`}
                   >
                     {saved.earned > 0 ? (
                       <CheckCircle2 className="h-4 w-4" />

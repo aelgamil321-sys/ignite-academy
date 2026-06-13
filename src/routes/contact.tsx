@@ -62,22 +62,22 @@ function ContactPage() {
             placeholder={tr("your_message")}
             className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm"
           />
-          <button className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors">
+          <button className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors">
             {tr("send")}
           </button>
         </form>
 
         <div className="space-y-4">
           <div className="rounded-2xl border border-border bg-card p-6 flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald/10 text-emerald"><Mail className="h-5 w-5" /></div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary"><Mail className="h-5 w-5" /></div>
             <div><div className="text-sm text-muted-foreground">Email</div><div className="font-medium">hello@igniteislamic.academy</div></div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-6 flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald/10 text-emerald"><Phone className="h-5 w-5" /></div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary"><Phone className="h-5 w-5" /></div>
             <div><div className="text-sm text-muted-foreground">Phone</div><div className="font-medium">+1 (555) 010-2030</div></div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-6 flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald/10 text-emerald"><MapPin className="h-5 w-5" /></div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary"><MapPin className="h-5 w-5" /></div>
             <div><div className="text-sm text-muted-foreground">Location</div><div className="font-medium">{tr("ft_online")}</div></div>
           </div>
         </div>

@@ -34,10 +34,10 @@ function AboutPage() {
       <div className="grid gap-6 md:grid-cols-3">
         {cards.map((c) => (
           <div key={c.t} className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald/10 text-emerald mb-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4">
               <c.icon className="h-6 w-6" />
             </div>
-            <h3 className="font-display text-xl text-primary">{c.t}</h3>
+            <h3 className="font-display text-xl text-foreground">{c.t}</h3>
             <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{c.d}</p>
           </div>
         ))}

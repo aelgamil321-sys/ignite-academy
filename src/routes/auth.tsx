@@ -465,7 +465,7 @@ function AuthPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-60"
+              className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-60"
             >
               {busy ? "…" : mode === "signup" ? (accountType === "parent" ? T.parentSignup : T.submitSignup) : T.submitLogin}
             </button>
@@ -483,7 +483,7 @@ function AuthPage() {
         </div>
 
         {/* Side panel */}
-        <div className="rounded-3xl bg-gradient-to-br from-primary to-emerald text-primary-foreground p-8 shadow-[var(--shadow-elegant)]">
+        <div className="rounded-3xl bg-gradient-to-br from-brand-dark to-primary text-primary-foreground p-8 shadow-[var(--shadow-elegant)]">
           <GraduationCap className="h-10 w-10 text-gold" />
           <h3 className="mt-4 font-display text-2xl">
             {lang === "ar" ? "ابدأ رحلتك التعليمية" : "Start your learning journey"}

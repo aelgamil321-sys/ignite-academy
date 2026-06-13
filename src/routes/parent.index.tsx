@@ -41,16 +41,16 @@ function ParentPage() {
   return (
     <PageShell eyebrow={tr("nav_parent")} title={tr("parent_title")} lead={tr("parent_lead")} crumbs={[{ label: tr("nav_parent") }]}>
       {showStudentNotice && <ParentAccountRequired />}
-      <h2 className="font-display text-2xl text-primary mb-6 flex items-center gap-2">
-        <Users className="h-6 w-6 text-emerald" /> {tr("parent_guides")}
+      <h2 className="font-display text-2xl text-foreground mb-6 flex items-center gap-2">
+        <Users className="h-6 w-6 text-primary" /> {tr("parent_guides")}
       </h2>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {parentGuides.map((g) => (
           <Link key={g.slug} to="/parent/$slug" params={{ slug: g.slug }}
-            className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:border-emerald hover:shadow-[var(--shadow-elegant)] transition-all flex flex-col">
-            <h3 className="font-display text-xl text-primary leading-snug">{g.title[lang]}</h3>
+            className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:border-primary hover:shadow-[var(--shadow-elegant)] transition-all flex flex-col">
+            <h3 className="font-display text-xl text-foreground leading-snug">{g.title[lang]}</h3>
             <p className="mt-3 text-sm text-muted-foreground flex-1">{g.excerpt[lang]}</p>
-            <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary group-hover:text-emerald">
+            <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary group-hover:text-primary">
               {tr("read_more")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
             </div>
           </Link>

@@ -259,7 +259,7 @@ export function CertificateModal({
         >
           <DialogHeader className="shrink-0 pr-8">
             <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Award className="h-5 w-5 text-emerald shrink-0" />
+              <Award className="h-5 w-5 text-primary shrink-0" />
               {L("Certificate Preview", "معاينة الشهادة")[lang]}
             </DialogTitle>
             <DialogDescription>
@@ -288,7 +288,7 @@ export function CertificateModal({
               {loadError === CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE && (
                 <Link
                   to="/student/profile"
-                  className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors"
+                  className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
                 >
                   {L("Complete profile", "إكمال الملف الشخصي")[lang]}
                 </Link>
@@ -325,7 +325,7 @@ export function CertificateModal({
                   type="button"
                   disabled={downloading}
                   onClick={() => void handleDownloadPdf()}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-50 w-full"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-50 w-full"
                 >
                   {downloading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -338,7 +338,7 @@ export function CertificateModal({
                   type="button"
                   disabled={downloading}
                   onClick={() => onOpenChange(false)}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold hover:border-emerald hover:text-emerald transition-colors w-full disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors w-full disabled:opacity-50"
                 >
                   <X className="h-4 w-4" />
                   Close / إغلاق
@@ -413,7 +413,7 @@ export function CertificateButton({
         type="button"
         disabled={checking}
         onClick={() => void handleOpen()}
-        className="inline-flex items-center gap-2 rounded-full border-2 border-emerald bg-emerald/10 px-6 py-2.5 text-sm font-semibold text-emerald hover:bg-emerald hover:text-white transition-colors disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-full border-2 border-primary bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary hover:bg-primary-hover hover:text-white transition-colors disabled:opacity-60"
       >
         {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Award className="h-4 w-4" />}
         {checking ? "Checking profile… / جارٍ التحقق…" : "Download Certificate / تحميل الشهادة"}

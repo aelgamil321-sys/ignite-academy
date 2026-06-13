@@ -69,13 +69,13 @@ function QuizzesIndex() {
               key={qz.slug}
               to="/grades/$grade/$lesson"
               params={{ grade: qz._gradeSlug ?? "8", lesson: qz.slug }}
-              className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:border-emerald hover:shadow-[var(--shadow-elegant)] transition-all flex flex-col"
+              className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:border-primary hover:shadow-[var(--shadow-elegant)] transition-all flex flex-col"
             >
-              <div className="text-xs uppercase tracking-wider text-emerald font-semibold">{qz.grade[lang]}</div>
-              <h3 className="mt-2 font-display text-xl text-primary leading-snug">{qz.title[lang]}</h3>
+              <div className="text-xs uppercase tracking-wider text-primary font-semibold">{qz.grade[lang]}</div>
+              <h3 className="mt-2 font-display text-xl text-foreground leading-snug">{qz.title[lang]}</h3>
               <p className="mt-2 text-sm text-muted-foreground flex-1">{qz.description[lang]}</p>
               <div className="mt-4 text-xs text-muted-foreground">{qz.questions.length} {tr("questions")}</div>
-              <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary group-hover:text-emerald">
+              <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary group-hover:text-primary">
                 {tr("start_quiz")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               </div>
             </Link>

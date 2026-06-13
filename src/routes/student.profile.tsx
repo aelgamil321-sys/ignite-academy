@@ -173,7 +173,7 @@ function StudentProfilePage() {
             className="rounded-3xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] space-y-5"
           >
             <div className="flex items-center gap-3 pb-2 border-b border-border">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald/10 text-emerald">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <User className="h-5 w-5" />
               </div>
               <p className="text-sm text-muted-foreground">{T.certNote}</p>
@@ -238,7 +238,7 @@ function StudentProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-60"
             >
               {saving ? (
                 <>

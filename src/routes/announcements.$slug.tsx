@@ -33,7 +33,7 @@ function AnnouncementDetail() {
     <PageShell eyebrow={ann.tag[lang]} title={ann.title[lang]}
       crumbs={[{ label: tr("nav_announcements"), to: "/announcements" }, { label: ann.title[lang] }]}>
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-        <Calendar className="h-4 w-4 text-emerald" /> {ann.date}
+        <Calendar className="h-4 w-4 text-primary" /> {ann.date}
       </div>
       {image && <img src={image} alt={ann.title[lang]} className="w-full max-w-3xl rounded-2xl mb-6 border border-border" />}
       <article className="max-w-3xl">

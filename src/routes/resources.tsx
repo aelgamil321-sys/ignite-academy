@@ -56,7 +56,7 @@ function ResourcesPage() {
         </select>
         {(["all", "pdf", "ppt", "worksheet"] as const).map((k) => (
           <button key={k} onClick={() => setType(k)}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${type === k ? "border-emerald bg-emerald text-emerald-foreground" : "border-border bg-card hover:border-emerald"}`}>
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${type === k ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-primary"}`}>
             {k === "all" ? tr("res_all") : k.toUpperCase()}
           </button>
         ))}
@@ -82,12 +82,12 @@ function ResourcesPage() {
                 </div>
                 {downloadable ? (
                   <a href={r._url} download={r._fileName ?? r.title[lang]}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors">
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
                     <Download className="h-3.5 w-3.5" /> {r.type.toUpperCase()}
                   </a>
                 ) : (
                   <button onClick={() => toast.info(`${tr("download_pdf").split(" ")[0]}: ${r.title[lang]}`)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors">
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
                     <Download className="h-3.5 w-3.5" /> {r.type.toUpperCase()}
                   </button>
                 )}

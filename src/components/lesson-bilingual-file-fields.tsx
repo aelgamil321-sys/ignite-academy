@@ -278,7 +278,7 @@ export function LessonBilingualFileFields({
 
   return (
     <div className="space-y-4 rounded-xl border border-border bg-background p-4">
-      <h4 className="font-display text-lg text-primary">
+      <h4 className="font-display text-lg text-foreground">
         {L("Bilingual Lesson Files", "ملفات الدرس ثنائية اللغة")[lang]}
       </h4>
       <p className="text-xs text-muted-foreground font-mono">
@@ -307,7 +307,7 @@ export function LessonBilingualFileFields({
                 type="file"
                 accept={slot.accept}
                 disabled={busy}
-                className="block w-full text-sm file:mr-3 file:rounded-md file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-xs file:font-semibold hover:file:border-emerald"
+                className="block w-full text-sm file:mr-3 file:rounded-md file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-xs file:font-semibold hover:file:border-primary"
                 onChange={(e) => {
                   void handleFileUpload(e, column);
                 }}
@@ -317,7 +317,7 @@ export function LessonBilingualFileFields({
                 <div className="text-xs font-medium text-primary">Uploading to Supabase…</div>
               )}
               {successMsg[slot.key] && !busy && (
-                <div className="text-xs font-medium text-emerald">{successMsg[slot.key]}</div>
+                <div className="text-xs font-medium text-primary">{successMsg[slot.key]}</div>
               )}
               {errors[slot.key] && !busy && (
                 <div className="text-xs font-medium text-destructive break-all">{errors[slot.key]}</div>
@@ -330,14 +330,14 @@ export function LessonBilingualFileFields({
 
               {localUrl && (
                 <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
-                  <span className="text-emerald truncate max-w-[180px]" title={fileName ?? undefined}>
+                  <span className="text-primary truncate max-w-[180px]" title={fileName ?? undefined}>
                     ✓ {fileName}
                   </span>
                   <a
                     href={localUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-primary hover:text-emerald"
+                    className="inline-flex items-center gap-1 text-primary hover:text-primary"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     {L("View", "عرض")[lang]}

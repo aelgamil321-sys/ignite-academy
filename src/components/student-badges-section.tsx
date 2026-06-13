@@ -19,7 +19,7 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
             </span>
           </div>
           <div>
-            <h2 className="font-display text-xl text-primary">
+            <h2 className="font-display text-xl text-foreground">
               {L("Achievements & Badges", "الإنجازات والشارات")[lang]}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
@@ -30,7 +30,7 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
             </p>
           </div>
         </div>
-        <div className="rounded-full border border-emerald/30 bg-emerald/10 px-4 py-2 text-sm font-semibold text-emerald">
+        <div className="rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
           {L("Unlocked", "مفتوحة")[lang]} {unlockedCount} / {totalCount}
         </div>
       </div>
@@ -41,7 +41,7 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
             key={badge.id}
             className={`relative rounded-2xl border p-5 transition-colors ${
               badge.unlocked
-                ? "border-emerald/25 bg-gradient-to-br from-emerald/5 to-background shadow-[var(--shadow-soft)]"
+                ? "border-primary/25 bg-gradient-to-br from-primary/5 to-background shadow-[var(--shadow-soft)]"
                 : "border-border bg-muted/40 opacity-75 grayscale"
             }`}
           >
@@ -69,7 +69,7 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
               {badge.description[lang]}
             </p>
             {badge.unlocked && (
-              <div className="mt-3 text-xs font-semibold uppercase tracking-wider text-emerald">
+              <div className="mt-3 text-xs font-semibold uppercase tracking-wider text-primary">
                 {L("Unlocked", "مفتوحة")[lang]}
               </div>
             )}
