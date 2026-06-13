@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 const STUDENT_ONLY_PATHS = new Set(["/grades", "/quizzes", "/student"]);
 
 type SiteHeaderProps = {
-  /** Homepage header: Ignite School logo top-right + Ignite palette. */
+  /** Homepage header: school logo + Ignite palette; academy name lives in hero only. */
   showSchoolLogo?: boolean;
 };
 
@@ -82,43 +82,39 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
       >
         <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
-      <div className="min-w-0 leading-tight">
-        <div
-          className={cn(
-            "font-display text-base font-semibold sm:text-lg",
-            igniteHome ? "text-ignite-dark line-clamp-2" : "truncate text-primary",
-          )}
-        >
-          {tr("brand_name")}
-        </div>
-        {!igniteHome && (
+      {!igniteHome && (
+        <div className="min-w-0 leading-tight">
+          <div className="truncate font-display text-base font-semibold text-primary sm:text-lg">
+            {tr("brand_name")}
+          </div>
           <div className="truncate text-[10px] uppercase tracking-[0.16em] text-muted-foreground sm:text-[11px] sm:tracking-[0.18em]">
             {tr("brand_org")}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </Link>
   );
 
-  const schoolLogo = (
-    <BrandLogo src={schoolLogoUrl} alt={schoolLogoAlt} size="header" />
+  const homeIconLink = (
+    <Link
+      to="/"
+      aria-label={tr("brand_name")}
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ignite-gold text-ignite-dark shadow-[var(--shadow-soft)] transition-opacity hover:opacity-90 sm:h-11 sm:w-11"
+    >
+      <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
+    </Link>
   );
 
-  const headerActions = (
-    <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-      <button
-        onClick={toggle}
-        aria-label="Toggle language"
-        className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-2 text-sm font-semibold transition-colors sm:px-3",
-          igniteHome
-            ? "border-ignite-dark/15 text-ignite-dark hover:border-ignite-gold hover:text-ignite-gold"
-            : "border-border text-foreground hover:border-emerald hover:text-emerald",
-        )}
-      >
-        <Languages className="h-4 w-4" />
-        <span className="hidden sm:inline">{lang === "en" ? "العربية" : "English"}</span>
-      </button>
+  const schoolLogoDesktop = (
+    <BrandLogo src={schoolLogoUrl} alt={schoolLogoAlt} size="header" className="hidden lg:flex" />
+  );
+
+  const schoolLogoTablet = (
+    <BrandLogo src={schoolLogoUrl} alt={schoolLogoAlt} size="headerCompact" className="hidden md:flex lg:hidden" />
+  );
+
+  const authButtons = (compact?: boolean) => (
+    <>
       {signedIn && isParent && (
         <Link
           to="/parent/dashboard"
@@ -130,7 +126,7 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
           )}
         >
           <LayoutDashboard className="h-4 w-4" />
-          {tr("parent_dashboard_title")}
+          {!compact && tr("parent_dashboard_title")}
         </Link>
       )}
       {signedIn ? (
@@ -144,7 +140,7 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
           )}
         >
           <User className="h-4 w-4" />
-          {profileLabel}
+          {!compact && profileLabel}
         </Link>
       ) : (
         <a
@@ -163,18 +159,37 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
           {tr("nav_login")}
         </a>
       )}
-      <button
-        aria-label="Toggle menu"
-        onClick={() => setOpen((o) => !o)}
-        className="xl:hidden inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-muted"
-      >
-        {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </button>
-    </div>
+    </>
+  );
+
+  const langButton = (
+    <button
+      onClick={toggle}
+      aria-label="Toggle language"
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-2 text-sm font-semibold transition-colors sm:px-3",
+        igniteHome
+          ? "border-ignite-dark/15 text-ignite-dark hover:border-ignite-gold hover:text-ignite-gold"
+          : "border-border text-foreground hover:border-emerald hover:text-emerald",
+      )}
+    >
+      <Languages className="h-4 w-4" />
+      <span className="hidden sm:inline">{lang === "en" ? "العربية" : "English"}</span>
+    </button>
+  );
+
+  const menuButton = (
+    <button
+      aria-label="Toggle menu"
+      onClick={() => setOpen((o) => !o)}
+      className="xl:hidden inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-muted"
+    >
+      {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+    </button>
   );
 
   const desktopNavEl = (
-    <nav className="hidden xl:flex items-center justify-center gap-1">
+    <nav className={cn("items-center justify-center gap-0.5", igniteHome ? "hidden xl:flex" : "hidden xl:flex")}>
       {!roleLoading && desktopNav.map((item) => (
         <Link
           key={item.to + item.label}
@@ -182,10 +197,10 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
           activeOptions={{ exact: item.to === "/" }}
           activeProps={{ className: igniteHome ? "text-ignite-gold" : "text-primary" }}
           className={cn(
-            "px-3 py-2 text-sm font-medium transition-colors rounded-md",
+            "rounded-md font-medium transition-colors",
             igniteHome
-              ? "text-ignite-dark/80 hover:text-ignite-gold"
-              : "text-foreground/80 hover:text-primary",
+              ? "px-2.5 py-2 text-[13px] text-ignite-dark/80 hover:text-ignite-gold"
+              : "px-3 py-2 text-sm text-foreground/80 hover:text-primary",
           )}
         >
           {item.label}
@@ -205,30 +220,45 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
     >
       <div
         className={cn(
-          "container-page py-3 md:py-4",
-          showSchoolLogo ? "space-y-2.5 xl:space-y-0" : "flex h-18 items-center justify-between",
+          "container-page",
+          showSchoolLogo ? "py-3.5 md:py-4 lg:py-5" : "flex h-18 items-center justify-between py-4",
         )}
       >
         {showSchoolLogo ? (
           <>
-            <div className="flex items-center gap-3 xl:hidden">
-              <div className="min-w-0 flex-1">{brandLink}</div>
-              {schoolLogo}
+            {/* Mobile & tablet: home icon, optional compact logo, lang, menu */}
+            <div className="flex min-h-12 items-center gap-2 sm:gap-3 xl:hidden">
+              {homeIconLink}
+              <div className="min-w-0 flex-1" aria-hidden />
+              {schoolLogoTablet}
+              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                {langButton}
+                {authButtons(true)}
+                {menuButton}
+              </div>
             </div>
-            <div className="flex items-center justify-end xl:hidden">{headerActions}</div>
-            <div className="hidden xl:grid xl:grid-cols-[auto_1fr_auto_auto] xl:items-center xl:gap-4">
-              {brandLink}
-              {desktopNavEl}
-              {schoolLogo}
-              {headerActions}
+
+            {/* Desktop: actions left, nav center, school logo right */}
+            <div className="hidden xl:grid xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-center xl:gap-6">
+              <div className="flex items-center gap-2">
+                {homeIconLink}
+                {langButton}
+                {authButtons()}
+              </div>
+              <div className="flex min-w-0 justify-center px-2">{desktopNavEl}</div>
+              {schoolLogoDesktop}
             </div>
           </>
         ) : (
-          <>
+          <div className="flex items-center justify-between">
             {brandLink}
             {desktopNavEl}
-            {headerActions}
-          </>
+            <div className="flex shrink-0 items-center gap-2">
+              {langButton}
+              {authButtons()}
+              {menuButton}
+            </div>
+          </div>
         )}
       </div>
 

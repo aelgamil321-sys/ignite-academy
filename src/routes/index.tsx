@@ -20,8 +20,7 @@ import { useCMS, useCMSStats, useAllAnnouncements } from "@/lib/cms";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { SITE_NAME } from "@/lib/site-branding";
 import { certificateIslamicLogoUrl } from "@/lib/certificate-branding";
-import { BrandLogo } from "@/components/brand-logo";
-import { cn } from "@/lib/utils";
+import { DepartmentLogoCard } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -85,7 +84,7 @@ function Home() {
             style={{ backgroundImage: `url(${patternImg})`, backgroundSize: "320px" }}
             aria-hidden
           />
-          <div className="container-page relative grid items-center gap-10 py-16 sm:gap-12 sm:py-20 md:py-24 lg:grid-cols-2 lg:gap-16 lg:py-28 xl:py-32">
+          <div className="container-page relative grid items-start gap-10 py-16 sm:gap-12 sm:py-20 md:py-24 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-24 xl:gap-16 xl:py-28">
             <div className="relative z-10 flex flex-col justify-center">
               <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-ignite-gold/50 bg-ignite-gold/15 px-4 py-2 text-xs font-medium tracking-wide text-ignite-gold sm:text-sm">
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
@@ -146,32 +145,29 @@ function Home() {
                 ))}
               </div>
             </div>
-            <div className="relative mx-auto w-full max-w-xl pb-4 lg:max-w-none lg:mx-0 lg:pb-36">
-              <div className="absolute -inset-6 bg-ignite-gold/20 blur-3xl rounded-full pointer-events-none" aria-hidden />
-              <div className="relative rounded-3xl overflow-hidden shadow-[var(--shadow-elegant)] border border-ignite-gold/25">
-                <img src={heroImg} alt="" width={1600} height={1100} className="w-full h-auto" />
+            <div className="relative z-10 flex w-full flex-col items-center lg:items-stretch">
+              <div className="relative w-full">
+                <div className="absolute -inset-4 bg-ignite-gold/20 blur-3xl rounded-full pointer-events-none sm:-inset-6" aria-hidden />
+                <div className="relative overflow-hidden rounded-3xl border border-ignite-gold/25 shadow-[var(--shadow-elegant)]">
+                  <img src={heroImg} alt="" width={1600} height={1100} className="w-full h-auto" />
+                </div>
               </div>
-              <div
-                className={cn(
-                  "mt-5 flex flex-col gap-4 sm:gap-5",
-                  "lg:absolute lg:mt-0 lg:top-full lg:pt-5",
-                  dir === "rtl" ? "lg:items-end lg:-right-2" : "lg:items-start lg:-left-2",
-                )}
-              >
-                <div className="flex w-full max-w-sm items-center gap-3 rounded-2xl bg-white p-4 text-ignite-dark shadow-[var(--shadow-elegant)] sm:max-w-md lg:max-w-xs">
-                  <div className="h-12 w-12 shrink-0 rounded-xl bg-ignite-gold flex items-center justify-center text-ignite-dark">
+
+              <div className="mt-6 flex w-full max-w-[340px] flex-col items-center gap-4 sm:mt-8 sm:gap-5 lg:mx-auto">
+                <div className="flex w-full min-w-[260px] max-w-[340px] items-center gap-3 rounded-2xl bg-white p-4 text-ignite-dark shadow-[var(--shadow-elegant)] sm:p-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ignite-gold text-ignite-dark">
                     <Award className="h-6 w-6" />
                   </div>
-                  <div className="min-w-0">
-                    <div className="font-semibold text-sm">{tr("badge_certified")}</div>
-                    <div className="text-xs text-ignite-dark/65">{tr("badge_certified_sub")}</div>
+                  <div className="min-w-0 text-start">
+                    <div className="font-semibold text-sm leading-snug">{tr("badge_certified")}</div>
+                    <div className="mt-0.5 text-xs leading-relaxed text-ignite-dark/65">{tr("badge_certified_sub")}</div>
                   </div>
                 </div>
-                <BrandLogo
+
+                <DepartmentLogoCard
                   src={certificateIslamicLogoUrl()}
                   alt={lang === "ar" ? "قسم التربية الإسلامية" : "Department of Islamic Education"}
-                  size="hero"
-                  className={dir === "rtl" ? "self-end" : "self-start"}
+                  className="min-w-[260px]"
                 />
               </div>
             </div>
