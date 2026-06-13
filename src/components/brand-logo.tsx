@@ -4,7 +4,7 @@ const SIZE_CLASS = {
   /** Homepage header — wide enough for full school logo, never cropped */
   header: "h-11 w-28 sm:h-12 sm:w-32 md:h-14 md:w-40 lg:h-[3.75rem] lg:w-48 xl:h-16 xl:w-52",
   /** Compact header logo for tablet row */
-  headerCompact: "h-10 w-24 sm:h-11 sm:w-28",
+  headerCompact: "h-9 w-20 sm:h-10 sm:w-24 md:h-11 md:w-28",
 } as const;
 
 type BrandLogoProps = {

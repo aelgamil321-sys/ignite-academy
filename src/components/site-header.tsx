@@ -10,12 +10,7 @@ import { cn } from "@/lib/utils";
 
 const STUDENT_ONLY_PATHS = new Set(["/grades", "/quizzes", "/student"]);
 
-type SiteHeaderProps = {
-  /** Homepage header: school logo top-right. */
-  showSchoolLogo?: boolean;
-};
-
-export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
+export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const { tr, toggle, lang } = useI18n();
@@ -69,40 +64,34 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
   const schoolLogoUrl = certificateSchoolLogoUrl();
   const schoolLogoAlt = lang === "ar" ? "مدرسة اجنايت" : "Ignite School";
 
-  const brandLink = (
-    <Link to="/" className="group flex min-w-0 items-center gap-2 sm:gap-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[var(--shadow-soft)] sm:h-11 sm:w-11">
-        <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
+  const brandLink = (compact?: boolean) => (
+    <Link to="/" className="group flex min-w-0 items-center gap-2 sm:gap-2.5">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[var(--shadow-soft)] sm:h-10 sm:w-10">
+        <BookOpen className="h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" />
       </div>
-      {!showSchoolLogo && (
-        <div className="min-w-0 leading-tight">
-          <div className="truncate font-display text-base font-semibold text-foreground sm:text-lg">
-            {tr("brand_name")}
-          </div>
-          <div className="truncate text-[10px] uppercase tracking-[0.16em] text-muted-foreground sm:text-[11px] sm:tracking-[0.18em]">
+      <div className={cn("min-w-0 leading-tight", compact ? "hidden min-[400px]:block max-w-[9.5rem] sm:max-w-[13rem]" : "max-w-[11rem] sm:max-w-[14rem] lg:max-w-[16rem] xl:max-w-[18rem]")}>
+        <div className="font-display text-[13px] font-semibold text-foreground leading-snug sm:text-sm md:text-base [overflow-wrap:anywhere]">
+          {tr("brand_name")}
+        </div>
+        {!compact && (
+          <div className="mt-0.5 hidden text-[10px] uppercase tracking-[0.14em] text-muted-foreground sm:block sm:tracking-[0.16em] lg:text-[11px]">
             {tr("brand_org")}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </Link>
   );
 
-  const homeIconLink = (
-    <Link
-      to="/"
-      aria-label={tr("brand_name")}
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[var(--shadow-soft)] transition-opacity hover:opacity-90 sm:h-11 sm:w-11"
-    >
-      <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
-    </Link>
-  );
-
-  const schoolLogoDesktop = (
-    <BrandLogo src={schoolLogoUrl} alt={schoolLogoAlt} size="header" className="hidden lg:flex" />
+  const schoolLogoMobile = (
+    <BrandLogo src={schoolLogoUrl} alt={schoolLogoAlt} size="headerCompact" className="flex shrink-0 md:hidden" />
   );
 
   const schoolLogoTablet = (
     <BrandLogo src={schoolLogoUrl} alt={schoolLogoAlt} size="headerCompact" className="hidden md:flex lg:hidden" />
+  );
+
+  const schoolLogoDesktop = (
+    <BrandLogo src={schoolLogoUrl} alt={schoolLogoAlt} size="header" className="hidden lg:flex" />
   );
 
   const authButtons = (compact?: boolean) => (
@@ -160,6 +149,9 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
     </button>
   );
 
+  const navLinkClass = "px-2.5 py-2 text-[13px] font-medium text-foreground/80 transition-colors rounded-md hover:text-primary";
+  const navLinkActiveClass = "text-primary font-semibold";
+
   const desktopNavEl = (
     <nav className="hidden xl:flex items-center justify-center gap-0.5">
       {!roleLoading && desktopNav.map((item) => (
@@ -167,8 +159,8 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
           key={item.to + item.label}
           to={item.to}
           activeOptions={{ exact: item.to === "/" }}
-          activeProps={{ className: "text-primary" }}
-          className="px-2.5 py-2 text-[13px] font-medium text-foreground/80 transition-colors rounded-md hover:text-primary"
+          activeProps={{ className: navLinkActiveClass }}
+          className={navLinkClass}
         >
           {item.label}
         </Link>
@@ -178,45 +170,30 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-lg">
-      <div
-        className={cn(
-          "container-page",
-          showSchoolLogo ? "py-3.5 md:py-4 lg:py-5" : "flex min-h-[4.5rem] items-center justify-between py-4",
-        )}
-      >
-        {showSchoolLogo ? (
-          <>
-            <div className="flex min-h-12 items-center gap-2 sm:gap-3 xl:hidden">
-              {homeIconLink}
-              <div className="min-w-0 flex-1" aria-hidden />
-              {schoolLogoTablet}
-              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-                {langButton}
-                {authButtons(true)}
-                {menuButton}
-              </div>
-            </div>
-            <div className="hidden xl:grid xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-center xl:gap-6">
-              <div className="flex items-center gap-2">
-                {homeIconLink}
-                {langButton}
-                {authButtons()}
-              </div>
-              <div className="flex min-w-0 justify-center px-2">{desktopNavEl}</div>
-              {schoolLogoDesktop}
-            </div>
-          </>
-        ) : (
-          <div className="flex w-full items-center justify-between gap-4">
-            {brandLink}
-            {desktopNavEl}
-            <div className="flex shrink-0 items-center gap-2">
-              {langButton}
-              {authButtons()}
-              {menuButton}
-            </div>
+      <div className="container-page py-3.5 md:py-4 lg:py-5">
+        {/* Mobile & tablet (< xl) */}
+        <div className="flex min-h-12 items-center gap-2 sm:gap-3 xl:hidden">
+          {brandLink(true)}
+          <div className="min-w-0 flex-1" aria-hidden />
+          {schoolLogoMobile}
+          {schoolLogoTablet}
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {langButton}
+            {authButtons(true)}
+            {menuButton}
           </div>
-        )}
+        </div>
+
+        {/* Desktop (xl+) */}
+        <div className="hidden xl:grid xl:grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto] xl:items-center xl:gap-6">
+          <div className="flex min-w-0 items-center gap-3">
+            {brandLink()}
+            {langButton}
+            {authButtons()}
+          </div>
+          <div className="flex min-w-0 justify-center px-2">{desktopNavEl}</div>
+          {schoolLogoDesktop}
+        </div>
       </div>
 
       {open && (
@@ -227,6 +204,8 @@ export function SiteHeader({ showSchoolLogo = false }: SiteHeaderProps) {
                 key={item.to + item.label}
                 to={item.to}
                 onClick={() => setOpen(false)}
+                activeOptions={{ exact: item.to === "/" }}
+                activeProps={{ className: "bg-primary/10 text-primary font-semibold" }}
                 className="px-3 py-2.5 text-sm font-medium rounded-md hover:bg-muted"
               >
                 {item.label}

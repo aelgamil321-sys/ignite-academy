@@ -132,7 +132,7 @@ function LessonPage() {
             {lesson.vocab.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/15 text-gold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <FileText className="h-5 w-5" />
                   </div>
                   <h2 className="font-display text-xl font-semibold text-foreground">{tr("vocab")}</h2>

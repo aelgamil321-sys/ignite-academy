@@ -75,7 +75,7 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader showSchoolLogo />
+      <SiteHeader />
       <main>
         {/* HERO */}
         <section className="relative overflow-hidden bg-brand-dark text-white">
