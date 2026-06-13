@@ -2,11 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
+import { StudentProgressDashboard } from "@/components/student-progress-dashboard";
 import { useI18n } from "@/lib/i18n";
 import { grades } from "@/lib/curriculum";
-import { useLessonsForGrade } from "@/lib/cms";
-import { normalizeGradeSlug } from "@/lib/grade-utils";
-import { GraduationCap, BookOpen, ClipboardCheck, TrendingUp, ArrowRight, LogOut, User } from "lucide-react";
+import { gradeDisplayName, normalizeGradeSlug } from "@/lib/grade-utils";
+import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-progress";
+import { LogOut, User } from "lucide-react";
 import { toast } from "sonner";
 import { isStudentProfileComplete } from "@/lib/student-profile";
 
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/student/")({
   head: () => ({
     meta: [
       { title: "Student Dashboard — Ignite Islamic Academy" },
-      { name: "description", content: "Your student dashboard: lessons, videos, quizzes, files and progress." },
+      { name: "description", content: "Your student progress dashboard: lessons completed, quiz scores, and certificates." },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/student/")({
 function StudentGate() {
   const navigate = useNavigate();
   const [state, setState] = useState<"checking" | "ok">("checking");
+  const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [gradeSlug, setGradeSlug] = useState("8");
   const [profileComplete, setProfileComplete] = useState(true);
@@ -33,7 +35,10 @@ function StudentGate() {
     void (async () => {
       const { data } = await supabase.auth.getUser();
       if (!active) return;
-      if (!data.user) { navigate({ to: "/auth", search: { mode: "login" } }); return; }
+      if (!data.user) {
+        navigate({ to: "/auth", search: { mode: "login" } });
+        return;
+      }
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -41,6 +46,7 @@ function StudentGate() {
         .eq("user_id", data.user.id)
         .maybeSingle();
 
+      setUserId(data.user.id);
       setEmail(profile?.email ?? data.user.email ?? "");
       setGradeSlug(normalizeGradeSlug(profile?.grade ?? "8") || "8");
       setProfileComplete(isStudentProfileComplete(profile));
@@ -49,39 +55,65 @@ function StudentGate() {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") navigate({ to: "/auth", search: { mode: "login" } });
     });
-    return () => { active = false; sub.subscription.unsubscribe(); };
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, [navigate]);
 
-  if (state !== "ok") {
+  if (state !== "ok" || !userId) {
     return (
       <PageShell eyebrow="Student" title="Student Dashboard" lead="Checking access…" crumbs={[{ label: "Student" }]}>
         <div className="text-sm text-muted-foreground">Verifying your access…</div>
       </PageShell>
     );
   }
-  return <StudentPage email={email} gradeSlug={gradeSlug} profileComplete={profileComplete} />;
+
+  return (
+    <StudentDashboardPage
+      userId={userId}
+      email={email}
+      gradeSlug={gradeSlug}
+      profileComplete={profileComplete}
+    />
+  );
 }
 
-function StudentPage({
+function StudentDashboardPage({
+  userId,
   email,
   gradeSlug,
   profileComplete,
 }: {
+  userId: string;
   email: string;
   gradeSlug: string;
   profileComplete: boolean;
 }) {
   const navigate = useNavigate();
-  const { tr, lang, dir } = useI18n();
-  const myGrade = grades.find((g) => g.slug === gradeSlug) ?? grades.find((g) => g.slug === "8")!;
-  const lessons = useLessonsForGrade(myGrade.slug);
-  const quizCount = lessons.filter((l) => l.quiz.length > 0).length;
+  const { tr, lang } = useI18n();
+  const [progress, setProgress] = useState<StudentProgressData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const stats = [
-    { icon: BookOpen, label: tr("recent_lessons"), value: String(lessons.length) },
-    { icon: ClipboardCheck, label: tr("my_quizzes"), value: String(quizCount) },
-    { icon: TrendingUp, label: tr("my_progress"), value: lessons.length > 0 ? "—" : "0%" },
-  ];
+  const myGrade = grades.find((g) => g.slug === gradeSlug) ?? grades.find((g) => g.slug === "8")!;
+  const gradeName = gradeDisplayName(myGrade.slug, lang) || myGrade.name[lang];
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      setLoading(true);
+      setLoadError(null);
+      const { data, error } = await fetchStudentProgress(userId);
+      if (!active) return;
+      if (error) setLoadError(error);
+      else setProgress(data);
+      setLoading(false);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [userId]);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -92,8 +124,8 @@ function StudentPage({
   return (
     <PageShell
       eyebrow={tr("nav_student")}
-      title={tr("student_title")}
-      lead={tr("student_lead")}
+      title={tr("student_dashboard_title")}
+      lead={tr("student_dashboard_lead")}
       crumbs={[{ label: tr("nav_student") }]}
     >
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6 rounded-2xl border border-border bg-card px-5 py-4">
@@ -110,7 +142,8 @@ function StudentPage({
             {lang === "ar" ? "الملف الشخصي" : "Profile"}
           </Link>
           <button
-            onClick={signOut}
+            type="button"
+            onClick={() => { void signOut(); }}
             className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-emerald hover:text-emerald transition-colors"
           >
             <LogOut className="h-3.5 w-3.5" /> {lang === "ar" ? "تسجيل الخروج" : "Sign out"}
@@ -135,57 +168,21 @@ function StudentPage({
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-3 mb-10">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald/10 text-emerald mb-4">
-              <s.icon className="h-5 w-5" />
-            </div>
-            <div className="font-display text-3xl text-primary">{s.value}</div>
-            <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-5">
-          <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-emerald mb-1">{tr("my_grade")}</div>
-            <h2 className="font-display text-2xl text-primary">{myGrade.name[lang]}</h2>
-          </div>
-          <Link
-            to="/grades/$grade"
-            params={{ grade: myGrade.slug }}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors"
-          >
-            <GraduationCap className="h-4 w-4" /> {tr("go_to_grade")}
-          </Link>
+      {loading ? (
+        <div className="text-sm text-muted-foreground py-12 text-center">
+          {lang === "ar" ? "جارٍ تحميل التقدّم…" : "Loading your progress…"}
         </div>
-        {lessons.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {lang === "ar"
-              ? "لا توجد دروس منشورة لهذا الصف بعد. تفقّد الصف لاحقًا."
-              : "No published lessons for your grade yet. Check back soon."}
-          </p>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-3">
-            {lessons.slice(0, 6).map((l) => (
-              <Link
-                key={l.slug}
-                to="/grades/$grade/$lesson"
-                params={{ grade: myGrade.slug, lesson: l.slug }}
-                className="group rounded-xl border border-border bg-background p-4 hover:border-emerald transition-colors"
-              >
-                <div className="text-xs text-emerald font-semibold uppercase tracking-wider">{l.subject[lang]}</div>
-                <div className="mt-1 font-display text-lg text-primary leading-snug">{l.title[lang]}</div>
-                <div className="mt-3 inline-flex items-center gap-1 text-sm text-primary group-hover:text-emerald">
-                  {tr("open")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+      ) : loadError ? (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-sm text-destructive">
+          {lang === "ar" ? `تعذر تحميل التقدّم: ${loadError}` : `Could not load progress: ${loadError}`}
+        </div>
+      ) : progress ? (
+        <StudentProgressDashboard
+          progress={progress}
+          gradeName={gradeName}
+          gradeSlug={myGrade.slug}
+        />
+      ) : null}
     </PageShell>
   );
 }

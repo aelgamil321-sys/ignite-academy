@@ -205,6 +205,8 @@ export const t = {
   // Student Portal
   student_title: { en: "Student Portal", ar: "بوابة الطالب" },
   student_lead: { en: "Your dashboard, lessons, quizzes, and certificates — all in one place.", ar: "لوحة التحكم، والدروس، والاختبارات، والشهادات — في مكان واحد." },
+  student_dashboard_title: { en: "Student Dashboard", ar: "لوحة تحكم الطالب" },
+  student_dashboard_lead: { en: "Track your lesson progress, quiz scores, certificates, and achievements.", ar: "تابع تقدّمك في الدروس، ودرجات الاختبارات، والشهادات، والإنجازات." },
   my_grade: { en: "My Grade", ar: "صفّي" },
   recent_lessons: { en: "Recent Lessons", ar: "الدروس الأخيرة" },
   my_quizzes: { en: "My Quizzes", ar: "اختباراتي" },
