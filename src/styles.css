@@ -38,6 +38,10 @@
   --color-gold-foreground: var(--gold-foreground);
   --color-cream: var(--cream);
 
+  --color-ignite-gold: #F2B21B;
+  --color-ignite-dark: #2F3542;
+  --color-ignite-bg: #F8F8F6;
+
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-arabic: "Tajawal", "Inter", system-ui, sans-serif;

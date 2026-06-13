@@ -90,16 +90,36 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
   const islamicLogoUrl = certificateIslamicLogoUrl();
   const schoolLogoUrl = certificateSchoolLogoUrl();
   const islamicLogoAlt = lang === "ar" ? "قسم التربية الإسلامية" : "Department of Islamic Education";
-  const schoolLogoAlt = lang === "ar" ? "مدرسة إشعال" : "Ignite School";
+  const schoolLogoAlt = lang === "ar" ? "مدرسة اجنايت" : "Ignite School";
+  const igniteHome = showPartnerLogos;
 
   const brandLink = (
     <Link to="/" className="group flex min-w-0 items-center gap-2 sm:gap-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-emerald text-primary-foreground shadow-[var(--shadow-soft)] sm:h-11 sm:w-11">
+      <div
+        className={cn(
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-[var(--shadow-soft)] sm:h-11 sm:w-11",
+          igniteHome
+            ? "bg-ignite-gold text-ignite-dark"
+            : "bg-gradient-to-br from-primary to-emerald text-primary-foreground",
+        )}
+      >
         <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
       <div className="min-w-0 leading-tight">
-        <div className="truncate font-display text-base font-semibold text-primary sm:text-lg">{tr("brand_name")}</div>
-        <div className="truncate text-[10px] uppercase tracking-[0.16em] text-muted-foreground sm:text-[11px] sm:tracking-[0.18em]">
+        <div
+          className={cn(
+            "truncate font-display text-base font-semibold sm:text-lg",
+            igniteHome ? "text-ignite-dark" : "text-primary",
+          )}
+        >
+          {tr("brand_name")}
+        </div>
+        <div
+          className={cn(
+            "truncate text-[10px] uppercase tracking-[0.16em] sm:text-[11px] sm:tracking-[0.18em]",
+            igniteHome ? "text-ignite-dark/65" : "text-muted-foreground",
+          )}
+        >
           {tr("brand_sub")}
         </div>
       </div>
@@ -111,7 +131,12 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
       <button
         onClick={toggle}
         aria-label="Toggle language"
-        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-2 text-sm font-semibold text-foreground hover:border-emerald hover:text-emerald transition-colors sm:px-3"
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-2 text-sm font-semibold transition-colors sm:px-3",
+          igniteHome
+            ? "border-ignite-dark/15 text-ignite-dark hover:border-ignite-gold hover:text-ignite-gold"
+            : "border-border text-foreground hover:border-emerald hover:text-emerald",
+        )}
       >
         <Languages className="h-4 w-4" />
         <span className="hidden sm:inline">{lang === "en" ? "العربية" : "English"}</span>
@@ -119,7 +144,12 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
       {signedIn && isParent && (
         <Link
           to="/parent/dashboard"
-          className="hidden md:inline-flex items-center gap-1.5 justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)]"
+          className={cn(
+            "hidden md:inline-flex items-center gap-1.5 justify-center rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[var(--shadow-soft)]",
+            igniteHome
+              ? "bg-ignite-gold text-ignite-dark hover:bg-ignite-gold/90"
+              : "bg-primary text-primary-foreground hover:bg-emerald",
+          )}
         >
           <LayoutDashboard className="h-4 w-4" />
           {tr("parent_dashboard_title")}
@@ -128,7 +158,12 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
       {signedIn ? (
         <Link
           to={profilePath}
-          className="hidden md:inline-flex items-center gap-1.5 justify-center rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground hover:border-emerald hover:text-emerald transition-colors"
+          className={cn(
+            "hidden md:inline-flex items-center gap-1.5 justify-center rounded-full border bg-card px-5 py-2.5 text-sm font-semibold transition-colors",
+            igniteHome
+              ? "border-ignite-dark/15 text-ignite-dark hover:border-ignite-gold hover:text-ignite-gold"
+              : "border-border text-foreground hover:border-emerald hover:text-emerald",
+          )}
         >
           <User className="h-4 w-4" />
           {profileLabel}
@@ -140,7 +175,12 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
             e.preventDefault();
             window.location.assign("/auth?mode=login");
           }}
-          className="hidden md:inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shadow-[var(--shadow-soft)]"
+          className={cn(
+            "hidden md:inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[var(--shadow-soft)]",
+            igniteHome
+              ? "bg-ignite-gold text-ignite-dark hover:bg-ignite-gold/90"
+              : "bg-primary text-primary-foreground hover:bg-emerald",
+          )}
         >
           {tr("nav_login")}
         </a>
@@ -162,8 +202,13 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
           key={item.to + item.label}
           to={item.to}
           activeOptions={{ exact: item.to === "/" }}
-          activeProps={{ className: "text-primary" }}
-          className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-md"
+          activeProps={{ className: igniteHome ? "text-ignite-gold" : "text-primary" }}
+          className={cn(
+            "px-3 py-2 text-sm font-medium transition-colors rounded-md",
+            igniteHome
+              ? "text-ignite-dark/80 hover:text-ignite-gold"
+              : "text-foreground/80 hover:text-primary",
+          )}
         >
           {item.label}
         </Link>
@@ -172,7 +217,14 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-lg">
+    <header
+      className={cn(
+        "sticky top-0 z-40 border-b backdrop-blur-lg",
+        igniteHome
+          ? "border-ignite-dark/10 bg-ignite-bg/95"
+          : "border-border/60 bg-background/80",
+      )}
+    >
       <div
         className={cn(
           "container-page py-3 md:py-4",
@@ -207,7 +259,7 @@ export function SiteHeader({ showPartnerLogos = false }: SiteHeaderProps) {
       </div>
 
       {open && (
-        <div className="xl:hidden border-t border-border bg-background">
+        <div className={cn("xl:hidden border-t", igniteHome ? "border-ignite-dark/10 bg-ignite-bg" : "border-border bg-background")}>
           <div className="container-page py-4 flex flex-col gap-1">
             {!roleLoading && nav.map((item) => (
               <Link

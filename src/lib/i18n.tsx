@@ -19,8 +19,8 @@ export const t = {
   nav_login: { en: "Student Login", ar: "دخول الطالب" },
 
   // Brand
-  brand_name: { en: "Ignite", ar: "إشعال" },
-  brand_sub: { en: "Islamic Academy", ar: "الأكاديمية الإسلامية" },
+  brand_name: { en: "Ignite School", ar: "مدرسة اجنايت" },
+  brand_sub: { en: "Department of Islamic Education", ar: "قسم التربية الإسلامية" },
   tagline: { en: "Igniting Knowledge, Faith, and Character", ar: "نُشعل المعرفة والإيمان والأخلاق" },
 
   // Hero
@@ -193,7 +193,7 @@ export const t = {
   stage_overview: { en: "Stage Overview", ar: "نظرة عامة على المرحلة" },
 
   // About
-  about_title: { en: "About Ignite Islamic Academy", ar: "عن أكاديمية إشعال الإسلامية" },
+  about_title: { en: "About Ignite School", ar: "عن مدرسة اجنايت" },
   about_lead: { en: "An online Islamic education platform serving students, parents, and teachers from KG1 to Grade 12.", ar: "منصة تعليم إسلامي عبر الإنترنت تخدم الطلاب وأولياء الأمور والمعلمين من رياض الأطفال إلى الصف الثاني عشر." },
   about_mission_t: { en: "Our Mission", ar: "رسالتنا" },
   about_mission_d: { en: "To ignite knowledge, faith, and character in every learner through authentic, modern, and engaging Islamic Studies.", ar: "أن نُشعل المعرفة والإيمان والأخلاق في كل متعلّم من خلال دراسات إسلامية أصيلة وعصرية وجذّابة." },

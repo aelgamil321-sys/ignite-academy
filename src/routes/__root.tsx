@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider } from "../lib/i18n";
 import { CMSProvider } from "../lib/cms";
+import { SITE_NAME } from "../lib/site-branding";
 
 
 function NotFoundComponent() {
@@ -80,9 +81,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Ignite Islamic Academy" },
+      { title: SITE_NAME },
       { name: "description", content: "Online Islamic education for KG1–Grade 12: lessons, worksheets, videos, quizzes and parent resources." },
-      { property: "og:site_name", content: "Ignite Islamic Academy" },
+      { property: "og:site_name", content: SITE_NAME },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
