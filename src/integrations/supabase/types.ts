@@ -485,6 +485,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      submit_lesson_quiz: {
+        Args: {
+          p_lesson_id: string
+          p_answers: Json
+        }
+        Returns: Database["public"]["Tables"]["lesson_quiz_submissions"]["Row"]
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "student" | "parent"

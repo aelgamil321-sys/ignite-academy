@@ -6,13 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import type { QuizQuestion } from "@/lib/curriculum";
 import {
-  buildSubmissionAnswers,
-  calculateQuizScore,
   fetchLatestQuizSubmission,
   fetchStudentQuizSubmissions,
   isQuestionAnswered,
   normalizeQuizList,
-  submissionRowToSaved,
+  submitLessonQuiz,
   type SavedQuizSubmission,
 } from "@/lib/lesson-quiz";
 import { LessonQuizResults } from "@/components/lesson-quiz-results";
@@ -138,39 +136,26 @@ export function LessonQuizStudent({
         return;
       }
 
-      const scoreResult = calculateQuizScore(questions, choiceAnswers, essayAnswers);
-      const submissionAnswers = buildSubmissionAnswers(questions, choiceAnswers, essayAnswers);
-      const { data: inserted, error } = await supabase
-        .from("lesson_quiz_submissions")
-        .insert({
-          student_id: user.id,
-          lesson_id: lessonId,
-          score: scoreResult.autoScore,
-          auto_score: scoreResult.autoScore,
-          essay_score: 0,
-          final_score: scoreResult.autoScore,
-          total_points: scoreResult.totalPoints,
-          percentage: scoreResult.finalPercentage,
-          status: scoreResult.status,
-          answers: submissionAnswers,
-        })
-        .select("*")
-        .single();
+      const { submission, error } = await submitLessonQuiz(
+        lessonId,
+        questions,
+        choiceAnswers,
+        essayAnswers,
+      );
 
-      if (error) {
+      if (error || !submission) {
         console.error("[quiz submit]", error);
         setSaveError(
           lang === "ar"
-            ? `تعذر حفظ النتيجة: ${error.message}`
-            : `Could not save result: ${error.message}`,
+            ? `تعذر حفظ النتيجة: ${error ?? "unknown error"}`
+            : `Could not save result: ${error ?? "unknown error"}`,
         );
         return;
       }
 
-      const submission = submissionRowToSaved(inserted as Record<string, unknown>);
       setSavedSubmission(submission);
       toast.success(
-        scoreResult.hasEssayPending
+        submission.status === "pending_review"
           ? lang === "ar"
             ? "تم إرسال الاختبار — الإجابة قيد مراجعة المعلم"
             : "Quiz submitted — answer pending teacher review"

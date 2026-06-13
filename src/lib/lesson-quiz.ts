@@ -405,6 +405,72 @@ export function submissionRowToSaved(row: Record<string, unknown>): SavedQuizSub
   };
 }
 
+/** Raw answer payload sent to submit_lesson_quiz RPC (no scores). */
+export type QuizSubmitAnswerPayload =
+  | {
+      questionIndex: number;
+      type: "multiple_choice" | "true_false";
+      selectedIndex: number;
+    }
+  | {
+      questionIndex: number;
+      type: "essay";
+      essayText: string;
+    };
+
+export function buildQuizSubmitPayload(
+  questions: QuizQuestion[],
+  choiceAnswers: Record<number, number>,
+  essayAnswers: Record<number, string>,
+): QuizSubmitAnswerPayload[] {
+  return questions.map((q, i) => {
+    if (q.type === "essay") {
+      return {
+        questionIndex: i,
+        type: "essay" as const,
+        essayText: essayAnswers[i]?.trim() ?? "",
+      };
+    }
+    return {
+      questionIndex: i,
+      type: q.type,
+      selectedIndex: choiceAnswers[i] ?? -1,
+    };
+  });
+}
+
+/**
+ * Submit a lesson quiz via server-side grading (submit_lesson_quiz RPC).
+ * Clients must not insert score fields directly into lesson_quiz_submissions.
+ */
+export async function submitLessonQuiz(
+  lessonId: string,
+  questions: QuizQuestion[],
+  choiceAnswers: Record<number, number>,
+  essayAnswers: Record<number, string>,
+): Promise<{ submission: SavedQuizSubmission | null; error: string | null }> {
+  const payload = buildQuizSubmitPayload(questions, choiceAnswers, essayAnswers);
+
+  const { data, error } = await supabase.rpc("submit_lesson_quiz", {
+    p_lesson_id: lessonId,
+    p_answers: payload,
+  });
+
+  if (error) {
+    console.error("[submitLessonQuiz]", error);
+    return { submission: null, error: error.message };
+  }
+
+  if (!data) {
+    return { submission: null, error: "Quiz submission returned no data" };
+  }
+
+  return {
+    submission: submissionRowToSaved(data as Record<string, unknown>),
+    error: null,
+  };
+}
+
 /** Load the latest saved quiz submission for a student + lesson from Supabase. */
 export async function fetchLatestQuizSubmission(
   lessonId: string,
