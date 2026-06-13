@@ -7,10 +7,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero.jpg";
 import patternImg from "@/assets/pattern.jpg";
-import kgImg from "@/assets/kg.jpg";
-import elemImg from "@/assets/elementary.jpg";
-import midImg from "@/assets/middle.jpg";
-import highImg from "@/assets/high.jpg";
+import { STAGE_CARD_IMAGES } from "@/lib/stage-images";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
@@ -67,10 +64,10 @@ function Home() {
   }
 
   const stages: Array<{ name: TKey; grades: TKey; img: string; tint: string; to: string }> = [
-    { name: "stage_kg", grades: "stage_kg_grades", img: kgImg, tint: "from-primary/50", to: "/grades" },
-    { name: "stage_elem", grades: "stage_elem_grades", img: elemImg, tint: "from-primary/35", to: "/grades" },
-    { name: "stage_mid", grades: "stage_mid_grades", img: midImg, tint: "from-brand-dark/40", to: "/grades" },
-    { name: "stage_high", grades: "stage_high_grades", img: highImg, tint: "from-primary/45", to: "/grades" },
+    { name: "stage_kg", grades: "stage_kg_grades", img: STAGE_CARD_IMAGES.kg, tint: "from-primary/50", to: "/grades" },
+    { name: "stage_elem", grades: "stage_elem_grades", img: STAGE_CARD_IMAGES.elementary, tint: "from-primary/35", to: "/grades" },
+    { name: "stage_mid", grades: "stage_mid_grades", img: STAGE_CARD_IMAGES.middle, tint: "from-brand-dark/40", to: "/grades" },
+    { name: "stage_high", grades: "stage_high_grades", img: STAGE_CARD_IMAGES.high, tint: "from-primary/45", to: "/grades" },
   ];
 
   return (
