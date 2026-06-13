@@ -28,6 +28,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
 import { Route as StudentProfileRouteImport } from './routes/student.profile'
 import { Route as QuizzesSlugRouteImport } from './routes/quizzes.$slug'
+import { Route as ParentDashboardRouteImport } from './routes/parent.dashboard'
 import { Route as ParentSlugRouteImport } from './routes/parent.$slug'
 import { Route as CategoriesCategoryRouteImport } from './routes/categories.$category'
 import { Route as AnnouncementsSlugRouteImport } from './routes/announcements.$slug'
@@ -134,6 +135,11 @@ const QuizzesSlugRoute = QuizzesSlugRouteImport.update({
   path: '/quizzes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParentDashboardRoute = ParentDashboardRouteImport.update({
+  id: '/parent/dashboard',
+  path: '/parent/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParentSlugRoute = ParentSlugRouteImport.update({
   id: '/parent/$slug',
   path: '/parent/$slug',
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
+  '/parent/dashboard': typeof ParentDashboardRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
   '/student/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByTo {
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
+  '/parent/dashboard': typeof ParentDashboardRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
   '/student/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
@@ -262,6 +270,7 @@ export interface FileRoutesById {
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
+  '/parent/dashboard': typeof ParentDashboardRoute
   '/quizzes/$slug': typeof QuizzesSlugRoute
   '/student/profile': typeof StudentProfileRoute
   '/videos/$slug': typeof VideosSlugRoute
@@ -295,6 +304,7 @@ export interface FileRouteTypes {
     | '/announcements/$slug'
     | '/categories/$category'
     | '/parent/$slug'
+    | '/parent/dashboard'
     | '/quizzes/$slug'
     | '/student/profile'
     | '/videos/$slug'
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
     | '/announcements/$slug'
     | '/categories/$category'
     | '/parent/$slug'
+    | '/parent/dashboard'
     | '/quizzes/$slug'
     | '/student/profile'
     | '/videos/$slug'
@@ -355,6 +366,7 @@ export interface FileRouteTypes {
     | '/announcements/$slug'
     | '/categories/$category'
     | '/parent/$slug'
+    | '/parent/dashboard'
     | '/quizzes/$slug'
     | '/student/profile'
     | '/videos/$slug'
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   AnnouncementsSlugRoute: typeof AnnouncementsSlugRoute
   CategoriesCategoryRoute: typeof CategoriesCategoryRoute
   ParentSlugRoute: typeof ParentSlugRoute
+  ParentDashboardRoute: typeof ParentDashboardRoute
   QuizzesSlugRoute: typeof QuizzesSlugRoute
   VideosSlugRoute: typeof VideosSlugRoute
   AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
@@ -533,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuizzesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/parent/dashboard': {
+      id: '/parent/dashboard'
+      path: '/parent/dashboard'
+      fullPath: '/parent/dashboard'
+      preLoaderRoute: typeof ParentDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/parent/$slug': {
       id: '/parent/$slug'
       path: '/parent/$slug'
@@ -652,6 +672,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnnouncementsSlugRoute: AnnouncementsSlugRoute,
   CategoriesCategoryRoute: CategoriesCategoryRoute,
   ParentSlugRoute: ParentSlugRoute,
+  ParentDashboardRoute: ParentDashboardRoute,
   QuizzesSlugRoute: QuizzesSlugRoute,
   VideosSlugRoute: VideosSlugRoute,
   AnnouncementsIndexRoute: AnnouncementsIndexRoute,

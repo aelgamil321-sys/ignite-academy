@@ -2,6 +2,7 @@ import type { Bi } from "@/lib/curriculum";
 import { gradeLabelForPercentage } from "@/lib/lesson-quiz";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { supabase } from "@/integrations/supabase/client";
+import { buildActivityTimeline, type ActivityTimelineItem } from "@/lib/activity-timeline";
 
 function parseBi(raw: unknown): Bi {
   if (raw && typeof raw === "object" && !Array.isArray(raw)) {
@@ -49,7 +50,10 @@ export type StudentProgressData = {
   learningLevelAr: string;
   certificates: StudentCertificateRow[];
   recentAchievements: StudentAchievement[];
+  activityTimeline: ActivityTimelineItem[];
 };
+
+export type { ActivityTimelineItem };
 
 export async function fetchStudentProgress(userId: string): Promise<{
   data: StudentProgressData | null;
@@ -171,6 +175,24 @@ export async function fetchStudentProgress(userId: string): Promise<{
       })),
   ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
 
+  const activityTimeline = buildActivityTimeline({
+    submissions: submissions.map((row) => ({
+      id: String(row.id),
+      lesson_id: String(row.lesson_id),
+      percentage: Number(row.percentage ?? 0),
+      status: String(row.status ?? ""),
+      submitted_at: String(row.submitted_at ?? ""),
+    })),
+    certificates: certificates.map((row) => ({
+      certificate_id: String(row.certificate_id),
+      lesson_id: String(row.lesson_id),
+      percentage: Number(row.percentage ?? 0),
+      issued_at: String(row.issued_at ?? ""),
+    })),
+    totalLessons,
+    lessonTitleMap,
+  });
+
   return {
     data: {
       gradeSlug,
@@ -183,6 +205,7 @@ export async function fetchStudentProgress(userId: string): Promise<{
       learningLevelAr,
       certificates: certificateRows,
       recentAchievements: achievements.slice(0, 10),
+      activityTimeline,
     },
     error: null,
   };

@@ -217,6 +217,9 @@ export const t = {
   parent_title: { en: "Parent Corner", ar: "ركن الوالدين" },
   parent_lead: { en: "Guides, exam information, and study tips to support your child's learning at home.", ar: "أدلة ومعلومات الاختبارات ونصائح الدراسة لدعم تعلّم أبنائكم في المنزل." },
   parent_guides: { en: "Parent Guides", ar: "أدلة الوالدين" },
+  parent_dashboard_title: { en: "Parent Dashboard", ar: "لوحة ولي الأمر" },
+  parent_dashboard_lead: { en: "Monitor your child's progress, certificates, badges, and recent learning activity.", ar: "راقب تقدّم ابنك/ابنتك والشهادات والشارات وآخر نشاط تعليمي." },
+  parent_dashboard_cta: { en: "Open Parent Dashboard", ar: "فتح لوحة ولي الأمر" },
 
   // Resources
   res_title: { en: "Resource Library", ar: "المكتبة التعليمية" },

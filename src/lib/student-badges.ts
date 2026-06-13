@@ -104,3 +104,25 @@ export function computeStudentBadges(progress: StudentProgressData): {
   const unlockedCount = badges.filter((b) => b.unlocked).length;
   return { badges, unlockedCount, totalCount: badges.length };
 }
+
+export function isStudentBadgeUnlocked(
+  badgeId: StudentBadgeId,
+  progress: StudentProgressData,
+): boolean {
+  const def = BADGE_DEFS.find((d) => d.id === badgeId);
+  return def ? def.isUnlocked(progress) : false;
+}
+
+export function studentBadgeMeta(badgeId: StudentBadgeId): {
+  icon: string;
+  title: Bi;
+  description: Bi;
+} | null {
+  const def = BADGE_DEFS.find((d) => d.id === badgeId);
+  if (!def) return null;
+  return { icon: def.icon, title: def.title, description: def.description };
+}
+
+export function evaluateStudentBadges(progress: StudentProgressData): StudentBadgeId[] {
+  return BADGE_DEFS.filter((def) => def.isUnlocked(progress)).map((def) => def.id);
+}
