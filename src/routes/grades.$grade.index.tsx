@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import { useMemo, useState } from "react";
-import { ArrowRight, Clock, BookOpen, ChevronLeft, Search, Layers, Video as VideoIcon, FileText, ClipboardCheck } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronLeft, Search, Layers, Video as VideoIcon, FileText } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
@@ -9,9 +9,10 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { EmptyState } from "@/components/empty-state";
 import { useI18n } from "@/lib/i18n";
 import { getGrade } from "@/lib/curriculum";
-import { useLessonsForGrade, useAllVideos, useAllResources } from "@/lib/cms";
+import { useLessonsForGrade, useAllVideos, useAllResources, useCMS } from "@/lib/cms";
 import { gradeMatches } from "@/lib/grade-utils";
 import { slugifyUnit } from "./grades.$grade.units.$unit";
+import { GradeLessonsSection } from "@/components/grade-lessons-section";
 
 export const Route = createFileRoute("/grades/$grade/")({
   beforeLoad: () => blockParentFromStudentRoutes(),
@@ -41,7 +42,12 @@ export const Route = createFileRoute("/grades/$grade/")({
 function GradePage() {
   const { grade } = Route.useLoaderData();
   const { tr, lang, dir } = useI18n();
+  const { lessons: cmsLessons } = useCMS();
   const lessons = useLessonsForGrade(grade.slug);
+  const gradeCustomLessons = useMemo(
+    () => cmsLessons.filter((l) => l.published && gradeMatches(l.grade, grade.slug)),
+    [cmsLessons, grade.slug],
+  );
   const allVideos = useAllVideos();
   const allResources = useAllResources();
   const [q, setQ] = useState("");
@@ -68,13 +74,13 @@ function GradePage() {
 
   const filteredLessons = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return lessons;
-    return lessons.filter((l) =>
-      `${l.title.en} ${l.title.ar} ${l.unit.en} ${l.unit.ar} ${l.subject.en} ${l.subject.ar}`
+    if (!needle) return gradeCustomLessons;
+    return gradeCustomLessons.filter((l) =>
+      `${l.title.en} ${l.title.ar} ${l.unit.en} ${l.unit.ar} ${l.outcome.en} ${l.outcome.ar}`
         .toLowerCase()
         .includes(needle),
     );
-  }, [lessons, q]);
+  }, [gradeCustomLessons, q]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -145,30 +151,7 @@ function GradePage() {
           ) : filteredLessons.length === 0 ? (
             <EmptyState icon={Search} title={tr("empty_results")} />
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredLessons.map((l, i) => (
-                <Link
-                  key={l.slug}
-                  to="/grades/$grade/$lesson"
-                  params={{ grade: grade.slug, lesson: l.slug }}
-                  className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] hover:border-primary transition-all flex flex-col"
-                >
-                  <div className="text-xs uppercase tracking-[0.18em] text-primary mb-2">
-                    {tr("lesson")} {i + 1} · {l.subject[lang]}
-                  </div>
-                  <h3 className="font-display text-xl font-semibold text-foreground leading-snug">{l.title[lang]}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{l.unit[lang]}</p>
-                  <div className="mt-5 flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {l.duration} {tr("minutes")}</span>
-                    <span className="inline-flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" /> {l.quiz.length} Q</span>
-                  </div>
-                  <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary group-hover:text-primary">
-                    {tr("explore")}
-                    <ArrowRight className={`h-4 w-4 transition-transform ${dir === "rtl" ? "rotate-180 group-hover:-translate-x-1" : "group-hover:translate-x-1"}`} />
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <GradeLessonsSection gradeSlug={grade.slug} lessons={filteredLessons} />
           )}
         </section>
 
