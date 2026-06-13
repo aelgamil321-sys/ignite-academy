@@ -8,7 +8,7 @@ import { useCMS, type CustomLesson, type CustomVideo, type CustomFile, type Cust
 import { SUBJECT_CATEGORIES, type SubjectCategory } from "@/lib/categories";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import type { QuizQuestion } from "@/lib/curriculum";
-import { emptyMultipleChoiceQuestion, serializeQuizForSave } from "@/lib/lesson-quiz";
+import { quizQuestionsForForm, serializeQuizForSave } from "@/lib/lesson-quiz";
 import {
   BookOpen, Video, FileUp, Newspaper, Folder, GraduationCap,
   Layers, ClipboardCheck, Megaphone, Plus, Trash2, Eye, EyeOff, Save, X, ExternalLink, LogOut, Pencil, RotateCcw,
@@ -22,6 +22,7 @@ import {
 import { AdminSidebar, type AdminTab } from "@/components/admin-sidebar";
 import { DeleteLessonButton } from "@/components/admin-manage-lessons";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
+import { LessonQuizBuilder } from "@/components/lesson-quiz-builder";
 import {
   bilingualFilesFromLesson,
   bilingualFilesSavePayload,
@@ -228,8 +229,6 @@ function Overview() {
 }
 
 // ============ Lesson Form ============
-const emptyQuiz: QuizQuestion = emptyMultipleChoiceQuestion();
-
 function lessonToFormState(l: CustomLesson) {
   return {
     grade: l.grade,
@@ -246,9 +245,7 @@ function lessonToFormState(l: CustomLesson) {
     ppt: l.pptUrl ? { url: l.pptUrl, name: l.pptName ?? "PowerPoint" } : null,
     ws: l.worksheetUrl ? { url: l.worksheetUrl, name: l.worksheetName ?? "Worksheet" } : null,
     bilingualFiles: bilingualFilesFromLesson(l),
-    quiz: l.quiz.length > 0
-      ? l.quiz.map((q) => ({ ...q, q: { ...q.q }, options: q.options.map((o) => ({ ...o })) }))
-      : [{ ...emptyQuiz, options: emptyQuiz.options.map((o) => ({ ...o })) }],
+    quiz: quizQuestionsForForm(l.quiz),
     pub: l.published,
   };
 }
@@ -272,7 +269,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const [ppt, setPpt] = useState<{ url: string; name: string } | null>(null);
   const [ws, setWs] = useState<{ url: string; name: string } | null>(null);
   const [bilingualFiles, setBilingualFiles] = useState<BilingualLessonFiles>(EMPTY_BILINGUAL_LESSON_FILES);
-  const [quiz, setQuiz] = useState<QuizQuestion[]>([{ ...emptyQuiz }]);
+  const [quiz, setQuiz] = useState<QuizQuestion[]>(() => quizQuestionsForForm([]));
   const [pub, setPub] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dbg, setDbg] = useState({ clicked: false, valid: false, status: "" as "" | "success" | "error", error: "", id: "" });
@@ -329,7 +326,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const resetForm = () => {
     setTitleEn(""); setTitleAr(""); setOutEn(""); setOutAr(""); setExpEn(""); setExpAr("");
     setVocEn(""); setVocAr(""); setActEn(""); setActAr(""); setWsEn(""); setWsAr(""); setYt("");
-    setPdf(null); setPpt(null); setWs(null); setBilingualFiles(EMPTY_BILINGUAL_LESSON_FILES); setQuiz([{ ...emptyQuiz }]);
+    setPdf(null); setPpt(null); setWs(null); setBilingualFiles(EMPTY_BILINGUAL_LESSON_FILES); setQuiz(quizQuestionsForForm([]));
     setUnitEn(""); setUnitAr("");
   };
 
@@ -538,36 +535,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
         savedFiles={editLesson ? bilingualFilesFromLesson(editLesson) : undefined}
       />
 
-      <div className="rounded-xl border border-border bg-background p-4 mt-2">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="font-display text-lg text-primary">{L("Quiz Questions", "أسئلة الاختبار")[lang]}</h4>
-          <button type="button" onClick={() => setQuiz((q) => [...q, { ...emptyQuiz, options: emptyQuiz.options.map(o => ({ ...o })) }])}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-emerald hover:text-emerald">
-            <Plus className="h-3.5 w-3.5" /> {L("Add Question", "إضافة سؤال")[lang]}
-          </button>
-        </div>
-        <div className="space-y-4">
-          {quiz.map((q, i) => (
-            <div key={i} className="rounded-lg border border-border p-3 bg-card">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-xs uppercase tracking-wider text-emerald font-semibold">Q{i + 1}</div>
-                <button type="button" onClick={() => setQuiz((qq) => qq.filter((_, j) => j !== i))} className="text-destructive hover:text-destructive/70"><Trash2 className="h-4 w-4" /></button>
-              </div>
-              <Row>
-                <input className="input" placeholder="Question (EN)" value={q.q.en} onChange={(e) => setQuiz((qq) => qq.map((x, j) => j === i ? { ...x, q: { ...x.q, en: e.target.value } } : x))} />
-                <input className="input" dir="rtl" placeholder="السؤال (عربي)" value={q.q.ar} onChange={(e) => setQuiz((qq) => qq.map((x, j) => j === i ? { ...x, q: { ...x.q, ar: e.target.value } } : x))} />
-              </Row>
-              {q.options.map((opt, oi) => (
-                <div key={oi} className="flex items-center gap-2 mt-2">
-                  <input type="radio" name={`ans-${i}`} checked={q.answer === oi} onChange={() => setQuiz((qq) => qq.map((x, j) => j === i ? { ...x, answer: oi } : x))} className="accent-emerald" />
-                  <input className="input flex-1" placeholder={`Option ${oi + 1} (EN)`} value={opt.en} onChange={(e) => setQuiz((qq) => qq.map((x, j) => j === i ? { ...x, options: x.options.map((o, k) => k === oi ? { ...o, en: e.target.value } : o) } : x))} />
-                  <input className="input flex-1" dir="rtl" placeholder={`خيار ${oi + 1}`} value={opt.ar} onChange={(e) => setQuiz((qq) => qq.map((x, j) => j === i ? { ...x, options: x.options.map((o, k) => k === oi ? { ...o, ar: e.target.value } : o) } : x))} />
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      <LessonQuizBuilder questions={quiz} onChange={setQuiz} />
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
         <label className="inline-flex items-center gap-2 text-sm">
