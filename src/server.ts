@@ -7,6 +7,32 @@ type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
+type CloudflareEnv = {
+  ASSETS?: { fetch: typeof fetch };
+};
+
+/** Secondary stage card — public asset key uses Unicode; requests arrive percent-encoded. */
+const SECONDARY_STAGE_IMAGE_PATH = "/images/الثانوية.jpg";
+
+async function tryServeSecondaryStageImage(
+  request: Request,
+  env: CloudflareEnv,
+): Promise<Response | undefined> {
+  const url = new URL(request.url);
+  const encodedPath = `/images/${encodeURIComponent("الثانوية.jpg")}`;
+  if (url.pathname !== SECONDARY_STAGE_IMAGE_PATH && url.pathname !== encodedPath) {
+    return undefined;
+  }
+
+  const assets = env.ASSETS;
+  if (!assets) return undefined;
+
+  const assetUrl = new URL(request.url);
+  assetUrl.pathname = SECONDARY_STAGE_IMAGE_PATH;
+  const response = await assets.fetch(new Request(assetUrl, request));
+  return response.ok ? response : undefined;
+}
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {
@@ -40,6 +66,9 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const assetResponse = await tryServeSecondaryStageImage(request, env as CloudflareEnv);
+      if (assetResponse) return assetResponse;
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
