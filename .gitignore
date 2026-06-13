@@ -20,9 +20,6 @@ dist-ssr
 .wrangler/
 .dev.vars
 
-# Build-generated copy of الثانوية.jpg for Cloudflare asset upload
-public/images/_secondary-stage.jpg
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
