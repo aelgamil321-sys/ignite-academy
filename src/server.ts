@@ -7,19 +7,6 @@ type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
-/** Secondary stage card — requests arrive percent-encoded but the asset manifest key is Unicode. */
-const SECONDARY_STAGE_IMAGE_PATH = "/images/الثانوية.jpg";
-
-function withDecodedSecondaryStagePath(request: Request): Request {
-  const url = new URL(request.url);
-  const encodedPath = `/images/${encodeURIComponent("الثانوية.jpg")}`;
-  if (url.pathname !== encodedPath) return request;
-
-  const decodedUrl = new URL(request.url);
-  decodedUrl.pathname = SECONDARY_STAGE_IMAGE_PATH;
-  return new Request(decodedUrl, request);
-}
-
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {
@@ -53,8 +40,6 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      request = withDecodedSecondaryStagePath(request);
-
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
