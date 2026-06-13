@@ -1,0 +1,23 @@
+import { supabase } from "@/integrations/supabase/client";
+import { getAccountRole } from "@/lib/account-role";
+
+export type ParentCornerAccess =
+  | { kind: "guest" }
+  | { kind: "parent"; userId: string }
+  | { kind: "student"; userId: string }
+  | { kind: "other"; userId: string };
+
+export async function resolveParentCornerAccess(): Promise<ParentCornerAccess> {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return { kind: "guest" };
+
+  const role = await getAccountRole(data.user.id);
+  if (role === "parent") return { kind: "parent", userId: data.user.id };
+  if (role === "student") return { kind: "student", userId: data.user.id };
+  return { kind: "other", userId: data.user.id };
+}
+
+export function parseAuthAccountType(search: Record<string, unknown>): "student" | "parent" {
+  const raw = search.accountType ?? search.role ?? search.type;
+  return raw === "parent" ? "parent" : "student";
+}

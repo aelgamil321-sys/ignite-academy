@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { LogOut, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
+import { ParentAccountRequired } from "@/components/parent-account-required";
 import { ParentDashboardView } from "@/components/parent-dashboard";
 import { useI18n } from "@/lib/i18n";
 import { grades } from "@/lib/curriculum";
@@ -27,7 +28,8 @@ export const Route = createFileRoute("/parent/dashboard")({
 
 function ParentDashboardGate() {
   const navigate = useNavigate();
-  const [state, setState] = useState<"checking" | "ok">("checking");
+  const { tr } = useI18n();
+  const [state, setState] = useState<"checking" | "ok" | "denied">("checking");
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,25 +38,38 @@ function ParentDashboardGate() {
       const { data } = await supabase.auth.getUser();
       if (!active) return;
       if (!data.user) {
-        navigate({ to: "/auth", search: { mode: "login" } });
+        navigate({ to: "/auth", search: { mode: "login", accountType: "parent" } });
         return;
       }
       const parent = await isParentAccount(data.user.id);
       if (!parent) {
-        navigate({ to: "/student" });
+        setState("denied");
         return;
       }
       setUserId(data.user.id);
       setState("ok");
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") navigate({ to: "/auth", search: { mode: "login" } });
+      if (event === "SIGNED_OUT") navigate({ to: "/auth", search: { mode: "login", accountType: "parent" } });
     });
     return () => {
       active = false;
       sub.subscription.unsubscribe();
     };
   }, [navigate]);
+
+  if (state === "denied") {
+    return (
+      <PageShell
+        eyebrow={tr("nav_parent")}
+        title={tr("parent_dashboard_title")}
+        lead={tr("parent_dashboard_lead")}
+        crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: tr("parent_dashboard_title") }]}
+      >
+        <ParentAccountRequired />
+      </PageShell>
+    );
+  }
 
   if (state !== "ok" || !userId) {
     return (
@@ -105,7 +120,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
   async function signOut() {
     await supabase.auth.signOut();
     toast.success(lang === "ar" ? "تم تسجيل الخروج" : "Signed out");
-    navigate({ to: "/auth", search: { mode: "login" } });
+    navigate({ to: "/auth", search: { mode: "login", accountType: "parent" } });
   }
 
   return (

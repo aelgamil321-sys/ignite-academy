@@ -220,6 +220,12 @@ export const t = {
   parent_dashboard_title: { en: "Parent Dashboard", ar: "لوحة ولي الأمر" },
   parent_dashboard_lead: { en: "Monitor your child's progress, certificates, badges, and recent learning activity.", ar: "راقب تقدّم ابنك/ابنتك والشهادات والشارات وآخر نشاط تعليمي." },
   parent_dashboard_cta: { en: "Open Parent Dashboard", ar: "فتح لوحة ولي الأمر" },
+  parent_corner_student_msg: {
+    en: "Please sign in with a parent account to access Parent Corner and track your child's progress.",
+    ar: "يرجى تسجيل الدخول بحساب ولي أمر للوصول إلى ركن الوالدين ومتابعة تقدّم ابنك/ابنتك.",
+  },
+  parent_corner_parent_login: { en: "Sign out & parent sign in", ar: "تسجيل الخروج ودخول ولي الأمر" },
+  parent_corner_parent_signup: { en: "Create parent account", ar: "إنشاء حساب ولي أمر" },
 
   // Resources
   res_title: { en: "Resource Library", ar: "المكتبة التعليمية" },

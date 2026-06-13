@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
-import { getPostAuthPath } from "@/lib/account-role";
+import { getAccountRole, getPostAuthPath, postAuthPathForRole } from "@/lib/account-role";
+import { parseAuthAccountType } from "@/lib/parent-corner-access";
 import { toast } from "sonner";
 import { GraduationCap, LogIn, UserPlus, AlertCircle, Users } from "lucide-react";
 import { grades } from "@/lib/curriculum";
@@ -11,6 +12,7 @@ import { grades } from "@/lib/curriculum";
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     mode: s.mode === "signup" ? "signup" : "login",
+    accountType: parseAuthAccountType(s),
   }),
   head: () => ({
     meta: [
@@ -23,10 +25,10 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { mode: initialMode } = Route.useSearch();
+  const { mode: initialMode, accountType: initialAccountType } = Route.useSearch();
   const { lang } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
-  const [accountType, setAccountType] = useState<"student" | "parent">("student");
+  const [accountType, setAccountType] = useState<"student" | "parent">(initialAccountType);
   const [fullName, setFullName] = useState("");
   const [arabicName, setArabicName] = useState("");
   const [englishName, setEnglishName] = useState("");
@@ -40,6 +42,7 @@ function AuthPage() {
   const [signupAlert, setSignupAlert] = useState<string | null>(null);
 
   useEffect(() => { setMode(initialMode); }, [initialMode]);
+  useEffect(() => { setAccountType(initialAccountType); }, [initialAccountType]);
 
   function isDuplicateEmailError(err: unknown): boolean {
     if (err && typeof err === "object" && "code" in err) {
@@ -51,12 +54,16 @@ function AuthPage() {
     return false;
   }
 
-  // If already signed in, send to the correct dashboard
+  // If already signed in, send to the correct dashboard (unless switching account type)
   useEffect(() => {
     let active = true;
     const redirectSignedInUser = async (userId: string) => {
-      const path = await getPostAuthPath(userId);
-      if (active) window.location.replace(path);
+      const role = await getAccountRole(userId);
+      if (!active) return;
+      if (initialAccountType === "parent" && role === "student") return;
+      if (initialAccountType === "student" && role === "parent") return;
+      const path = postAuthPathForRole(role);
+      window.location.replace(path);
     };
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (active && session?.user) void redirectSignedInUser(session.user.id);
@@ -68,7 +75,7 @@ function AuthPage() {
       active = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [initialAccountType]);
 
 
   const T = {

@@ -1,12 +1,25 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { PageShell } from "@/components/page-shell";
+import { ParentAccountRequired } from "@/components/parent-account-required";
 import { useI18n } from "@/lib/i18n";
 import { useAllParentGuides } from "@/lib/cms";
-import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, LayoutDashboard, Users } from "lucide-react";
+import { resolveParentCornerAccess } from "@/lib/parent-corner-access";
+import { ArrowRight, Users } from "lucide-react";
 
 export const Route = createFileRoute("/parent/")({
+  beforeLoad: async () => {
+    const access = await resolveParentCornerAccess();
+    if (access.kind === "guest") {
+      throw redirect({ to: "/auth", search: { mode: "login", accountType: "parent" } });
+    }
+    if (access.kind === "parent") {
+      throw redirect({ to: "/parent/dashboard" });
+    }
+  },
+  loader: async () => {
+    const access = await resolveParentCornerAccess();
+    return { showStudentNotice: access.kind === "student" };
+  },
   head: () => ({
     meta: [
       { title: "Parent Corner — Ignite Islamic Academy" },
@@ -22,41 +35,12 @@ export const Route = createFileRoute("/parent/")({
 
 function ParentPage() {
   const { tr, lang, dir } = useI18n();
+  const { showStudentNotice } = Route.useLoaderData();
   const parentGuides = useAllParentGuides();
-  const [signedIn, setSignedIn] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      const { data } = await supabase.auth.getUser();
-      if (active) setSignedIn(Boolean(data.user));
-    })();
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSignedIn(Boolean(session?.user));
-    });
-    return () => {
-      active = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
 
   return (
     <PageShell eyebrow={tr("nav_parent")} title={tr("parent_title")} lead={tr("parent_lead")} crumbs={[{ label: tr("nav_parent") }]}>
-      {signedIn && (
-        <div className="mb-8 rounded-2xl border border-emerald/25 bg-gradient-to-br from-emerald/5 to-background p-6 shadow-[var(--shadow-soft)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="font-display text-2xl text-primary">{tr("parent_dashboard_title")}</h2>
-            <p className="mt-2 text-sm text-muted-foreground max-w-2xl">{tr("parent_dashboard_lead")}</p>
-          </div>
-          <Link
-            to="/parent/dashboard"
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-emerald transition-colors shrink-0"
-          >
-            <LayoutDashboard className="h-4 w-4" />
-            {tr("parent_dashboard_cta")}
-          </Link>
-        </div>
-      )}
+      {showStudentNotice && <ParentAccountRequired />}
       <h2 className="font-display text-2xl text-primary mb-6 flex items-center gap-2">
         <Users className="h-6 w-6 text-emerald" /> {tr("parent_guides")}
       </h2>
