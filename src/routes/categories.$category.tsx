@@ -35,9 +35,9 @@ function CategoryPage() {
   return (
     <PageShell
       eyebrow={tr("cat_eyebrow")}
-      title={category.name[lang]}
-      lead={category.desc[lang]}
-      crumbs={[{ label: tr("nav_home"), to: "/" }, { label: category.name[lang] }]}
+      title={category.name[locale]}
+      lead={category.desc[locale]}
+      crumbs={[{ label: tr("nav_home"), to: "/" }, { label: category.name[locale] }]}
     >
       {!hasContent ? (
         <EmptyState
@@ -62,8 +62,8 @@ function CategoryPage() {
                     <div className="text-xs text-primary font-semibold uppercase tracking-wider">
                       {gradeDisplayName(l.grade, lang)}
                     </div>
-                    <h3 className="mt-1 font-display text-lg text-foreground">{l.title[lang]}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{l.outcome[lang]}</p>
+                    <h3 className="mt-1 font-display text-lg text-foreground">{l.title[locale]}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{l.outcome[locale]}</p>
                     <div className="mt-3 inline-flex items-center gap-1 text-sm text-primary group-hover:text-primary">
                       {tr("open")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                     </div>
@@ -90,8 +90,8 @@ function CategoryPage() {
                       <Play className="h-10 w-10 relative" />
                     </div>
                     <div className="p-4">
-                      <h3 className="font-display text-lg text-foreground">{v.title[lang]}</h3>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{v.description[lang]}</p>
+                      <h3 className="font-display text-lg text-foreground">{v.title[locale]}</h3>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{v.description[locale]}</p>
                     </div>
                   </Link>
                 ))}
@@ -111,7 +111,7 @@ function CategoryPage() {
                   >
                     <Download className="h-5 w-5 text-primary shrink-0" />
                     <div className="min-w-0">
-                      <div className="font-medium text-primary truncate">{f.title[lang]}</div>
+                      <div className="font-medium text-primary truncate">{f.title[locale]}</div>
                       <div className="text-xs text-muted-foreground">{f.type.toUpperCase()} · {f.size}</div>
                     </div>
                   </a>
@@ -130,8 +130,8 @@ function CategoryPage() {
                     params={{ slug: a.id }}
                     className="rounded-2xl border border-border bg-card p-5 hover:border-primary transition-colors"
                   >
-                    <h3 className="font-display text-lg text-foreground">{a.title[lang]}</h3>
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{a.content[lang]}</p>
+                    <h3 className="font-display text-lg text-foreground">{a.title[locale]}</h3>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{a.content[locale]}</p>
                   </Link>
                 ))}
               </div>

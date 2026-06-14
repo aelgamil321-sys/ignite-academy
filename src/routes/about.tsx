@@ -18,7 +18,7 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
-  const { tr } = useI18n();
+  const { tr, locale } = useI18n();
   const cards = [
     { icon: Sparkles, t: tr("about_mission_t"), d: tr("about_mission_d") },
     { icon: Compass, t: tr("about_vision_t"), d: tr("about_vision_d") },

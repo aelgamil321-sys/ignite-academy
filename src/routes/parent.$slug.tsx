@@ -26,11 +26,11 @@ function ParentDetail() {
   if (!guide) return <div className="container-page py-20">Guide not found.</div>;
   const image = (guide as { image?: string }).image;
   return (
-    <PageShell eyebrow={tr("nav_parent")} title={guide.title[lang]} lead={guide.excerpt[lang]}
-      crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: guide.title[lang] }]}>
-      {image && <img src={image} alt={guide.title[lang]} className="w-full max-w-3xl rounded-2xl mb-6 border border-border" />}
+    <PageShell eyebrow={tr("nav_parent")} title={guide.title[locale]} lead={guide.excerpt[locale]}
+      crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: guide.title[locale] }]}>
+      {image && <img src={image} alt={guide.title[locale]} className="w-full max-w-3xl rounded-2xl mb-6 border border-border" />}
       <article className="prose max-w-3xl">
-        <p className="text-foreground/85 leading-relaxed text-lg whitespace-pre-line">{guide.body[lang]}</p>
+        <p className="text-foreground/85 leading-relaxed text-lg whitespace-pre-line">{guide.body[locale]}</p>
       </article>
     </PageShell>
   );

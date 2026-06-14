@@ -20,7 +20,7 @@ export const Route = createFileRoute("/admin/lessons/edit/$lessonId")({
 function AdminLessonEditPage() {
   const navigate = useNavigate();
   const { lessonId } = Route.useParams();
-  const { lang } = useI18n();
+  const { lang, locale } = useI18n();
   const { lessons, deletedLessons, loading, refresh } = useCMS();
   const [lesson, setLesson] = useState<CustomLesson | null>(null);
   const [fetching, setFetching] = useState(true);

@@ -88,13 +88,13 @@ function GradePage() {
       <main className="flex-1">
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
           <div className="container-page py-12">
-            <div className="mb-5"><Breadcrumbs items={[{ label: tr("nav_stages"), to: "/grades" }, { label: grade.name[lang] }]} /></div>
+            <div className="mb-5"><Breadcrumbs items={[{ label: tr("nav_stages"), to: "/grades" }, { label: grade.name[locale] }]} /></div>
             <Link to="/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-5">
               <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               {tr("back_to_grades")}
             </Link>
-            <div className="text-xs uppercase tracking-[0.22em] text-primary mb-2">{grade.stage[lang]}</div>
-            <h1 className="font-display text-4xl md:text-5xl font-semibold text-foreground">{grade.name[lang]}</h1>
+            <div className="text-xs uppercase tracking-[0.22em] text-primary mb-2">{grade.stage[locale]}</div>
+            <h1 className="font-display text-4xl md:text-5xl font-semibold text-foreground">{grade.name[locale]}</h1>
 
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl">
               <Stat icon={BookOpen} value={lessons.length} label={tr("stat_lessons")} />
@@ -121,7 +121,7 @@ function GradePage() {
                   className="rounded-2xl border border-border bg-card p-5 hover:border-primary hover:shadow-[var(--shadow-soft)] transition-all flex items-center justify-between gap-3"
                 >
                   <div className="min-w-0">
-                    <div className="font-medium text-primary truncate">{u.name[lang] || u.name.en || u.name.ar}</div>
+                    <div className="font-medium text-primary truncate">{u.name[locale] || u.name.en || u.name.ar}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">{u.count} {tr("lesson")}</div>
                   </div>
                   <ArrowRight className={`h-4 w-4 text-primary shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
@@ -169,7 +169,7 @@ function GradePage() {
                   {gradeVideos.slice(0, 4).map((v) => (
                     <li key={v.slug}>
                       <Link to="/videos/$slug" params={{ slug: v.slug }} className="block rounded-lg border border-border bg-card px-4 py-3 text-sm hover:border-primary">
-                        {v.title[lang]}
+                        {v.title[locale]}
                       </Link>
                     </li>
                   ))}
@@ -187,7 +187,7 @@ function GradePage() {
                 <ul className="space-y-2">
                   {gradeResources.slice(0, 4).map((r) => (
                     <li key={r.slug} className="rounded-lg border border-border bg-card px-4 py-3 text-sm flex items-center justify-between gap-3">
-                      <span className="truncate">{r.title[lang]}</span>
+                      <span className="truncate">{r.title[locale]}</span>
                       <span className="text-xs text-muted-foreground">{r.type.toUpperCase()}</span>
                     </li>
                   ))}

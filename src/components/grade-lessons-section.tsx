@@ -97,7 +97,7 @@ function StatusBadge({ status, lang }: { status: LessonStatus; lang: "en" | "ar"
     <span
       className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${STATUS_STYLES[status]}`}
     >
-      {labels[status][lang]}
+      {labels[status][locale]}
     </span>
   );
 }
@@ -235,10 +235,10 @@ export function GradeLessonsSection({
           <div className="flex flex-wrap items-end justify-between gap-3 mb-3">
             <div>
               <div className="text-xs uppercase tracking-[0.2em] text-primary mb-1">
-                {L("Your Progress", "تقدّمك")[lang]}
+                {L("Your Progress", "تقدّمك")[locale]}
               </div>
               <p className="text-sm text-muted-foreground">
-                {L("Completed lessons", "الدروس المكتملة")[lang]}
+                {L("Completed lessons", "الدروس المكتملة")[locale]}
               </p>
             </div>
             <div className="font-display text-2xl text-foreground tabular-nums">
@@ -269,8 +269,8 @@ export function GradeLessonsSection({
 
           const quizLabel =
             status === "in_progress"
-              ? L("Continue Quiz", "متابعة الاختبار")[lang]
-              : L("Start Quiz", "بدء الاختبار")[lang];
+              ? L("Continue Quiz", "متابعة الاختبار")[locale]
+              : L("Start Quiz", "بدء الاختبار")[locale];
 
           return (
             <article
@@ -284,10 +284,10 @@ export function GradeLessonsSection({
                       {tr("lesson")} {index + 1} · {subject}
                     </div>
                     <h3 className="font-display text-xl sm:text-2xl font-semibold text-foreground leading-snug break-words">
-                      {lesson.title[lang]}
+                      {lesson.title[locale]}
                     </h3>
                     <p className="mt-1.5 text-sm text-muted-foreground break-words">
-                      {lesson.unit[lang]}
+                      {lesson.unit[locale]}
                     </p>
                   </div>
                   <StatusBadge status={status} lang={lang} />
@@ -302,7 +302,7 @@ export function GradeLessonsSection({
 
               <div className="p-5 sm:p-6 space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {L("Lesson Actions", "إجراءات الدرس")[lang]}
+                  {L("Lesson Actions", "إجراءات الدرس")[locale]}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                   <ActionButton
@@ -311,14 +311,14 @@ export function GradeLessonsSection({
                     hash="lesson-video"
                     onClick={() => touchLesson(custom.id)}
                     icon={PlayCircle}
-                    label={L("Watch Lesson Video", "مشاهدة فيديو الدرس")[lang]}
+                    label={L("Watch Lesson Video", "مشاهدة فيديو الدرس")[locale]}
                     disabled={!videoAvailable}
                   />
                   <ActionButton
                     href={pdfUrl ?? undefined}
                     onClick={() => touchLesson(custom.id)}
                     icon={FileText}
-                    label={L("Download PDF", "تحميل PDF")[lang]}
+                    label={L("Download PDF", "تحميل PDF")[locale]}
                     disabled={!pdfUrl}
                     external
                   />
@@ -328,7 +328,7 @@ export function GradeLessonsSection({
                       touchLesson(custom.id);
                     }}
                     icon={FileSpreadsheet}
-                    label={L("Download Worksheet", "تحميل ورقة العمل")[lang]}
+                    label={L("Download Worksheet", "تحميل ورقة العمل")[locale]}
                     disabled={!worksheetUrl}
                     external
                   />
@@ -347,7 +347,7 @@ export function GradeLessonsSection({
                     hash="lesson-result"
                     onClick={() => touchLesson(custom.id)}
                     icon={submission ? Award : BookOpen}
-                    label={L("View Result", "عرض النتيجة")[lang]}
+                    label={L("View Result", "عرض النتيجة")[locale]}
                     disabled={!submission}
                   />
                 </div>

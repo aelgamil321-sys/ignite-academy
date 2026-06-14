@@ -48,8 +48,8 @@ function ParentPage() {
         {parentGuides.map((g) => (
           <Link key={g.slug} to="/parent/$slug" params={{ slug: g.slug }}
             className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:border-primary hover:shadow-[var(--shadow-elegant)] transition-all flex flex-col">
-            <h3 className="font-display text-xl text-foreground leading-snug">{g.title[lang]}</h3>
-            <p className="mt-3 text-sm text-muted-foreground flex-1">{g.excerpt[lang]}</p>
+            <h3 className="font-display text-xl text-foreground leading-snug">{g.title[locale]}</h3>
+            <p className="mt-3 text-sm text-muted-foreground flex-1">{g.excerpt[locale]}</p>
             <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary group-hover:text-primary">
               {tr("read_more")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
             </div>

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, BookOpen, Languages, User, LayoutDashboard } from "lucide-react";
+import { Menu, X, BookOpen, User, LayoutDashboard } from "lucide-react";
+import { LanguageSelector } from "@/components/language-selector";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +38,7 @@ const mobileNavPillActive = cn(
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
-  const { tr, toggle, lang } = useI18n();
+  const { tr, lang, locale } = useI18n();
   const { isParent, loading: roleLoading } = useAccountRole();
 
   useEffect(() => {
@@ -66,7 +67,7 @@ export function SiteHeader() {
     { label: tr("nav_parent"), to: "/parent" },
     { label: tr("nav_student"), to: "/student" },
     { label: tr("nav_contact"), to: "/contact" },
-    { label: lang === "ar" ? "الإدارة" : "Admin", to: "/admin" },
+    { label: locale === "ar" ? "الإدارة" : "Admin", to: "/admin" },
   ];
 
   const parentNav: Array<{ label: string; to: string }> = [
@@ -77,18 +78,18 @@ export function SiteHeader() {
     { label: tr("nav_parent"), to: "/parent" },
     { label: tr("parent_dashboard_title"), to: "/parent/dashboard" },
     { label: tr("nav_contact"), to: "/contact" },
-    { label: lang === "ar" ? "الإدارة" : "Admin", to: "/admin" },
+    { label: locale === "ar" ? "الإدارة" : "Admin", to: "/admin" },
   ];
 
   const nav = signedIn && isParent ? parentNav : allNav.filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
   const desktopNav = signedIn && isParent ? parentNav : allNav.slice(0, 8).filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
   const profilePath = signedIn && isParent ? "/parent/settings" : "/student/profile";
   const profileLabel = signedIn && isParent
-    ? (lang === "ar" ? "ملف ولي الأمر" : "Parent Profile")
-    : (lang === "ar" ? "الملف الشخصي" : "Profile");
+    ? (locale === "ar" ? "ملف ولي الأمر" : "Parent Profile")
+    : (locale === "ar" ? "الملف الشخصي" : "Profile");
 
   const schoolLogoUrl = certificateSchoolLogoUrl();
-  const schoolLogoAlt = lang === "ar" ? "مدرسة اجنايت" : "Ignite School";
+  const schoolLogoAlt = locale === "ar" ? "مدرسة اجنايت" : "Ignite School";
 
   const brandLink = (compact?: boolean) => (
     <Link to="/" className="group flex min-w-0 items-center gap-2 sm:gap-2.5">
@@ -168,16 +169,7 @@ export function SiteHeader() {
     </>
   );
 
-  const langButton = (
-    <button
-      onClick={toggle}
-      aria-label="Toggle language"
-      className={cn(headerPillBase, "h-8 shrink-0 gap-1 px-2 text-[11px] font-semibold sm:px-2.5")}
-    >
-      <Languages className="h-3.5 w-3.5" />
-      <span className="hidden sm:inline">{lang === "en" ? "العربية" : "EN"}</span>
-    </button>
-  );
+  const langButton = <LanguageSelector />;
 
   const menuButton = (
     <button

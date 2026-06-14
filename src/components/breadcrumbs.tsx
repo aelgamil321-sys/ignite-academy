@@ -10,7 +10,7 @@ export interface Crumb {
 }
 
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
-  const { tr, dir } = useI18n();
+  const { tr, dir, locale } = useI18n();
   const Sep = (
     <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground ${dir === "rtl" ? "rotate-180" : ""}`} />
   );

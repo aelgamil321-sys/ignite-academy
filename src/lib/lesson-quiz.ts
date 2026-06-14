@@ -386,7 +386,7 @@ export function optionLabel(
 ): string {
   const opt = options[index];
   if (!opt) return "—";
-  return opt[lang] || opt.en || opt.ar || "—";
+  return opt[locale] || opt.en || opt.ar || "—";
 }
 
 export function submissionRowToSaved(row: Record<string, unknown>): SavedQuizSubmission {

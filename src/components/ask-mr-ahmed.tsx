@@ -4,7 +4,7 @@ import { useI18n } from "@/lib/i18n";
 
 export function AskMrAhmed() {
   const [open, setOpen] = useState(false);
-  const { tr, dir } = useI18n();
+  const { tr, dir, locale } = useI18n();
   return (
     <>
       <button

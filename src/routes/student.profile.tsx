@@ -32,7 +32,7 @@ export const Route = createFileRoute("/student/profile")({
 
 function StudentProfilePage() {
   const navigate = useNavigate();
-  const { lang, dir } = useI18n();
+  const { lang, dir, locale } = useI18n();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [email, setEmail] = useState("");

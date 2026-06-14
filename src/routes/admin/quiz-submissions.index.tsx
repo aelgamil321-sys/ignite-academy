@@ -180,7 +180,7 @@ function AdminQuizSubmissionsPage() {
 
       if (error) throw error;
 
-      toast.success(L("Submission reviewed", "تمت مراجعة الإرسال")[lang]);
+      toast.success(L("Submission reviewed", "تمت مراجعة الإرسال")[locale]);
       setDraftScores((prev) => {
         const next = { ...prev };
         delete next[row.id];
@@ -204,27 +204,27 @@ function AdminQuizSubmissionsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl text-foreground">
-          {L("Quiz Submissions", "إرسالات الاختبارات")[lang]}
+          {L("Quiz Submissions", "إرسالات الاختبارات")[locale]}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           {L(
             "Review student quiz submissions and grade essay answers.",
             "راجع إرسالات الطلاب وقيّم الإجابات المقالية.",
-          )[lang]}
+          )[locale]}
         </p>
         {pendingCount > 0 && (
           <p className="text-sm text-amber-700 mt-2 font-medium">
             {pendingCount}{" "}
-            {L("submission(s) pending review", "إرسال(ات) بانتظار المراجعة")[lang]}
+            {L("submission(s) pending review", "إرسال(ات) بانتظار المراجعة")[locale]}
           </p>
         )}
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</p>
+        <p className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[locale]}</p>
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          {L("No quiz submissions yet.", "لا توجد إرسالات بعد.")[lang]}
+          {L("No quiz submissions yet.", "لا توجد إرسالات بعد.")[locale]}
         </p>
       ) : (
         <ul className="space-y-3">
@@ -250,11 +250,11 @@ function AdminQuizSubmissionsPage() {
                 >
                   <div className="min-w-0 space-y-1">
                     <div className="font-medium text-foreground">
-                      {lesson?.title[lang] || lesson?.title.en || row.lesson_id}
+                      {lesson?.title[locale] || lesson?.title.en || row.lesson_id}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {profile?.full_name || profile?.email || row.student_id}
-                      {profile?.grade ? ` · ${L("Grade", "الصف")[lang]} ${profile.grade}` : ""}
+                      {profile?.grade ? ` · ${L("Grade", "الصف")[locale]} ${profile.grade}` : ""}
                       {(profile?.section || profile?.islamic_group) ? (
                         <span>
                           {" · "}
@@ -280,8 +280,8 @@ function AdminQuizSubmissionsPage() {
                       }`}
                     >
                       {row.status === "pending_review"
-                        ? L("Pending review", "قيد المراجعة")[lang]
-                        : L("Reviewed", "تمت المراجعة")[lang]}
+                        ? L("Pending review", "قيد المراجعة")[locale]
+                        : L("Reviewed", "تمت المراجعة")[locale]}
                     </span>
                     <span className="text-sm font-semibold text-primary">
                       {finalScore}/{row.total_points}
@@ -298,15 +298,15 @@ function AdminQuizSubmissionsPage() {
                   <div className="border-t border-border p-4 space-y-4 bg-background/50">
                     <div className="grid gap-2 sm:grid-cols-3 text-sm">
                       <div>
-                        <span className="text-muted-foreground">{L("Auto score", "الدرجة التلقائية")[lang]}: </span>
+                        <span className="text-muted-foreground">{L("Auto score", "الدرجة التلقائية")[locale]}: </span>
                         <span className="font-semibold">{autoScore}</span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">{L("Essay score", "درجة المقالي")[lang]}: </span>
+                        <span className="text-muted-foreground">{L("Essay score", "درجة المقالي")[locale]}: </span>
                         <span className="font-semibold">{essayScore}</span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">{L("Final score", "الدرجة النهائية")[lang]}: </span>
+                        <span className="text-muted-foreground">{L("Final score", "الدرجة النهائية")[locale]}: </span>
                         <span className="font-semibold text-primary">
                           {finalScore}/{row.total_points} ({row.percentage}%)
                         </span>
@@ -323,37 +323,37 @@ function AdminQuizSubmissionsPage() {
                             className="rounded-lg border border-border p-4 space-y-3"
                           >
                             <div className="text-xs uppercase tracking-wider text-primary font-semibold">
-                              {L("Essay", "سؤال مقالي")[lang]} #{a.questionIndex + 1}
+                              {L("Essay", "سؤال مقالي")[locale]} #{a.questionIndex + 1}
                               <span className="text-muted-foreground font-normal ms-2">
-                                ({a.points} {L("pts max", "نقطة كحد أقصى")[lang]})
+                                ({a.points} {L("pts max", "نقطة كحد أقصى")[locale]})
                               </span>
                             </div>
                             {q && (
                               <div className="text-sm font-medium">
-                                {q.q[lang] || q.q.en || q.q.ar}
+                                {q.q[locale] || q.q.en || q.q.ar}
                               </div>
                             )}
                             <div>
                               <div className="text-xs text-muted-foreground mb-1">
-                                {L("Student answer", "إجابة الطالب")[lang]}
+                                {L("Student answer", "إجابة الطالب")[locale]}
                               </div>
                               <div className="rounded-md border border-border bg-card px-3 py-2 text-sm whitespace-pre-wrap">
-                                {a.essayText || L("(empty)", "(فارغ)")[lang]}
+                                {a.essayText || L("(empty)", "(فارغ)")[locale]}
                               </div>
                             </div>
                             {model && (model.en || model.ar) && (
                               <div>
                                 <div className="text-xs text-muted-foreground mb-1">
-                                  {L("Model answer", "الإجابة النموذجية")[lang]}
+                                  {L("Model answer", "الإجابة النموذجية")[locale]}
                                 </div>
                                 <div className="rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground whitespace-pre-wrap">
-                                  {model[lang] || model.en || model.ar}
+                                  {model[locale] || model.en || model.ar}
                                 </div>
                               </div>
                             )}
                             <label className="block text-xs max-w-[200px]">
                               <span className="text-muted-foreground">
-                                {L("Points awarded", "النقاط الممنوحة")[lang]}
+                                {L("Points awarded", "النقاط الممنوحة")[locale]}
                               </span>
                               <input
                                 type="number"
@@ -374,7 +374,7 @@ function AdminQuizSubmissionsPage() {
                             <div className="grid gap-3 md:grid-cols-2">
                               <label className="block text-xs">
                                 <span className="text-muted-foreground">
-                                  {L("Teacher feedback (Arabic)", "ملاحظات المعلّم (عربي)")[lang]}
+                                  {L("Teacher feedback (Arabic)", "ملاحظات المعلّم (عربي)")[locale]}
                                 </span>
                                 <textarea
                                   className="mt-1 w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm min-h-[72px]"
@@ -387,7 +387,7 @@ function AdminQuizSubmissionsPage() {
                               </label>
                               <label className="block text-xs">
                                 <span className="text-muted-foreground">
-                                  {L("Teacher feedback (English)", "ملاحظات المعلّم (إنجليزي)")[lang]}
+                                  {L("Teacher feedback (English)", "ملاحظات المعلّم (إنجليزي)")[locale]}
                                 </span>
                                 <textarea
                                   className="mt-1 w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm min-h-[72px]"
@@ -412,13 +412,13 @@ function AdminQuizSubmissionsPage() {
                           <div>
                             <span className="text-xs text-muted-foreground uppercase">
                               {a.type === "true_false"
-                                ? L("True/False", "صح/خطأ")[lang]
-                                : L("MCQ", "اختيار من متعدد")[lang]}
+                                ? L("True/False", "صح/خطأ")[locale]
+                                : L("MCQ", "اختيار من متعدد")[locale]}
                               {" #"}
                               {a.questionIndex + 1}
                             </span>
                             {q && (
-                              <div className="font-medium mt-0.5">{q.q[lang] || q.q.en}</div>
+                              <div className="font-medium mt-0.5">{q.q[locale] || q.q.en}</div>
                             )}
                           </div>
                           <span className={correct ? "text-primary font-semibold" : "text-destructive font-semibold"}>
@@ -440,7 +440,7 @@ function AdminQuizSubmissionsPage() {
                         ) : (
                           <Save className="h-4 w-4" />
                         )}
-                        {L("Save review & final score", "حفظ المراجعة والدرجة النهائية")[lang]}
+                        {L("Save review & final score", "حفظ المراجعة والدرجة النهائية")[locale]}
                       </button>
                     )}
                   </div>

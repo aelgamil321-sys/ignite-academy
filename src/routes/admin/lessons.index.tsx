@@ -33,9 +33,9 @@ function AdminLessonsPage() {
               className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
             >
               <div className="min-w-0">
-                <div className="font-medium text-foreground">{lesson.title[lang]}</div>
+                <div className="font-medium text-foreground">{lesson.title[locale]}</div>
                 <div className="text-xs text-muted-foreground truncate">
-                  {lesson.grade} · {lesson.unit[lang] || "—"}
+                  {lesson.grade} · {lesson.unit[locale] || "—"}
                 </div>
               </div>
               <Link

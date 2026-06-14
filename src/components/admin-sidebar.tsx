@@ -56,7 +56,7 @@ export function AdminSidebar({
   return (
     <aside className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] h-fit">
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground px-3 py-2">
-        {L("Create", "إنشاء")[lang]}
+        {L("Create", "إنشاء")[locale]}
       </div>
       {createItems.map((s) => {
         const Icon = s.icon;
@@ -69,28 +69,28 @@ export function AdminSidebar({
             className={sideClass(active)}
           >
             <Icon className="h-4 w-4 shrink-0" />
-            <span className="text-start">{s.label[lang]}</span>
+            <span className="text-start">{s.label[locale]}</span>
           </Link>
         );
       })}
 
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground px-3 py-2 mt-2">
-        {L("Manage", "إدارة")[lang]}
+        {L("Manage", "إدارة")[locale]}
       </div>
 
       <Link to="/admin/lessons" className={sideClass(onLessonsRoute)}>
         <BookOpen className="h-4 w-4 shrink-0" />
-        <span className="text-start">{L("Manage Lessons", "إدارة الدروس")[lang]}</span>
+        <span className="text-start">{L("Manage Lessons", "إدارة الدروس")[locale]}</span>
       </Link>
 
       <Link to="/admin/quiz-submissions" className={sideClass(onQuizSubmissionsRoute)}>
         <ClipboardCheck className="h-4 w-4 shrink-0" />
-        <span className="text-start">{L("Quiz Submissions", "إرسالات الاختبارات")[lang]}</span>
+        <span className="text-start">{L("Quiz Submissions", "إرسالات الاختبارات")[locale]}</span>
       </Link>
 
       <Link to="/admin/analytics" className={sideClass(onAnalyticsRoute)}>
         <BarChart3 className="h-4 w-4 shrink-0" />
-        <span className="text-start">{L("Analytics", "التحليلات")[lang]}</span>
+        <span className="text-start">{L("Analytics", "التحليلات")[locale]}</span>
       </Link>
 
       {manageTabItems.map((s) => {
@@ -104,7 +104,7 @@ export function AdminSidebar({
             className={sideClass(active)}
           >
             <Icon className="h-4 w-4 shrink-0" />
-            <span className="text-start">{s.label[lang]}</span>
+            <span className="text-start">{s.label[locale]}</span>
           </Link>
         );
       })}

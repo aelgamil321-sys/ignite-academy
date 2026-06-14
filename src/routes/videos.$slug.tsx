@@ -25,13 +25,13 @@ function VideoDetail() {
 
   return (
     <PageShell
-      eyebrow={data.grade[lang]}
-      title={data.title[lang]}
-      lead={data.description[lang]}
-      crumbs={[{ label: tr("nav_videos"), to: "/videos" }, { label: data.title[lang] }]}
+      eyebrow={data.grade[locale]}
+      title={data.title[locale]}
+      lead={data.description[locale]}
+      crumbs={[{ label: tr("nav_videos"), to: "/videos" }, { label: data.title[locale] }]}
     >
       <div className="aspect-video w-full rounded-2xl overflow-hidden border border-border shadow-[var(--shadow-elegant)]">
-        <iframe className="h-full w-full" src={`https://www.youtube.com/embed/${data.ytId}`} title={data.title[lang]} allowFullScreen />
+        <iframe className="h-full w-full" src={`https://www.youtube.com/embed/${data.ytId}`} title={data.title[locale]} allowFullScreen />
       </div>
       {data.duration && <div className="mt-6 text-sm text-muted-foreground">Duration: {data.duration}</div>}
     </PageShell>

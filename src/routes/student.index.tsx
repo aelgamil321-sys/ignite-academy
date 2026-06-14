@@ -106,7 +106,7 @@ function StudentDashboardPage({
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const myGrade = grades.find((g) => g.slug === gradeSlug) ?? grades.find((g) => g.slug === "8")!;
-  const gradeName = gradeDisplayName(myGrade.slug, lang) || myGrade.name[lang];
+  const gradeName = gradeDisplayName(myGrade.slug, lang) || myGrade.name[locale];
 
   useEffect(() => {
     let active = true;

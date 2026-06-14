@@ -35,10 +35,10 @@ function QuizDetail() {
 
   return (
     <PageShell
-      eyebrow={quiz.grade[lang]}
-      title={quiz.title[lang]}
-      lead={quiz.description[lang]}
-      crumbs={[{ label: tr("nav_quizzes"), to: "/quizzes" }, { label: quiz.title[lang] }]}
+      eyebrow={quiz.grade[locale]}
+      title={quiz.title[locale]}
+      lead={quiz.description[locale]}
+      crumbs={[{ label: tr("nav_quizzes"), to: "/quizzes" }, { label: quiz.title[locale] }]}
     >
       <div className="space-y-6 max-w-3xl">
         {quiz.questions.map((q, i) => {
@@ -49,7 +49,7 @@ function QuizDetail() {
               <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-primary mb-2">
                 <HelpCircle className="h-4 w-4" /> {tr("question")} {i + 1}
               </div>
-              <div className="font-medium mb-3">{q.q[lang]}</div>
+              <div className="font-medium mb-3">{q.q[locale]}</div>
               <div className="grid gap-2">
                 {q.options.map((opt, oi) => {
                   const chosen = sel === oi;
@@ -68,7 +68,7 @@ function QuizDetail() {
                           : "border-border hover:border-primary hover:text-primary",
                       ].join(" ")}
                     >
-                      {opt[lang]}
+                      {opt[locale]}
                     </button>
                   );
                 })}

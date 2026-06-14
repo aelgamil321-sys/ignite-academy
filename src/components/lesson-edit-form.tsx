@@ -110,11 +110,11 @@ export function LessonEditForm({
 
   const submit = async () => {
     if (!titleEn.trim() || !titleAr.trim()) {
-      toast.error(L("Title (English) and Title (Arabic) are required", "العنوان (إنجليزي) والعنوان (عربي) مطلوبان")[lang]);
+      toast.error(L("Title (English) and Title (Arabic) are required", "العنوان (إنجليزي) والعنوان (عربي) مطلوبان")[locale]);
       return;
     }
     if (!grade) {
-      toast.error(L("Grade is required", "الصف مطلوب")[lang]);
+      toast.error(L("Grade is required", "الصف مطلوب")[locale]);
       return;
     }
 
@@ -144,7 +144,7 @@ export function LessonEditForm({
         quiz: serializeQuizForSave(quiz),
         ...bilingualFilesSavePayload(mergedFiles, baselineFiles),
       });
-      toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
+      toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[locale]);
       onSaved();
     } catch {
       // CMS layer already shows the error toast
@@ -156,84 +156,84 @@ export function LessonEditForm({
   return (
     <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-2xl text-foreground">{L("Edit Lesson", "تعديل الدرس")[lang]}</h2>
+        <h2 className="font-display text-2xl text-foreground">{L("Edit Lesson", "تعديل الدرس")[locale]}</h2>
         <button
           type="button"
           onClick={onCancel}
           className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
         >
-          <X className="h-4 w-4" /> {L("Cancel", "إلغاء")[lang]}
+          <X className="h-4 w-4" /> {L("Cancel", "إلغاء")[locale]}
         </button>
       </div>
 
       <Row>
-        <Field label={L("Grade", "الصف")[lang]}>
+        <Field label={L("Grade", "الصف")[locale]}>
           <select value={grade} onChange={(e) => setGrade(e.target.value)} className="lesson-input">
-            {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[lang]}</option>)}
+            {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[locale]}</option>)}
           </select>
         </Field>
       </Row>
       <Row>
-        <Field label={L("Unit (English)", "الوحدة (إنجليزي)")[lang]}>
+        <Field label={L("Unit (English)", "الوحدة (إنجليزي)")[locale]}>
           <input className="lesson-input" value={unitEn} onChange={(e) => setUnitEn(e.target.value)} />
         </Field>
-        <Field label={L("Unit (Arabic)", "الوحدة (عربي)")[lang]}>
+        <Field label={L("Unit (Arabic)", "الوحدة (عربي)")[locale]}>
           <input className="lesson-input" dir="rtl" value={unitAr} onChange={(e) => setUnitAr(e.target.value)} />
         </Field>
       </Row>
       <Row>
-        <Field label={L("Title (English)", "العنوان (إنجليزي)")[lang]} required>
+        <Field label={L("Title (English)", "العنوان (إنجليزي)")[locale]} required>
           <input className="lesson-input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
         </Field>
-        <Field label={L("Title (Arabic)", "العنوان (عربي)")[lang]} required>
+        <Field label={L("Title (Arabic)", "العنوان (عربي)")[locale]} required>
           <input className="lesson-input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} />
         </Field>
       </Row>
       <Row>
-        <Field label={L("Learning Outcome (EN)", "نواتج التعلّم (إنجليزي)")[lang]}>
+        <Field label={L("Learning Outcome (EN)", "نواتج التعلّم (إنجليزي)")[locale]}>
           <textarea className="lesson-input" rows={3} value={outEn} onChange={(e) => setOutEn(e.target.value)} />
         </Field>
-        <Field label={L("Learning Outcome (AR)", "نواتج التعلّم (عربي)")[lang]}>
+        <Field label={L("Learning Outcome (AR)", "نواتج التعلّم (عربي)")[locale]}>
           <textarea className="lesson-input" dir="rtl" rows={3} value={outAr} onChange={(e) => setOutAr(e.target.value)} />
         </Field>
       </Row>
       <Row>
-        <Field label={L("Lesson Content (EN)", "محتوى الدرس (إنجليزي)")[lang]}>
+        <Field label={L("Lesson Content (EN)", "محتوى الدرس (إنجليزي)")[locale]}>
           <textarea className="lesson-input" rows={5} value={expEn} onChange={(e) => setExpEn(e.target.value)} />
         </Field>
-        <Field label={L("Lesson Content (AR)", "محتوى الدرس (عربي)")[lang]}>
+        <Field label={L("Lesson Content (AR)", "محتوى الدرس (عربي)")[locale]}>
           <textarea className="lesson-input" dir="rtl" rows={5} value={expAr} onChange={(e) => setExpAr(e.target.value)} />
         </Field>
       </Row>
       <Row>
-        <Field label={L("Key Vocabulary (EN)", "المفردات (إنجليزي)")[lang]}>
+        <Field label={L("Key Vocabulary (EN)", "المفردات (إنجليزي)")[locale]}>
           <input className="lesson-input" value={vocEn} onChange={(e) => setVocEn(e.target.value)} />
         </Field>
-        <Field label={L("Key Vocabulary (AR)", "المفردات (عربي)")[lang]}>
+        <Field label={L("Key Vocabulary (AR)", "المفردات (عربي)")[locale]}>
           <input className="lesson-input" dir="rtl" value={vocAr} onChange={(e) => setVocAr(e.target.value)} />
         </Field>
       </Row>
       <Row>
-        <Field label={L("Student Activity (EN)", "نشاط الطالب (إنجليزي)")[lang]}>
+        <Field label={L("Student Activity (EN)", "نشاط الطالب (إنجليزي)")[locale]}>
           <textarea className="lesson-input" rows={3} value={actEn} onChange={(e) => setActEn(e.target.value)} />
         </Field>
-        <Field label={L("Student Activity (AR)", "نشاط الطالب (عربي)")[lang]}>
+        <Field label={L("Student Activity (AR)", "نشاط الطالب (عربي)")[locale]}>
           <textarea className="lesson-input" dir="rtl" rows={3} value={actAr} onChange={(e) => setActAr(e.target.value)} />
         </Field>
       </Row>
       <Row>
-        <Field label={L("Worksheet Text (EN)", "نص ورقة العمل (إنجليزي)")[lang]}>
+        <Field label={L("Worksheet Text (EN)", "نص ورقة العمل (إنجليزي)")[locale]}>
           <textarea className="lesson-input" rows={3} value={wsEn} onChange={(e) => setWsEn(e.target.value)} />
         </Field>
-        <Field label={L("Worksheet Text (AR)", "نص ورقة العمل (عربي)")[lang]}>
+        <Field label={L("Worksheet Text (AR)", "نص ورقة العمل (عربي)")[locale]}>
           <textarea className="lesson-input" dir="rtl" rows={3} value={wsAr} onChange={(e) => setWsAr(e.target.value)} />
         </Field>
       </Row>
       <Row>
-        <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[lang]}>
+        <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[locale]}>
           <input className="lesson-input" dir="rtl" placeholder="https://www.youtube.com/watch?v=..." value={ytAr} onChange={(e) => setYtAr(e.target.value)} />
         </Field>
-        <Field label={L("YouTube Video Link (English)", "رابط فيديو يوتيوب (إنجليزي)")[lang]}>
+        <Field label={L("YouTube Video Link (English)", "رابط فيديو يوتيوب (إنجليزي)")[locale]}>
           <input className="lesson-input" placeholder="https://www.youtube.com/watch?v=..." value={ytEn} onChange={(e) => setYtEn(e.target.value)} />
         </Field>
       </Row>
@@ -250,7 +250,7 @@ export function LessonEditForm({
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
         <label className="inline-flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
-          {L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[lang]}
+          {L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[locale]}
         </label>
         <button
           type="button"
@@ -259,7 +259,7 @@ export function LessonEditForm({
           className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <Save className="h-4 w-4" />
-          {saving ? L("Saving…", "جارٍ الحفظ…")[lang] : L("Save Changes", "حفظ التغييرات")[lang]}
+          {saving ? L("Saving…", "جارٍ الحفظ…")[locale] : L("Save Changes", "حفظ التغييرات")[locale]}
         </button>
       </div>
 

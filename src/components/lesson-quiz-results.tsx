@@ -46,50 +46,50 @@ export function LessonQuizResults({
     <div className="space-y-6 scroll-mt-28 outline-none" id="lesson-result" tabIndex={-1}>
       <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 space-y-3">
         <h3 className="font-display text-lg text-foreground">
-          {L("Quiz Results", "نتيجة الاختبار")[lang]}
+          {L("Quiz Results", "نتيجة الاختبار")[locale]}
         </h3>
 
         {pending ? (
           <div className="text-sm text-amber-700 font-medium inline-flex items-center gap-2">
             <Clock className="h-4 w-4 shrink-0" />
-            {L("Your answer is pending teacher review", "الإجابة قيد مراجعة المعلم")[lang]}
+            {L("Your answer is pending teacher review", "الإجابة قيد مراجعة المعلم")[locale]}
           </div>
         ) : (
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
               <CheckCircle2 className="h-4 w-4" />
-              {L("Your answer has been reviewed", "تمت مراجعة إجابتك")[lang]}
+              {L("Your answer has been reviewed", "تمت مراجعة إجابتك")[locale]}
             </div>
             <div className="font-display text-xl text-foreground">
-              {L("Final score", "الدرجة النهائية")[lang]}:{" "}
+              {L("Final score", "الدرجة النهائية")[locale]}:{" "}
               <span className="text-primary">
                 {finalScore}/{submission.total_points}
               </span>
               <span className="text-muted-foreground text-base ms-2">({percentage}%)</span>
             </div>
             <div className="text-sm font-semibold text-primary">
-              {L("Grade", "التقدير")[lang]}: {gradeLabel}
+              {L("Grade", "التقدير")[locale]}: {gradeLabel}
             </div>
           </div>
         )}
 
         <div className="grid gap-2 sm:grid-cols-3 text-sm pt-1">
           <div>
-            <span className="text-muted-foreground">{L("Auto score", "الدرجة التلقائية")[lang]}: </span>
+            <span className="text-muted-foreground">{L("Auto score", "الدرجة التلقائية")[locale]}: </span>
             <span className="font-semibold">{submission.auto_score}</span>
           </div>
           <div>
-            <span className="text-muted-foreground">{L("Essay score", "درجة المقالي")[lang]}: </span>
+            <span className="text-muted-foreground">{L("Essay score", "درجة المقالي")[locale]}: </span>
             <span className="font-semibold">{submission.essay_score}</span>
           </div>
           <div>
-            <span className="text-muted-foreground">{L("Status", "الحالة")[lang]}: </span>
+            <span className="text-muted-foreground">{L("Status", "الحالة")[locale]}: </span>
             <span
               className={`font-semibold ${pending ? "text-amber-700" : "text-primary"}`}
             >
               {pending
-                ? L("Pending review", "قيد المراجعة")[lang]
-                : L("Reviewed", "تمت المراجعة")[lang]}
+                ? L("Pending review", "قيد المراجعة")[locale]
+                : L("Reviewed", "تمت المراجعة")[locale]}
             </span>
           </div>
         </div>
@@ -125,16 +125,16 @@ export function LessonQuizResults({
                 </span>
               </div>
 
-              <div className="font-medium text-foreground">{q.q[lang] || q.q.en || q.q.ar}</div>
+              <div className="font-medium text-foreground">{q.q[locale] || q.q.en || q.q.ar}</div>
 
               {isEssay && saved?.type === "essay" ? (
                 <div className="space-y-3 text-sm">
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">
-                      {L("Your answer", "إجابتك")[lang]}
+                      {L("Your answer", "إجابتك")[locale]}
                     </div>
                     <div className="rounded-lg border border-border bg-card px-3 py-2 whitespace-pre-wrap">
-                      {saved.essayText || L("(empty)", "(فارغ)")[lang]}
+                      {saved.essayText || L("(empty)", "(فارغ)")[locale]}
                     </div>
                   </div>
 
@@ -142,11 +142,11 @@ export function LessonQuizResults({
                     <>
                       <div className="inline-flex items-center gap-2 text-primary font-medium">
                         <CheckCircle2 className="h-4 w-4" />
-                        {L("Reviewed", "تمت المراجعة")[lang]}
+                        {L("Reviewed", "تمت المراجعة")[locale]}
                       </div>
                       <div>
                         <span className="text-muted-foreground">
-                          {L("Teacher score", "درجة المعلّم")[lang]}:{" "}
+                          {L("Teacher score", "درجة المعلّم")[locale]}:{" "}
                         </span>
                         <span className="font-semibold">
                           {saved.earned}/{saved.points}
@@ -156,10 +156,10 @@ export function LessonQuizResults({
                         (saved.teacherFeedback.en.trim() || saved.teacherFeedback.ar.trim()) && (
                           <div>
                             <div className="text-xs text-muted-foreground mb-1">
-                              {L("Teacher feedback", "ملاحظات المعلّم")[lang]}
+                              {L("Teacher feedback", "ملاحظات المعلّم")[locale]}
                             </div>
                             <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-2 whitespace-pre-wrap">
-                              {saved.teacherFeedback[lang] ||
+                              {saved.teacherFeedback[locale] ||
                                 saved.teacherFeedback.en ||
                                 saved.teacherFeedback.ar}
                             </div>
@@ -169,7 +169,7 @@ export function LessonQuizResults({
                   ) : (
                     <div className="inline-flex items-center gap-2 text-amber-700 font-medium">
                       <Clock className="h-4 w-4" />
-                      {L("Your answer is pending teacher review", "الإجابة قيد مراجعة المعلم")[lang]}
+                      {L("Your answer is pending teacher review", "الإجابة قيد مراجعة المعلم")[locale]}
                     </div>
                   )}
                 </div>
@@ -177,7 +177,7 @@ export function LessonQuizResults({
                 <div className="space-y-2 text-sm">
                   <div>
                     <span className="text-muted-foreground">
-                      {L("Your answer", "إجابتك")[lang]}:{" "}
+                      {L("Your answer", "إجابتك")[locale]}:{" "}
                     </span>
                     <span className="font-medium">
                       {optionLabel(q.options, saved.selectedIndex, lang)}
@@ -185,7 +185,7 @@ export function LessonQuizResults({
                   </div>
                   <div>
                     <span className="text-muted-foreground">
-                      {L("Correct answer", "الإجابة الصحيحة")[lang]}:{" "}
+                      {L("Correct answer", "الإجابة الصحيحة")[locale]}:{" "}
                     </span>
                     <span className="font-medium">
                       {optionLabel(q.options, saved.correctIndex, lang)}

@@ -67,7 +67,7 @@ function StudentCard({
 }
 
 export function HallOfFamePage() {
-  const { tr, lang } = useI18n();
+  const { tr, lang, locale } = useI18n();
   const [data, setData] = useState<HallOfFameData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -227,7 +227,7 @@ export function CertificateModal({
     setPdfError(null);
     try {
       await downloadCertificatePdf(el, displayData.studentName);
-      toast.success(L("Certificate downloaded", "تم تحميل الشهادة")[lang]);
+      toast.success(L("Certificate downloaded", "تم تحميل الشهادة")[locale]);
     } catch (error) {
       console.error("[certificate pdf]", error);
       const message =
@@ -260,27 +260,27 @@ export function CertificateModal({
           <DialogHeader className="shrink-0 pr-8">
             <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Award className="h-5 w-5 text-primary shrink-0" />
-              {L("Certificate Preview", "معاينة الشهادة")[lang]}
+              {L("Certificate Preview", "معاينة الشهادة")[locale]}
             </DialogTitle>
             <DialogDescription>
               {L(
                 "Review your certificate before downloading as PDF.",
                 "راجع شهادتك قبل التحميل بصيغة PDF.",
-              )[lang]}
+              )[locale]}
             </DialogDescription>
           </DialogHeader>
 
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" />
-              {L("Preparing certificate…", "جارٍ تجهيز الشهادة…")[lang]}
+              {L("Preparing certificate…", "جارٍ تجهيز الشهادة…")[locale]}
             </div>
           ) : loadError ? (
             <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive space-y-2">
               <div className="font-semibold">
                 {loadError === CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE
                   ? CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE
-                  : L("Certificate could not be loaded", "تعذر تحميل الشهادة")[lang]}
+                  : L("Certificate could not be loaded", "تعذر تحميل الشهادة")[locale]}
               </div>
               {loadError !== CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE && (
                 <div className="font-mono text-xs break-all">{loadError}</div>
@@ -290,12 +290,12 @@ export function CertificateModal({
                   to="/student/profile"
                   className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
                 >
-                  {L("Complete profile", "إكمال الملف الشخصي")[lang]}
+                  {L("Complete profile", "إكمال الملف الشخصي")[locale]}
                 </Link>
               )}
               {missingFields.length > 0 && loadError !== CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE && (
                 <div className="text-xs">
-                  {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
+                  {L("Missing fields", "الحقول الناقصة")[locale]}: {missingFields.join(", ")}
                 </div>
               )}
             </div>
@@ -347,10 +347,10 @@ export function CertificateModal({
             </>
           ) : (
             <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-              {L("No certificate data available.", "لا توجد بيانات للشهادة.")[lang]}
+              {L("No certificate data available.", "لا توجد بيانات للشهادة.")[locale]}
               {missingFields.length > 0 && (
                 <div className="mt-2 font-mono text-xs">
-                  {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
+                  {L("Missing fields", "الحقول الناقصة")[locale]}: {missingFields.join(", ")}
                 </div>
               )}
             </div>
@@ -383,7 +383,7 @@ export function CertificateButton({
       const { data: authData } = await supabase.auth.getUser();
       const user = authData.user;
       if (!user) {
-        toast.error(L("Please sign in to download your certificate.", "يرجى تسجيل الدخول لتحميل الشهادة.")[lang]);
+        toast.error(L("Please sign in to download your certificate.", "يرجى تسجيل الدخول لتحميل الشهادة.")[locale]);
         navigate({ to: "/auth", search: { mode: "login" } });
         return;
       }
@@ -392,7 +392,7 @@ export function CertificateButton({
       if (!isStudentProfileComplete(profile)) {
         toast.error(CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE, {
           action: {
-            label: L("Profile", "الملف الشخصي")[lang],
+            label: L("Profile", "الملف الشخصي")[locale],
             onClick: () => navigate({ to: "/student/profile" }),
           },
         });

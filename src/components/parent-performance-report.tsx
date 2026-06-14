@@ -99,7 +99,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
           <FileBarChart className="h-5 w-5 text-primary mt-1" />
           <div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Performance Report", "تقرير الأداء")[lang]}
+              {L("Performance Report", "تقرير الأداء")[locale]}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {L("Academic progress overview for your child.", "نظرة عامة على التقدّم الأكاديمي لابنك/ابنتك.")[
@@ -125,7 +125,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
         <div className="min-w-0 flex-1 space-y-2">
           <div>
             <div className="text-xs uppercase tracking-[0.2em] text-primary mb-1">
-              {L("Arabic Student Name", "اسم الطالب بالعربية")[lang]}
+              {L("Arabic Student Name", "اسم الطالب بالعربية")[locale]}
             </div>
             <div className="font-display text-2xl text-foreground leading-tight" dir="rtl">
               {report.arabicName}
@@ -133,7 +133,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
           </div>
           <div>
             <div className="text-xs text-muted-foreground">
-              {L("English Student Name", "اسم الطالب بالإنجليزية")[lang]}
+              {L("English Student Name", "اسم الطالب بالإنجليزية")[locale]}
             </div>
             <div className="text-sm font-medium text-foreground">{report.englishName}</div>
           </div>
@@ -175,7 +175,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="h-4 w-4 text-primary" />
           <h3 className="font-display text-base text-foreground">
-            {L("Class ranking", "الترتيب الصفي")[lang]}
+            {L("Class ranking", "الترتيب الصفي")[locale]}
           </h3>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
@@ -200,7 +200,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
           {L(
             "Rankings compare quiz averages only. Other students' names are not shown.",
             "يعتمد الترتيب على متوسط درجات الاختبارات فقط دون عرض أسماء الطلاب الآخرين.",
-          )[lang]}
+          )[locale]}
         </p>
       </div>
 
@@ -208,7 +208,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
         <div className="flex items-center gap-2 mb-3">
           <BarChart3 className="h-4 w-4 text-primary" />
           <h3 className="font-display text-base text-foreground">
-            {L("Quiz score trend", "اتجاه درجات الاختبارات")[lang]}
+            {L("Quiz score trend", "اتجاه درجات الاختبارات")[locale]}
           </h3>
         </div>
         {report.quizTrend.length === 0 ? (
@@ -216,7 +216,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
             {L(
               "Quiz scores will appear here after the first submission.",
               "ستظهر درجات الاختبارات هنا بعد أول إرسال.",
-            )[lang]}
+            )[locale]}
           </p>
         ) : (
           <ChartContainer config={chartConfig} className="aspect-[2.2/1] min-h-[220px] w-full">

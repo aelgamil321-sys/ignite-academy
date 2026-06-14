@@ -1,6 +1,20 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  LANG_STORAGE_KEY,
+  contentLocale,
+  isLang,
+  isRtlLang,
+  langDir,
+  type ContentLocale,
+  type Lang,
+} from "@/lib/i18n-config";
+import { de } from "@/lib/i18n/locales/de";
+import { fr } from "@/lib/i18n/locales/fr";
+import { ur } from "@/lib/i18n/locales/ur";
+import { zh } from "@/lib/i18n/locales/zh";
 
-export type Lang = "en" | "ar";
+export type { Lang, ContentLocale } from "@/lib/i18n-config";
+export { L, LANG_OPTIONS, pickBi, pickBiLocale } from "@/lib/i18n-config";
 
 type Dict = Record<string, { en: string; ar: string }>;
 
@@ -366,12 +380,28 @@ export const t = {
   admin_only: { en: "Admin only", ar: "للإداريين فقط" },
 } satisfies Dict;
 
-
-
 export type TKey = keyof typeof t;
+
+const LOCALE_OVERRIDES: Record<Lang, Partial<Record<TKey, string>>> = {
+  en: {},
+  ar: {},
+  fr,
+  de,
+  ur,
+  zh,
+};
+
+function translate(key: TKey, lang: Lang): string {
+  const override = LOCALE_OVERRIDES[lang]?.[key];
+  if (override) return override;
+  if (lang === "ar") return t[key].ar;
+  if (lang === "en") return t[key].en;
+  return t[key].en || t[key].ar;
+}
 
 interface I18nCtx {
   lang: Lang;
+  locale: ContentLocale;
   dir: "ltr" | "rtl";
   setLang: (l: Lang) => void;
   toggle: () => void;
@@ -385,27 +415,32 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem("iia.lang") as Lang | null;
-    if (saved === "en" || saved === "ar") setLangState(saved);
+    const saved = window.localStorage.getItem(LANG_STORAGE_KEY);
+    if (isLang(saved)) setLangState(saved);
   }, []);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
+    const dir = langDir(lang);
     document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    document.documentElement.dir = dir;
+    document.body.dir = dir;
   }, [lang]);
 
   const setLang = (l: Lang) => {
     setLangState(l);
-    if (typeof window !== "undefined") window.localStorage.setItem("iia.lang", l);
+    if (typeof window !== "undefined") window.localStorage.setItem(LANG_STORAGE_KEY, l);
   };
+
+  const locale = contentLocale(lang);
 
   const value: I18nCtx = {
     lang,
-    dir: lang === "ar" ? "rtl" : "ltr",
+    locale,
+    dir: isRtlLang(lang) ? "rtl" : "ltr",
     setLang,
     toggle: () => setLang(lang === "en" ? "ar" : "en"),
-    tr: (key) => t[key][lang],
+    tr: (key) => translate(key, lang),
   };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -23,12 +23,12 @@ export function ParentChildSelector({
   return (
     <section
       className="rounded-2xl border border-border bg-card p-4 md:p-5 shadow-[var(--shadow-soft)]"
-      aria-label={L("Select child", "اختر الطفل")[lang]}
+      aria-label={L("Select child", "اختر الطفل")[locale]}
     >
       <div className="text-xs uppercase tracking-[0.2em] text-primary mb-3">
-        {L("Your children", "أبناؤك")[lang]}
+        {L("Your children", "أبناؤك")[locale]}
       </div>
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label={L("Linked children", "الأبناء المرتبطون")[lang]}>
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label={L("Linked children", "الأبناء المرتبطون")[locale]}>
         {linkedChildren.map((child) => {
           const active = child.studentUserId === selectedStudentUserId;
           const gradeName = gradeDisplayName(child.gradeSlug, lang) || child.gradeSlug;
@@ -46,7 +46,7 @@ export function ParentChildSelector({
               }`}
             >
               <UserRound className="h-4 w-4 shrink-0" />
-              <span>{child.studentName[lang] || child.studentName.en}</span>
+              <span>{child.studentName[locale] || child.studentName.en}</span>
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${
                   active ? "bg-primary-foreground/15 text-primary-foreground" : "bg-muted text-muted-foreground"

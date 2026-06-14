@@ -114,10 +114,10 @@ export function AdminLayoutShell({ email }: { email: string }) {
   const onAnalytics =
     pathname === "/admin/analytics" || pathname === "/admin/analytics/";
 
-  const adminLabel = L("Admin", "الإدارة")[lang];
-  const manageLessonsLabel = L("Manage Lessons", "إدارة الدروس")[lang];
-  const quizSubmissionsLabel = L("Quiz Submissions", "إرسالات الاختبارات")[lang];
-  const analyticsLabel = L("Analytics", "التحليلات")[lang];
+  const adminLabel = L("Admin", "الإدارة")[locale];
+  const manageLessonsLabel = L("Manage Lessons", "إدارة الدروس")[locale];
+  const quizSubmissionsLabel = L("Quiz Submissions", "إرسالات الاختبارات")[locale];
+  const analyticsLabel = L("Analytics", "التحليلات")[locale];
   const title = onAnalytics
     ? analyticsLabel
     : onQuizSubmissions
@@ -125,21 +125,21 @@ export function AdminLayoutShell({ email }: { email: string }) {
     : onLessonsList
       ? manageLessonsLabel
       : onLessonsEdit
-        ? L("Edit Lesson", "تعديل الدرس")[lang]
-        : L("Admin Dashboard", "لوحة الإدارة")[lang];
+        ? L("Edit Lesson", "تعديل الدرس")[locale]
+        : L("Admin Dashboard", "لوحة الإدارة")[locale];
   const lead = onAnalytics
     ? L(
         "Compare student quiz performance and certificates by grade, section, and Islamic group.",
         "قارن أداء الطلاب في الاختبارات والشهادات حسب الصف والشعبة والمجموعة الإسلامية.",
-      )[lang]
+      )[locale]
     : onQuizSubmissions
-    ? L("Review student quiz submissions and grade essay answers.", "راجع إرسالات الطلاب وقيّم الإجابات المقالية.")[lang]
+    ? L("Review student quiz submissions and grade essay answers.", "راجع إرسالات الطلاب وقيّم الإجابات المقالية.")[locale]
     : onLessonsList
-      ? L("View and edit all lessons.", "عرض وتعديل جميع الدروس.")[lang]
+      ? L("View and edit all lessons.", "عرض وتعديل جميع الدروس.")[locale]
       : onLessonsEdit
-        ? L("Update the existing lesson.", "تحديث بيانات الدرس الحالي.")[lang]
+        ? L("Update the existing lesson.", "تحديث بيانات الدرس الحالي.")[locale]
         : L("Create, edit, publish, and manage all content via Supabase CMS.",
-            "أنشئ المحتوى وحرّره وانشره وأدره عبر نظام إدارة المحتوى.")[lang];
+            "أنشئ المحتوى وحرّره وانشره وأدره عبر نظام إدارة المحتوى.")[locale];
   const crumbs = onAnalytics
     ? [{ label: adminLabel, to: "/admin" }, { label: analyticsLabel }]
     : onQuizSubmissions
@@ -147,7 +147,7 @@ export function AdminLayoutShell({ email }: { email: string }) {
     : onLessonsList
       ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel }]
       : onLessonsEdit
-        ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel, to: "/admin/lessons" }, { label: L("Edit", "تعديل")[lang] }]
+        ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel, to: "/admin/lessons" }, { label: L("Edit", "تعديل")[locale] }]
         : [{ label: title }];
 
   return (
@@ -221,12 +221,12 @@ function Overview() {
   const { lessons, videos, files, articles } = useCMS();
   const totalGrades = grades.length;
   const stats = [
-    { label: L("Lessons", "الدروس")[lang], value: lessons.filter((l) => l.published).length },
-    { label: L("Videos", "الفيديوهات")[lang], value: videos.filter((v) => v.published).length },
-    { label: L("Files", "الملفات")[lang], value: files.filter((f) => f.published).length },
-    { label: L("Articles", "المقالات")[lang], value: articles.filter((a) => a.published).length },
-    { label: L("Total Grades", "إجمالي الصفوف")[lang], value: totalGrades },
-    { label: L("Subject Categories", "التصنيفات")[lang], value: SUBJECT_CATEGORIES.length },
+    { label: L("Lessons", "الدروس")[locale], value: lessons.filter((l) => l.published).length },
+    { label: L("Videos", "الفيديوهات")[locale], value: videos.filter((v) => v.published).length },
+    { label: L("Files", "الملفات")[locale], value: files.filter((f) => f.published).length },
+    { label: L("Articles", "المقالات")[locale], value: articles.filter((a) => a.published).length },
+    { label: L("Total Grades", "إجمالي الصفوف")[locale], value: totalGrades },
+    { label: L("Subject Categories", "التصنيفات")[locale], value: SUBJECT_CATEGORIES.length },
   ];
 
   return (
@@ -332,13 +332,13 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const submit = async (publish: boolean) => {
     setDbg({ clicked: true, valid: false, status: "", error: "", id: "" });
     if (!titleEn.trim() || !titleAr.trim()) {
-      const msg = L("Title (English) and Title (Arabic) are required", "العنوان (إنجليزي) والعنوان (عربي) مطلوبان")[lang];
+      const msg = L("Title (English) and Title (Arabic) are required", "العنوان (إنجليزي) والعنوان (عربي) مطلوبان")[locale];
       toast.error(msg);
       setDbg((d) => ({ ...d, valid: false, status: "error", error: msg }));
       return;
     }
     if (!grade) {
-      const msg = L("Grade is required", "الصف مطلوب")[lang];
+      const msg = L("Grade is required", "الصف مطلوب")[locale];
       toast.error(msg);
       setDbg((d) => ({ ...d, valid: false, status: "error", error: msg }));
       return;
@@ -408,7 +408,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
           ...bilingualFilesSavePayload(mergedFiles, baselineFiles),
         });
         setDbg({ clicked: true, valid: true, status: "success", error: "", id: editId });
-        toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
+        toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[locale]);
         await refresh();
         onSaved?.();
         return;
@@ -431,8 +431,8 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       console.log("[LessonForm] insert ok", id);
       setDbg({ clicked: true, valid: true, status: "success", error: "", id });
       toast.success(publish
-        ? L("Lesson published!", "تم نشر الدرس!")[lang]
-        : L("Saved as draft", "حُفظ كمسودة")[lang]);
+        ? L("Lesson published!", "تم نشر الدرس!")[locale]
+        : L("Saved as draft", "حُفظ كمسودة")[locale]);
       await refresh();
       resetForm();
       if (publish) {
@@ -450,11 +450,11 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
 
   if (isEditing && editId && !lessons.find((l) => l.id === editId)) {
     return (
-      <FormCard title={L("Edit Lesson", "تعديل الدرس")[lang]}>
-        <div className="text-sm text-muted-foreground">{L("Lesson not found.", "الدرس غير موجود.")[lang]}</div>
+      <FormCard title={L("Edit Lesson", "تعديل الدرس")[locale]}>
+        <div className="text-sm text-muted-foreground">{L("Lesson not found.", "الدرس غير موجود.")[locale]}</div>
         {onCancel && (
           <button type="button" onClick={onCancel} className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm hover:bg-muted">
-            <X className="h-4 w-4" /> {L("Back to lessons", "العودة إلى الدروس")[lang]}
+            <X className="h-4 w-4" /> {L("Back to lessons", "العودة إلى الدروس")[locale]}
           </button>
         )}
       </FormCard>
@@ -464,52 +464,52 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const editLesson = editId ? lessons.find((l) => l.id === editId) : undefined;
 
   return (
-    <FormCard title={isEditing ? L("Edit Lesson", "تعديل الدرس")[lang] : L("Add New Lesson", "إضافة درس جديد")[lang]}>
+    <FormCard title={isEditing ? L("Edit Lesson", "تعديل الدرس")[locale] : L("Add New Lesson", "إضافة درس جديد")[locale]}>
       <Row>
-        <Field label={L("Grade", "الصف")[lang]}>
+        <Field label={L("Grade", "الصف")[locale]}>
           <select value={grade} onChange={(e) => setGrade(e.target.value)} className="input">
-            {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[lang]}</option>)}
+            {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[locale]}</option>)}
           </select>
         </Field>
-        <Field label={L("Subject Category", "التصنيف")[lang]}>
+        <Field label={L("Subject Category", "التصنيف")[locale]}>
           <select value={subjectCategory} onChange={(e) => setSubjectCategory(e.target.value as SubjectCategory)} className="input">
-            {SUBJECT_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.name[lang]}</option>)}
+            {SUBJECT_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.name[locale]}</option>)}
           </select>
         </Field>
       </Row>
       <Row>
-        <Field label={L("Unit (English)", "الوحدة (إنجليزي)")[lang]}><input className="input" value={unitEn} onChange={(e) => setUnitEn(e.target.value)} /></Field>
-        <Field label={L("Unit (Arabic)", "الوحدة (عربي)")[lang]}><input className="input" dir="rtl" value={unitAr} onChange={(e) => setUnitAr(e.target.value)} /></Field>
+        <Field label={L("Unit (English)", "الوحدة (إنجليزي)")[locale]}><input className="input" value={unitEn} onChange={(e) => setUnitEn(e.target.value)} /></Field>
+        <Field label={L("Unit (Arabic)", "الوحدة (عربي)")[locale]}><input className="input" dir="rtl" value={unitAr} onChange={(e) => setUnitAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Title (English)", "العنوان (إنجليزي)")[lang]} required><input className="input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
-        <Field label={L("Title (Arabic)", "العنوان (عربي)")[lang]} required><input className="input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
+        <Field label={L("Title (English)", "العنوان (إنجليزي)")[locale]} required><input className="input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+        <Field label={L("Title (Arabic)", "العنوان (عربي)")[locale]} required><input className="input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Learning Outcome (EN)", "نواتج التعلّم (إنجليزي)")[lang]}><textarea className="input" rows={3} value={outEn} onChange={(e) => setOutEn(e.target.value)} /></Field>
-        <Field label={L("Learning Outcome (AR)", "نواتج التعلّم (عربي)")[lang]}><textarea className="input" dir="rtl" rows={3} value={outAr} onChange={(e) => setOutAr(e.target.value)} /></Field>
+        <Field label={L("Learning Outcome (EN)", "نواتج التعلّم (إنجليزي)")[locale]}><textarea className="input" rows={3} value={outEn} onChange={(e) => setOutEn(e.target.value)} /></Field>
+        <Field label={L("Learning Outcome (AR)", "نواتج التعلّم (عربي)")[locale]}><textarea className="input" dir="rtl" rows={3} value={outAr} onChange={(e) => setOutAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Explanation (EN)", "الشرح (إنجليزي)")[lang]}><textarea className="input" rows={5} value={expEn} onChange={(e) => setExpEn(e.target.value)} /></Field>
-        <Field label={L("Explanation (AR)", "الشرح (عربي)")[lang]}><textarea className="input" dir="rtl" rows={5} value={expAr} onChange={(e) => setExpAr(e.target.value)} /></Field>
+        <Field label={L("Explanation (EN)", "الشرح (إنجليزي)")[locale]}><textarea className="input" rows={5} value={expEn} onChange={(e) => setExpEn(e.target.value)} /></Field>
+        <Field label={L("Explanation (AR)", "الشرح (عربي)")[locale]}><textarea className="input" dir="rtl" rows={5} value={expAr} onChange={(e) => setExpAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Key Vocabulary (EN, comma separated)", "المفردات (إنجليزي، مفصولة بفواصل)")[lang]}><input className="input" value={vocEn} onChange={(e) => setVocEn(e.target.value)} /></Field>
-        <Field label={L("Key Vocabulary (AR)", "المفردات (عربي)")[lang]}><input className="input" dir="rtl" value={vocAr} onChange={(e) => setVocAr(e.target.value)} /></Field>
+        <Field label={L("Key Vocabulary (EN, comma separated)", "المفردات (إنجليزي، مفصولة بفواصل)")[locale]}><input className="input" value={vocEn} onChange={(e) => setVocEn(e.target.value)} /></Field>
+        <Field label={L("Key Vocabulary (AR)", "المفردات (عربي)")[locale]}><input className="input" dir="rtl" value={vocAr} onChange={(e) => setVocAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Student Activity (EN)", "نشاط الطالب (إنجليزي)")[lang]}><textarea className="input" rows={3} value={actEn} onChange={(e) => setActEn(e.target.value)} /></Field>
-        <Field label={L("Student Activity (AR)", "نشاط الطالب (عربي)")[lang]}><textarea className="input" dir="rtl" rows={3} value={actAr} onChange={(e) => setActAr(e.target.value)} /></Field>
+        <Field label={L("Student Activity (EN)", "نشاط الطالب (إنجليزي)")[locale]}><textarea className="input" rows={3} value={actEn} onChange={(e) => setActEn(e.target.value)} /></Field>
+        <Field label={L("Student Activity (AR)", "نشاط الطالب (عربي)")[locale]}><textarea className="input" dir="rtl" rows={3} value={actAr} onChange={(e) => setActAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Worksheet Text (EN)", "نص ورقة العمل (إنجليزي)")[lang]}><textarea className="input" rows={3} value={wsEn} onChange={(e) => setWsEn(e.target.value)} /></Field>
-        <Field label={L("Worksheet Text (AR)", "نص ورقة العمل (عربي)")[lang]}><textarea className="input" dir="rtl" rows={3} value={wsAr} onChange={(e) => setWsAr(e.target.value)} /></Field>
+        <Field label={L("Worksheet Text (EN)", "نص ورقة العمل (إنجليزي)")[locale]}><textarea className="input" rows={3} value={wsEn} onChange={(e) => setWsEn(e.target.value)} /></Field>
+        <Field label={L("Worksheet Text (AR)", "نص ورقة العمل (عربي)")[locale]}><textarea className="input" dir="rtl" rows={3} value={wsAr} onChange={(e) => setWsAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[lang]}>
+        <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[locale]}>
           <input className="input" dir="rtl" placeholder="https://www.youtube.com/watch?v=..." value={ytAr} onChange={(e) => setYtAr(e.target.value)} />
         </Field>
-        <Field label={L("YouTube Video Link (English)", "رابط فيديو يوتيوب (إنجليزي)")[lang]}>
+        <Field label={L("YouTube Video Link (English)", "رابط فيديو يوتيوب (إنجليزي)")[locale]}>
           <input className="input" placeholder="https://www.youtube.com/watch?v=..." value={ytEn} onChange={(e) => setYtEn(e.target.value)} />
         </Field>
       </Row>
@@ -527,8 +527,8 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
         <label className="inline-flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
           {isEditing
-            ? L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[lang]
-            : L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[lang]}
+            ? L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[locale]
+            : L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[locale]}
         </label>
         <div className="flex flex-wrap items-center gap-2">
           {isEditing && onCancel && (
@@ -538,7 +538,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
               onClick={onCancel}
               className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:bg-muted disabled:opacity-60"
             >
-              <X className="h-4 w-4" /> {L("Cancel", "إلغاء")[lang]}
+              <X className="h-4 w-4" /> {L("Cancel", "إلغاء")[locale]}
             </button>
           )}
           <button
@@ -549,10 +549,10 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
           >
             <Save className="h-4 w-4" />
             {saving
-              ? L("Saving…", "جارٍ الحفظ…")[lang]
+              ? L("Saving…", "جارٍ الحفظ…")[locale]
               : isEditing
-                ? L("Save Changes", "حفظ التغييرات")[lang]
-                : pub ? L("Publish", "نشر")[lang] : L("Save Draft", "حفظ كمسودة")[lang]}
+                ? L("Save Changes", "حفظ التغييرات")[locale]
+                : pub ? L("Publish", "نشر")[locale] : L("Save Draft", "حفظ كمسودة")[locale]}
           </button>
         </div>
       </div>
@@ -582,14 +582,14 @@ function ArticleForm() {
   const onImg = async (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     try {
-      toast.message(L("Uploading image…", "جارٍ رفع الصورة…")[lang]);
+      toast.message(L("Uploading image…", "جارٍ رفع الصورة…")[locale]);
       const up = await uploadToStorage(f, "articles");
       setImg(up.url);
-      toast.success(L("Image uploaded", "تم رفع الصورة")[lang]);
+      toast.success(L("Image uploaded", "تم رفع الصورة")[locale]);
     } catch (err) { toast.error(formatError(err)); }
   };
   const submit = async () => {
-    if (!titleEn || !titleAr) { toast.error(L("Title required", "العنوان مطلوب")[lang]); return; }
+    if (!titleEn || !titleAr) { toast.error(L("Title required", "العنوان مطلوب")[locale]); return; }
     try {
       await addArticle({
         title: { en: titleEn, ar: titleAr },
@@ -599,35 +599,35 @@ function ArticleForm() {
         imageUrl: img,
         published: pub,
       });
-      toast.success(pub ? L("Article published!", "تم نشر المقال!")[lang] : L("Saved as draft", "حُفظ كمسودة")[lang]);
+      toast.success(pub ? L("Article published!", "تم نشر المقال!")[locale] : L("Saved as draft", "حُفظ كمسودة")[locale]);
       setTitleEn(""); setTitleAr(""); setBodyEn(""); setBodyAr(""); setImg("");
     } catch (e) { toast.error(`Save failed: ${formatError(e)}`); console.error("Article save failed", e); }
   };
 
   return (
-    <FormCard title={L("Add New Article", "إضافة مقال جديد")[lang]}>
+    <FormCard title={L("Add New Article", "إضافة مقال جديد")[locale]}>
       <Row>
-        <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className="input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
-        <Field label={L("Title (AR)", "العنوان (عربي)")[lang]} required><input className="input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
+        <Field label={L("Title (EN)", "العنوان (إنجليزي)")[locale]} required><input className="input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+        <Field label={L("Title (AR)", "العنوان (عربي)")[locale]} required><input className="input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Content (EN)", "المحتوى (إنجليزي)")[lang]}><textarea className="input" rows={8} value={bodyEn} onChange={(e) => setBodyEn(e.target.value)} /></Field>
-        <Field label={L("Content (AR)", "المحتوى (عربي)")[lang]}><textarea className="input" dir="rtl" rows={8} value={bodyAr} onChange={(e) => setBodyAr(e.target.value)} /></Field>
+        <Field label={L("Content (EN)", "المحتوى (إنجليزي)")[locale]}><textarea className="input" rows={8} value={bodyEn} onChange={(e) => setBodyEn(e.target.value)} /></Field>
+        <Field label={L("Content (AR)", "المحتوى (عربي)")[locale]}><textarea className="input" dir="rtl" rows={8} value={bodyAr} onChange={(e) => setBodyAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Article Type", "نوع المقال")[lang]}>
+        <Field label={L("Article Type", "نوع المقال")[locale]}>
           <select className="input" value={cat} onChange={(e) => setCat(e.target.value as ArticleCategory)}>
-            <option value="announcement">{L("Announcement", "إعلان")[lang]}</option>
-            <option value="parent">{L("Parent Corner", "ركن الوالدين")[lang]}</option>
+            <option value="announcement">{L("Announcement", "إعلان")[locale]}</option>
+            <option value="parent">{L("Parent Corner", "ركن الوالدين")[locale]}</option>
           </select>
         </Field>
-        <Field label={L("Subject Category", "التصنيف")[lang]}>
+        <Field label={L("Subject Category", "التصنيف")[locale]}>
           <select className="input" value={subjectCategory} onChange={(e) => setSubjectCategory(e.target.value as SubjectCategory)}>
-            {SUBJECT_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.name[lang]}</option>)}
+            {SUBJECT_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.name[locale]}</option>)}
           </select>
         </Field>
       </Row>
-      <Field label={L("Featured Image", "صورة مميزة")[lang]}>
+      <Field label={L("Featured Image", "صورة مميزة")[locale]}>
         <input type="file" accept="image/*" onChange={onImg} className="input" />
         {img && <img src={img} alt="" className="mt-2 max-h-40 rounded-lg border border-border" />}
       </Field>
@@ -651,51 +651,51 @@ function VideoForm() {
   const onThumb = async (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     try {
-      toast.message(L("Uploading thumbnail…", "جارٍ رفع الصورة…")[lang]);
+      toast.message(L("Uploading thumbnail…", "جارٍ رفع الصورة…")[locale]);
       const up = await uploadToStorage(f, "videos");
       setThumb(up.url);
-      toast.success(L("Thumbnail uploaded", "تم رفع الصورة")[lang]);
+      toast.success(L("Thumbnail uploaded", "تم رفع الصورة")[locale]);
     } catch (err) { toast.error(formatError(err)); }
   };
   const submit = async () => {
-    if (!titleEn || !titleAr || !yt) { toast.error(L("Title and YouTube link required", "العنوان والرابط مطلوبان")[lang]); return; }
+    if (!titleEn || !titleAr || !yt) { toast.error(L("Title and YouTube link required", "العنوان والرابط مطلوبان")[locale]); return; }
     try {
       await addVideo({ title: { en: titleEn, ar: titleAr }, description: { en: descEn, ar: descAr }, grade: normalizeGradeSlug(grade), unit: { en: unitEn, ar: unitAr }, category, youtubeUrl: yt, thumbnailUrl: thumb, published: pub });
-      toast.success(pub ? L("Video published!", "تم نشر الفيديو!")[lang] : L("Saved as draft", "حُفظ كمسودة")[lang]);
+      toast.success(pub ? L("Video published!", "تم نشر الفيديو!")[locale] : L("Saved as draft", "حُفظ كمسودة")[locale]);
       setTitleEn(""); setTitleAr(""); setDescEn(""); setDescAr(""); setUnitEn(""); setUnitAr(""); setYt(""); setThumb(""); setCategory("quran");
     } catch (e) { toast.error(`Save failed: ${formatError(e)}`); console.error("Video save failed", e); }
   };
 
   return (
-    <FormCard title={L("Add New Video", "إضافة فيديو جديد")[lang]}>
-      <Field label={L("Library Category", "تصنيف المكتبة")[lang]} required>
+    <FormCard title={L("Add New Video", "إضافة فيديو جديد")[locale]}>
+      <Field label={L("Library Category", "تصنيف المكتبة")[locale]} required>
         <select className="input" value={category} onChange={(e) => setCategory(e.target.value as typeof category)}>
-          {SUBJECT_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.name[lang]}</option>)}
+          {SUBJECT_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.name[locale]}</option>)}
         </select>
       </Field>
       <Row>
-        <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className="input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
-        <Field label={L("Title (AR)", "العنوان (عربي)")[lang]} required><input className="input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
+        <Field label={L("Title (EN)", "العنوان (إنجليزي)")[locale]} required><input className="input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+        <Field label={L("Title (AR)", "العنوان (عربي)")[locale]} required><input className="input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Description (EN)", "الوصف (إنجليزي)")[lang]}><textarea className="input" rows={3} value={descEn} onChange={(e) => setDescEn(e.target.value)} /></Field>
-        <Field label={L("Description (AR)", "الوصف (عربي)")[lang]}><textarea className="input" dir="rtl" rows={3} value={descAr} onChange={(e) => setDescAr(e.target.value)} /></Field>
+        <Field label={L("Description (EN)", "الوصف (إنجليزي)")[locale]}><textarea className="input" rows={3} value={descEn} onChange={(e) => setDescEn(e.target.value)} /></Field>
+        <Field label={L("Description (AR)", "الوصف (عربي)")[locale]}><textarea className="input" dir="rtl" rows={3} value={descAr} onChange={(e) => setDescAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Grade", "الصف")[lang]}>
+        <Field label={L("Grade", "الصف")[locale]}>
           <select className="input" value={grade} onChange={(e) => setGrade(e.target.value)}>
-            {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[lang]}</option>)}
+            {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[locale]}</option>)}
           </select>
         </Field>
-        <Field label={L("Unit", "الوحدة")[lang]}>
+        <Field label={L("Unit", "الوحدة")[locale]}>
           <input className="input" placeholder="EN" value={unitEn} onChange={(e) => setUnitEn(e.target.value)} />
           <input className="input mt-2" dir="rtl" placeholder="عربي" value={unitAr} onChange={(e) => setUnitAr(e.target.value)} />
         </Field>
       </Row>
-      <Field label={L("YouTube Video Link", "رابط فيديو يوتيوب")[lang]} required>
+      <Field label={L("YouTube Video Link", "رابط فيديو يوتيوب")[locale]} required>
         <input className="input" placeholder="https://www.youtube.com/watch?v=..." value={yt} onChange={(e) => setYt(e.target.value)} />
       </Field>
-      <Field label={L("Thumbnail Upload", "صورة مصغّرة")[lang]}>
+      <Field label={L("Thumbnail Upload", "صورة مصغّرة")[locale]}>
         <input type="file" accept="image/*" onChange={onThumb} className="input" />
         {thumb && <img src={thumb} alt="" className="mt-2 max-h-32 rounded-lg border border-border" />}
       </Field>
@@ -719,19 +719,19 @@ function FileForm() {
 
   const gradeLessons = lessons
     .filter((l) => normalizeGradeSlug(l.grade) === normalizeGradeSlug(grade))
-    .map((l) => ({ slug: l.id, title: l.title[lang] }));
+    .map((l) => ({ slug: l.id, title: l.title[locale] }));
 
   const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     try {
-      toast.message(L("Uploading file…", "جارٍ رفع الملف…")[lang]);
+      toast.message(L("Uploading file…", "جارٍ رفع الملف…")[locale]);
       const up = await uploadToStorage(f, `files/${type}`);
       setFile({ url: up.url, name: up.name, size: up.size });
-      toast.success(L("File uploaded", "تم رفع الملف")[lang]);
+      toast.success(L("File uploaded", "تم رفع الملف")[locale]);
     } catch (err) { toast.error(formatError(err)); }
   };
   const submit = async () => {
-    if (!titleEn || !titleAr || !file) { toast.error(L("Title and file required", "العنوان والملف مطلوبان")[lang]); return; }
+    if (!titleEn || !titleAr || !file) { toast.error(L("Title and file required", "العنوان والملف مطلوبان")[locale]); return; }
     try {
       await addFile({
         title: { en: titleEn, ar: titleAr },
@@ -745,48 +745,48 @@ function FileForm() {
         size: file.size,
         published: pub,
       });
-      toast.success(pub ? L("File uploaded!", "تم رفع الملف!")[lang] : L("Saved as draft", "حُفظ كمسودة")[lang]);
+      toast.success(pub ? L("File uploaded!", "تم رفع الملف!")[locale] : L("Saved as draft", "حُفظ كمسودة")[locale]);
       setTitleEn(""); setTitleAr(""); setUnitEn(""); setUnitAr(""); setLesson(""); setFile(null);
     } catch (e) { toast.error(`Save failed: ${formatError(e)}`); console.error("File save failed", e); }
   };
 
   return (
 
-    <FormCard title={L("Upload New File", "رفع ملف جديد")[lang]}>
+    <FormCard title={L("Upload New File", "رفع ملف جديد")[locale]}>
       <Row>
-        <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className="input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
-        <Field label={L("Title (AR)", "العنوان (عربي)")[lang]} required><input className="input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
+        <Field label={L("Title (EN)", "العنوان (إنجليزي)")[locale]} required><input className="input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+        <Field label={L("Title (AR)", "العنوان (عربي)")[locale]} required><input className="input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("Grade", "الصف")[lang]}>
+        <Field label={L("Grade", "الصف")[locale]}>
           <select className="input" value={grade} onChange={(e) => { setGrade(e.target.value); setLesson(""); }}>
-            {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[lang]}</option>)}
+            {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[locale]}</option>)}
           </select>
         </Field>
-        <Field label={L("Lesson", "الدرس")[lang]}>
+        <Field label={L("Lesson", "الدرس")[locale]}>
           <select className="input" value={lesson} onChange={(e) => setLesson(e.target.value)}>
-            <option value="">{L("— None —", "— لا شيء —")[lang]}</option>
+            <option value="">{L("— None —", "— لا شيء —")[locale]}</option>
             {gradeLessons.map((l) => <option key={l.slug} value={l.slug}>{l.title}</option>)}
           </select>
         </Field>
       </Row>
       <Row>
-        <Field label={L("Unit (EN)", "الوحدة (إنجليزي)")[lang]}><input className="input" value={unitEn} onChange={(e) => setUnitEn(e.target.value)} /></Field>
-        <Field label={L("Unit (AR)", "الوحدة (عربي)")[lang]}><input className="input" dir="rtl" value={unitAr} onChange={(e) => setUnitAr(e.target.value)} /></Field>
+        <Field label={L("Unit (EN)", "الوحدة (إنجليزي)")[locale]}><input className="input" value={unitEn} onChange={(e) => setUnitEn(e.target.value)} /></Field>
+        <Field label={L("Unit (AR)", "الوحدة (عربي)")[locale]}><input className="input" dir="rtl" value={unitAr} onChange={(e) => setUnitAr(e.target.value)} /></Field>
       </Row>
       <Row>
-        <Field label={L("File Type", "نوع الملف")[lang]}>
+        <Field label={L("File Type", "نوع الملف")[locale]}>
           <select className="input" value={type} onChange={(e) => setType(e.target.value as FileType)}>
             <option value="pdf">PDF</option><option value="ppt">PowerPoint</option><option value="worksheet">Worksheet</option><option value="image">Image</option>
           </select>
         </Field>
-        <Field label={L("Subject Category", "التصنيف")[lang]}>
+        <Field label={L("Subject Category", "التصنيف")[locale]}>
           <select className="input" value={subjectCategory} onChange={(e) => setSubjectCategory(e.target.value as SubjectCategory)}>
-            {SUBJECT_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.name[lang]}</option>)}
+            {SUBJECT_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.name[locale]}</option>)}
           </select>
         </Field>
       </Row>
-      <Field label={L("Upload File", "ارفع الملف")[lang]} required>
+      <Field label={L("Upload File", "ارفع الملف")[locale]} required>
         <input type="file" onChange={onFile} className="input" />
         {file && <div className="text-xs text-primary mt-1">✓ {file.name} ({file.size})</div>}
       </Field>
@@ -835,25 +835,25 @@ function ManageResources() {
   const { files, updateFile, deleteFile, lessons, updateLesson } = useCMS();
   return (
     <div className="space-y-6">
-      <SectionCard title={L("Uploaded Files", "الملفات المرفوعة")[lang]}>
+      <SectionCard title={L("Uploaded Files", "الملفات المرفوعة")[locale]}>
         {files.length === 0 ? <Empty lang={lang} /> : files.map((f: CustomFile) => (
           <ItemRow key={f.id} published={f.published}
             onPublish={() => updateFile(f.id, { published: !f.published })}
-            onDelete={() => { deleteFile(f.id); toast.success(L("Deleted", "تم الحذف")[lang]); }}>
-            <div className="font-medium text-foreground truncate">{f.title[lang]}</div>
+            onDelete={() => { deleteFile(f.id); toast.success(L("Deleted", "تم الحذف")[locale]); }}>
+            <div className="font-medium text-foreground truncate">{f.title[locale]}</div>
             <div className="text-xs text-muted-foreground">{f.type.toUpperCase()} · {f.size} · {f.fileName}</div>
           </ItemRow>
         ))}
       </SectionCard>
-      <SectionCard title={L("Custom Lessons", "الدروس المخصصة")[lang]}>
+      <SectionCard title={L("Custom Lessons", "الدروس المخصصة")[locale]}>
         {lessons.length === 0 ? <Empty lang={lang} /> : lessons.map((l: CustomLesson) => (
           <ItemRow key={l.id} published={l.published}
             onPublish={() => updateLesson(l.id, { published: !l.published })}
             onDelete={() => {}}
             lessonDelete={l}
             viewHref={`/grades/${l.grade}/${l.id}`}>
-            <div className="font-medium text-foreground truncate">{l.title[lang]}</div>
-            <div className="text-xs text-muted-foreground">{L("Grade", "الصف")[lang]}: {grades.find(g => g.slug === l.grade)?.name[lang]}</div>
+            <div className="font-medium text-foreground truncate">{l.title[locale]}</div>
+            <div className="text-xs text-muted-foreground">{L("Grade", "الصف")[locale]}: {grades.find(g => g.slug === l.grade)?.name[locale]}</div>
           </ItemRow>
         ))}
       </SectionCard>
@@ -865,23 +865,23 @@ function ManageGrades() {
   const { lang } = useI18n();
   const { lessons } = useCMS();
   return (
-    <SectionCard title={L("Grades", "الصفوف")[lang]}>
+    <SectionCard title={L("Grades", "الصفوف")[locale]}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-start text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-              <th className="text-start py-3 pe-4">{L("Grade", "الصف")[lang]}</th>
-              <th className="text-start py-3 pe-4">{L("Stage", "المرحلة")[lang]}</th>
-              <th className="text-start py-3 pe-4">{L("Built-in lessons", "دروس مدمجة")[lang]}</th>
-              <th className="text-start py-3 pe-4">{L("Custom lessons", "دروس مخصصة")[lang]}</th>
+              <th className="text-start py-3 pe-4">{L("Grade", "الصف")[locale]}</th>
+              <th className="text-start py-3 pe-4">{L("Stage", "المرحلة")[locale]}</th>
+              <th className="text-start py-3 pe-4">{L("Built-in lessons", "دروس مدمجة")[locale]}</th>
+              <th className="text-start py-3 pe-4">{L("Custom lessons", "دروس مخصصة")[locale]}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {grades.map((g) => (
               <tr key={g.slug} className="border-b border-border/60 last:border-0">
-                <td className="py-3 pe-4 font-medium">{g.name[lang]}</td>
-                <td className="py-3 pe-4 text-muted-foreground">{g.stage[lang]}</td>
+                <td className="py-3 pe-4 font-medium">{g.name[locale]}</td>
+                <td className="py-3 pe-4 text-muted-foreground">{g.stage[locale]}</td>
                 <td className="py-3 pe-4">{g.lessons.length}</td>
                 <td className="py-3 pe-4">{lessons.filter(l => l.grade === g.slug).length}</td>
                 <td className="py-3 pe-4 text-end">
@@ -900,19 +900,19 @@ function ManageUnits() {
   const { lang } = useI18n();
   const { lessons } = useCMS();
   const units = new Map<string, number>();
-  grades.forEach(g => g.lessons.forEach(l => units.set(`${g.name[lang]} — ${l.unit[lang]}`, (units.get(`${g.name[lang]} — ${l.unit[lang]}`) ?? 0) + 1)));
+  grades.forEach(g => g.lessons.forEach(l => units.set(`${g.name[locale]} — ${l.unit[locale]}`, (units.get(`${g.name[locale]} — ${l.unit[locale]}`) ?? 0) + 1)));
   lessons.forEach(l => {
-    const gn = grades.find(g => g.slug === l.grade)?.name[lang] ?? l.grade;
-    const k = `${gn} — ${l.unit[lang] || "—"}`;
+    const gn = grades.find(g => g.slug === l.grade)?.name[locale] ?? l.grade;
+    const k = `${gn} — ${l.unit[locale] || "—"}`;
     units.set(k, (units.get(k) ?? 0) + 1);
   });
   return (
-    <SectionCard title={L("Units", "الوحدات")[lang]}>
+    <SectionCard title={L("Units", "الوحدات")[locale]}>
       {units.size === 0 ? <Empty lang={lang} /> : (
         <div className="space-y-2">
           {[...units.entries()].map(([k, n]) => (
             <div key={k} className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm">
-              <span>{k}</span><span className="text-xs text-muted-foreground">{n} {L("lessons", "درس")[lang]}</span>
+              <span>{k}</span><span className="text-xs text-muted-foreground">{n} {L("lessons", "درس")[locale]}</span>
             </div>
           ))}
         </div>
@@ -925,15 +925,15 @@ function ManageQuizzes() {
   const { lang } = useI18n();
   const { lessons, updateLesson } = useCMS();
   return (
-    <SectionCard title={L("Custom Lesson Quizzes", "اختبارات الدروس المخصصة")[lang]}>
+    <SectionCard title={L("Custom Lesson Quizzes", "اختبارات الدروس المخصصة")[locale]}>
       {lessons.length === 0 ? <Empty lang={lang} /> : lessons.map((l) => (
         <ItemRow key={l.id} published={l.published}
           onPublish={() => updateLesson(l.id, { published: !l.published })}
           onDelete={() => {}}
           lessonDelete={l}
           viewHref={`/grades/${l.grade}/${l.id}`}>
-          <div className="font-medium text-foreground truncate">{l.title[lang]}</div>
-          <div className="text-xs text-muted-foreground">{l.quiz.length} {L("questions", "أسئلة")[lang]} · {grades.find(g => g.slug === l.grade)?.name[lang]}</div>
+          <div className="font-medium text-foreground truncate">{l.title[locale]}</div>
+          <div className="text-xs text-muted-foreground">{l.quiz.length} {L("questions", "أسئلة")[locale]} · {grades.find(g => g.slug === l.grade)?.name[locale]}</div>
         </ItemRow>
       ))}
     </SectionCard>
@@ -945,24 +945,24 @@ function ManageAnnouncements() {
   const { articles, updateArticle, deleteArticle, videos: cvids, updateVideo, deleteVideo } = useCMS();
   return (
     <div className="space-y-6">
-      <SectionCard title={L("Articles", "المقالات")[lang]}>
+      <SectionCard title={L("Articles", "المقالات")[locale]}>
         {articles.length === 0 ? <Empty lang={lang} /> : articles.map((a: CustomArticle) => (
           <ItemRow key={a.id} published={a.published}
             onPublish={() => updateArticle(a.id, { published: !a.published })}
-            onDelete={() => { deleteArticle(a.id); toast.success(L("Deleted", "تم الحذف")[lang]); }}
+            onDelete={() => { deleteArticle(a.id); toast.success(L("Deleted", "تم الحذف")[locale]); }}
             viewHref={a.category === "announcement" ? `/announcements/${a.id}` : `/parent/${a.id}`}>
-            <div className="font-medium text-foreground truncate">{a.title[lang]}</div>
-            <div className="text-xs text-muted-foreground">{a.category === "announcement" ? L("Announcement", "إعلان")[lang] : L("Parent Corner", "ركن الوالدين")[lang]}</div>
+            <div className="font-medium text-foreground truncate">{a.title[locale]}</div>
+            <div className="text-xs text-muted-foreground">{a.category === "announcement" ? L("Announcement", "إعلان")[locale] : L("Parent Corner", "ركن الوالدين")[locale]}</div>
           </ItemRow>
         ))}
       </SectionCard>
-      <SectionCard title={L("Videos", "الفيديوهات")[lang]}>
+      <SectionCard title={L("Videos", "الفيديوهات")[locale]}>
         {cvids.length === 0 ? <Empty lang={lang} /> : cvids.map((v: CustomVideo) => (
           <ItemRow key={v.id} published={v.published}
             onPublish={() => updateVideo(v.id, { published: !v.published })}
-            onDelete={() => { deleteVideo(v.id); toast.success(L("Deleted", "تم الحذف")[lang]); }}
+            onDelete={() => { deleteVideo(v.id); toast.success(L("Deleted", "تم الحذف")[locale]); }}
             viewHref={`/videos/${v.id}`}>
-            <div className="font-medium text-foreground truncate">{v.title[lang]}</div>
+            <div className="font-medium text-foreground truncate">{v.title[locale]}</div>
             <div className="text-xs text-muted-foreground">{v.grade}</div>
           </ItemRow>
         ))}
@@ -1003,16 +1003,16 @@ function PublishActions({ pub, setPub, onSave, lang }: { pub: boolean; setPub: (
     <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
       <label className="inline-flex items-center gap-2 text-sm">
         <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
-        {L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[lang]}
+        {L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[locale]}
       </label>
       <button onClick={onSave} className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)]">
-        <Save className="h-4 w-4" /> {pub ? L("Publish", "نشر")[lang] : L("Save Draft", "حفظ كمسودة")[lang]}
+        <Save className="h-4 w-4" /> {pub ? L("Publish", "نشر")[locale] : L("Save Draft", "حفظ كمسودة")[locale]}
       </button>
     </div>
   );
 }
 function Empty({ lang }: { lang: "en" | "ar" }) {
-  return <div className="text-sm text-muted-foreground py-6 text-center">{L("No items yet.", "لا توجد عناصر بعد.")[lang]}</div>;
+  return <div className="text-sm text-muted-foreground py-6 text-center">{L("No items yet.", "لا توجد عناصر بعد.")[locale]}</div>;
 }
 
 function ManageUsers() {
@@ -1058,7 +1058,7 @@ function ManageUsers() {
     try {
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "admin" });
       if (error) throw error;
-      toast.success(L("Admin role granted", "تم منح صلاحية المدير")[lang]);
+      toast.success(L("Admin role granted", "تم منح صلاحية المدير")[locale]);
       await load();
     } catch (e) {
       toast.error(formatError(e));
@@ -1069,7 +1069,7 @@ function ManageUsers() {
     try {
       const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
       if (error) throw error;
-      toast.success(L("Admin role revoked", "تم إلغاء صلاحية المدير")[lang]);
+      toast.success(L("Admin role revoked", "تم إلغاء صلاحية المدير")[locale]);
       await load();
     } catch (e) {
       toast.error(formatError(e));
@@ -1079,7 +1079,7 @@ function ManageUsers() {
   const promoteByEmail = async () => {
     const profile = profiles.find((p) => p.email.toLowerCase() === promoteEmail.trim().toLowerCase());
     if (!profile) {
-      toast.error(L("User not found", "المستخدم غير موجود")[lang]);
+      toast.error(L("User not found", "المستخدم غير موجود")[locale]);
       return;
     }
     await grantAdmin(profile.user_id);
@@ -1094,7 +1094,7 @@ function ManageUsers() {
       if (error) throw error;
       const payload = (data ?? {}) as { ok?: boolean; parent_link_code?: string; error?: string };
       if (!payload.ok) throw new Error(payload.error ?? "unknown");
-      toast.success(L("Link code regenerated", "تم تجديد رمز الربط")[lang]);
+      toast.success(L("Link code regenerated", "تم تجديد رمز الربط")[locale]);
       await load();
     } catch (e) {
       toast.error(formatError(e));
@@ -1103,22 +1103,22 @@ function ManageUsers() {
 
   return (
     <div className="space-y-6">
-      <SectionCard title={L("Grant Admin Access", "منح صلاحية المدير")[lang]}>
+      <SectionCard title={L("Grant Admin Access", "منح صلاحية المدير")[locale]}>
         <div className="flex flex-wrap gap-2">
           <input
             className="input flex-1 min-w-[200px]"
-            placeholder={L("User email", "البريد الإلكتروني")[lang]}
+            placeholder={L("User email", "البريد الإلكتروني")[locale]}
             value={promoteEmail}
             onChange={(e) => setPromoteEmail(e.target.value)}
           />
           <button onClick={() => void promoteByEmail()} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">
-            {L("Grant Admin", "منح المدير")[lang]}
+            {L("Grant Admin", "منح المدير")[locale]}
           </button>
         </div>
       </SectionCard>
-      <SectionCard title={L("Registered Users", "المستخدمون المسجلون")[lang]}>
+      <SectionCard title={L("Registered Users", "المستخدمون المسجلون")[locale]}>
         {loading ? (
-          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</div>
+          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[locale]}</div>
         ) : profiles.length === 0 ? (
           <Empty lang={lang} />
         ) : (
@@ -1132,7 +1132,7 @@ function ManageUsers() {
               <div className="flex-1 min-w-0">
                 <div className="font-medium">{p.full_name || p.email}</div>
                 <div className="text-xs text-muted-foreground">
-                  {p.email} · {L("Grade", "الصف")[lang]}: {p.grade || "—"}
+                  {p.email} · {L("Grade", "الصف")[locale]}: {p.grade || "—"}
                   {(p.section || p.islamic_group) ? (
                     <span>
                       {" · "}
@@ -1159,16 +1159,16 @@ function ManageUsers() {
                   onClick={() => void regenerateCode(p.user_id)}
                   className="text-xs text-primary hover:underline"
                 >
-                  {L("Regenerate code", "تجديد الرمز")[lang]}
+                  {L("Regenerate code", "تجديد الرمز")[locale]}
                 </button>
               )}
               {isAdmin(p.user_id) ? (
                 <button onClick={() => void revokeAdmin(p.user_id)} className="text-xs text-destructive hover:underline">
-                  {L("Revoke Admin", "إلغاء المدير")[lang]}
+                  {L("Revoke Admin", "إلغاء المدير")[locale]}
                 </button>
               ) : (
                 <button onClick={() => void grantAdmin(p.user_id)} className="text-xs text-primary hover:underline">
-                  {L("Make Admin", "تعيين مدير")[lang]}
+                  {L("Make Admin", "تعيين مدير")[locale]}
                 </button>
               )}
             </div>
@@ -1239,11 +1239,11 @@ function ManageParentLinks() {
 
   const addLink = async () => {
     if (!selectedParentId || !selectedStudentId) {
-      toast.error(L("Select a parent and a student.", "اختر ولي أمر وطالبًا.")[lang]);
+      toast.error(L("Select a parent and a student.", "اختر ولي أمر وطالبًا.")[locale]);
       return;
     }
     if (links.some((link) => link.parent_user_id === selectedParentId && link.student_user_id === selectedStudentId)) {
-      toast.error(L("This link already exists.", "هذا الربط موجود بالفعل.")[lang]);
+      toast.error(L("This link already exists.", "هذا الربط موجود بالفعل.")[locale]);
       return;
     }
     try {
@@ -1252,7 +1252,7 @@ function ManageParentLinks() {
         student_user_id: selectedStudentId,
       });
       if (error) throw error;
-      toast.success(L("Student linked to parent.", "تم ربط الطالب بولي الأمر.")[lang]);
+      toast.success(L("Student linked to parent.", "تم ربط الطالب بولي الأمر.")[locale]);
       setSelectedStudentId("");
       await load();
     } catch (e) {
@@ -1264,7 +1264,7 @@ function ManageParentLinks() {
     try {
       const { error } = await supabase.from("parent_student_links").delete().eq("id", linkId);
       if (error) throw error;
-      toast.success(L("Link removed.", "تم إزالة الربط.")[lang]);
+      toast.success(L("Link removed.", "تم إزالة الربط.")[locale]);
       await load();
     } catch (e) {
       toast.error(formatError(e));
@@ -1273,15 +1273,15 @@ function ManageParentLinks() {
 
   return (
     <div className="space-y-6">
-      <SectionCard title={L("Link student to parent", "ربط طالب بولي أمر")[lang]}>
+      <SectionCard title={L("Link student to parent", "ربط طالب بولي أمر")[locale]}>
         {loading ? (
-          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</div>
+          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[locale]}</div>
         ) : parents.length === 0 ? (
           <Empty lang={lang} />
         ) : (
           <div className="space-y-4">
             <Row>
-              <Field label={L("Parent account", "حساب ولي الأمر")[lang]} required>
+              <Field label={L("Parent account", "حساب ولي الأمر")[locale]} required>
                 <select
                   className="input w-full"
                   value={selectedParentId}
@@ -1294,16 +1294,16 @@ function ManageParentLinks() {
                   ))}
                 </select>
               </Field>
-              <Field label={L("Student", "الطالب")[lang]} required>
+              <Field label={L("Student", "الطالب")[locale]} required>
                 <select
                   className="input w-full"
                   value={selectedStudentId}
                   onChange={(e) => setSelectedStudentId(e.target.value)}
                 >
-                  <option value="">{L("Select student…", "اختر طالبًا…")[lang]}</option>
+                  <option value="">{L("Select student…", "اختر طالبًا…")[locale]}</option>
                   {students.map((student) => (
                     <option key={student.user_id} value={student.user_id}>
-                      {student.full_name || student.email} · {L("Grade", "الصف")[lang]} {student.grade || "—"}
+                      {student.full_name || student.email} · {L("Grade", "الصف")[locale]} {student.grade || "—"}
                       {(student.section || student.islamic_group)
                         ? ` · ${formatStudentAcademics(
                             {
@@ -1323,20 +1323,20 @@ function ManageParentLinks() {
               onClick={() => void addLink()}
               className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
             >
-              {L("Add link", "إضافة ربط")[lang]}
+              {L("Add link", "إضافة ربط")[locale]}
             </button>
           </div>
         )}
       </SectionCard>
 
-      <SectionCard title={L("Linked children", "الأبناء المرتبطون")[lang]}>
+      <SectionCard title={L("Linked children", "الأبناء المرتبطون")[locale]}>
         {loading ? (
-          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</div>
+          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[locale]}</div>
         ) : !selectedParentId ? (
           <Empty lang={lang} />
         ) : linksForParent.length === 0 ? (
           <p className="text-sm text-muted-foreground italic">
-            {L("No linked students for this parent yet.", "لا يوجد طلاب مرتبطون بهذا ولي الأمر بعد.")[lang]}
+            {L("No linked students for this parent yet.", "لا يوجد طلاب مرتبطون بهذا ولي الأمر بعد.")[locale]}
           </p>
         ) : (
           linksForParent.map((link) => {
@@ -1348,7 +1348,7 @@ function ManageParentLinks() {
                   <div className="font-medium">{student?.full_name || student?.email || link.student_user_id}</div>
                   <div className="text-xs text-muted-foreground">
                     {parent?.full_name || parent?.email || link.parent_user_id}
-                    {student?.grade ? ` · ${L("Grade", "الصف")[lang]}: ${student.grade}` : ""}
+                    {student?.grade ? ` · ${L("Grade", "الصف")[locale]}: ${student.grade}` : ""}
                     {(student?.section || student?.islamic_group) ? (
                       <span>
                         {" · "}
@@ -1368,7 +1368,7 @@ function ManageParentLinks() {
                   onClick={() => void removeLink(link.id)}
                   className="text-xs text-destructive hover:underline"
                 >
-                  {L("Remove link", "إزالة الربط")[lang]}
+                  {L("Remove link", "إزالة الربط")[locale]}
                 </button>
               </div>
             );

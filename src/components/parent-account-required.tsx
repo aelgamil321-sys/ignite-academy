@@ -4,7 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
 export function ParentAccountRequired() {
-  const { tr } = useI18n();
+  const { tr, locale } = useI18n();
   const navigate = useNavigate();
 
   async function signOutForParentLogin() {

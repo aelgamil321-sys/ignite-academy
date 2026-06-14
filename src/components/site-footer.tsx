@@ -4,7 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAccountRole } from "@/hooks/use-account-role";
 
 export function SiteFooter() {
-  const { tr } = useI18n();
+  const { tr, locale } = useI18n();
   const { isParent } = useAccountRole();
 
   const learn: Array<{ label: string; to: string }> = isParent

@@ -416,7 +416,7 @@ function AuthPage() {
                     className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
                   >
                     {grades.map((g) => (
-                      <option key={g.slug} value={g.slug}>{g.name[lang]}</option>
+                      <option key={g.slug} value={g.slug}>{g.name[locale]}</option>
                     ))}
                   </select>
                 </div>

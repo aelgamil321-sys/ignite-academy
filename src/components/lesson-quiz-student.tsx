@@ -216,7 +216,7 @@ export function LessonQuizStudent({
                     </span>
                   </div>
                   <div className="font-medium text-foreground mb-3">
-                    {q.q[lang] || q.q.en || q.q.ar}
+                    {q.q[locale] || q.q.en || q.q.ar}
                   </div>
 
                   {isEssay ? (
@@ -247,7 +247,7 @@ export function LessonQuizStudent({
                                 : "border-border hover:border-primary hover:text-primary",
                             ].join(" ")}
                           >
-                            {opt[lang] || opt.en || opt.ar}
+                            {opt[locale] || opt.en || opt.ar}
                           </button>
                         );
                       })}

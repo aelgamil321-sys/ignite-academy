@@ -19,6 +19,10 @@ export function getSubjectCategory(slug: string) {
   return SUBJECT_CATEGORIES.find((c) => c.slug === slug);
 }
 
-export function subjectCategoryName(slug: string, lang: "en" | "ar"): string {
-  return getSubjectCategory(slug)?.name[lang] ?? slug;
+import type { Lang } from "./i18n-config";
+import { contentLocale } from "./i18n-config";
+
+export function subjectCategoryName(slug: string, lang: Lang | "en" | "ar"): string {
+  const displayLang = contentLocale(lang as Lang);
+  return getSubjectCategory(slug)?.name[displayLang] ?? slug;
 }

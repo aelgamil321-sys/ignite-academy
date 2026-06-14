@@ -20,7 +20,7 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
-  const { tr } = useI18n();
+  const { tr, locale } = useI18n();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
   return (

@@ -30,14 +30,14 @@ function AnnouncementDetail() {
   const image = (ann as { image?: string }).image;
 
   return (
-    <PageShell eyebrow={ann.tag[lang]} title={ann.title[lang]}
-      crumbs={[{ label: tr("nav_announcements"), to: "/announcements" }, { label: ann.title[lang] }]}>
+    <PageShell eyebrow={ann.tag[locale]} title={ann.title[locale]}
+      crumbs={[{ label: tr("nav_announcements"), to: "/announcements" }, { label: ann.title[locale] }]}>
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
         <Calendar className="h-4 w-4 text-primary" /> {ann.date}
       </div>
-      {image && <img src={image} alt={ann.title[lang]} className="w-full max-w-3xl rounded-2xl mb-6 border border-border" />}
+      {image && <img src={image} alt={ann.title[locale]} className="w-full max-w-3xl rounded-2xl mb-6 border border-border" />}
       <article className="max-w-3xl">
-        <p className="text-foreground/85 leading-relaxed text-lg whitespace-pre-line">{ann.body[lang]}</p>
+        <p className="text-foreground/85 leading-relaxed text-lg whitespace-pre-line">{ann.body[locale]}</p>
       </article>
     </PageShell>
   );

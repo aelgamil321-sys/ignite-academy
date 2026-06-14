@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
 
 export function ParentLinkCodeCard({ code }: { code: string }) {
-  const { tr, lang } = useI18n();
+  const { tr, lang, locale } = useI18n();
 
   async function copyCode() {
     try {

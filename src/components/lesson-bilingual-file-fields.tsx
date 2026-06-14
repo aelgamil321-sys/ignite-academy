@@ -211,7 +211,7 @@ export function LessonBilingualFileFields({
           setMeta((prev) => ({ ...prev, [key]: { name: file.name, path: filePath } }));
           onChange((prev) => ({ ...prev, [key]: publicUrl }));
 
-          const success = L("File uploaded and saved successfully", "تم رفع الملف وحفظه بنجاح")[lang];
+          const success = L("File uploaded and saved successfully", "تم رفع الملف وحفظه بنجاح")[locale];
           setSuccessMsg((p) => ({ ...p, [key]: success }));
           toast.success(success);
         })(),
@@ -273,13 +273,13 @@ export function LessonBilingualFileFields({
       }
     }
 
-    toast.success(L("File removed", "تم إزالة الملف")[lang]);
+    toast.success(L("File removed", "تم إزالة الملف")[locale]);
   };
 
   return (
     <div className="space-y-4 rounded-xl border border-border bg-background p-4">
       <h4 className="font-display text-lg text-foreground">
-        {L("Bilingual Lesson Files", "ملفات الدرس ثنائية اللغة")[lang]}
+        {L("Bilingual Lesson Files", "ملفات الدرس ثنائية اللغة")[locale]}
       </h4>
       <p className="text-xs text-muted-foreground font-mono">
         bucket: {LESSON_FILES_BUCKET}
@@ -324,7 +324,7 @@ export function LessonBilingualFileFields({
               )}
               {!busy && !localUrl && !errors[slot.key] && !successMsg[slot.key] && (
                 <div className="text-xs text-muted-foreground italic">
-                  {L("No file uploaded", "لم يتم رفع ملف")[lang]}
+                  {L("No file uploaded", "لم يتم رفع ملف")[locale]}
                 </div>
               )}
 
@@ -340,7 +340,7 @@ export function LessonBilingualFileFields({
                     className="inline-flex items-center gap-1 text-primary hover:text-primary"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
-                    {L("View", "عرض")[lang]}
+                    {L("View", "عرض")[locale]}
                   </a>
                   <button
                     type="button"
@@ -349,7 +349,7 @@ export function LessonBilingualFileFields({
                     className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 disabled:opacity-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    {L("Remove", "إزالة")[lang]}
+                    {L("Remove", "إزالة")[locale]}
                   </button>
                 </div>
               )}

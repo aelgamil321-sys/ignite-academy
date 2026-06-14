@@ -54,7 +54,7 @@ function QuizzesIndex() {
         <select value={gradeSlug} onChange={(e) => setGradeSlug(e.target.value)}
           className="rounded-full border border-border bg-card px-4 py-2.5 text-sm">
           <option value="all">{tr("filter_by_grade")}</option>
-          {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[lang]}</option>)}
+          {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[locale]}</option>)}
         </select>
       </div>
 
@@ -71,9 +71,9 @@ function QuizzesIndex() {
               params={{ grade: qz._gradeSlug ?? "8", lesson: qz.slug }}
               className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:border-primary hover:shadow-[var(--shadow-elegant)] transition-all flex flex-col"
             >
-              <div className="text-xs uppercase tracking-wider text-primary font-semibold">{qz.grade[lang]}</div>
-              <h3 className="mt-2 font-display text-xl text-foreground leading-snug">{qz.title[lang]}</h3>
-              <p className="mt-2 text-sm text-muted-foreground flex-1">{qz.description[lang]}</p>
+              <div className="text-xs uppercase tracking-wider text-primary font-semibold">{qz.grade[locale]}</div>
+              <h3 className="mt-2 font-display text-xl text-foreground leading-snug">{qz.title[locale]}</h3>
+              <p className="mt-2 text-sm text-muted-foreground flex-1">{qz.description[locale]}</p>
               <div className="mt-4 text-xs text-muted-foreground">{qz.questions.length} {tr("questions")}</div>
               <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary group-hover:text-primary">
                 {tr("start_quiz")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />

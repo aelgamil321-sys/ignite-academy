@@ -52,7 +52,7 @@ export function StudentProgressDashboard({
     {
       key: "progress",
       icon: TrendingUp,
-      label: L("Overall Progress", "التقدّم الإجمالي")[lang],
+      label: L("Overall Progress", "التقدّم الإجمالي")[locale],
       value: `${progress.overallProgressPct}%`,
       sub: (
         <Progress value={progress.overallProgressPct} className="mt-3 h-2" />
@@ -61,21 +61,21 @@ export function StudentProgressDashboard({
     {
       key: "lessons",
       icon: BookOpenCheck,
-      label: L("Lessons Completed", "الدروس المكتملة")[lang],
+      label: L("Lessons Completed", "الدروس المكتملة")[locale],
       value: `${progress.completedLessons} / ${progress.totalLessons}`,
       sub: null,
     },
     {
       key: "certificates",
       icon: Award,
-      label: L("Certificates Earned", "الشهادات المكتسبة")[lang],
+      label: L("Certificates Earned", "الشهادات المكتسبة")[locale],
       value: String(progress.certificatesEarned),
       sub: null,
     },
     {
       key: "average",
       icon: ClipboardCheck,
-      label: L("Average Quiz Score", "متوسط درجات الاختبارات")[lang],
+      label: L("Average Quiz Score", "متوسط درجات الاختبارات")[locale],
       value:
         progress.averageQuizScorePct === null
           ? "—"
@@ -85,7 +85,7 @@ export function StudentProgressDashboard({
     {
       key: "level",
       icon: Medal,
-      label: L("Learning Level", "المستوى التعليمي")[lang],
+      label: L("Learning Level", "المستوى التعليمي")[locale],
       value: learningLevel,
       sub: (
         <span
@@ -128,7 +128,7 @@ export function StudentProgressDashboard({
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div>
             <div className="text-xs uppercase tracking-[0.2em] text-primary mb-1">
-              {L("My Grade", "صفّي")[lang]}
+              {L("My Grade", "صفّي")[locale]}
             </div>
             <h2 className="font-display text-2xl text-foreground">{gradeName}</h2>
           </div>
@@ -137,14 +137,14 @@ export function StudentProgressDashboard({
             params={{ grade: gradeSlug }}
             className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
           >
-            {L("Browse lessons", "تصفّح الدروس")[lang]}
+            {L("Browse lessons", "تصفّح الدروس")[locale]}
           </Link>
         </div>
         <p className="text-sm text-muted-foreground">
           {L(
             "Progress is based on lesson quizzes you have submitted for your grade.",
             "يُحسب التقدّم من اختبارات الدروس التي أرسلتها لصفّك.",
-          )[lang]}
+          )[locale]}
         </p>
       </div>
 
@@ -156,7 +156,7 @@ export function StudentProgressDashboard({
             <Award className="h-5 w-5" />
           </div>
           <h2 className="font-display text-xl text-foreground">
-            {L("Certificates", "الشهادات")[lang]}
+            {L("Certificates", "الشهادات")[locale]}
           </h2>
         </div>
         {progress.certificates.length === 0 ? (
@@ -164,7 +164,7 @@ export function StudentProgressDashboard({
             {L(
               "No certificates yet. Complete a lesson quiz to earn one.",
               "لا توجد شهادات بعد. أكمل اختبار درس لتحصل على شهادة.",
-            )[lang]}
+            )[locale]}
           </p>
         ) : (
           <div className="overflow-x-auto -mx-2 px-2">
@@ -172,16 +172,16 @@ export function StudentProgressDashboard({
               <thead>
                 <tr className="border-b border-border text-muted-foreground text-start">
                   <th className="py-2 pe-4 font-semibold">
-                    {L("Certificate ID", "رقم الشهادة")[lang]}
+                    {L("Certificate ID", "رقم الشهادة")[locale]}
                   </th>
                   <th className="py-2 pe-4 font-semibold">
-                    {L("Lesson", "الدرس")[lang]}
+                    {L("Lesson", "الدرس")[locale]}
                   </th>
                   <th className="py-2 pe-4 font-semibold">
-                    {L("Score", "الدرجة")[lang]}
+                    {L("Score", "الدرجة")[locale]}
                   </th>
                   <th className="py-2 font-semibold">
-                    {L("Issued", "تاريخ الإصدار")[lang]}
+                    {L("Issued", "تاريخ الإصدار")[locale]}
                   </th>
                 </tr>
               </thead>
@@ -195,7 +195,7 @@ export function StudentProgressDashboard({
                         params={{ grade: gradeSlug, lesson: c.lessonId }}
                         className="font-medium text-primary hover:text-primary"
                       >
-                        {c.lessonTitle[lang] || c.lessonTitle.en}
+                        {c.lessonTitle[locale] || c.lessonTitle.en}
                       </Link>
                     </td>
                     <td className="py-3 pe-4">{c.percentage}%</td>
@@ -214,7 +214,7 @@ export function StudentProgressDashboard({
             <Trophy className="h-5 w-5" />
           </div>
           <h2 className="font-display text-xl text-foreground">
-            {L("Recent Achievements", "الإنجازات الأخيرة")[lang]}
+            {L("Recent Achievements", "الإنجازات الأخيرة")[locale]}
           </h2>
         </div>
         {progress.recentAchievements.length === 0 ? (
@@ -222,7 +222,7 @@ export function StudentProgressDashboard({
             {L(
               "Submit your first quiz to see achievements here.",
               "أرسل أول اختبار ليظهر إنجازك هنا.",
-            )[lang]}
+            )[locale]}
           </p>
         ) : (
           <ul className="space-y-3">
@@ -234,15 +234,15 @@ export function StudentProgressDashboard({
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary">
                     {item.kind === "certificate"
-                      ? L("Certificate earned", "شهادة مكتسبة")[lang]
-                      : L("Quiz submitted", "اختبار مُرسَل")[lang]}
+                      ? L("Certificate earned", "شهادة مكتسبة")[locale]
+                      : L("Quiz submitted", "اختبار مُرسَل")[locale]}
                   </div>
                   <Link
                     to="/grades/$grade/$lesson"
                     params={{ grade: gradeSlug, lesson: item.lessonId }}
                     className="mt-0.5 block font-display text-lg text-foreground hover:text-primary truncate"
                   >
-                    {item.lessonTitle[lang] || item.lessonTitle.en}
+                    {item.lessonTitle[locale] || item.lessonTitle.en}
                   </Link>
                   <div className="text-xs text-muted-foreground mt-1">
                     {formatDate(item.at, lang)}

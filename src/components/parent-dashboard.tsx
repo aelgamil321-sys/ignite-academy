@@ -63,35 +63,35 @@ export function ParentDashboardView({
     {
       key: "progress",
       icon: TrendingUp,
-      label: L("Overall Progress", "التقدّم الإجمالي")[lang],
+      label: L("Overall Progress", "التقدّم الإجمالي")[locale],
       value: `${progress.overallProgressPct}%`,
       sub: <Progress value={progress.overallProgressPct} className="mt-3 h-2" />,
     },
     {
       key: "lessons",
       icon: BookOpenCheck,
-      label: L("Lessons Completed", "الدروس المكتملة")[lang],
+      label: L("Lessons Completed", "الدروس المكتملة")[locale],
       value: `${progress.completedLessons} / ${progress.totalLessons}`,
       sub: null,
     },
     {
       key: "certificates",
       icon: Award,
-      label: L("Certificates Earned", "الشهادات المكتسبة")[lang],
+      label: L("Certificates Earned", "الشهادات المكتسبة")[locale],
       value: String(progress.certificatesEarned),
       sub: null,
     },
     {
       key: "average",
       icon: ClipboardCheck,
-      label: L("Average Quiz Score", "متوسط درجات الاختبارات")[lang],
+      label: L("Average Quiz Score", "متوسط درجات الاختبارات")[locale],
       value: progress.averageQuizScorePct === null ? "—" : `${progress.averageQuizScorePct}%`,
       sub: null,
     },
     {
       key: "level",
       icon: Medal,
-      label: L("Learning Level", "المستوى التعليمي")[lang],
+      label: L("Learning Level", "المستوى التعليمي")[locale],
       value: learningLevel,
       sub: (
         <span
@@ -135,7 +135,7 @@ export function ParentDashboardView({
               <Award className="h-5 w-5" />
             </div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Latest Certificates", "أحدث الشهادات")[lang]}
+              {L("Latest Certificates", "أحدث الشهادات")[locale]}
             </h2>
           </div>
           {latestCertificates.length === 0 ? (
@@ -143,7 +143,7 @@ export function ParentDashboardView({
               {L(
                 "No certificates yet. Completed lesson quizzes will appear here.",
                 "لا توجد شهادات بعد. ستظهر هنا عند إتمام اختبارات الدروس.",
-              )[lang]}
+              )[locale]}
             </p>
           ) : (
             <ul className="space-y-3">
@@ -154,7 +154,7 @@ export function ParentDashboardView({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-display text-lg text-foreground truncate">
-                      {certificate.lessonTitle[lang] || certificate.lessonTitle.en}
+                      {certificate.lessonTitle[locale] || certificate.lessonTitle.en}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {formatDate(certificate.issuedAt, lang)}
@@ -176,7 +176,7 @@ export function ParentDashboardView({
               <Sparkles className="h-5 w-5" />
             </div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Latest Badges", "أحدث الشارات")[lang]}
+              {L("Latest Badges", "أحدث الشارات")[locale]}
             </h2>
           </div>
           {unlockedBadges.length === 0 ? (
@@ -184,7 +184,7 @@ export function ParentDashboardView({
               {L(
                 "No badges unlocked yet. Progress milestones will appear here.",
                 "لم تُفتح شارات بعد. ستظهر هنا عند تحقيق إنجازات التقدّم.",
-              )[lang]}
+              )[locale]}
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
@@ -212,7 +212,7 @@ export function ParentDashboardView({
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-display text-base text-foreground leading-snug">
-                        {badge.title[lang]}
+                        {badge.title[locale]}
                       </h3>
                       {badge.at ? (
                         <p className="text-xs text-muted-foreground mt-1">
@@ -235,13 +235,13 @@ export function ParentDashboardView({
           </div>
           <div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Recent Activity", "النشاط الأخير")[lang]}
+              {L("Recent Activity", "النشاط الأخير")[locale]}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {L(
                 "Quiz completions, certificates, and badge milestones.",
                 "إتمام الاختبارات والشهادات وإنجازات الشارات.",
-              )[lang]}
+              )[locale]}
             </p>
           </div>
         </div>
@@ -250,7 +250,7 @@ export function ParentDashboardView({
             {L(
               "Activity will appear here once quizzes are submitted.",
               "سيظهر النشاط هنا بعد إرسال الاختبارات.",
-            )[lang]}
+            )[locale]}
           </p>
         ) : (
           <ul className="space-y-0">
@@ -282,15 +282,15 @@ export function ParentDashboardView({
                 <div className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-3">
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary">
                     {item.kind === "badge_unlocked"
-                      ? L("Badge unlocked", "شارة مفتوحة")[lang]
+                      ? L("Badge unlocked", "شارة مفتوحة")[locale]
                       : item.kind === "certificate_earned"
-                        ? L("Certificate earned", "شهادة مكتسبة")[lang]
-                        : L("Quiz completed", "اختبار مكتمل")[lang]}
+                        ? L("Certificate earned", "شهادة مكتسبة")[locale]
+                        : L("Quiz completed", "اختبار مكتمل")[locale]}
                   </div>
                   <div className="mt-1 font-display text-lg text-foreground leading-snug">
                     {item.kind === "badge_unlocked"
-                      ? item.badgeTitle[lang]
-                      : item.lessonTitle[lang] || item.lessonTitle.en}
+                      ? item.badgeTitle[locale]
+                      : item.lessonTitle[locale] || item.lessonTitle.en}
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span>{formatDate(item.at, lang)}</span>

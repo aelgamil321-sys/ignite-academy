@@ -180,11 +180,11 @@ function ParentDashboardPage({ userId }: { userId: string }) {
             ? L(
                 "Signed in to view your children's learning progress.",
                 "أنت مسجّل الدخول لمتابعة تقدّم أبنائك التعليمي.",
-              )[lang]
+              )[locale]
             : L(
                 "Signed in to view your child's learning progress.",
                 "أنت مسجّل الدخول لمتابعة تقدّم ابنك/ابنتك التعليمي.",
-              )[lang]}
+              )[locale]}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Link
@@ -223,7 +223,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
           {L(
             "More than one student found. Please contact the school to link your account.",
             "تم العثور على أكثر من طالب. يرجى التواصل مع المدرسة لربط حسابك.",
-          )[lang]}
+          )[locale]}
         </div>
       ) : linkError === "none" ? (
         <div className="rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900">

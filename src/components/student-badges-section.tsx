@@ -20,18 +20,18 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
           </div>
           <div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Achievements & Badges", "الإنجازات والشارات")[lang]}
+              {L("Achievements & Badges", "الإنجازات والشارات")[locale]}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {L(
                 "Earn badges automatically as you learn and complete quizzes.",
                 "اكسب الشارات تلقائيًا أثناء التعلّم وإتمام الاختبارات.",
-              )[lang]}
+              )[locale]}
             </p>
           </div>
         </div>
         <div className="rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-          {L("Unlocked", "مفتوحة")[lang]} {unlockedCount} / {totalCount}
+          {L("Unlocked", "مفتوحة")[locale]} {unlockedCount} / {totalCount}
         </div>
       </div>
 
@@ -46,7 +46,7 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
             }`}
           >
             {!badge.unlocked && (
-              <div className="absolute top-3 end-3 text-muted-foreground/80" title={L("Locked", "مقفلة")[lang]}>
+              <div className="absolute top-3 end-3 text-muted-foreground/80" title={L("Locked", "مقفلة")[locale]}>
                 <Lock className="h-4 w-4" />
               </div>
             )}
@@ -63,14 +63,14 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
                 badge.unlocked ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              {badge.title[lang]}
+              {badge.title[locale]}
             </h3>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-              {badge.description[lang]}
+              {badge.description[locale]}
             </p>
             {badge.unlocked && (
               <div className="mt-3 text-xs font-semibold uppercase tracking-wider text-primary">
-                {L("Unlocked", "مفتوحة")[lang]}
+                {L("Unlocked", "مفتوحة")[locale]}
               </div>
             )}
           </article>

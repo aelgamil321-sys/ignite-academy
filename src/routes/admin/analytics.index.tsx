@@ -70,11 +70,11 @@ function AnalyticsTable({
   lang: "en" | "ar";
 }) {
   const headers = {
-    group: L("Group", "المجموعة")[lang],
-    students: L("Students", "الطلاب")[lang],
-    avgScore: L("Avg. quiz score", "متوسط درجات الاختبار")[lang],
-    submissions: L("Submissions", "الإرسالات")[lang],
-    certificates: L("Certificates", "الشهادات")[lang],
+    group: L("Group", "المجموعة")[locale],
+    students: L("Students", "الطلاب")[locale],
+    avgScore: L("Avg. quiz score", "متوسط درجات الاختبار")[locale],
+    submissions: L("Submissions", "الإرسالات")[locale],
+    certificates: L("Certificates", "الشهادات")[locale],
   };
 
   if (rows.length === 0) {
@@ -82,7 +82,7 @@ function AnalyticsTable({
       <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
         <h3 className="font-display text-lg text-foreground mb-3">{title}</h3>
         <p className="text-sm text-muted-foreground">
-          {L("No data for current filters.", "لا توجد بيانات للفلاتر الحالية.")[lang]}
+          {L("No data for current filters.", "لا توجد بيانات للفلاتر الحالية.")[locale]}
         </p>
       </section>
     );
@@ -133,17 +133,17 @@ function LeadingInsightsBanner({
   const items = [
     {
       key: "grade",
-      label: L("Best grade", "أفضل صف")[lang],
+      label: L("Best grade", "أفضل صف")[locale],
       value: data.leading.grade,
     },
     {
       key: "section",
-      label: L("Best section", "أفضل شعبة")[lang],
+      label: L("Best section", "أفضل شعبة")[locale],
       value: data.leading.section,
     },
     {
       key: "group",
-      label: L("Best Islamic group", "أفضل مجموعة إسلامية")[lang],
+      label: L("Best Islamic group", "أفضل مجموعة إسلامية")[locale],
       value: data.leading.islamicGroup,
     },
   ];
@@ -157,7 +157,7 @@ function LeadingInsightsBanner({
       <div className="flex items-center gap-2 mb-4">
         <Sparkles className="h-5 w-5 text-primary" />
         <h2 className="font-display text-lg text-foreground">
-          {L("Currently leading", "المتصدّر حاليًا")[lang]}
+          {L("Currently leading", "المتصدّر حاليًا")[locale]}
         </h2>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
@@ -194,7 +194,7 @@ function IslamicGroupComparison({
       <div className="flex items-center gap-2 mb-4">
         <BarChart3 className="h-5 w-5 text-primary" />
         <h3 className="font-display text-lg text-foreground">
-          {L("Islamic group comparison", "مقارنة المجموعات الإسلامية")[lang]}
+          {L("Islamic group comparison", "مقارنة المجموعات الإسلامية")[locale]}
         </h3>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -208,12 +208,12 @@ function IslamicGroupComparison({
             </div>
             <div className="grid grid-cols-3 gap-3 mt-3 text-sm">
               <div>
-                <div className="text-muted-foreground text-xs">{L("Students", "الطلاب")[lang]}</div>
+                <div className="text-muted-foreground text-xs">{L("Students", "الطلاب")[locale]}</div>
                 <div className="font-display text-xl text-foreground mt-0.5">{card.studentCount}</div>
               </div>
               <div>
                 <div className="text-muted-foreground text-xs">
-                  {L("Avg. score", "متوسط الدرجة")[lang]}
+                  {L("Avg. score", "متوسط الدرجة")[locale]}
                 </div>
                 <div className="font-display text-xl text-primary mt-0.5">
                   {formatPct(card.averageScorePct)}
@@ -221,7 +221,7 @@ function IslamicGroupComparison({
               </div>
               <div>
                 <div className="text-muted-foreground text-xs">
-                  {L("Certificates", "الشهادات")[lang]}
+                  {L("Certificates", "الشهادات")[locale]}
                 </div>
                 <div className="font-display text-xl text-foreground mt-0.5">
                   {card.certificatesEarned}
@@ -243,15 +243,15 @@ function TopStudentsTable({
   lang: "en" | "ar";
 }) {
   const T = {
-    title: L("Top students", "أفضل الطلاب")[lang],
-    empty: L("No ranked students for current filters.", "لا يوجد طلاب مصنّفون للفلاتر الحالية.")[lang],
-    rank: L("Rank", "الترتيب")[lang],
-    student: L("Student", "الطالب")[lang],
-    grade: L("Grade", "الصف")[lang],
-    section: L("Section", "الشعبة")[lang],
-    islamicGroup: L("Islamic Group", "المجموعة الإسلامية")[lang],
-    avgScore: L("Avg. score", "متوسط الدرجة")[lang],
-    certificates: L("Certificates", "الشهادات")[lang],
+    title: L("Top students", "أفضل الطلاب")[locale],
+    empty: L("No ranked students for current filters.", "لا يوجد طلاب مصنّفون للفلاتر الحالية.")[locale],
+    rank: L("Rank", "الترتيب")[locale],
+    student: L("Student", "الطالب")[locale],
+    grade: L("Grade", "الصف")[locale],
+    section: L("Section", "الشعبة")[locale],
+    islamicGroup: L("Islamic Group", "المجموعة الإسلامية")[locale],
+    avgScore: L("Avg. score", "متوسط الدرجة")[locale],
+    certificates: L("Certificates", "الشهادات")[locale],
   };
 
   return (
@@ -332,13 +332,13 @@ function TopSectionsTable({
   lang: "en" | "ar";
 }) {
   const T = {
-    title: L("Top sections", "أفضل الشعب")[lang],
-    empty: L("No ranked sections for current filters.", "لا توجد شعب مصنّفة للفلاتر الحالية.")[lang],
-    rank: L("Rank", "الترتيب")[lang],
-    section: L("Section", "الشعبة")[lang],
-    students: L("Students", "الطلاب")[lang],
-    avgScore: L("Avg. score", "متوسط الدرجة")[lang],
-    certificates: L("Certificates", "الشهادات")[lang],
+    title: L("Top sections", "أفضل الشعب")[locale],
+    empty: L("No ranked sections for current filters.", "لا توجد شعب مصنّفة للفلاتر الحالية.")[locale],
+    rank: L("Rank", "الترتيب")[locale],
+    section: L("Section", "الشعبة")[locale],
+    students: L("Students", "الطلاب")[locale],
+    avgScore: L("Avg. score", "متوسط الدرجة")[locale],
+    certificates: L("Certificates", "الشهادات")[locale],
   };
 
   return (
@@ -397,17 +397,17 @@ function AtRiskStudentsTable({
   lang: "en" | "ar";
 }) {
   const T = {
-    title: L("At-risk students", "طلاب يحتاجون متابعة")[lang],
+    title: L("At-risk students", "طلاب يحتاجون متابعة")[locale],
     subtitle: L(
       "Average score below 60% or no certificates earned.",
       "متوسط الدرجة أقل من 60٪ أو لم يحصلوا على شهادات.",
-    )[lang],
-    empty: L("No at-risk students for current filters.", "لا يوجد طلاب معرّضون للخطر للفلاتر الحالية.")[lang],
-    name: L("Name", "الاسم")[lang],
-    grade: L("Grade", "الصف")[lang],
-    section: L("Section", "الشعبة")[lang],
-    islamicGroup: L("Islamic Group", "المجموعة الإسلامية")[lang],
-    avgScore: L("Avg. score", "متوسط الدرجة")[lang],
+    )[locale],
+    empty: L("No at-risk students for current filters.", "لا يوجد طلاب معرّضون للخطر للفلاتر الحالية.")[locale],
+    name: L("Name", "الاسم")[locale],
+    grade: L("Grade", "الصف")[locale],
+    section: L("Section", "الشعبة")[locale],
+    islamicGroup: L("Islamic Group", "المجموعة الإسلامية")[locale],
+    avgScore: L("Avg. score", "متوسط الدرجة")[locale],
   };
 
   return (
@@ -493,20 +493,20 @@ function AdminAnalyticsPage() {
   }, [load]);
 
   const T = {
-    filters: L("Filters", "الفلاتر")[lang],
-    grade: L("Grade", "الصف")[lang],
-    section: L("Section", "الشعبة")[lang],
-    islamicGroup: L("Islamic Group", "المجموعة الإسلامية")[lang],
-    all: L("All", "الكل")[lang],
-    notSet: L("Not set", "غير محدد")[lang],
-    students: L("Students", "الطلاب")[lang],
-    avgScore: L("Average quiz score", "متوسط درجات الاختبار")[lang],
-    submissions: L("Quiz submissions", "إرسالات الاختبارات")[lang],
-    certificates: L("Certificates earned", "الشهادات المكتسبة")[lang],
-    byGrade: L("Performance by grade", "الأداء حسب الصف")[lang],
-    bySection: L("Performance by section", "الأداء حسب الشعبة")[lang],
-    byIslamicGroup: L("Performance by Islamic group", "الأداء حسب المجموعة الإسلامية")[lang],
-    loading: L("Loading analytics…", "جارٍ تحميل التحليلات…")[lang],
+    filters: L("Filters", "الفلاتر")[locale],
+    grade: L("Grade", "الصف")[locale],
+    section: L("Section", "الشعبة")[locale],
+    islamicGroup: L("Islamic Group", "المجموعة الإسلامية")[locale],
+    all: L("All", "الكل")[locale],
+    notSet: L("Not set", "غير محدد")[locale],
+    students: L("Students", "الطلاب")[locale],
+    avgScore: L("Average quiz score", "متوسط درجات الاختبار")[locale],
+    submissions: L("Quiz submissions", "إرسالات الاختبارات")[locale],
+    certificates: L("Certificates earned", "الشهادات المكتسبة")[locale],
+    byGrade: L("Performance by grade", "الأداء حسب الصف")[locale],
+    bySection: L("Performance by section", "الأداء حسب الشعبة")[locale],
+    byIslamicGroup: L("Performance by Islamic group", "الأداء حسب المجموعة الإسلامية")[locale],
+    loading: L("Loading analytics…", "جارٍ تحميل التحليلات…")[locale],
   };
 
   const summaryCards = data
@@ -551,7 +551,7 @@ function AdminAnalyticsPage() {
               <option value="">{T.all}</option>
               {grades.map((grade) => (
                 <option key={grade.slug} value={grade.slug}>
-                  {grade.name[lang]}
+                  {grade.name[locale]}
                 </option>
               ))}
             </select>
