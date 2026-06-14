@@ -46,24 +46,36 @@ export function SiteHeader() {
     if (!header) return;
     const chrome = header.querySelector<HTMLElement>("[data-site-header-chrome]");
     if (!chrome) return;
+    const mq = window.matchMedia("(min-width: 768px)");
 
     const updateHeaderOffset = () => {
+      if (!mq.matches) return;
       const height = Math.ceil(chrome.getBoundingClientRect().height + 1);
       if (height > 0) {
         document.documentElement.style.setProperty("--site-header-offset", `${height}px`);
       }
     };
 
-    updateHeaderOffset();
-    const observer = new ResizeObserver(updateHeaderOffset);
-    observer.observe(chrome);
+    let observer: ResizeObserver | null = null;
+    const startObserver = () => {
+      observer?.disconnect();
+      observer = null;
+      if (!mq.matches) return;
+      updateHeaderOffset();
+      observer = new ResizeObserver(updateHeaderOffset);
+      observer.observe(chrome);
+    };
+
+    startObserver();
+    mq.addEventListener("change", startObserver);
     window.addEventListener("resize", updateHeaderOffset);
 
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
+      mq.removeEventListener("change", startObserver);
       window.removeEventListener("resize", updateHeaderOffset);
     };
-  }, [signedIn, isParent, roleLoading, lang]);
+  }, [signedIn, isParent, roleLoading, lang, open]);
 
   useEffect(() => {
     let active = true;
@@ -240,11 +252,11 @@ export function SiteHeader() {
 
   return (
     <>
-    <header ref={headerRef} className="fixed top-0 inset-x-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-lg">
+    <header ref={headerRef} className="sticky top-0 inset-x-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-lg md:fixed">
       <div data-site-header-chrome>
-      <div className="container-page py-2 md:py-3.5 lg:py-4">
+      <div className="container-page md:py-3.5 lg:py-4">
         {/* Mobile (< md): menu, language, school logo, book icon only */}
-        <div data-site-header-bar className="flex md:hidden min-h-10 items-center gap-2">
+        <div data-site-header-bar data-site-header-mobile className="site-header-mobile-row flex md:hidden items-center gap-2">
           {menuButton}
           {langButton}
           <div className="flex min-w-0 flex-1 items-center justify-center px-1">
@@ -329,7 +341,7 @@ export function SiteHeader() {
         </div>
       )}
     </header>
-    <div data-site-header-spacer className="site-header-spacer shrink-0" aria-hidden />
+    <div data-site-header-spacer className="site-header-spacer hidden md:block shrink-0" aria-hidden />
     </>
   );
 }

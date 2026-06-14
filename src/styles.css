@@ -115,8 +115,8 @@
   --emerald-foreground: #2F3542;
   --cream: #F8F8F6;
 
-  /* Layout chrome — updated by SiteHeader at runtime; fallbacks for SSR */
-  --site-header-offset: 3.75rem;
+  /* Layout chrome — 64px on mobile (CSS); md+ updated by SiteHeader at runtime */
+  --site-header-offset: 4rem;
   --site-fab-clearance: 5.5rem;
 }
 
@@ -164,7 +164,29 @@
   }
   .site-header-spacer {
     height: var(--site-header-offset);
-    min-height: 3.75rem;
+    min-height: 4rem;
+  }
+  @media (max-width: 767.98px) {
+    [data-site-header-chrome] {
+      height: 64px;
+    }
+    .site-header-mobile-row {
+      height: 64px;
+    }
+    header .container-page {
+      height: 64px;
+      padding-block: 0;
+      display: flex;
+      align-items: center;
+    }
+    header nav,
+    [data-site-header-bar]:not([data-site-header-mobile]) {
+      display: none !important;
+    }
+    [data-site-header-mobile] {
+      display: flex !important;
+      width: 100%;
+    }
   }
   .site-content-shell {
     padding-bottom: max(
