@@ -81,80 +81,116 @@ function LessonPage() {
   ];
 
   const lessonVideos = lessonVideoEmbeds(custom, lang);
+  const quizCount = normalizeQuizList(custom?.quiz ?? lesson.quiz).length;
+  const hasQuiz = Boolean(custom && quizCount > 0);
+
+  const lessonCard =
+    "w-full max-w-full overflow-hidden rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-soft)] md:rounded-2xl md:p-7";
+  const lessonCardHeader = "flex items-center gap-2.5 mb-2.5 md:gap-3 md:mb-3";
+  const lessonCardIcon =
+    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary md:h-10 md:w-10";
+  const lessonCardTitle = "min-w-0 font-display text-lg font-semibold text-foreground md:text-xl";
+  const lessonBody = "text-sm leading-[1.8] text-foreground/85 whitespace-pre-line [overflow-wrap:anywhere] md:text-base";
+  const resourceBtn =
+    "flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium transition-colors hover:border-primary hover:text-primary";
 
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-hidden">
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
-          <div className="container-page pt-4 pb-6 md:py-10">
-            <div className="mb-2 md:mb-5">
-              <div className="md:hidden">
-                <Breadcrumbs items={[
-                  { label: tr("nav_stages"), to: "/grades" },
-                  { label: grade.name[lang], to: "/grades/$grade", params: { grade: grade.slug } },
-                ]} />
-              </div>
-              <div className="hidden md:block">
-                <Breadcrumbs items={[
-                  { label: tr("nav_stages"), to: "/grades" },
-                  { label: grade.name[lang], to: "/grades/$grade", params: { grade: grade.slug } },
-                  { label: lesson.title[lang] },
-                ]} />
-              </div>
+          <div className="container-page pt-3 pb-4 md:py-10">
+            <div className="hidden md:block mb-5">
+              <Breadcrumbs items={[
+                { label: tr("nav_stages"), to: "/grades" },
+                { label: grade.name[lang], to: "/grades/$grade", params: { grade: grade.slug } },
+                { label: lesson.title[lang] },
+              ]} />
             </div>
-            <Link to="/grades/$grade" params={{ grade: grade.slug }} className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-5">
-              <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-              {tr("back_to_grade")} · {grade.name[lang]}
+            <Link
+              to="/grades/$grade"
+              params={{ grade: grade.slug }}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 md:mb-5 md:text-muted-foreground md:hover:text-primary"
+            >
+              <ChevronLeft className={`h-4 w-4 shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
+              <span>{tr("back_to_grade")} {grade.name[lang]}</span>
             </Link>
-            <div className="text-xs uppercase tracking-[0.22em] text-primary mb-1.5 md:mb-2">
+            <div className="mt-2 hidden text-xs uppercase tracking-[0.22em] text-primary md:mb-2 md:block">
               {lesson.subject[lang]} · {lesson.unit[lang]}
             </div>
-            <h1 className="font-display text-2xl sm:text-3xl md:text-5xl font-semibold text-foreground leading-tight">{lesson.title[lang]}</h1>
-            <div className="mt-3 md:mt-4 flex flex-wrap items-center gap-3 md:gap-4 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><Clock className="h-4 w-4" /> {lesson.duration} {tr("minutes")}</span>
-              <span className="inline-flex items-center gap-1.5"><HelpCircle className="h-4 w-4" /> {normalizeQuizList(custom?.quiz ?? lesson.quiz).length} Q</span>
-              <span className="inline-flex items-center gap-1.5"><BookOpen className="h-4 w-4" /> {grade.name[lang]}</span>
+            <h1 className="mt-2 font-display text-xl font-semibold leading-snug text-foreground [overflow-wrap:anywhere] md:mt-0 md:text-5xl md:leading-tight">
+              {lesson.title[lang]}
+            </h1>
+            <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-primary md:hidden">
+              {lesson.subject[lang]} · {lesson.unit[lang]}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground md:mt-4 md:gap-4 md:text-sm">
+              <span className="order-1 inline-flex items-center gap-1.5 md:order-3"><BookOpen className="h-3.5 w-3.5 md:h-4 md:w-4" /> {grade.name[lang]}</span>
+              <span className="order-2 inline-flex items-center gap-1.5 md:order-1"><Clock className="h-3.5 w-3.5 md:h-4 md:w-4" /> {lesson.duration} {tr("minutes")}</span>
+              <span className="order-3 inline-flex items-center gap-1.5 md:order-2"><HelpCircle className="h-3.5 w-3.5 md:h-4 md:w-4" /> {quizCount} Q</span>
             </div>
           </div>
         </section>
 
-        <section className="container-page py-8 md:py-12 grid gap-8 md:gap-10 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="container-page py-3 md:hidden">
+          <div className="grid grid-cols-2 gap-2">
+            <a href="#lesson-video" className={resourceBtn}>
+              <Video className="h-4 w-4 shrink-0" />
+              {tr("ls_video")}
+            </a>
+            <a href="#lesson-pdf" className={resourceBtn}>
+              <FileText className="h-4 w-4 shrink-0" />
+              PDF
+            </a>
+            <a href="#lesson-worksheet" className={resourceBtn}>
+              <ClipboardList className="h-4 w-4 shrink-0" />
+              {tr("ls_worksheet")}
+            </a>
+            {hasQuiz && (
+              <a href="#lesson-quiz" className={resourceBtn}>
+                <HelpCircle className="h-4 w-4 shrink-0" />
+                {tr("nav_quizzes")}
+              </a>
+            )}
+          </div>
+        </div>
+
+        <section className="container-page py-4 md:py-12 grid gap-4 md:gap-10 lg:grid-cols-3">
+          <div className="min-w-0 lg:col-span-2 space-y-4 md:space-y-6">
             {sections.map((s) => {
               const Icon = s.icon;
               const fallback = lang === "ar" ? "لم تتم إضافة هذا المحتوى بعد" : "This content has not been added yet";
               const body = (s.body ?? "").trim();
               return (
-                <div key={s.key} className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Icon className="h-5 w-5" />
+                <div key={s.key} className={lessonCard}>
+                  <div className={lessonCardHeader}>
+                    <div className={lessonCardIcon}>
+                      <Icon className="h-4 w-4 md:h-5 md:w-5" />
                     </div>
-                    <h2 className="font-display text-xl font-semibold text-foreground">{tr(s.key)}</h2>
+                    <h2 className={lessonCardTitle}>{tr(s.key)}</h2>
                   </div>
                   {body ? (
-                    <p className="text-foreground/85 leading-relaxed whitespace-pre-line">{body}</p>
+                    <p className={lessonBody}>{body}</p>
                   ) : (
-                    <p className="text-muted-foreground italic">{fallback}</p>
+                    <p className="text-sm italic text-muted-foreground md:text-base">{fallback}</p>
                   )}
                 </div>
               );
             })}
 
             {lesson.vocab.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <FileText className="h-5 w-5" />
+              <div className={lessonCard}>
+                <div className={`${lessonCardHeader} md:mb-4`}>
+                  <div className={lessonCardIcon}>
+                    <FileText className="h-4 w-4 md:h-5 md:w-5" />
                   </div>
-                  <h2 className="font-display text-xl font-semibold text-foreground">{tr("vocab")}</h2>
+                  <h2 className={lessonCardTitle}>{tr("vocab")}</h2>
                 </div>
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4">
                   {lesson.vocab.map((vw, i) => (
-                    <div key={i} className="rounded-xl border border-border bg-background p-4">
-                      <div className="font-display text-lg text-foreground">{vw.term[lang]}</div>
-                      {vw.def[lang] && <div className="text-sm text-muted-foreground mt-1">{vw.def[lang]}</div>}
+                    <div key={i} className="rounded-xl border border-border bg-background p-3 md:p-4">
+                      <div className="font-display text-base text-foreground md:text-lg [overflow-wrap:anywhere]">{vw.term[lang]}</div>
+                      {vw.def[lang] && <div className="mt-1 text-sm leading-[1.8] text-muted-foreground [overflow-wrap:anywhere]">{vw.def[lang]}</div>}
                     </div>
                   ))}
                 </div>
@@ -164,13 +200,13 @@ function LessonPage() {
             <div
               id="lesson-video"
               tabIndex={-1}
-              className="scroll-mt-28 rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] outline-none"
+              className={`scroll-mt-28 outline-none ${lessonCard}`}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Video className="h-5 w-5" />
+              <div className={`${lessonCardHeader} md:mb-4`}>
+                <div className={lessonCardIcon}>
+                  <Video className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
-                <h2 className="font-display text-xl font-semibold text-foreground">{tr("ls_video")}</h2>
+                <h2 className={lessonCardTitle}>{tr("ls_video")}</h2>
               </div>
               {lessonVideos.length > 0 ? (
                 <div className="space-y-6">
@@ -203,9 +239,9 @@ function LessonPage() {
               )}
             </div>
 
-            <LessonDownloads custom={custom} />
+            <LessonDownloads custom={custom} lessonCard={lessonCard} lessonCardHeader={lessonCardHeader} lessonCardIcon={lessonCardIcon} lessonCardTitle={lessonCardTitle} resourceBtn={resourceBtn} />
 
-            {custom && normalizeQuizList(custom.quiz).length > 0 && (
+            {hasQuiz && (
               <div id="lesson-quiz" tabIndex={-1} className="scroll-mt-28 outline-none">
                 <LessonQuizStudent
                   lessonId={custom.id}
@@ -217,15 +253,16 @@ function LessonPage() {
             )}
           </div>
 
-          <aside className="space-y-6">
+          <aside className="min-w-0 space-y-4 md:space-y-6">
             {lessonFiles.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] sticky top-24">
-                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{tr("ls_resources")}</div>
+              <div className={`${lessonCard} md:sticky md:top-24`}>
+                <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground md:mb-2">{tr("ls_resources")}</div>
                 <div className="space-y-2">
                   {lessonFiles.map((f: CustomFile) => (
                     <a key={f.id} href={f.fileUrl} download={f.fileName}
-                      className="block rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-primary hover:text-primary">
-                      {f.title[lang]} <span className="opacity-60">· {f.type.toUpperCase()}</span>
+                      className={`${resourceBtn} justify-start text-xs md:text-sm`}>
+                      <Download className="h-4 w-4 shrink-0" />
+                      <span className="min-w-0 [overflow-wrap:anywhere]">{f.title[lang]} <span className="opacity-60">· {f.type.toUpperCase()}</span></span>
                     </a>
                   ))}
                 </div>
@@ -240,7 +277,21 @@ function LessonPage() {
   );
 }
 
-function LessonDownloads({ custom }: { custom?: CustomLesson }) {
+function LessonDownloads({
+  custom,
+  lessonCard,
+  lessonCardHeader,
+  lessonCardIcon,
+  lessonCardTitle,
+  resourceBtn,
+}: {
+  custom?: CustomLesson;
+  lessonCard: string;
+  lessonCardHeader: string;
+  lessonCardIcon: string;
+  lessonCardTitle: string;
+  resourceBtn: string;
+}) {
   const items = custom ? studentDownloadItems(custom) : [];
   const pdfItems = items.filter(
     (item) =>
@@ -252,16 +303,18 @@ function LessonDownloads({ custom }: { custom?: CustomLesson }) {
   const worksheetItems = items.filter(
     (item) => item.key === "worksheetArUrl" || item.key === "worksheetEnUrl",
   );
+  const sectionProps = { lessonCard, lessonCardHeader, lessonCardIcon, lessonCardTitle, resourceBtn };
 
   if (items.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <LessonFileSection
           id="lesson-pdf"
           title="PDF"
           items={[]}
           emptyEn="No PDF attached to this lesson."
           emptyAr="لا يوجد PDF مرفق لهذا الدرس."
+          {...sectionProps}
         />
         <LessonFileSection
           id="lesson-worksheet"
@@ -269,19 +322,21 @@ function LessonDownloads({ custom }: { custom?: CustomLesson }) {
           items={[]}
           emptyEn="No worksheet attached to this lesson."
           emptyAr="لا توجد ورقة عمل مرفقة لهذا الدرس."
+          {...sectionProps}
         />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <LessonFileSection
         id="lesson-pdf"
         title="PDF"
         items={pdfItems}
         emptyEn="No PDF attached to this lesson."
         emptyAr="لا يوجد PDF مرفق لهذا الدرس."
+        {...sectionProps}
       />
       <LessonFileSection
         id="lesson-worksheet"
@@ -289,6 +344,7 @@ function LessonDownloads({ custom }: { custom?: CustomLesson }) {
         items={worksheetItems}
         emptyEn="No worksheet attached to this lesson."
         emptyAr="لا توجد ورقة عمل مرفقة لهذا الدرس."
+        {...sectionProps}
       />
     </div>
   );
@@ -300,29 +356,39 @@ function LessonFileSection({
   items,
   emptyEn,
   emptyAr,
+  lessonCard,
+  lessonCardHeader,
+  lessonCardIcon,
+  lessonCardTitle,
+  resourceBtn,
 }: {
   id: string;
   title: string;
   items: StudentDownloadItem[];
   emptyEn: string;
   emptyAr: string;
+  lessonCard: string;
+  lessonCardHeader: string;
+  lessonCardIcon: string;
+  lessonCardTitle: string;
+  resourceBtn: string;
 }) {
   return (
     <div
       id={id}
       tabIndex={-1}
-      className="scroll-mt-28 rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] outline-none"
+      className={`scroll-mt-28 outline-none ${lessonCard}`}
     >
-      <div className="flex items-center gap-3 mb-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <FileText className="h-5 w-5" />
+      <div className={`${lessonCardHeader} md:mb-4`}>
+        <div className={lessonCardIcon}>
+          <FileText className="h-4 w-4 md:h-5 md:w-5" />
         </div>
-        <h2 className="font-display text-xl font-semibold text-foreground">{title}</h2>
+        <h2 className={lessonCardTitle}>{title}</h2>
       </div>
       {items.length > 0 ? (
-        <DownloadGrid items={items} />
+        <DownloadGrid items={items} resourceBtn={resourceBtn} />
       ) : (
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm leading-[1.8] text-muted-foreground md:text-base">
           {emptyAr}
           <br />
           {emptyEn}
@@ -332,9 +398,9 @@ function LessonFileSection({
   );
 }
 
-function DownloadGrid({ items }: { items: StudentDownloadItem[] }) {
+function DownloadGrid({ items, resourceBtn }: { items: StudentDownloadItem[]; resourceBtn: string }) {
   return (
-    <div className="grid gap-2.5 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-2.5">
       {items.map((item) => (
         <a
           key={item.key}
@@ -342,10 +408,10 @@ function DownloadGrid({ items }: { items: StudentDownloadItem[] }) {
           target="_blank"
           rel="noopener noreferrer"
           download={fileNameFromUrl(item.url)}
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium hover:border-primary hover:text-primary transition-colors"
+          className={resourceBtn}
         >
           <Download className="h-4 w-4 shrink-0" />
-          <span>{item.label}</span>
+          <span className="min-w-0 [overflow-wrap:anywhere]">{item.label}</span>
         </a>
       ))}
     </div>
