@@ -87,21 +87,31 @@ function LessonPage() {
       <SiteHeader />
       <main className="flex-1">
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
-          <div className="container-page py-10">
-            <div className="mb-5"><Breadcrumbs items={[
-              { label: tr("nav_stages"), to: "/grades" },
-              { label: grade.name[lang], to: "/grades/$grade", params: { grade: grade.slug } },
-              { label: lesson.title[lang] },
-            ]} /></div>
-            <Link to="/grades/$grade" params={{ grade: grade.slug }} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-5">
+          <div className="container-page pt-4 pb-6 md:py-10">
+            <div className="mb-2 md:mb-5">
+              <div className="md:hidden">
+                <Breadcrumbs items={[
+                  { label: tr("nav_stages"), to: "/grades" },
+                  { label: grade.name[lang], to: "/grades/$grade", params: { grade: grade.slug } },
+                ]} />
+              </div>
+              <div className="hidden md:block">
+                <Breadcrumbs items={[
+                  { label: tr("nav_stages"), to: "/grades" },
+                  { label: grade.name[lang], to: "/grades/$grade", params: { grade: grade.slug } },
+                  { label: lesson.title[lang] },
+                ]} />
+              </div>
+            </div>
+            <Link to="/grades/$grade" params={{ grade: grade.slug }} className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-5">
               <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               {tr("back_to_grade")} · {grade.name[lang]}
             </Link>
-            <div className="text-xs uppercase tracking-[0.22em] text-primary mb-2">
+            <div className="text-xs uppercase tracking-[0.22em] text-primary mb-1.5 md:mb-2">
               {lesson.subject[lang]} · {lesson.unit[lang]}
             </div>
-            <h1 className="font-display text-3xl md:text-5xl font-semibold text-foreground leading-tight">{lesson.title[lang]}</h1>
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <h1 className="font-display text-2xl sm:text-3xl md:text-5xl font-semibold text-foreground leading-tight">{lesson.title[lang]}</h1>
+            <div className="mt-3 md:mt-4 flex flex-wrap items-center gap-3 md:gap-4 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5"><Clock className="h-4 w-4" /> {lesson.duration} {tr("minutes")}</span>
               <span className="inline-flex items-center gap-1.5"><HelpCircle className="h-4 w-4" /> {normalizeQuizList(custom?.quiz ?? lesson.quiz).length} Q</span>
               <span className="inline-flex items-center gap-1.5"><BookOpen className="h-4 w-4" /> {grade.name[lang]}</span>
@@ -109,7 +119,7 @@ function LessonPage() {
           </div>
         </section>
 
-        <section className="container-page py-12 grid gap-10 lg:grid-cols-3">
+        <section className="container-page py-8 md:py-12 grid gap-8 md:gap-10 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             {sections.map((s) => {
               const Icon = s.icon;
