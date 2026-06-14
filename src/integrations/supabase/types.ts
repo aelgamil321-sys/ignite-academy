@@ -544,6 +544,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_student_peer_rankings: {
+        Args: {
+          p_student_user_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "student" | "parent"

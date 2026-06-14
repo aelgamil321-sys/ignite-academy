@@ -7,8 +7,6 @@ import { ParentAccountRequired } from "@/components/parent-account-required";
 import { ParentChildSelector } from "@/components/parent-child-selector";
 import { ParentDashboardView } from "@/components/parent-dashboard";
 import { useI18n } from "@/lib/i18n";
-import { grades } from "@/lib/curriculum";
-import { gradeDisplayName, normalizeGradeSlug } from "@/lib/grade-utils";
 import {
   fetchParentDashboardBundle,
   type ParentDashboardData,
@@ -121,7 +119,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
         await redeemPendingParentLinkCodeFromMetadata();
       }
 
-      const bundle = await fetchParentDashboardBundle(userId, studentUserId);
+      const bundle = await fetchParentDashboardBundle(userId, studentUserId, { lang });
 
       if (bundle.linkError) {
         setLinkError(bundle.linkError);
@@ -149,7 +147,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
       if (isInitial) setLoading(false);
       else setSwitchingChild(false);
     },
-    [userId],
+    [userId, lang],
   );
 
   useEffect(() => {
@@ -162,10 +160,6 @@ function ParentDashboardPage({ userId }: { userId: string }) {
     storeParentChildId(userId, studentUserId);
     void loadDashboard(studentUserId);
   };
-
-  const gradeSlug = normalizeGradeSlug(dashboard?.gradeSlug ?? "8") || "8";
-  const myGrade = grades.find((grade) => grade.slug === gradeSlug) ?? grades.find((grade) => grade.slug === "8")!;
-  const gradeName = gradeDisplayName(myGrade.slug, lang) || myGrade.name[lang];
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -261,7 +255,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
               {tr("parent_dashboard_switching")}
             </div>
           ) : (
-            <ParentDashboardView data={dashboard} gradeName={gradeName} />
+            <ParentDashboardView data={dashboard} />
           )}
         </div>
       ) : null}
