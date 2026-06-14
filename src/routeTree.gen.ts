@@ -37,6 +37,7 @@ import { Route as AdminUploadTestRouteImport } from './routes/admin/upload-test'
 import { Route as GradesGradeIndexRouteImport } from './routes/grades.$grade.index'
 import { Route as AdminQuizSubmissionsIndexRouteImport } from './routes/admin/quiz-submissions.index'
 import { Route as AdminLessonsIndexRouteImport } from './routes/admin/lessons.index'
+import { Route as AdminAnalyticsIndexRouteImport } from './routes/admin/analytics.index'
 import { Route as GradesGradeLessonRouteImport } from './routes/grades.$grade.$lesson'
 import { Route as GradesGradeUnitsUnitRouteImport } from './routes/grades.$grade.units.$unit'
 import { Route as AdminLessonsEditLessonIdRouteImport } from './routes/admin.lessons.edit.$lessonId'
@@ -182,6 +183,11 @@ const AdminLessonsIndexRoute = AdminLessonsIndexRouteImport.update({
   path: '/lessons/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminAnalyticsIndexRoute = AdminAnalyticsIndexRouteImport.update({
+  id: '/analytics/',
+  path: '/analytics/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const GradesGradeLessonRoute = GradesGradeLessonRouteImport.update({
   id: '/grades/$grade/$lesson',
   path: '/grades/$grade/$lesson',
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/student/': typeof StudentIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
+  '/admin/analytics/': typeof AdminAnalyticsIndexRoute
   '/admin/lessons/': typeof AdminLessonsIndexRoute
   '/admin/quiz-submissions/': typeof AdminQuizSubmissionsIndexRoute
   '/grades/$grade/': typeof GradesGradeIndexRoute
@@ -257,6 +264,7 @@ export interface FileRoutesByTo {
   '/student': typeof StudentIndexRoute
   '/videos': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
+  '/admin/analytics': typeof AdminAnalyticsIndexRoute
   '/admin/lessons': typeof AdminLessonsIndexRoute
   '/admin/quiz-submissions': typeof AdminQuizSubmissionsIndexRoute
   '/grades/$grade': typeof GradesGradeIndexRoute
@@ -291,6 +299,7 @@ export interface FileRoutesById {
   '/student/': typeof StudentIndexRoute
   '/videos/': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
+  '/admin/analytics/': typeof AdminAnalyticsIndexRoute
   '/admin/lessons/': typeof AdminLessonsIndexRoute
   '/admin/quiz-submissions/': typeof AdminQuizSubmissionsIndexRoute
   '/grades/$grade/': typeof GradesGradeIndexRoute
@@ -326,6 +335,7 @@ export interface FileRouteTypes {
     | '/student/'
     | '/videos/'
     | '/grades/$grade/$lesson'
+    | '/admin/analytics/'
     | '/admin/lessons/'
     | '/admin/quiz-submissions/'
     | '/grades/$grade/'
@@ -357,6 +367,7 @@ export interface FileRouteTypes {
     | '/student'
     | '/videos'
     | '/grades/$grade/$lesson'
+    | '/admin/analytics'
     | '/admin/lessons'
     | '/admin/quiz-submissions'
     | '/grades/$grade'
@@ -390,6 +401,7 @@ export interface FileRouteTypes {
     | '/student/'
     | '/videos/'
     | '/grades/$grade/$lesson'
+    | '/admin/analytics/'
     | '/admin/lessons/'
     | '/admin/quiz-submissions/'
     | '/grades/$grade/'
@@ -622,6 +634,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLessonsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/analytics/': {
+      id: '/admin/analytics/'
+      path: '/analytics'
+      fullPath: '/admin/analytics/'
+      preLoaderRoute: typeof AdminAnalyticsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/grades/$grade/$lesson': {
       id: '/grades/$grade/$lesson'
       path: '/grades/$grade/$lesson'
@@ -649,6 +668,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteRouteChildren {
   AdminUploadTestRoute: typeof AdminUploadTestRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminAnalyticsIndexRoute: typeof AdminAnalyticsIndexRoute
   AdminLessonsIndexRoute: typeof AdminLessonsIndexRoute
   AdminQuizSubmissionsIndexRoute: typeof AdminQuizSubmissionsIndexRoute
   AdminLessonsEditLessonIdRoute: typeof AdminLessonsEditLessonIdRoute
@@ -657,6 +677,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminUploadTestRoute: AdminUploadTestRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminAnalyticsIndexRoute: AdminAnalyticsIndexRoute,
   AdminLessonsIndexRoute: AdminLessonsIndexRoute,
   AdminQuizSubmissionsIndexRoute: AdminQuizSubmissionsIndexRoute,
   AdminLessonsEditLessonIdRoute: AdminLessonsEditLessonIdRoute,

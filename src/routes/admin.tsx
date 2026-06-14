@@ -111,18 +111,28 @@ export function AdminLayoutShell({ email }: { email: string }) {
   const onLessonsEdit = pathname.startsWith("/admin/lessons/edit/");
   const onQuizSubmissions =
     pathname === "/admin/quiz-submissions" || pathname === "/admin/quiz-submissions/";
+  const onAnalytics =
+    pathname === "/admin/analytics" || pathname === "/admin/analytics/";
 
   const adminLabel = L("Admin", "الإدارة")[lang];
   const manageLessonsLabel = L("Manage Lessons", "إدارة الدروس")[lang];
   const quizSubmissionsLabel = L("Quiz Submissions", "إرسالات الاختبارات")[lang];
-  const title = onQuizSubmissions
+  const analyticsLabel = L("Analytics", "التحليلات")[lang];
+  const title = onAnalytics
+    ? analyticsLabel
+    : onQuizSubmissions
     ? quizSubmissionsLabel
     : onLessonsList
       ? manageLessonsLabel
       : onLessonsEdit
         ? L("Edit Lesson", "تعديل الدرس")[lang]
         : L("Admin Dashboard", "لوحة الإدارة")[lang];
-  const lead = onQuizSubmissions
+  const lead = onAnalytics
+    ? L(
+        "Compare student quiz performance and certificates by grade, section, and Islamic group.",
+        "قارن أداء الطلاب في الاختبارات والشهادات حسب الصف والشعبة والمجموعة الإسلامية.",
+      )[lang]
+    : onQuizSubmissions
     ? L("Review student quiz submissions and grade essay answers.", "راجع إرسالات الطلاب وقيّم الإجابات المقالية.")[lang]
     : onLessonsList
       ? L("View and edit all lessons.", "عرض وتعديل جميع الدروس.")[lang]
@@ -130,7 +140,9 @@ export function AdminLayoutShell({ email }: { email: string }) {
         ? L("Update the existing lesson.", "تحديث بيانات الدرس الحالي.")[lang]
         : L("Create, edit, publish, and manage all content via Supabase CMS.",
             "أنشئ المحتوى وحرّره وانشره وأدره عبر نظام إدارة المحتوى.")[lang];
-  const crumbs = onQuizSubmissions
+  const crumbs = onAnalytics
+    ? [{ label: adminLabel, to: "/admin" }, { label: analyticsLabel }]
+    : onQuizSubmissions
     ? [{ label: adminLabel, to: "/admin" }, { label: quizSubmissionsLabel }]
     : onLessonsList
       ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel }]
