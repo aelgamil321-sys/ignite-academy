@@ -23,7 +23,7 @@ export const Route = createFileRoute("/parent/settings")({
 
 function ParentSettingsPage() {
   const navigate = useNavigate();
-  const { tr, lang, biMaybe } = useI18n();
+  const { tr, lang, bi, biMaybe } = useI18n();
   const [loading, setLoading] = useState(true);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");

@@ -29,6 +29,7 @@ export function DeleteLessonButton({
   iconOnly?: boolean;
   onDeleted?: () => void;
 }) {
+  const { bi } = useI18n();
   const { deleteLesson } = useCMS();
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);

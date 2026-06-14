@@ -530,7 +530,7 @@ interface I18nCtx {
   toggle: () => void;
   tr: (key: TKey) => string;
   /** Pick lesson/CMS text; dynamically translates for fr/de/ur/zh. */
-  bi: (text: Bi) => string;
+  bi: (text?: Bi | null) => string;
   /** Safe variant when bilingual text may be undefined. */
   biMaybe: (text?: Bi | null) => string;
   /** Number of in-flight content translations (for loading UI). */
@@ -592,7 +592,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   );
 
   const bi = useCallback(
-    (text: Bi) => {
+    (text?: Bi | null) => {
+      if (!text) return "";
       if (!needsDynamicTranslation(lang)) {
         return pickBiLocale(text, locale);
       }

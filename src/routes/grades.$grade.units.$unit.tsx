@@ -368,6 +368,7 @@ function OverviewTab({
   counts: { lessons: number; information: number; articles: number; files: number; videos: number; quizzes: number };
   lang: "en" | "ar";
 }) {
+  const { bi } = useI18n();
   const items: Array<{ k: keyof typeof counts; label: Bi }> = [
     { k: "lessons", label: L("Lessons", "الدروس") },
     { k: "information", label: L("Information", "المعلومات") },
@@ -397,6 +398,7 @@ function LessonsTab({
   custom: ReturnType<typeof useCMS>["lessons"];
   onRefresh: () => Promise<void>;
 }) {
+  const { bi } = useI18n();
   const allItems = [
     ...builtIn.map((l) => ({ id: l.slug, title: l.title, builtIn: true, published: true })),
     ...custom.map((l) => ({ id: l.id, title: l.title, builtIn: false, published: l.published })),
@@ -467,6 +469,7 @@ function InfoTab({
   gradeSlug: string; unitSlug: string; unitName: Bi; lang: "en" | "ar";
   infos: UnitInfo[]; loading: boolean; onRefresh: () => Promise<void>;
 }) {
+  const { bi } = useI18n();
   const [titleEn, setTitleEn] = useState(""); const [titleAr, setTitleAr] = useState("");
   const [descEn, setDescEn] = useState(""); const [descAr, setDescAr] = useState("");
   const [kpEn, setKpEn] = useState(""); const [kpAr, setKpAr] = useState("");
@@ -595,6 +598,7 @@ function ArticlesTab({
   articles: Array<{ id: string; title: Bi; content: Bi; imageUrl?: string; published: boolean; category: string }>;
   onRefresh: () => Promise<void>;
 }) {
+  const { bi } = useI18n();
   const [titleEn, setTitleEn] = useState(""); const [titleAr, setTitleAr] = useState("");
   const [bodyEn, setBodyEn] = useState(""); const [bodyAr, setBodyAr] = useState("");
   const [cat, setCat] = useState("announcement");
@@ -707,6 +711,7 @@ function FilesTab({
   gradeSlug: string; unitSlug: string; unitName: Bi; lang: "en" | "ar";
   files: ReturnType<typeof useCMS>["files"]; onRefresh: () => Promise<void>;
 }) {
+  const { bi } = useI18n();
   const [titleEn, setTitleEn] = useState(""); const [titleAr, setTitleAr] = useState("");
   const [type, setType] = useState<"pdf" | "ppt" | "worksheet" | "image" | "word">("pdf");
   const [desc, setDesc] = useState("");
@@ -820,6 +825,7 @@ function VideosTab({
   gradeSlug: string; unitSlug: string; unitName: Bi; lang: "en" | "ar";
   videos: ReturnType<typeof useCMS>["videos"]; onRefresh: () => Promise<void>;
 }) {
+  const { bi } = useI18n();
   const [titleEn, setTitleEn] = useState(""); const [titleAr, setTitleAr] = useState("");
   const [descEn, setDescEn] = useState(""); const [descAr, setDescAr] = useState("");
   const [yt, setYt] = useState("");
@@ -940,6 +946,7 @@ function QuizzesTab({
   gradeSlug: string; unitSlug: string; unitName: Bi; lang: "en" | "ar";
   quizzes: UnitQuiz[]; loading: boolean; onRefresh: () => Promise<void>;
 }) {
+  const { bi } = useI18n();
   const [titleEn, setTitleEn] = useState(""); const [titleAr, setTitleAr] = useState("");
   const [qs, setQs] = useState<QuizQuestion[]>([{ ...emptyQ, options: emptyQ.options.map((o) => ({ ...o })) }]);
   const [pub, setPub] = useState(true);
