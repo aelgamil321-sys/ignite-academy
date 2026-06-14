@@ -1,5 +1,7 @@
 -- Complete Parent Link Code flow: column, generation, student RPC, backfill.
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS parent_link_code text;
 
@@ -18,6 +20,46 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_parent_link_code_unique
   ON public.profiles (public.normalize_parent_link_code(parent_link_code))
   WHERE parent_link_code IS NOT NULL AND trim(parent_link_code) <> '';
 
+CREATE OR REPLACE FUNCTION public.parent_link_random_suffix()
+RETURNS text
+LANGUAGE plpgsql
+VOLATILE
+SET search_path = public, extensions
+AS $$
+DECLARE
+  raw text;
+  cleaned text := '';
+  i integer;
+  ch text;
+BEGIN
+  BEGIN
+    BEGIN
+      raw := upper(encode(extensions.gen_random_bytes(5), 'hex'));
+    EXCEPTION WHEN OTHERS THEN
+      raw := upper(encode(gen_random_bytes(5), 'hex'));
+    END;
+  EXCEPTION WHEN OTHERS THEN
+    raw := upper(
+      replace(
+        md5(gen_random_uuid()::text || clock_timestamp()::text || random()::text),
+        '-',
+        '',
+      ),
+    );
+  END;
+
+  FOR i IN 1..length(raw) LOOP
+    ch := substr(raw, i, 1);
+    IF ch ~ '[A-Z0-9]' THEN
+      cleaned := cleaned || ch;
+    END IF;
+    EXIT WHEN length(cleaned) >= 6;
+  END LOOP;
+
+  RETURN substr(rpad(cleaned, 6, 'X'), 1, 6);
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION public.generate_parent_link_code(p_grade text DEFAULT '')
 RETURNS text
 LANGUAGE plpgsql
@@ -28,22 +70,9 @@ DECLARE
   suffix text;
   candidate text;
   attempts integer := 0;
-  raw text;
-  i integer;
-  ch text;
-  cleaned text := '';
 BEGIN
   LOOP
-    raw := upper(encode(gen_random_bytes(5), 'hex'));
-    cleaned := '';
-    FOR i IN 1..length(raw) LOOP
-      ch := substr(raw, i, 1);
-      IF ch ~ '[A-Z0-9]' THEN
-        cleaned := cleaned || ch;
-      END IF;
-      EXIT WHEN length(cleaned) >= 6;
-    END LOOP;
-    suffix := substr(rpad(cleaned, 6, 'X'), 1, 6);
+    suffix := public.parent_link_random_suffix();
     candidate := 'IIA-' || suffix;
 
     EXIT WHEN NOT EXISTS (
@@ -127,6 +156,8 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION public.get_my_parent_link_code() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.get_my_parent_link_code() TO authenticated;
+
+REVOKE EXECUTE ON FUNCTION public.parent_link_random_suffix() FROM PUBLIC, anon, authenticated;
 
 CREATE OR REPLACE FUNCTION public.redeem_parent_link_code(p_code text)
 RETURNS jsonb

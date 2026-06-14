@@ -1,11 +1,64 @@
 -- Parent Link Codes: unique per-student codes for secure parent linking.
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS parent_link_code text;
 
+DROP INDEX IF EXISTS idx_profiles_parent_link_code_unique;
+
+CREATE OR REPLACE FUNCTION public.normalize_parent_link_code(p_code text)
+RETURNS text
+LANGUAGE sql
+IMMUTABLE
+SET search_path = public
+AS $$
+  SELECT upper(regexp_replace(COALESCE(p_code, ''), '[^A-Z0-9]', '', 'g'));
+$$;
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_parent_link_code_unique
-  ON public.profiles (upper(parent_link_code))
-  WHERE parent_link_code IS NOT NULL AND parent_link_code <> '';
+  ON public.profiles (public.normalize_parent_link_code(parent_link_code))
+  WHERE parent_link_code IS NOT NULL AND trim(parent_link_code) <> '';
+
+CREATE OR REPLACE FUNCTION public.parent_link_random_suffix()
+RETURNS text
+LANGUAGE plpgsql
+VOLATILE
+SET search_path = public, extensions
+AS $$
+DECLARE
+  raw text;
+  cleaned text := '';
+  i integer;
+  ch text;
+BEGIN
+  BEGIN
+    BEGIN
+      raw := upper(encode(extensions.gen_random_bytes(5), 'hex'));
+    EXCEPTION WHEN OTHERS THEN
+      raw := upper(encode(gen_random_bytes(5), 'hex'));
+    END;
+  EXCEPTION WHEN OTHERS THEN
+    raw := upper(
+      replace(
+        md5(gen_random_uuid()::text || clock_timestamp()::text || random()::text),
+        '-',
+        '',
+      ),
+    );
+  END;
+
+  FOR i IN 1..length(raw) LOOP
+    ch := substr(raw, i, 1);
+    IF ch ~ '[A-Z0-9]' THEN
+      cleaned := cleaned || ch;
+    END IF;
+    EXIT WHEN length(cleaned) >= 6;
+  END LOOP;
+
+  RETURN substr(rpad(cleaned, 6, 'X'), 1, 6);
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.generate_parent_link_code(p_grade text)
 RETURNS text
@@ -14,35 +67,18 @@ VOLATILE
 SET search_path = public
 AS $$
 DECLARE
-  grade_part text;
   suffix text;
   candidate text;
   attempts integer := 0;
-  raw text;
-  i integer;
-  ch text;
-  cleaned text := '';
 BEGIN
-  grade_part := COALESCE(NULLIF(trim(p_grade), ''), '0');
-
   LOOP
-    raw := upper(encode(gen_random_bytes(4), 'hex'));
-    cleaned := '';
-    FOR i IN 1..length(raw) LOOP
-      ch := substr(raw, i, 1);
-      IF ch ~ '[A-Z0-9]' THEN
-        cleaned := cleaned || ch;
-      END IF;
-      EXIT WHEN length(cleaned) >= 5;
-    END LOOP;
-    suffix := rpad(cleaned, 5, 'X');
-    suffix := substr(suffix, 1, 5);
-    candidate := 'IIA-' || grade_part || '-' || suffix;
+    suffix := public.parent_link_random_suffix();
+    candidate := 'IIA-' || suffix;
 
     EXIT WHEN NOT EXISTS (
       SELECT 1
       FROM public.profiles p
-      WHERE upper(p.parent_link_code) = candidate
+      WHERE public.normalize_parent_link_code(p.parent_link_code) = public.normalize_parent_link_code(candidate)
     );
 
     attempts := attempts + 1;
@@ -80,15 +116,6 @@ UPDATE public.profiles
 SET parent_link_code = public.generate_parent_link_code(grade)
 WHERE parent_link_code IS NULL OR trim(parent_link_code) = '';
 
-CREATE OR REPLACE FUNCTION public.normalize_parent_link_code(p_code text)
-RETURNS text
-LANGUAGE sql
-IMMUTABLE
-SET search_path = public
-AS $$
-  SELECT upper(regexp_replace(COALESCE(p_code, ''), '[^A-Z0-9]', '', 'g'));
-$$;
-
 CREATE OR REPLACE FUNCTION public.redeem_parent_link_code(p_code text)
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -111,7 +138,7 @@ BEGIN
   END IF;
 
   normalized_code := public.normalize_parent_link_code(p_code);
-  IF normalized_code = '' OR length(normalized_code) < 8 THEN
+  IF normalized_code = '' OR length(normalized_code) < 7 THEN
     RETURN jsonb_build_object('ok', false, 'error', 'invalid_code');
   END IF;
 
