@@ -15,6 +15,7 @@ export type StudentProfileRow = {
   grade: string;
   section: StudentSection | null;
   islamic_group: IslamicGroup | null;
+  profile_photo_path: string | null;
 };
 
 export type StudentProfileForm = {
@@ -34,7 +35,7 @@ export type StudentProfileCertificateFields = Pick<
 >;
 
 const profileSelect =
-  "user_id, full_name, arabic_name, english_name, email, grade, section, islamic_group";
+  "user_id, full_name, arabic_name, english_name, email, grade, section, islamic_group, profile_photo_path";
 
 function mapProfileRow(data: {
   user_id: string;
@@ -45,6 +46,7 @@ function mapProfileRow(data: {
   grade: string | null;
   section: string | null;
   islamic_group: string | null;
+  profile_photo_path: string | null;
 }): StudentProfileRow {
   return {
     user_id: data.user_id,
@@ -55,6 +57,7 @@ function mapProfileRow(data: {
     grade: data.grade ?? "",
     section: normalizeStudentSection(data.section),
     islamic_group: normalizeIslamicGroup(data.islamic_group),
+    profile_photo_path: data.profile_photo_path ?? null,
   };
 }
 
@@ -87,12 +90,14 @@ export async function saveStudentProfile(
   email: string,
   form: StudentProfileForm,
 ): Promise<StudentProfileRow> {
+  const englishName = form.english_name.trim();
+  const arabicName = form.arabic_name.trim();
   const payload = {
     user_id: userId,
     email,
-    full_name: form.full_name.trim(),
-    arabic_name: form.arabic_name.trim(),
-    english_name: form.english_name.trim(),
+    full_name: form.full_name.trim() || englishName,
+    arabic_name: arabicName,
+    english_name: englishName,
     section: form.section ?? null,
     islamic_group: form.islamic_group ?? null,
   };
@@ -143,11 +148,12 @@ export async function saveStudentProfile(
 }
 
 async function syncProfileUserMetadata(form: StudentProfileForm): Promise<void> {
+  const englishName = form.english_name.trim();
   const { error } = await supabase.auth.updateUser({
     data: {
-      full_name: form.full_name.trim(),
+      full_name: form.full_name.trim() || englishName,
       arabic_name: form.arabic_name.trim(),
-      english_name: form.english_name.trim(),
+      english_name: englishName,
       ...(form.section ? { section: form.section } : {}),
       ...(form.islamic_group ? { islamic_group: form.islamic_group } : {}),
     },

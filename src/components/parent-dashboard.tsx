@@ -7,13 +7,14 @@ import {
   Medal,
   Sparkles,
   TrendingUp,
-  UserRound,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { computeStudentBadges } from "@/lib/student-badges";
 import { useI18n } from "@/lib/i18n";
 import type { ParentDashboardData } from "@/lib/parent-dashboard";
 import type { ActivityTimelineItem } from "@/lib/student-progress";
+import { StudentProfileAvatar } from "@/components/student-profile-avatar";
+import { islamicGroupLabel, sectionLabel } from "@/lib/student-academics";
 
 const L = (en: string, ar: string) => ({ en, ar });
 
@@ -53,7 +54,7 @@ export function ParentDashboardView({
   gradeName: string;
 }) {
   const { lang } = useI18n();
-  const { progress, studentName } = data;
+  const { progress, studentName, section, islamicGroup, profilePhotoPath } = data;
   const learningLevel = lang === "ar" ? progress.learningLevelAr : progress.learningLevelEn;
   const { badges } = computeStudentBadges(progress);
   const unlockedBadges = badges.filter((badge) => badge.unlocked);
@@ -111,9 +112,10 @@ export function ParentDashboardView({
       <section className="rounded-2xl border border-border bg-card p-6 md:p-7 shadow-[var(--shadow-soft)]">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <UserRound className="h-7 w-7" />
-            </div>
+            <StudentProfileAvatar
+              profilePhotoPath={profilePhotoPath}
+              alt={studentName[lang] || studentName.en}
+            />
             <div>
               <div className="text-xs uppercase tracking-[0.2em] text-primary mb-1">
                 {L("Student Name", "اسم الطالب")[lang]}
@@ -126,6 +128,16 @@ export function ParentDashboardView({
                   <GraduationCap className="h-4 w-4 text-primary" />
                   <span className="font-semibold text-primary">{gradeName}</span>
                 </span>
+                {section ? (
+                  <span className="inline-flex rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold">
+                    {sectionLabel(section, lang)}
+                  </span>
+                ) : null}
+                {islamicGroup ? (
+                  <span className="inline-flex rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold">
+                    {islamicGroupLabel(islamicGroup, lang)}
+                  </span>
+                ) : null}
                 <span
                   className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${learningLevelClass(learningLevel)}`}
                 >

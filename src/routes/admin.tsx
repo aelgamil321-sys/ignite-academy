@@ -8,6 +8,7 @@ import { useCMS, type CustomLesson, type CustomVideo, type CustomFile, type Cust
 import { SUBJECT_CATEGORIES, type SubjectCategory } from "@/lib/categories";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { formatStudentAcademics, normalizeIslamicGroup, normalizeStudentSection } from "@/lib/student-academics";
+import { StudentProfileAvatar } from "@/components/student-profile-avatar";
 import type { QuizQuestion } from "@/lib/curriculum";
 import { quizQuestionsForForm, serializeQuizForSave } from "@/lib/lesson-quiz";
 import {
@@ -1013,6 +1014,7 @@ function ManageUsers() {
     section: string | null;
     islamic_group: string | null;
     parent_link_code: string | null;
+    profile_photo_path: string | null;
   }>>([]);
   const [roles, setRoles] = useState<Array<{ user_id: string; role: string }>>([]);
   const [loading, setLoading] = useState(true);
@@ -1022,7 +1024,7 @@ function ManageUsers() {
     setLoading(true);
     try {
       const [p, r] = await Promise.all([
-        supabase.from("profiles").select("id, user_id, full_name, email, grade, section, islamic_group, parent_link_code").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, user_id, full_name, email, grade, section, islamic_group, parent_link_code, profile_photo_path").order("created_at", { ascending: false }),
         supabase.from("user_roles").select("user_id, role"),
       ]);
       if (p.error) throw p.error;
@@ -1110,6 +1112,11 @@ function ManageUsers() {
         ) : (
           profiles.map((p) => (
             <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
+              <StudentProfileAvatar
+                profilePhotoPath={p.profile_photo_path}
+                alt={p.full_name || p.email}
+                className="h-11 w-11"
+              />
               <div className="flex-1 min-w-0">
                 <div className="font-medium">{p.full_name || p.email}</div>
                 <div className="text-xs text-muted-foreground">

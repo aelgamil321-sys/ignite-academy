@@ -5,11 +5,15 @@ import {
   type ParentLinkedChild,
 } from "@/lib/parent-children";
 import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-progress";
+import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 
 export type ParentDashboardData = {
   studentUserId: string;
   studentName: Bi;
   gradeSlug: string;
+  section: StudentSection | null;
+  islamicGroup: IslamicGroup | null;
+  profilePhotoPath: string | null;
   progress: StudentProgressData;
 };
 
@@ -28,7 +32,10 @@ export type ParentDashboardBundle = ParentChildrenResult & {
 
 export async function fetchParentDashboardForStudent(
   studentUserId: string,
-  childMeta?: Pick<ParentLinkedChild, "studentName" | "gradeSlug">,
+  childMeta?: Pick<
+    ParentLinkedChild,
+    "studentName" | "gradeSlug" | "section" | "islamicGroup" | "profilePhotoPath"
+  >,
 ): Promise<ParentDashboardResult> {
   const { data: progress, error: progressError } = await fetchStudentProgress(studentUserId);
   if (progressError) {
@@ -45,6 +52,9 @@ export async function fetchParentDashboardForStudent(
       studentUserId,
       studentName,
       gradeSlug: childMeta?.gradeSlug ?? progress.gradeSlug,
+      section: childMeta?.section ?? null,
+      islamicGroup: childMeta?.islamicGroup ?? null,
+      profilePhotoPath: childMeta?.profilePhotoPath ?? null,
       progress,
     },
     error: null,

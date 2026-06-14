@@ -2,11 +2,20 @@ import type { Bi } from "@/lib/curriculum";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { resolveParentStudentLink } from "@/lib/parent-student-link";
+import {
+  normalizeIslamicGroup,
+  normalizeStudentSection,
+  type IslamicGroup,
+  type StudentSection,
+} from "@/lib/student-academics";
 
 export type ParentLinkedChild = {
   studentUserId: string;
   studentName: Bi;
   gradeSlug: string;
+  section: StudentSection | null;
+  islamicGroup: IslamicGroup | null;
+  profilePhotoPath: string | null;
 };
 
 export type ParentChildrenLinkError = "none" | "multiple";
@@ -24,6 +33,9 @@ type StudentProfileRow = {
   arabic_name: string;
   english_name: string;
   grade: string;
+  section: string | null;
+  islamic_group: string | null;
+  profile_photo_path: string | null;
 };
 
 function profileToLinkedChild(profile: StudentProfileRow, fallbackName = ""): ParentLinkedChild {
@@ -36,6 +48,9 @@ function profileToLinkedChild(profile: StudentProfileRow, fallbackName = ""): Pa
       ar: profile.arabic_name?.trim() || fullName,
     },
     gradeSlug,
+    section: normalizeStudentSection(profile.section),
+    islamicGroup: normalizeIslamicGroup(profile.islamic_group),
+    profilePhotoPath: profile.profile_photo_path ?? null,
   };
 }
 
@@ -73,7 +88,7 @@ async function fetchLegacyParentChildren(parentUserId: string): Promise<ParentCh
   const studentGrade = normalizeGradeSlug(parentProfile.student_grade) || parentProfile.student_grade;
   const { data: studentProfiles, error: studentsError } = await supabase
     .from("profiles")
-    .select("user_id, full_name, arabic_name, english_name, grade")
+    .select("user_id, full_name, arabic_name, english_name, grade, section, islamic_group, profile_photo_path")
     .eq("grade", studentGrade);
 
   if (studentsError) {
@@ -119,7 +134,7 @@ export async function fetchParentLinkedChildren(parentUserId: string): Promise<P
     const studentIds = links.map((link) => link.student_user_id);
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("user_id, full_name, arabic_name, english_name, grade")
+      .select("user_id, full_name, arabic_name, english_name, grade, section, islamic_group, profile_photo_path")
       .in("user_id", studentIds);
 
     if (profilesError) {

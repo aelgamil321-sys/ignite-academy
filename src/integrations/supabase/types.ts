@@ -340,6 +340,7 @@ export type Database = {
           id: string
           islamic_group: string | null
           parent_link_code: string | null
+          profile_photo_path: string | null
           section: string | null
           updated_at: string
           user_id: string
@@ -354,6 +355,7 @@ export type Database = {
           id?: string
           islamic_group?: string | null
           parent_link_code?: string | null
+          profile_photo_path?: string | null
           section?: string | null
           updated_at?: string
           user_id: string
@@ -368,6 +370,7 @@ export type Database = {
           id?: string
           islamic_group?: string | null
           parent_link_code?: string | null
+          profile_photo_path?: string | null
           section?: string | null
           updated_at?: string
           user_id?: string

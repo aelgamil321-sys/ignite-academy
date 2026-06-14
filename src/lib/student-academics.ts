@@ -32,7 +32,8 @@ export function normalizeStudentSection(value: string | null | undefined): Stude
 
 export function islamicGroupLabel(group: IslamicGroup | null | undefined, lang: "en" | "ar"): string {
   if (!group) return lang === "ar" ? "غير محدد" : "Not set";
-  return lang === "ar" ? `المجموعة ${group}` : `Group ${group}`;
+  if (group === "A") return lang === "ar" ? "إسلامي A" : "Islamic A";
+  return lang === "ar" ? "إسلامي B" : "Islamic B";
 }
 
 export function sectionLabel(section: StudentSection | null | undefined, lang: "en" | "ar"): string {

@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { GraduationCap, LogIn, UserPlus, AlertCircle, Users } from "lucide-react";
 import { grades } from "@/lib/curriculum";
 import { StudentAcademicFields } from "@/components/student-academic-fields";
+import { ProfilePhotoField } from "@/components/profile-photo-field";
+import { uploadProfilePhoto } from "@/lib/profile-photo";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 
 export const Route = createFileRoute("/auth")({
@@ -32,9 +34,9 @@ function AuthPage() {
   const { lang } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [accountType, setAccountType] = useState<"student" | "parent">(initialAccountType);
-  const [fullName, setFullName] = useState("");
   const [arabicName, setArabicName] = useState("");
   const [englishName, setEnglishName] = useState("");
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const [parentFullName, setParentFullName] = useState("");
   const [parentLinkCode, setParentLinkCode] = useState("");
   const [email, setEmail] = useState("");
@@ -98,12 +100,10 @@ function AuthPage() {
     parentLinkCodeHint: lang === "ar"
       ? "أدخل الكود من لوحة الطالب"
       : "Enter the code from your child's student dashboard",
-    fullName: lang === "ar" ? "الاسم الكامل" : "Full Name",
-    fullNameHint: lang === "ar" ? "الاسم الكامل" : "Full Name / الاسم الكامل",
-    arabicName: lang === "ar" ? "الاسم باللغة العربية" : "Arabic Name",
-    arabicNameHint: lang === "ar" ? "اختياري" : "Arabic Name / الاسم باللغة العربية (optional)",
-    englishName: lang === "ar" ? "الاسم باللغة الإنجليزية" : "English Name",
-    englishNameHint: lang === "ar" ? "اختياري" : "English Name / الاسم باللغة الإنجليزية (optional)",
+    arabicName: lang === "ar" ? "اسم الطالب بالعربية" : "Arabic Student Name",
+    arabicNameHint: lang === "ar" ? "اسم الطالب بالعربية" : "Arabic Student Name / اسم الطالب بالعربية",
+    englishName: lang === "ar" ? "اسم الطالب بالإنجليزية" : "English Student Name",
+    englishNameHint: lang === "ar" ? "اسم الطالب بالإنجليزية" : "English Student Name / اسم الطالب بالإنجليزية",
     email: lang === "ar" ? "البريد الإلكتروني" : "Email",
     password: lang === "ar" ? "كلمة المرور" : "Password",
     grade: lang === "ar" ? "الصف الدراسي" : "Grade",
@@ -125,7 +125,6 @@ function AuthPage() {
       const fd = new FormData(e.currentTarget);
       const submitEmail = String(fd.get("email") ?? email).trim();
       const submitPassword = String(fd.get("password") ?? password);
-      const submitFullName = String(fd.get("full_name") ?? fullName).trim();
       const submitArabicName = String(fd.get("arabic_name") ?? arabicName).trim();
       const submitEnglishName = String(fd.get("english_name") ?? englishName).trim();
       const submitGrade = String(fd.get("grade") ?? grade).trim();
@@ -141,8 +140,12 @@ function AuthPage() {
 
       if (mode === "signup") {
         if (accountType === "student") {
-          if (!submitFullName) {
-            toast.error(lang === "ar" ? "يرجى إدخال الاسم الكامل." : "Please enter your full name.");
+          if (!submitArabicName) {
+            toast.error(lang === "ar" ? "يرجى إدخال اسم الطالب بالعربية." : "Please enter the Arabic student name.");
+            return;
+          }
+          if (!submitEnglishName) {
+            toast.error(lang === "ar" ? "يرجى إدخال اسم الطالب بالإنجليزية." : "Please enter the English student name.");
             return;
           }
           if (!submitSection) {
@@ -153,6 +156,16 @@ function AuthPage() {
             toast.error(lang === "ar" ? "يرجى اختيار المجموعة الإسلامية." : "Please select your Islamic group.");
             return;
           }
+          if (!profilePhotoFile) {
+            toast.error(lang === "ar" ? "يرجى رفع صورة الملف الشخصي." : "Please upload a profile photo.");
+            return;
+          }
+
+          const completeStudentSignup = async (userId: string) => {
+            await uploadProfilePhoto(userId, profilePhotoFile);
+            toast.success(T.welcome);
+            window.location.assign("/student");
+          };
 
           const { data, error } = await supabase.auth.signUp({
             email: submitEmail,
@@ -160,9 +173,9 @@ function AuthPage() {
             options: {
               emailRedirectTo: `${window.location.origin}/student-dashboard`,
               data: {
-                full_name: submitFullName,
-                arabic_name: submitArabicName || undefined,
-                english_name: submitEnglishName || undefined,
+                full_name: submitEnglishName,
+                arabic_name: submitArabicName,
+                english_name: submitEnglishName,
                 role_intent: "student",
                 grade: submitGrade,
                 section: submitSection,
@@ -172,9 +185,8 @@ function AuthPage() {
           });
           if (error) throw error;
 
-          if (data.session) {
-            toast.success(T.welcome);
-            window.location.assign("/student");
+          if (data.session && data.user) {
+            await completeStudentSignup(data.user.id);
             return;
           }
 
@@ -182,9 +194,8 @@ function AuthPage() {
             email: submitEmail,
             password: submitPassword,
           });
-          if (!loginError && loginData.session) {
-            toast.success(T.welcome);
-            window.location.assign("/student");
+          if (!loginError && loginData.session?.user) {
+            await completeStudentSignup(loginData.user.id);
             return;
           }
 
@@ -369,24 +380,12 @@ function AuthPage() {
             {mode === "signup" && accountType === "student" && (
               <>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.fullNameHint}</label>
-                  <input
-                    type="text"
-                    name="full_name"
-                    autoComplete="name"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    maxLength={100}
-                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.arabicNameHint}</label>
+                  <label className="text-xs font-medium text-muted-foreground">{T.arabicNameHint} *</label>
                   <input
                     type="text"
                     name="arabic_name"
                     autoComplete="additional-name"
+                    required
                     value={arabicName}
                     onChange={(e) => setArabicName(e.target.value)}
                     maxLength={100}
@@ -395,11 +394,12 @@ function AuthPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.englishNameHint}</label>
+                  <label className="text-xs font-medium text-muted-foreground">{T.englishNameHint} *</label>
                   <input
                     type="text"
                     name="english_name"
-                    autoComplete="nickname"
+                    autoComplete="name"
+                    required
                     value={englishName}
                     onChange={(e) => setEnglishName(e.target.value)}
                     maxLength={100}
@@ -426,6 +426,12 @@ function AuthPage() {
                   islamicGroup={islamicGroup}
                   onSectionChange={setSection}
                   onIslamicGroupChange={setIslamicGroup}
+                  required
+                />
+                <ProfilePhotoField
+                  lang={lang}
+                  file={profilePhotoFile}
+                  onChange={setProfilePhotoFile}
                   required
                 />
               </>
