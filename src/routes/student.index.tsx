@@ -2,11 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
-import { StudentProgressDashboard } from "@/components/student-progress-dashboard";
 import { ParentLinkCodeCard } from "@/components/parent-link-code-card";
+import { StudentProgressDashboard } from "@/components/student-progress-dashboard";
 import { useI18n } from "@/lib/i18n";
 import { grades } from "@/lib/curriculum";
 import { gradeDisplayName, normalizeGradeSlug } from "@/lib/grade-utils";
+import { fetchMyParentLinkCode } from "@/lib/parent-link-code";
 import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-progress";
 import { LogOut, User } from "lucide-react";
 import { toast } from "sonner";
@@ -42,27 +43,19 @@ function StudentGate() {
         return;
       }
 
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from("profiles")
-        .select("email, grade, arabic_name, english_name, parent_link_code")
+        .select("email, grade, arabic_name, english_name")
         .eq("user_id", data.user.id)
         .maybeSingle();
 
-      const profileRow = profileError?.message?.includes("parent_link_code")
-        ? (
-            await supabase
-              .from("profiles")
-              .select("email, grade, arabic_name, english_name")
-              .eq("user_id", data.user.id)
-              .maybeSingle()
-          ).data
-        : profile;
+      const code = await fetchMyParentLinkCode();
 
       setUserId(data.user.id);
-      setEmail(profileRow?.email ?? data.user.email ?? "");
-      setGradeSlug(normalizeGradeSlug(profileRow?.grade ?? "8") || "8");
-      setParentLinkCode(profileRow && "parent_link_code" in profileRow ? profileRow.parent_link_code ?? null : null);
-      setProfileComplete(isStudentProfileComplete(profileRow));
+      setEmail(profile?.email ?? data.user.email ?? "");
+      setGradeSlug(normalizeGradeSlug(profile?.grade ?? "8") || "8");
+      setParentLinkCode(code);
+      setProfileComplete(isStudentProfileComplete(profile));
       setState("ok");
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {

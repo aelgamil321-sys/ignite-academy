@@ -98,3 +98,29 @@ export async function adminRegenerateParentLinkCode(studentUserId: string): Prom
 
   return { ok: true, code: payload.parent_link_code };
 }
+
+/** Returns the logged-in student's parent link code, generating one if missing. */
+export async function fetchMyParentLinkCode(): Promise<string | null> {
+  const { data: rpcCode, error: rpcError } = await supabase.rpc("get_my_parent_link_code");
+  if (!rpcError && typeof rpcCode === "string" && rpcCode.trim()) {
+    return rpcCode.trim();
+  }
+
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return null;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("parent_link_code")
+    .eq("user_id", auth.user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    if (profileError.message.toLowerCase().includes("parent_link_code")) {
+      return null;
+    }
+    return null;
+  }
+
+  return profile?.parent_link_code?.trim() || null;
+}

@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Save, User } from "lucide-react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
+import { ParentLinkCodeCard } from "@/components/parent-link-code-card";
 import { useI18n } from "@/lib/i18n";
+import { fetchMyParentLinkCode } from "@/lib/parent-link-code";
 import { supabase } from "@/integrations/supabase/client";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import {
@@ -35,6 +37,7 @@ function StudentProfilePage() {
     arabic_name: "",
     english_name: "",
   });
+  const [parentLinkCode, setParentLinkCode] = useState<string | null>(null);
 
   const T = {
     eyebrow: lang === "ar" ? "الطالب" : "Student",
@@ -92,6 +95,7 @@ function StudentProfilePage() {
             profile?.english_name?.trim() ||
             (typeof meta.english_name === "string" ? meta.english_name.trim() : ""),
         });
+        setParentLinkCode(await fetchMyParentLinkCode());
       } catch (error) {
         console.error("[student profile load]", error);
         toast.error(error instanceof Error ? error.message : String(error));
@@ -161,6 +165,8 @@ function StudentProfilePage() {
           <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
           {T.back}
         </Link>
+
+        {parentLinkCode ? <div className="mb-6"><ParentLinkCodeCard code={parentLinkCode} /></div> : null}
 
         {loading ? (
           <div className="flex items-center gap-2 text-muted-foreground py-12">

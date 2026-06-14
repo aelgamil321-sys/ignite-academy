@@ -90,9 +90,9 @@ function AuthPage() {
     studentAccount: lang === "ar" ? "حساب طالب" : "Student Account",
     parentAccount: lang === "ar" ? "حساب ولي أمر" : "Parent Account",
     parentFullName: lang === "ar" ? "الاسم الكامل لولي الأمر" : "Parent full name",
-    parentLinkCode: lang === "ar" ? "رمز ربط ولي الأمر" : "Parent Link Code",
+    parentLinkCode: lang === "ar" ? "كود الطالب / Student Link Code" : "Student Link Code",
     parentLinkCodeHint: lang === "ar"
-      ? "أدخل الرمز من لوحة الطالب"
+      ? "أدخل الكود من لوحة الطالب"
       : "Enter the code from your child's student dashboard",
     fullName: lang === "ar" ? "الاسم الكامل" : "Full Name",
     fullNameHint: lang === "ar" ? "الاسم الكامل" : "Full Name / الاسم الكامل",
@@ -223,8 +223,8 @@ function AuthPage() {
           if (!redeem.ok) {
             toast.error(
               lang === "ar"
-                ? "تعذر ربط الطالب. تحقق من الرمز في إعدادات ولي الأمر بعد تسجيل الدخول."
-                : "Could not link student. Check the code in Parent Settings after signing in.",
+                ? "كود الطالب غير صالح. تحقق من الكود في إعدادات ولي الأمر بعد تسجيل الدخول."
+                : "That student link code is not valid. Check the code in Parent Settings after signing in.",
             );
           } else if (redeem.alreadyLinked) {
             toast.success(lang === "ar" ? "هذا الطالب مرتبط بالفعل." : "This student is already linked.");
@@ -430,7 +430,7 @@ function AuthPage() {
                     value={parentLinkCode}
                     onChange={(e) => setParentLinkCode(e.target.value.toUpperCase())}
                     maxLength={20}
-                    placeholder="IIA-8-X7K92"
+                    placeholder="IIA-X7K92A"
                     autoComplete="off"
                     className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-mono tracking-wider uppercase"
                   />

@@ -531,6 +531,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_my_parent_link_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "student" | "parent"

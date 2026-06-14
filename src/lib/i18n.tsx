@@ -256,15 +256,16 @@ export const t = {
     en: "More than one student matched your account. Please contact the school to confirm links.",
     ar: "تم العثور على أكثر من طالب مطابق. يرجى التواصل مع المدرسة لتأكيد الربط.",
   },
-  parent_link_code_label: { en: "Parent Link Code", ar: "رمز ربط ولي الأمر" },
+  parent_link_code_label: { en: "Student Link Code", ar: "كود الطالب" },
+  parent_link_code_reg_label: { en: "Student Link Code", ar: "كود الطالب / Student Link Code" },
   parent_link_code_hint: {
     en: "Enter the code from your child's student dashboard.",
     ar: "أدخل الرمز من لوحة الطالب.",
   },
-  parent_link_code_title: { en: "Parent Link Code", ar: "رمز ربط ولي الأمر" },
+  parent_link_code_title: { en: "Parent Link Code", ar: "كود ربط ولي الأمر" },
   parent_link_code_note: {
     en: "Share this code only with your parent.",
-    ar: "شارك هذا الرمز مع ولي أمرك فقط.",
+    ar: "شارك هذا الكود مع ولي أمرك فقط",
   },
   parent_link_code_copy: { en: "Copy code", ar: "نسخ الرمز" },
   parent_link_code_copied: { en: "Code copied!", ar: "تم نسخ الرمز!" },
@@ -280,7 +281,7 @@ export const t = {
     en: "This student is already linked to your account.",
     ar: "هذا الطالب مرتبط بحسابك بالفعل.",
   },
-  parent_add_child_title: { en: "Link another child", ar: "ربط طفل آخر" },
+  parent_add_child_title: { en: "Add another student", ar: "إضافة طالب آخر" },
   parent_add_child_lead: {
     en: "Enter a Parent Link Code from your child's student dashboard.",
     ar: "أدخل رمز ربط ولي الأمر من لوحة الطالب.",

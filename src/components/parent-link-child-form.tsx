@@ -49,13 +49,13 @@ export function ParentLinkChildForm({ onLinked }: { onLinked: () => void }) {
       </div>
       <div>
         <label className="text-xs uppercase tracking-wider text-muted-foreground">
-          {tr("parent_link_code_label")}
+          {tr("parent_link_code_reg_label")}
         </label>
         <input
           type="text"
           value={code}
           onChange={(event) => setCode(event.target.value.toUpperCase())}
-          placeholder="IIA-8-X7K92"
+          placeholder="IIA-X7K92A"
           maxLength={20}
           autoComplete="off"
           className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-mono tracking-wider uppercase"
