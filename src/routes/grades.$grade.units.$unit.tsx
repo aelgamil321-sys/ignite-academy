@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { ChevronLeft, Plus, Trash2, Eye, EyeOff, Save, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
-import { useI18n } from "@/lib/i18n";
+import {useI18n, L } from "@/lib/i18n";
 import { getGrade, type Bi, type Grade, type Lesson, type QuizQuestion } from "@/lib/curriculum";
 import { useCMS, ytId } from "@/lib/cms";
 import { gradeMatches, normalizeGradeSlug } from "@/lib/grade-utils";
@@ -20,7 +20,6 @@ export function slugifyUnit(s: string): string {
     .replace(/[^a-z0-9\u0600-\u06ff]+/g, "-")
     .replace(/^-+|-+$/g, "") || "untitled";
 }
-const L = (en: string, ar: string): Bi => ({ en, ar });
 const empty: Bi = { en: "", ar: "" };
 const emptyQ: QuizQuestion = {
   q: { en: "", ar: "" },
@@ -73,7 +72,7 @@ interface UnitQuiz {
 
 function UnitPage() {
   const { grade, unitSlug } = Route.useLoaderData() as { grade: Grade; unitSlug: string };
-  const { tr, lang, dir } = useI18n();
+  const { tr, lang, dir, bi } = useI18n();
   const { lessons, files, videos, articles, refresh } = useCMS();
   const [tab, setTab] = useState<Tab>("overview");
 
@@ -150,12 +149,12 @@ function UnitPage() {
 
   return (
     <PageShell
-      eyebrow={`${grade.name[locale]} · ${tr("nav_stages")}`}
-      title={unitName[locale] || unitName.ar || unitName.en}
+      eyebrow={`${bi(grade.name)} · ${tr("nav_stages")}`}
+      title={bi(unitName) || unitName.ar || unitName.en}
       crumbs={[
         { label: tr("nav_stages"), to: "/grades" },
-        { label: grade.name[locale], to: "/grades/$grade", params: { grade: grade.slug } },
-        { label: unitName[locale] },
+        { label: bi(grade.name), to: "/grades/$grade", params: { grade: grade.slug } },
+        { label: bi(unitName) },
       ]}
     >
       <Link
@@ -164,7 +163,7 @@ function UnitPage() {
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-5"
       >
         <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-        {grade.name[locale]}
+        {bi(grade.name)}
       </Link>
 
       <div className="flex flex-wrap gap-2 mb-6 border-b border-border pb-3">
@@ -178,7 +177,7 @@ function UnitPage() {
                 : "border border-border text-foreground/70 hover:border-primary hover:text-primary"
             }`}
           >
-            {t.label[locale]}
+            {bi(t.label)}
             {typeof t.count === "number" && (
               <span className="text-[11px] opacity-80">({t.count})</span>
             )}
@@ -303,7 +302,7 @@ function PublishBar({
     <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
       <label className="inline-flex items-center gap-2 text-sm">
         <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
-        {L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[locale]}
+        {L("Publish now (otherwise save as draft)", "النشر الآن (وإلا حفظ كمسودة)")[lang]}
       </label>
       <button
         type="button"
@@ -313,10 +312,10 @@ function PublishBar({
       >
         <Save className="h-4 w-4" />
         {saving
-          ? L("Saving…", "جارٍ الحفظ…")[locale]
+          ? L("Saving…", "جارٍ الحفظ…")[lang]
           : pub
-            ? L("Publish", "نشر")[locale]
-            : L("Save Draft", "حفظ كمسودة")[locale]}
+            ? L("Publish", "نشر")[lang]
+            : L("Save Draft", "حفظ كمسودة")[lang]}
       </button>
     </div>
   );
@@ -357,7 +356,7 @@ function Empty({ lang, kind = "items" }: { lang: "en" | "ar"; kind?: "lessons" |
   };
   return (
     <div className="rounded-xl border border-dashed border-border bg-card/50 py-10 text-center">
-      <div className="text-sm text-muted-foreground">{map[kind][locale]}</div>
+      <div className="text-sm text-muted-foreground">{map[kind][lang]}</div>
     </div>
   );
 }
@@ -381,7 +380,7 @@ function OverviewTab({
     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
       {items.map((it) => (
         <Card key={it.k}>
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">{it.label[locale]}</div>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">{bi(it.label)}</div>
           <div className="font-display text-3xl text-foreground mt-1">{counts[it.k]}</div>
         </Card>
       ))}
@@ -404,10 +403,10 @@ function LessonsTab({
   ];
   const { deleteLesson } = useCMS();
   const onDelete = async (id: string) => {
-    if (!confirm(L("Are you sure you want to delete this lesson?", "هل أنت متأكد أنك تريد حذف هذا الدرس?")[locale])) return;
+    if (!confirm(L("Are you sure you want to delete this lesson?", "هل أنت متأكد أنك تريد حذف هذا الدرس?")[lang])) return;
     try {
       await deleteLesson(id);
-      toast.success(L("Deleted", "تم الحذف")[locale]);
+      toast.success(L("Deleted", "تم الحذف")[lang]);
       await onRefresh();
     } catch { /* CMS layer already shows the error toast */ }
   };
@@ -422,9 +421,9 @@ function LessonsTab({
     <div className="space-y-3">
       <div className="text-sm text-muted-foreground">
         {L("To add a lesson to this unit, use the Admin → Add New Lesson form. Set Unit to ",
-          "لإضافة درس لهذه الوحدة، استخدم لوحة الإدارة → إضافة درس جديد. اضبط الوحدة على ")[locale]}
-        <span className="font-semibold text-foreground">“{unitName[locale]}”</span>
-        {L(` and Grade to the current grade.`, ` والصف على الصف الحالي.`)[locale]}
+          "لإضافة درس لهذه الوحدة، استخدم لوحة الإدارة → إضافة درس جديد. اضبط الوحدة على ")[lang]}
+        <span className="font-semibold text-foreground">“{bi(unitName)}”</span>
+        {L(` and Grade to the current grade.`, ` والصف على الصف الحالي.`)[lang]}
         <Link to="/admin" className="ms-2 inline-flex items-center gap-1 text-primary hover:text-primary">
           <ExternalLink className="h-3.5 w-3.5" /> Admin
         </Link>
@@ -440,10 +439,10 @@ function LessonsTab({
                 params={{ grade: gradeSlug, lesson: l.id }}
                 className="font-medium text-foreground hover:text-primary"
               >
-                {l.title[locale]}
+                {bi(l.title)}
               </Link>
               <div className="text-xs text-muted-foreground">
-                {l.builtIn ? L("Built-in", "مدمج")[locale] : L("Custom", "مخصص")[locale]}
+                {l.builtIn ? L("Built-in", "مدمج")[lang] : L("Custom", "مخصص")[lang]}
               </div>
             </div>
             {!l.builtIn && (
@@ -477,7 +476,7 @@ function InfoTab({
 
   const submit = async () => {
     if (!titleEn.trim() && !titleAr.trim()) {
-      toast.error(L("Title required", "العنوان مطلوب")[locale]); return;
+      toast.error(L("Title required", "العنوان مطلوب")[lang]); return;
     }
     setSaving(true);
     try {
@@ -493,7 +492,7 @@ function InfoTab({
       };
       const { error } = await supabase.from("unit_information" as never).insert(payload as never);
       if (error) throw error;
-      toast.success(L("Information saved!", "تم حفظ المعلومات!")[locale]);
+      toast.success(L("Information saved!", "تم حفظ المعلومات!")[lang]);
       setTitleEn(""); setTitleAr(""); setDescEn(""); setDescAr("");
       setKpEn(""); setKpAr(""); setNotesEn(""); setNotesAr("");
       await onRefresh();
@@ -509,7 +508,7 @@ function InfoTab({
     try {
       const { error } = await supabase.from("unit_information" as never).delete().eq("id", id);
       if (error) throw error;
-      toast.success(L("Deleted", "تم الحذف")[locale]);
+      toast.success(L("Deleted", "تم الحذف")[lang]);
       await onRefresh();
     } catch (e) { toast.error(`Delete failed: ${formatError(e)}`); }
   };
@@ -524,32 +523,32 @@ function InfoTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Information", "إضافة معلومات")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Information", "إضافة معلومات")[lang]}</h3>
         <div className="space-y-4">
           <Row>
-            <Field label={L("Title (EN)", "العنوان (إنجليزي)")[locale]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
-            <Field label={L("Title (AR)", "العنوان (عربي)")[locale]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
+            <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+            <Field label={L("Title (AR)", "العنوان (عربي)")[lang]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
           </Row>
           <Row>
-            <Field label={L("Description (EN)", "الوصف (إنجليزي)")[locale]}><textarea className={inputCls} rows={4} value={descEn} onChange={(e) => setDescEn(e.target.value)} /></Field>
-            <Field label={L("Description (AR)", "الوصف (عربي)")[locale]}><textarea className={inputCls} dir="rtl" rows={4} value={descAr} onChange={(e) => setDescAr(e.target.value)} /></Field>
+            <Field label={L("Description (EN)", "الوصف (إنجليزي)")[lang]}><textarea className={inputCls} rows={4} value={descEn} onChange={(e) => setDescEn(e.target.value)} /></Field>
+            <Field label={L("Description (AR)", "الوصف (عربي)")[lang]}><textarea className={inputCls} dir="rtl" rows={4} value={descAr} onChange={(e) => setDescAr(e.target.value)} /></Field>
           </Row>
           <Row>
-            <Field label={L("Key Points (EN)", "النقاط الرئيسية (إنجليزي)")[locale]}><textarea className={inputCls} rows={4} value={kpEn} onChange={(e) => setKpEn(e.target.value)} /></Field>
-            <Field label={L("Key Points (AR)", "النقاط الرئيسية (عربي)")[locale]}><textarea className={inputCls} dir="rtl" rows={4} value={kpAr} onChange={(e) => setKpAr(e.target.value)} /></Field>
+            <Field label={L("Key Points (EN)", "النقاط الرئيسية (إنجليزي)")[lang]}><textarea className={inputCls} rows={4} value={kpEn} onChange={(e) => setKpEn(e.target.value)} /></Field>
+            <Field label={L("Key Points (AR)", "النقاط الرئيسية (عربي)")[lang]}><textarea className={inputCls} dir="rtl" rows={4} value={kpAr} onChange={(e) => setKpAr(e.target.value)} /></Field>
           </Row>
           <Row>
-            <Field label={L("Learning Notes (EN)", "ملاحظات التعلم (إنجليزي)")[locale]}><textarea className={inputCls} rows={3} value={notesEn} onChange={(e) => setNotesEn(e.target.value)} /></Field>
-            <Field label={L("Learning Notes (AR)", "ملاحظات التعلم (عربي)")[locale]}><textarea className={inputCls} dir="rtl" rows={3} value={notesAr} onChange={(e) => setNotesAr(e.target.value)} /></Field>
+            <Field label={L("Learning Notes (EN)", "ملاحظات التعلم (إنجليزي)")[lang]}><textarea className={inputCls} rows={3} value={notesEn} onChange={(e) => setNotesEn(e.target.value)} /></Field>
+            <Field label={L("Learning Notes (AR)", "ملاحظات التعلم (عربي)")[lang]}><textarea className={inputCls} dir="rtl" rows={3} value={notesAr} onChange={(e) => setNotesAr(e.target.value)} /></Field>
           </Row>
           <PublishBar pub={pub} setPub={setPub} onSave={submit} saving={saving} lang={lang} />
         </div>
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-foreground">{L("Information", "المعلومات")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Information", "المعلومات")[lang]}</h3>
         {loading ? (
-          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[locale]}</div>
+          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</div>
         ) : infos.length === 0 ? (
           <Empty lang={lang} kind="info" />
         ) : (
@@ -557,20 +556,20 @@ function InfoTab({
             <div key={it.id} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-foreground">{it.title[locale]}</div>
-                  {it.description[locale] && (
-                    <p className="text-sm text-muted-foreground mt-1" dir={lang === "ar" ? "rtl" : "ltr"}>{it.description[locale]}</p>
+                  <div className="font-semibold text-foreground">{bi(it.title)}</div>
+                  {bi(it.description) && (
+                    <p className="text-sm text-muted-foreground mt-1" dir={lang === "ar" ? "rtl" : "ltr"}>{bi(it.description)}</p>
                   )}
-                  {it.key_points[locale] && (
+                  {bi(it.key_points) && (
                     <div className="mt-2 text-sm" dir={lang === "ar" ? "rtl" : "ltr"}>
-                      <span className="font-semibold">{L("Key points:", "النقاط الرئيسية:")[locale]} </span>
-                      {it.key_points[locale]}
+                      <span className="font-semibold">{L("Key points:", "النقاط الرئيسية:")[lang]} </span>
+                      {bi(it.key_points)}
                     </div>
                   )}
-                  {it.notes[locale] && (
+                  {bi(it.notes) && (
                     <div className="mt-2 text-sm text-muted-foreground" dir={lang === "ar" ? "rtl" : "ltr"}>
-                      <span className="font-semibold">{L("Notes:", "ملاحظات:")[locale]} </span>
-                      {it.notes[locale]}
+                      <span className="font-semibold">{L("Notes:", "ملاحظات:")[lang]} </span>
+                      {bi(it.notes)}
                     </div>
                   )}
                 </div>
@@ -608,11 +607,11 @@ function ArticlesTab({
     try {
       const up = await uploadToStorage(f, "articles");
       setImg(up.url);
-      toast.success(L("Image uploaded", "تم رفع الصورة")[locale]);
+      toast.success(L("Image uploaded", "تم رفع الصورة")[lang]);
     } catch (err) { toast.error(formatError(err)); }
   };
   const submit = async () => {
-    if (!titleEn.trim() && !titleAr.trim()) { toast.error(L("Title required", "العنوان مطلوب")[locale]); return; }
+    if (!titleEn.trim() && !titleAr.trim()) { toast.error(L("Title required", "العنوان مطلوب")[lang]); return; }
     setSaving(true);
     try {
       const payload = {
@@ -626,7 +625,7 @@ function ArticlesTab({
       };
       const { error } = await supabase.from("articles").insert(payload as never);
       if (error) throw error;
-      toast.success(L("Article saved!", "تم حفظ المقال!")[locale]);
+      toast.success(L("Article saved!", "تم حفظ المقال!")[lang]);
       setTitleEn(""); setTitleAr(""); setBodyEn(""); setBodyAr(""); setImg("");
       await onRefresh();
     } catch (e) { toast.error(`Save failed: ${formatError(e)}`); }
@@ -637,7 +636,7 @@ function ArticlesTab({
     try {
       const { error } = await supabase.from("articles").delete().eq("id", id);
       if (error) throw error;
-      toast.success(L("Deleted", "تم الحذف")[locale]);
+      toast.success(L("Deleted", "تم الحذف")[lang]);
       await onRefresh();
     } catch (e) { toast.error(`Delete failed: ${formatError(e)}`); }
   };
@@ -652,24 +651,24 @@ function ArticlesTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Article", "إضافة مقال")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Article", "إضافة مقال")[lang]}</h3>
         <div className="space-y-4">
           <Row>
-            <Field label={L("Title (EN)", "العنوان (إنجليزي)")[locale]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
-            <Field label={L("Title (AR)", "العنوان (عربي)")[locale]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
+            <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+            <Field label={L("Title (AR)", "العنوان (عربي)")[lang]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
           </Row>
           <Row>
-            <Field label={L("Body (EN)", "النص (إنجليزي)")[locale]}><textarea className={inputCls} rows={8} value={bodyEn} onChange={(e) => setBodyEn(e.target.value)} /></Field>
-            <Field label={L("Body (AR)", "النص (عربي)")[locale]}><textarea className={inputCls} dir="rtl" rows={8} value={bodyAr} onChange={(e) => setBodyAr(e.target.value)} /></Field>
+            <Field label={L("Body (EN)", "النص (إنجليزي)")[lang]}><textarea className={inputCls} rows={8} value={bodyEn} onChange={(e) => setBodyEn(e.target.value)} /></Field>
+            <Field label={L("Body (AR)", "النص (عربي)")[lang]}><textarea className={inputCls} dir="rtl" rows={8} value={bodyAr} onChange={(e) => setBodyAr(e.target.value)} /></Field>
           </Row>
-          <Field label={L("Category", "التصنيف")[locale]}>
+          <Field label={L("Category", "التصنيف")[lang]}>
             <select className={inputCls} value={cat} onChange={(e) => setCat(e.target.value)}>
-              <option value="announcement">{L("Announcement", "إعلان")[locale]}</option>
-              <option value="parent">{L("Parent Corner", "ركن الوالدين")[locale]}</option>
-              <option value="lesson">{L("Lesson Note", "ملاحظة درس")[locale]}</option>
+              <option value="announcement">{L("Announcement", "إعلان")[lang]}</option>
+              <option value="parent">{L("Parent Corner", "ركن الوالدين")[lang]}</option>
+              <option value="lesson">{L("Lesson Note", "ملاحظة درس")[lang]}</option>
             </select>
           </Field>
-          <Field label={L("Featured Image", "صورة مميزة")[locale]}>
+          <Field label={L("Featured Image", "صورة مميزة")[lang]}>
             <input type="file" accept="image/*" onChange={onImg} className={inputCls} />
             {img && <img src={img} alt="" className="mt-2 max-h-40 rounded-lg border border-border" />}
           </Field>
@@ -678,14 +677,14 @@ function ArticlesTab({
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-foreground">{L("Articles", "المقالات")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Articles", "المقالات")[lang]}</h3>
         {articles.length === 0 ? (
           <Empty lang={lang} kind="articles" />
         ) : (
           articles.map((a) => (
             <div key={a.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-foreground">{a.title[locale]}</div>
+                <div className="font-semibold text-foreground">{bi(a.title)}</div>
                 <div className="text-xs text-muted-foreground">{a.category}</div>
               </div>
               <ItemActions
@@ -720,12 +719,12 @@ function FilesTab({
     try {
       const up = await uploadToStorage(f, `files/${type}`);
       setUploaded({ url: up.url, name: up.name, size: up.size });
-      toast.success(L("File uploaded", "تم رفع الملف")[locale]);
+      toast.success(L("File uploaded", "تم رفع الملف")[lang]);
     } catch (err) { toast.error(formatError(err)); }
   };
   const submit = async () => {
-    if (!titleEn.trim() && !titleAr.trim()) { toast.error(L("Title required", "العنوان مطلوب")[locale]); return; }
-    if (!uploaded) { toast.error(L("File required", "الملف مطلوب")[locale]); return; }
+    if (!titleEn.trim() && !titleAr.trim()) { toast.error(L("Title required", "العنوان مطلوب")[lang]); return; }
+    if (!uploaded) { toast.error(L("File required", "الملف مطلوب")[lang]); return; }
     setSaving(true);
     try {
       const dbType = type === "word" ? "pdf" : type; // DB only has 4 types — store word as pdf
@@ -742,7 +741,7 @@ function FilesTab({
       };
       const { error } = await supabase.from("files").insert(payload as never);
       if (error) throw error;
-      toast.success(L("File saved!", "تم حفظ الملف!")[locale]);
+      toast.success(L("File saved!", "تم حفظ الملف!")[lang]);
       setTitleEn(""); setTitleAr(""); setDesc(""); setUploaded(null);
       await onRefresh();
     } catch (e) { toast.error(`Save failed: ${formatError(e)}`); }
@@ -753,7 +752,7 @@ function FilesTab({
     try {
       const { error } = await supabase.from("files").delete().eq("id", id);
       if (error) throw error;
-      toast.success(L("Deleted", "تم الحذف")[locale]);
+      toast.success(L("Deleted", "تم الحذف")[lang]);
       await onRefresh();
     } catch (e) { toast.error(`Delete failed: ${formatError(e)}`); }
   };
@@ -771,13 +770,13 @@ function FilesTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-foreground mb-4">{L("Add File", "إضافة ملف")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add File", "إضافة ملف")[lang]}</h3>
         <div className="space-y-4">
           <Row>
-            <Field label={L("Title (EN)", "العنوان (إنجليزي)")[locale]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
-            <Field label={L("Title (AR)", "العنوان (عربي)")[locale]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
+            <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+            <Field label={L("Title (AR)", "العنوان (عربي)")[lang]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
           </Row>
-          <Field label={L("File Type", "نوع الملف")[locale]}>
+          <Field label={L("File Type", "نوع الملف")[lang]}>
             <select className={inputCls} value={type} onChange={(e) => setType(e.target.value as typeof type)}>
               <option value="pdf">PDF</option>
               <option value="ppt">PowerPoint</option>
@@ -786,11 +785,11 @@ function FilesTab({
               <option value="word">Word Document</option>
             </select>
           </Field>
-          <Field label={L("File", "الملف")[locale]} required>
+          <Field label={L("File", "الملف")[lang]} required>
             <input type="file" onChange={onFile} className={inputCls} />
             {uploaded && <div className="text-xs text-primary mt-1">✓ {uploaded.name} ({uploaded.size})</div>}
           </Field>
-          <Field label={L("Short Description", "وصف مختصر")[locale]}>
+          <Field label={L("Short Description", "وصف مختصر")[lang]}>
             <textarea className={inputCls} rows={2} value={desc} onChange={(e) => setDesc(e.target.value)} />
           </Field>
           <PublishBar pub={pub} setPub={setPub} onSave={submit} saving={saving} lang={lang} />
@@ -798,11 +797,11 @@ function FilesTab({
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-foreground">{L("Files", "الملفات")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Files", "الملفات")[lang]}</h3>
         {files.length === 0 ? <Empty lang={lang} kind="files" /> : files.map((f) => (
           <div key={f.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
             <div className="flex-1 min-w-0">
-              <a href={f.fileUrl} target="_blank" rel="noreferrer" className="font-semibold text-foreground hover:text-primary">{f.title[locale] || f.fileName}</a>
+              <a href={f.fileUrl} target="_blank" rel="noreferrer" className="font-semibold text-foreground hover:text-primary">{bi(f.title) || f.fileName}</a>
               <div className="text-xs text-muted-foreground">{f.type.toUpperCase()} · {f.size} · {f.fileName}</div>
             </div>
             <ItemActions published={f.published} onToggle={() => void togglePub(f.id, !f.published)} onDelete={() => void onDelete(f.id)} />
@@ -833,7 +832,7 @@ function VideosTab({
     try {
       const up = await uploadToStorage(f, "videos");
       setThumb(up.url);
-      toast.success(L("Thumbnail uploaded", "تم رفع الصورة")[locale]);
+      toast.success(L("Thumbnail uploaded", "تم رفع الصورة")[lang]);
     } catch (err) { toast.error(formatError(err)); }
   };
   const onYtFile = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -841,12 +840,12 @@ function VideosTab({
     try {
       const up = await uploadToStorage(f, "videos/files");
       setYt(up.url); // store direct URL in same field
-      toast.success(L("Video uploaded", "تم رفع الفيديو")[locale]);
+      toast.success(L("Video uploaded", "تم رفع الفيديو")[lang]);
     } catch (err) { toast.error(formatError(err)); }
   };
   const submit = async () => {
-    if (!titleEn.trim() && !titleAr.trim()) { toast.error(L("Title required", "العنوان مطلوب")[locale]); return; }
-    if (!yt) { toast.error(L("YouTube link or video upload required", "رابط يوتيوب أو رفع فيديو مطلوب")[locale]); return; }
+    if (!titleEn.trim() && !titleAr.trim()) { toast.error(L("Title required", "العنوان مطلوب")[lang]); return; }
+    if (!yt) { toast.error(L("YouTube link or video upload required", "رابط يوتيوب أو رفع فيديو مطلوب")[lang]); return; }
     setSaving(true);
     try {
       const payload = {
@@ -860,7 +859,7 @@ function VideosTab({
       };
       const { error } = await supabase.from("videos").insert(payload as never);
       if (error) throw error;
-      toast.success(L("Video saved!", "تم حفظ الفيديو!")[locale]);
+      toast.success(L("Video saved!", "تم حفظ الفيديو!")[lang]);
       setTitleEn(""); setTitleAr(""); setDescEn(""); setDescAr(""); setYt(""); setThumb("");
       await onRefresh();
     } catch (e) { toast.error(`Save failed: ${formatError(e)}`); }
@@ -871,7 +870,7 @@ function VideosTab({
     try {
       const { error } = await supabase.from("videos").delete().eq("id", id);
       if (error) throw error;
-      toast.success(L("Deleted", "تم الحذف")[locale]);
+      toast.success(L("Deleted", "تم الحذف")[lang]);
       await onRefresh();
     } catch (e) { toast.error(`Delete failed: ${formatError(e)}`); }
   };
@@ -888,23 +887,23 @@ function VideosTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Video", "إضافة فيديو")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Video", "إضافة فيديو")[lang]}</h3>
         <div className="space-y-4">
           <Row>
-            <Field label={L("Title (EN)", "العنوان (إنجليزي)")[locale]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
-            <Field label={L("Title (AR)", "العنوان (عربي)")[locale]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
+            <Field label={L("Title (EN)", "العنوان (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+            <Field label={L("Title (AR)", "العنوان (عربي)")[lang]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
           </Row>
           <Row>
-            <Field label={L("Description (EN)", "الوصف (إنجليزي)")[locale]}><textarea className={inputCls} rows={3} value={descEn} onChange={(e) => setDescEn(e.target.value)} /></Field>
-            <Field label={L("Description (AR)", "الوصف (عربي)")[locale]}><textarea className={inputCls} dir="rtl" rows={3} value={descAr} onChange={(e) => setDescAr(e.target.value)} /></Field>
+            <Field label={L("Description (EN)", "الوصف (إنجليزي)")[lang]}><textarea className={inputCls} rows={3} value={descEn} onChange={(e) => setDescEn(e.target.value)} /></Field>
+            <Field label={L("Description (AR)", "الوصف (عربي)")[lang]}><textarea className={inputCls} dir="rtl" rows={3} value={descAr} onChange={(e) => setDescAr(e.target.value)} /></Field>
           </Row>
-          <Field label={L("YouTube Link", "رابط يوتيوب")[locale]}>
+          <Field label={L("YouTube Link", "رابط يوتيوب")[lang]}>
             <input className={inputCls} placeholder="https://www.youtube.com/watch?v=..." value={yt} onChange={(e) => setYt(e.target.value)} />
           </Field>
-          <Field label={L("…or upload a video file", "…أو ارفع ملف فيديو")[locale]}>
+          <Field label={L("…or upload a video file", "…أو ارفع ملف فيديو")[lang]}>
             <input type="file" accept="video/*" onChange={onYtFile} className={inputCls} />
           </Field>
-          <Field label={L("Thumbnail", "الصورة المصغرة")[locale]}>
+          <Field label={L("Thumbnail", "الصورة المصغرة")[lang]}>
             <input type="file" accept="image/*" onChange={onThumb} className={inputCls} />
             {thumb && <img src={thumb} alt="" className="mt-2 max-h-32 rounded-lg border border-border" />}
           </Field>
@@ -913,13 +912,13 @@ function VideosTab({
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-foreground">{L("Videos", "الفيديوهات")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Videos", "الفيديوهات")[lang]}</h3>
         {videos.length === 0 ? <Empty lang={lang} kind="videos" /> : videos.map((v) => {
           const id = ytId(v.youtubeUrl);
           return (
             <div key={v.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-foreground">{v.title[locale]}</div>
+                <div className="font-semibold text-foreground">{bi(v.title)}</div>
                 <div className="text-xs text-muted-foreground break-all">
                   {id ? `YouTube: ${id}` : v.youtubeUrl}
                 </div>
@@ -947,7 +946,7 @@ function QuizzesTab({
   const [saving, setSaving] = useState(false);
 
   const submit = async () => {
-    if (!titleEn.trim() && !titleAr.trim()) { toast.error(L("Title required", "العنوان مطلوب")[locale]); return; }
+    if (!titleEn.trim() && !titleAr.trim()) { toast.error(L("Title required", "العنوان مطلوب")[lang]); return; }
     setSaving(true);
     try {
       const payload = {
@@ -960,7 +959,7 @@ function QuizzesTab({
       };
       const { error } = await supabase.from("unit_quizzes" as never).insert(payload as never);
       if (error) throw error;
-      toast.success(L("Quiz saved!", "تم حفظ الاختبار!")[locale]);
+      toast.success(L("Quiz saved!", "تم حفظ الاختبار!")[lang]);
       setTitleEn(""); setTitleAr("");
       setQs([{ ...emptyQ, options: emptyQ.options.map((o) => ({ ...o })) }]);
       await onRefresh();
@@ -972,7 +971,7 @@ function QuizzesTab({
     try {
       const { error } = await supabase.from("unit_quizzes" as never).delete().eq("id", id);
       if (error) throw error;
-      toast.success(L("Deleted", "تم الحذف")[locale]);
+      toast.success(L("Deleted", "تم الحذف")[lang]);
       await onRefresh();
     } catch (e) { toast.error(`Delete failed: ${formatError(e)}`); }
   };
@@ -987,19 +986,19 @@ function QuizzesTab({
   return (
     <div className="space-y-6">
       <Card>
-        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Quiz", "إضافة اختبار")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground mb-4">{L("Add Quiz", "إضافة اختبار")[lang]}</h3>
         <div className="space-y-4">
           <Row>
-            <Field label={L("Quiz Title (EN)", "عنوان الاختبار (إنجليزي)")[locale]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
-            <Field label={L("Quiz Title (AR)", "عنوان الاختبار (عربي)")[locale]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
+            <Field label={L("Quiz Title (EN)", "عنوان الاختبار (إنجليزي)")[lang]} required><input className={inputCls} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} /></Field>
+            <Field label={L("Quiz Title (AR)", "عنوان الاختبار (عربي)")[lang]} required><input className={inputCls} dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} /></Field>
           </Row>
 
           <div className="rounded-xl border border-border bg-background p-4">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-display text-lg text-foreground">{L("Questions", "الأسئلة")[locale]}</h4>
+              <h4 className="font-display text-lg text-foreground">{L("Questions", "الأسئلة")[lang]}</h4>
               <button type="button" onClick={() => setQs((q) => [...q, { ...emptyQ, options: emptyQ.options.map((o) => ({ ...o })) }])}
                 className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary">
-                <Plus className="h-3.5 w-3.5" /> {L("Add Question", "إضافة سؤال")[locale]}
+                <Plus className="h-3.5 w-3.5" /> {L("Add Question", "إضافة سؤال")[lang]}
               </button>
             </div>
             <div className="space-y-4">
@@ -1035,18 +1034,18 @@ function QuizzesTab({
       </Card>
 
       <div className="space-y-3">
-        <h3 className="font-display text-xl text-foreground">{L("Quizzes", "الاختبارات")[locale]}</h3>
+        <h3 className="font-display text-xl text-foreground">{L("Quizzes", "الاختبارات")[lang]}</h3>
         {loading ? (
-          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[locale]}</div>
+          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</div>
         ) : quizzes.length === 0 ? (
           <Empty lang={lang} kind="quizzes" />
         ) : (
           quizzes.map((q) => (
             <div key={q.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-foreground">{q.title[locale]}</div>
+                <div className="font-semibold text-foreground">{bi(q.title)}</div>
                 <div className="text-xs text-muted-foreground">
-                  {(q.questions ?? []).length} {L("questions", "أسئلة")[locale]}
+                  {(q.questions ?? []).length} {L("questions", "أسئلة")[lang]}
                 </div>
               </div>
               <ItemActions published={q.published} onToggle={() => void togglePub(q.id, !q.published)} onDelete={() => void onDelete(q.id)} />

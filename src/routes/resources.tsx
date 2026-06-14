@@ -26,7 +26,7 @@ export const Route = createFileRoute("/resources")({
 const ICONS = { pdf: FileText, ppt: Presentation, worksheet: FileSpreadsheet } as const;
 
 function ResourcesPage() {
-  const { tr, lang, dir } = useI18n();
+  const { tr, lang, dir, bi } = useI18n();
   const resources = useAllResources();
   const [q, setQ] = useState("");
   const [type, setType] = useState<"all" | "pdf" | "ppt" | "worksheet">("all");
@@ -52,7 +52,7 @@ function ResourcesPage() {
         <select value={gradeSlug} onChange={(e) => setGradeSlug(e.target.value)}
           className="rounded-full border border-border bg-card px-4 py-2.5 text-sm">
           <option value="all">{tr("filter_by_grade")}</option>
-          {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[locale]}</option>)}
+          {grades.map((g) => <option key={g.slug} value={g.slug}>{bi(g.name)}</option>)}
         </select>
         {(["all", "pdf", "ppt", "worksheet"] as const).map((k) => (
           <button key={k} onClick={() => setType(k)}
@@ -77,16 +77,16 @@ function ResourcesPage() {
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-foreground truncate">{r.title[locale]}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{r.grade[locale]} · {r.subject[locale]} · {r.size}</div>
+                  <div className="font-medium text-foreground truncate">{bi(r.title)}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{bi(r.grade)} · {bi(r.subject)} · {r.size}</div>
                 </div>
                 {downloadable ? (
-                  <a href={r._url} download={r._fileName ?? r.title[locale]}
+                  <a href={r._url} download={r._fileName ?? bi(r.title)}
                     className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
                     <Download className="h-3.5 w-3.5" /> {r.type.toUpperCase()}
                   </a>
                 ) : (
-                  <button onClick={() => toast.info(`${tr("download_pdf").split(" ")[0]}: ${r.title[locale]}`)}
+                  <button onClick={() => toast.info(`${tr("download_pdf").split(" ")[0]}: ${bi(r.title)}`)}
                     className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
                     <Download className="h-3.5 w-3.5" /> {r.type.toUpperCase()}
                   </button>

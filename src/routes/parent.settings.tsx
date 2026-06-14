@@ -23,7 +23,7 @@ export const Route = createFileRoute("/parent/settings")({
 
 function ParentSettingsPage() {
   const navigate = useNavigate();
-  const { tr, lang } = useI18n();
+  const { tr, lang, biMaybe } = useI18n();
   const [loading, setLoading] = useState(true);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -133,7 +133,7 @@ function ParentSettingsPage() {
                 {children.map((child) => {
                   const gradeName =
                     gradeDisplayName(child.gradeSlug, lang) ||
-                    grades.find((g) => g.slug === child.gradeSlug)?.name[locale] ||
+                    biMaybe(grades.find((g) => g.slug === child.gradeSlug)?.name) ||
                     child.gradeSlug;
                   return (
                     <article
@@ -149,7 +149,7 @@ function ParentSettingsPage() {
                             {tr("parent_child_name_label")}
                           </div>
                           <div className="font-display text-lg text-foreground mt-1 leading-snug">
-                            {child.studentName[locale] || child.studentName.en}
+                            {bi(child.studentName) || child.studentName.en}
                           </div>
                           <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-primary">
                             <GraduationCap className="h-3.5 w-3.5" />

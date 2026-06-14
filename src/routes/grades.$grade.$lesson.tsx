@@ -34,7 +34,7 @@ function LessonPage() {
   const { gradeSlug, lessonSlug } = Route.useLoaderData();
   const { loading: cmsLoading } = useCMS();
   const resolved = useResolveLesson(gradeSlug, lessonSlug);
-  const { tr, lang, dir } = useI18n();
+  const { tr, lang, dir, bi } = useI18n();
   const lessonReady = !cmsLoading && Boolean(resolved?.lesson);
   useLessonHashScroll(lessonReady, lessonSlug);
 
@@ -59,7 +59,7 @@ function LessonPage() {
         <main className="flex-1 container-page py-20">
           <Link to="/grades/$grade" params={{ grade: grade.slug }} className="text-primary hover:text-primary inline-flex items-center gap-2">
             <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-            {tr("back_to_grade")} · {grade.name[locale]}
+            {tr("back_to_grade")} · {bi(grade.name)}
           </Link>
           <p className="mt-6 text-muted-foreground">Lesson not found.</p>
         </main>
@@ -68,15 +68,15 @@ function LessonPage() {
     );
   }
 
-  const worksheetBody = (lesson.worksheet[locale] ?? "").trim()
+  const worksheetBody = (bi(lesson.worksheet) ?? "").trim()
     || (custom?.worksheetName
       ? (lang === "ar" ? `ورقة عمل مرفقة: ${custom.worksheetName}` : `Worksheet attached: ${custom.worksheetName}`)
       : "");
 
   const sections: Array<{ icon: typeof Target; key: TKey; body: string }> = [
-    { icon: Target, key: "ls_outcome", body: lesson.outcome[locale] },
-    { icon: BookOpen, key: "ls_content", body: lesson.explanation[locale] },
-    { icon: Sparkles, key: "ls_activity", body: lesson.activity[locale] },
+    { icon: Target, key: "ls_outcome", body: bi(lesson.outcome) },
+    { icon: BookOpen, key: "ls_content", body: bi(lesson.explanation) },
+    { icon: Sparkles, key: "ls_activity", body: bi(lesson.activity) },
     { icon: ClipboardList, key: "ls_worksheet", body: worksheetBody },
   ];
 
@@ -103,8 +103,8 @@ function LessonPage() {
             <div className="hidden md:block mb-5">
               <Breadcrumbs items={[
                 { label: tr("nav_stages"), to: "/grades" },
-                { label: grade.name[locale], to: "/grades/$grade", params: { grade: grade.slug } },
-                { label: lesson.title[locale] },
+                { label: bi(grade.name), to: "/grades/$grade", params: { grade: grade.slug } },
+                { label: bi(lesson.title) },
               ]} />
             </div>
             <Link
@@ -115,21 +115,21 @@ function LessonPage() {
               <ChevronLeft className={`h-4 w-4 shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
               <span>
                 {lang === "ar"
-                  ? `العودة إلى ${grade.name[locale]}`
-                  : `${tr("back_to_grade")} ${grade.name[locale]}`}
+                  ? `العودة إلى ${bi(grade.name)}`
+                  : `${tr("back_to_grade")} ${bi(grade.name)}`}
               </span>
             </Link>
             <div className="mt-2 hidden text-xs uppercase tracking-[0.22em] text-primary md:mb-2 md:block">
-              {lesson.subject[locale]} · {lesson.unit[locale]}
+              {bi(lesson.subject)} · {bi(lesson.unit)}
             </div>
             <h1 className="mt-2 font-display text-xl font-semibold leading-snug text-foreground [overflow-wrap:anywhere] md:mt-0 md:text-5xl md:leading-tight">
-              {lesson.title[locale]}
+              {bi(lesson.title)}
             </h1>
             <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-primary md:hidden">
-              {lesson.subject[locale]} · {lesson.unit[locale]}
+              {bi(lesson.subject)} · {bi(lesson.unit)}
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground md:mt-4 md:gap-4 md:text-sm">
-              <span className="order-1 inline-flex items-center gap-1.5 md:order-3"><BookOpen className="h-3.5 w-3.5 md:h-4 md:w-4" /> {grade.name[locale]}</span>
+              <span className="order-1 inline-flex items-center gap-1.5 md:order-3"><BookOpen className="h-3.5 w-3.5 md:h-4 md:w-4" /> {bi(grade.name)}</span>
               <span className="order-2 inline-flex items-center gap-1.5 md:order-1"><Clock className="h-3.5 w-3.5 md:h-4 md:w-4" /> {lesson.duration} {tr("minutes")}</span>
               <span className="order-3 inline-flex items-center gap-1.5 md:order-2"><HelpCircle className="h-3.5 w-3.5 md:h-4 md:w-4" /> {quizCount} Q</span>
             </div>
@@ -193,8 +193,8 @@ function LessonPage() {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4">
                   {lesson.vocab.map((vw, i) => (
                     <div key={i} className="rounded-xl border border-border bg-background p-3 md:p-4">
-                      <div className="font-display text-base text-foreground md:text-lg [overflow-wrap:anywhere]">{vw.term[locale]}</div>
-                      {vw.def[locale] && <div className="mt-1 text-sm leading-[1.8] text-muted-foreground [overflow-wrap:anywhere]">{vw.def[locale]}</div>}
+                      <div className="font-display text-base text-foreground md:text-lg [overflow-wrap:anywhere]">{bi(vw.term)}</div>
+                      {bi(vw.def) && <div className="mt-1 text-sm leading-[1.8] text-muted-foreground [overflow-wrap:anywhere]">{bi(vw.def)}</div>}
                     </div>
                   ))}
                 </div>
@@ -223,7 +223,7 @@ function LessonPage() {
                         <iframe
                           className="h-full w-full"
                           src={`https://www.youtube.com/embed/${video.ytId}`}
-                          title={`${lesson.title[locale]} — ${video.label}`}
+                          title={`${bi(lesson.title)} — ${video.label}`}
                           allowFullScreen
                         />
                       </div>
@@ -266,7 +266,7 @@ function LessonPage() {
                     <a key={f.id} href={f.fileUrl} download={f.fileName}
                       className={`${resourceBtn} justify-start text-xs md:text-sm`}>
                       <Download className="h-4 w-4 shrink-0" />
-                      <span className="min-w-0 [overflow-wrap:anywhere]">{f.title[locale]} <span className="opacity-60">· {f.type.toUpperCase()}</span></span>
+                      <span className="min-w-0 [overflow-wrap:anywhere]">{bi(f.title)} <span className="opacity-60">· {f.type.toUpperCase()}</span></span>
                     </a>
                   ))}
                 </div>

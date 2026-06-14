@@ -23,7 +23,7 @@ export const Route = createFileRoute("/grades/")({
 });
 
 function GradesIndex() {
-  const { tr, lang, dir } = useI18n();
+  const { tr, lang, dir, bi } = useI18n();
   const [q, setQ] = useState("");
 
   const filteredGrades = useMemo(() => {
@@ -63,8 +63,8 @@ function GradesIndex() {
               <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <div className="text-xs uppercase tracking-[0.22em] text-primary mb-1">{tr("stage_overview")}</div>
-                  <h2 className="font-display text-3xl text-foreground">{s.name[locale]}</h2>
-                  <p className="text-sm text-muted-foreground mt-1">{s.desc[locale]}</p>
+                  <h2 className="font-display text-3xl text-foreground">{bi(s.name)}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">{bi(s.desc)}</p>
                 </div>
               </div>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -78,7 +78,7 @@ function GradesIndex() {
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-dark to-primary text-primary-foreground mb-4">
                       <GraduationCap className="h-5 w-5" />
                     </div>
-                    <div className="font-display text-xl text-foreground">{g.name[locale]}</div>
+                    <div className="font-display text-xl text-foreground">{bi(g.name)}</div>
                     <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
                       <BookOpen className="h-3.5 w-3.5" /> {g.lessons.length} {tr("lesson")}
                     </div>

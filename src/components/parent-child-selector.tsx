@@ -1,9 +1,8 @@
 import { GraduationCap, UserRound } from "lucide-react";
-import { useI18n } from "@/lib/i18n";
+import {useI18n, L } from "@/lib/i18n";
 import type { ParentLinkedChild } from "@/lib/parent-children";
 import { gradeDisplayName } from "@/lib/grade-utils";
 
-const L = (en: string, ar: string) => ({ en, ar });
 
 export function ParentChildSelector({
   linkedChildren,
@@ -14,7 +13,7 @@ export function ParentChildSelector({
   selectedStudentUserId: string;
   onSelect: (studentUserId: string) => void;
 }) {
-  const { lang } = useI18n();
+  const { lang, bi } = useI18n();
 
   if (linkedChildren.length <= 1) {
     return null;
@@ -23,12 +22,12 @@ export function ParentChildSelector({
   return (
     <section
       className="rounded-2xl border border-border bg-card p-4 md:p-5 shadow-[var(--shadow-soft)]"
-      aria-label={L("Select child", "اختر الطفل")[locale]}
+      aria-label={L("Select child", "اختر الطفل")[lang]}
     >
       <div className="text-xs uppercase tracking-[0.2em] text-primary mb-3">
-        {L("Your children", "أبناؤك")[locale]}
+        {L("Your children", "أبناؤك")[lang]}
       </div>
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label={L("Linked children", "الأبناء المرتبطون")[locale]}>
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label={L("Linked children", "الأبناء المرتبطون")[lang]}>
         {linkedChildren.map((child) => {
           const active = child.studentUserId === selectedStudentUserId;
           const gradeName = gradeDisplayName(child.gradeSlug, lang) || child.gradeSlug;
@@ -46,7 +45,7 @@ export function ParentChildSelector({
               }`}
             >
               <UserRound className="h-4 w-4 shrink-0" />
-              <span>{child.studentName[locale] || child.studentName.en}</span>
+              <span>{bi(child.studentName) || child.studentName.en}</span>
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${
                   active ? "bg-primary-foreground/15 text-primary-foreground" : "bg-muted text-muted-foreground"

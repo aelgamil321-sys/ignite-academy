@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin/lessons/")({
 
 function AdminLessonsPage() {
   const { lessons, loading } = useCMS();
-  const { lang } = useI18n();
+  const { lang, bi } = useI18n();
 
   return (
     <div className="space-y-6">
@@ -33,9 +33,9 @@ function AdminLessonsPage() {
               className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
             >
               <div className="min-w-0">
-                <div className="font-medium text-foreground">{lesson.title[locale]}</div>
+                <div className="font-medium text-foreground">{bi(lesson.title)}</div>
                 <div className="text-xs text-muted-foreground truncate">
-                  {lesson.grade} · {lesson.unit[locale] || "—"}
+                  {lesson.grade} · {bi(lesson.unit) || "—"}
                 </div>
               </div>
               <Link

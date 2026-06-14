@@ -52,7 +52,7 @@ function categorize(v: UnifiedVideo): string | null {
 }
 
 function VideosIndex() {
-  const { tr, lang, dir } = useI18n();
+  const { tr, lang, dir, bi } = useI18n();
   const videos = useAllVideos();
   const [q, setQ] = useState("");
   const [gradeSlug, setGradeSlug] = useState("all");
@@ -91,7 +91,7 @@ function VideosIndex() {
         <select value={gradeSlug} onChange={(e) => setGradeSlug(e.target.value)}
           className="rounded-full border border-border bg-card px-4 py-2.5 text-sm">
           <option value="all">{tr("filter_by_grade")}</option>
-          {grades.map((g) => <option key={g.slug} value={g.slug}>{g.name[locale]}</option>)}
+          {grades.map((g) => <option key={g.slug} value={g.slug}>{bi(g.name)}</option>)}
         </select>
       </div>
 
@@ -107,7 +107,7 @@ function VideosIndex() {
                     <Icon className="h-5 w-5" />
                   </div>
                   <Link to="/categories/$category" params={{ category: c.slug }} className="font-display text-xl text-foreground hover:text-primary">
-                    {c.name[locale]}
+                    {bi(c.name)}
                   </Link>
                 </div>
                 <span className="text-xs uppercase tracking-wider text-muted-foreground">
@@ -132,7 +132,7 @@ function VideosIndex() {
                       className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-[var(--shadow-elegant)] hover:border-primary transition-all">
                       <div className="aspect-video bg-gradient-to-br from-primary via-primary to-brand-dark/60 grid place-content-center text-primary-foreground relative">
                         {v._custom?.thumbnailUrl ? (
-                          <img src={v._custom.thumbnailUrl} alt={v.title[locale]} className="absolute inset-0 h-full w-full object-cover" />
+                          <img src={v._custom.thumbnailUrl} alt={bi(v.title)} className="absolute inset-0 h-full w-full object-cover" />
                         ) : null}
                         <div className="h-14 w-14 rounded-full bg-gold/90 grid place-content-center text-gold-foreground group-hover:scale-110 transition-transform relative">
                           <Play className="h-6 w-6 ms-0.5" />
@@ -140,9 +140,9 @@ function VideosIndex() {
                         {v.duration && <span className="absolute bottom-2 end-2 rounded bg-black/50 px-2 py-0.5 text-xs">{v.duration}</span>}
                       </div>
                       <div className="p-5">
-                        <div className="text-xs uppercase tracking-wider text-primary font-semibold">{v.grade[locale]}</div>
-                        <h3 className="mt-1 font-display text-lg text-foreground leading-snug">{v.title[locale]}</h3>
-                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{v.description[locale]}</p>
+                        <div className="text-xs uppercase tracking-wider text-primary font-semibold">{bi(v.grade)}</div>
+                        <h3 className="mt-1 font-display text-lg text-foreground leading-snug">{bi(v.title)}</h3>
+                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{bi(v.description)}</p>
                         {v.duration && (
                           <div className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Clock className="h-3.5 w-3.5" /> {v.duration}

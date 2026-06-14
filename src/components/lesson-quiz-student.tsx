@@ -26,7 +26,7 @@ export function LessonQuizStudent({
   gradeName: { en: string; ar: string };
   lessonTitle: { en: string; ar: string };
 }) {
-  const { tr, lang } = useI18n();
+  const { tr, lang, bi } = useI18n();
   const questions = normalizeQuizList(rawQuestions);
   const [choiceAnswers, setChoiceAnswers] = useState<Record<number, number>>({});
   const [essayAnswers, setEssayAnswers] = useState<Record<number, string>>({});
@@ -216,7 +216,7 @@ export function LessonQuizStudent({
                     </span>
                   </div>
                   <div className="font-medium text-foreground mb-3">
-                    {q.q[locale] || q.q.en || q.q.ar}
+                    {bi(q.q) || q.q.en || q.q.ar}
                   </div>
 
                   {isEssay ? (
@@ -247,7 +247,7 @@ export function LessonQuizStudent({
                                 : "border-border hover:border-primary hover:text-primary",
                             ].join(" ")}
                           >
-                            {opt[locale] || opt.en || opt.ar}
+                            {bi(opt) || opt.en || opt.ar}
                           </button>
                         );
                       })}

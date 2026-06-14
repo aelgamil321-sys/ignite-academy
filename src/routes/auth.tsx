@@ -31,7 +31,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { mode: initialMode, accountType: initialAccountType } = Route.useSearch();
-  const { lang } = useI18n();
+  const { lang, bi } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [accountType, setAccountType] = useState<"student" | "parent">(initialAccountType);
   const [arabicName, setArabicName] = useState("");
@@ -416,7 +416,7 @@ function AuthPage() {
                     className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
                   >
                     {grades.map((g) => (
-                      <option key={g.slug} value={g.slug}>{g.name[locale]}</option>
+                      <option key={g.slug} value={g.slug}>{bi(g.name)}</option>
                     ))}
                   </select>
                 </div>

@@ -6,7 +6,7 @@ import { PageShell } from "@/components/page-shell";
 import { ParentAccountRequired } from "@/components/parent-account-required";
 import { ParentChildSelector } from "@/components/parent-child-selector";
 import { ParentDashboardView } from "@/components/parent-dashboard";
-import { useI18n } from "@/lib/i18n";
+import {useI18n, L } from "@/lib/i18n";
 import {
   fetchParentDashboardBundle,
   type ParentDashboardData,
@@ -180,11 +180,11 @@ function ParentDashboardPage({ userId }: { userId: string }) {
             ? L(
                 "Signed in to view your children's learning progress.",
                 "أنت مسجّل الدخول لمتابعة تقدّم أبنائك التعليمي.",
-              )[locale]
+              )[lang]
             : L(
                 "Signed in to view your child's learning progress.",
                 "أنت مسجّل الدخول لمتابعة تقدّم ابنك/ابنتك التعليمي.",
-              )[locale]}
+              )[lang]}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Link
@@ -223,7 +223,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
           {L(
             "More than one student found. Please contact the school to link your account.",
             "تم العثور على أكثر من طالب. يرجى التواصل مع المدرسة لربط حسابك.",
-          )[locale]}
+          )[lang]}
         </div>
       ) : linkError === "none" ? (
         <div className="rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900">
@@ -263,4 +263,3 @@ function ParentDashboardPage({ userId }: { userId: string }) {
   );
 }
 
-const L = (en: string, ar: string) => ({ en, ar });

@@ -1,12 +1,11 @@
 import { Lock } from "lucide-react";
-import { useI18n } from "@/lib/i18n";
+import {useI18n, L } from "@/lib/i18n";
 import { computeStudentBadges } from "@/lib/student-badges";
 import type { StudentProgressData } from "@/lib/student-progress";
 
-const L = (en: string, ar: string) => ({ en, ar });
 
 export function StudentBadgesSection({ progress }: { progress: StudentProgressData }) {
-  const { lang } = useI18n();
+  const { lang, bi } = useI18n();
   const { badges, unlockedCount, totalCount } = computeStudentBadges(progress);
 
   return (
@@ -20,18 +19,18 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
           </div>
           <div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Achievements & Badges", "الإنجازات والشارات")[locale]}
+              {L("Achievements & Badges", "الإنجازات والشارات")[lang]}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {L(
                 "Earn badges automatically as you learn and complete quizzes.",
                 "اكسب الشارات تلقائيًا أثناء التعلّم وإتمام الاختبارات.",
-              )[locale]}
+              )[lang]}
             </p>
           </div>
         </div>
         <div className="rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-          {L("Unlocked", "مفتوحة")[locale]} {unlockedCount} / {totalCount}
+          {L("Unlocked", "مفتوحة")[lang]} {unlockedCount} / {totalCount}
         </div>
       </div>
 
@@ -46,7 +45,7 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
             }`}
           >
             {!badge.unlocked && (
-              <div className="absolute top-3 end-3 text-muted-foreground/80" title={L("Locked", "مقفلة")[locale]}>
+              <div className="absolute top-3 end-3 text-muted-foreground/80" title={L("Locked", "مقفلة")[lang]}>
                 <Lock className="h-4 w-4" />
               </div>
             )}
@@ -63,14 +62,14 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
                 badge.unlocked ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              {badge.title[locale]}
+              {bi(badge.title)}
             </h3>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-              {badge.description[locale]}
+              {bi(badge.description)}
             </p>
             {badge.unlocked && (
               <div className="mt-3 text-xs font-semibold uppercase tracking-wider text-primary">
-                {L("Unlocked", "مفتوحة")[locale]}
+                {L("Unlocked", "مفتوحة")[lang]}
               </div>
             )}
           </article>

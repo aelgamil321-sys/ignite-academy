@@ -1,5 +1,7 @@
 import type { Bi, QuizQuestion, QuizQuestionType } from "@/lib/curriculum";
 import { supabase } from "@/integrations/supabase/client";
+import type { Lang } from "./i18n-config";
+import { contentLocale } from "./i18n-config";
 
 export const TRUE_FALSE_OPTIONS: Bi[] = [
   { en: "True", ar: "صح" },
@@ -382,10 +384,11 @@ export function gradeLabelForPercentage(
 export function optionLabel(
   options: Bi[],
   index: number,
-  lang: "en" | "ar",
+  lang: Lang | "en" | "ar",
 ): string {
   const opt = options[index];
   if (!opt) return "—";
+  const locale = contentLocale(lang as Lang);
   return opt[locale] || opt.en || opt.ar || "—";
 }
 

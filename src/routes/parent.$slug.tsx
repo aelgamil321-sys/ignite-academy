@@ -12,7 +12,7 @@ export const Route = createFileRoute("/parent/$slug")({
 
 function ParentDetail() {
   const { slug } = Route.useLoaderData();
-  const { tr, lang } = useI18n();
+  const { tr, lang, bi } = useI18n();
   const { articles } = useCMS();
   const builtIn = getParentGuide(slug);
   const custom = articles.find((a) => a.id === slug && a.published && a.category === "parent");
@@ -26,11 +26,11 @@ function ParentDetail() {
   if (!guide) return <div className="container-page py-20">Guide not found.</div>;
   const image = (guide as { image?: string }).image;
   return (
-    <PageShell eyebrow={tr("nav_parent")} title={guide.title[locale]} lead={guide.excerpt[locale]}
-      crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: guide.title[locale] }]}>
-      {image && <img src={image} alt={guide.title[locale]} className="w-full max-w-3xl rounded-2xl mb-6 border border-border" />}
+    <PageShell eyebrow={tr("nav_parent")} title={bi(guide.title)} lead={bi(guide.excerpt)}
+      crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: bi(guide.title) }]}>
+      {image && <img src={image} alt={bi(guide.title)} className="w-full max-w-3xl rounded-2xl mb-6 border border-border" />}
       <article className="prose max-w-3xl">
-        <p className="text-foreground/85 leading-relaxed text-lg whitespace-pre-line">{guide.body[locale]}</p>
+        <p className="text-foreground/85 leading-relaxed text-lg whitespace-pre-line">{bi(guide.body)}</p>
       </article>
     </PageShell>
   );

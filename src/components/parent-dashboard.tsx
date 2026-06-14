@@ -10,11 +10,10 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { computeStudentBadges } from "@/lib/student-badges";
 import { ParentPerformanceReportCard } from "@/components/parent-performance-report";
-import { useI18n } from "@/lib/i18n";
+import {useI18n, L } from "@/lib/i18n";
 import type { ParentDashboardData } from "@/lib/parent-dashboard";
 import type { ActivityTimelineItem } from "@/lib/student-progress";
 
-const L = (en: string, ar: string) => ({ en, ar });
 
 function formatDate(iso: string, lang: "en" | "ar"): string {
   if (!iso) return "—";
@@ -49,7 +48,7 @@ export function ParentDashboardView({
 }: {
   data: ParentDashboardData;
 }) {
-  const { lang } = useI18n();
+  const { lang, bi } = useI18n();
   const { progress, performanceReport } = data;
   const learningLevel = lang === "ar" ? progress.learningLevelAr : progress.learningLevelEn;
   const { badges } = computeStudentBadges(progress);
@@ -63,35 +62,35 @@ export function ParentDashboardView({
     {
       key: "progress",
       icon: TrendingUp,
-      label: L("Overall Progress", "التقدّم الإجمالي")[locale],
+      label: L("Overall Progress", "التقدّم الإجمالي")[lang],
       value: `${progress.overallProgressPct}%`,
       sub: <Progress value={progress.overallProgressPct} className="mt-3 h-2" />,
     },
     {
       key: "lessons",
       icon: BookOpenCheck,
-      label: L("Lessons Completed", "الدروس المكتملة")[locale],
+      label: L("Lessons Completed", "الدروس المكتملة")[lang],
       value: `${progress.completedLessons} / ${progress.totalLessons}`,
       sub: null,
     },
     {
       key: "certificates",
       icon: Award,
-      label: L("Certificates Earned", "الشهادات المكتسبة")[locale],
+      label: L("Certificates Earned", "الشهادات المكتسبة")[lang],
       value: String(progress.certificatesEarned),
       sub: null,
     },
     {
       key: "average",
       icon: ClipboardCheck,
-      label: L("Average Quiz Score", "متوسط درجات الاختبارات")[locale],
+      label: L("Average Quiz Score", "متوسط درجات الاختبارات")[lang],
       value: progress.averageQuizScorePct === null ? "—" : `${progress.averageQuizScorePct}%`,
       sub: null,
     },
     {
       key: "level",
       icon: Medal,
-      label: L("Learning Level", "المستوى التعليمي")[locale],
+      label: L("Learning Level", "المستوى التعليمي")[lang],
       value: learningLevel,
       sub: (
         <span
@@ -135,7 +134,7 @@ export function ParentDashboardView({
               <Award className="h-5 w-5" />
             </div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Latest Certificates", "أحدث الشهادات")[locale]}
+              {L("Latest Certificates", "أحدث الشهادات")[lang]}
             </h2>
           </div>
           {latestCertificates.length === 0 ? (
@@ -143,7 +142,7 @@ export function ParentDashboardView({
               {L(
                 "No certificates yet. Completed lesson quizzes will appear here.",
                 "لا توجد شهادات بعد. ستظهر هنا عند إتمام اختبارات الدروس.",
-              )[locale]}
+              )[lang]}
             </p>
           ) : (
             <ul className="space-y-3">
@@ -154,7 +153,7 @@ export function ParentDashboardView({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-display text-lg text-foreground truncate">
-                      {certificate.lessonTitle[locale] || certificate.lessonTitle.en}
+                      {bi(certificate.lessonTitle) || certificate.lessonTitle.en}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {formatDate(certificate.issuedAt, lang)}
@@ -176,7 +175,7 @@ export function ParentDashboardView({
               <Sparkles className="h-5 w-5" />
             </div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Latest Badges", "أحدث الشارات")[locale]}
+              {L("Latest Badges", "أحدث الشارات")[lang]}
             </h2>
           </div>
           {unlockedBadges.length === 0 ? (
@@ -184,7 +183,7 @@ export function ParentDashboardView({
               {L(
                 "No badges unlocked yet. Progress milestones will appear here.",
                 "لم تُفتح شارات بعد. ستظهر هنا عند تحقيق إنجازات التقدّم.",
-              )[locale]}
+              )[lang]}
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
@@ -212,7 +211,7 @@ export function ParentDashboardView({
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-display text-base text-foreground leading-snug">
-                        {badge.title[locale]}
+                        {bi(badge.title)}
                       </h3>
                       {badge.at ? (
                         <p className="text-xs text-muted-foreground mt-1">
@@ -235,13 +234,13 @@ export function ParentDashboardView({
           </div>
           <div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Recent Activity", "النشاط الأخير")[locale]}
+              {L("Recent Activity", "النشاط الأخير")[lang]}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {L(
                 "Quiz completions, certificates, and badge milestones.",
                 "إتمام الاختبارات والشهادات وإنجازات الشارات.",
-              )[locale]}
+              )[lang]}
             </p>
           </div>
         </div>
@@ -250,7 +249,7 @@ export function ParentDashboardView({
             {L(
               "Activity will appear here once quizzes are submitted.",
               "سيظهر النشاط هنا بعد إرسال الاختبارات.",
-            )[locale]}
+            )[lang]}
           </p>
         ) : (
           <ul className="space-y-0">
@@ -282,15 +281,15 @@ export function ParentDashboardView({
                 <div className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-3">
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary">
                     {item.kind === "badge_unlocked"
-                      ? L("Badge unlocked", "شارة مفتوحة")[locale]
+                      ? L("Badge unlocked", "شارة مفتوحة")[lang]
                       : item.kind === "certificate_earned"
-                        ? L("Certificate earned", "شهادة مكتسبة")[locale]
-                        : L("Quiz completed", "اختبار مكتمل")[locale]}
+                        ? L("Certificate earned", "شهادة مكتسبة")[lang]
+                        : L("Quiz completed", "اختبار مكتمل")[lang]}
                   </div>
                   <div className="mt-1 font-display text-lg text-foreground leading-snug">
                     {item.kind === "badge_unlocked"
-                      ? item.badgeTitle[locale]
-                      : item.lessonTitle[locale] || item.lessonTitle.en}
+                      ? bi(item.badgeTitle)
+                      : bi(item.lessonTitle) || item.lessonTitle.en}
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span>{formatDate(item.at, lang)}</span>

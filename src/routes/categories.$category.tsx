@@ -27,7 +27,7 @@ export const Route = createFileRoute("/categories/$category")({
 
 function CategoryPage() {
   const { category } = Route.useLoaderData();
-  const { lang, dir, tr } = useI18n();
+  const { lang, dir, tr, bi } = useI18n();
   const { lessons, videos, files, articles } = useContentByCategory(category.slug as SubjectCategory);
 
   const hasContent = lessons.length + videos.length + files.length + articles.length > 0;
@@ -35,9 +35,9 @@ function CategoryPage() {
   return (
     <PageShell
       eyebrow={tr("cat_eyebrow")}
-      title={category.name[locale]}
-      lead={category.desc[locale]}
-      crumbs={[{ label: tr("nav_home"), to: "/" }, { label: category.name[locale] }]}
+      title={bi(category.name)}
+      lead={bi(category.desc)}
+      crumbs={[{ label: tr("nav_home"), to: "/" }, { label: bi(category.name) }]}
     >
       {!hasContent ? (
         <EmptyState
@@ -62,8 +62,8 @@ function CategoryPage() {
                     <div className="text-xs text-primary font-semibold uppercase tracking-wider">
                       {gradeDisplayName(l.grade, lang)}
                     </div>
-                    <h3 className="mt-1 font-display text-lg text-foreground">{l.title[locale]}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{l.outcome[locale]}</p>
+                    <h3 className="mt-1 font-display text-lg text-foreground">{bi(l.title)}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{bi(l.outcome)}</p>
                     <div className="mt-3 inline-flex items-center gap-1 text-sm text-primary group-hover:text-primary">
                       {tr("open")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                     </div>
@@ -90,8 +90,8 @@ function CategoryPage() {
                       <Play className="h-10 w-10 relative" />
                     </div>
                     <div className="p-4">
-                      <h3 className="font-display text-lg text-foreground">{v.title[locale]}</h3>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{v.description[locale]}</p>
+                      <h3 className="font-display text-lg text-foreground">{bi(v.title)}</h3>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{bi(v.description)}</p>
                     </div>
                   </Link>
                 ))}
@@ -111,7 +111,7 @@ function CategoryPage() {
                   >
                     <Download className="h-5 w-5 text-primary shrink-0" />
                     <div className="min-w-0">
-                      <div className="font-medium text-primary truncate">{f.title[locale]}</div>
+                      <div className="font-medium text-primary truncate">{bi(f.title)}</div>
                       <div className="text-xs text-muted-foreground">{f.type.toUpperCase()} · {f.size}</div>
                     </div>
                   </a>
@@ -130,8 +130,8 @@ function CategoryPage() {
                     params={{ slug: a.id }}
                     className="rounded-2xl border border-border bg-card p-5 hover:border-primary transition-colors"
                   >
-                    <h3 className="font-display text-lg text-foreground">{a.title[locale]}</h3>
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{a.content[locale]}</p>
+                    <h3 className="font-display text-lg text-foreground">{bi(a.title)}</h3>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{bi(a.content)}</p>
                   </Link>
                 ))}
               </div>

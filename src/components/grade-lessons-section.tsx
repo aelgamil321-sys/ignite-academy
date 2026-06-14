@@ -10,14 +10,13 @@ import {
   BookOpen,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useI18n } from "@/lib/i18n";
+import {useI18n, L } from "@/lib/i18n";
 import { customToLesson, type CustomLesson } from "@/lib/cms";
 import { subjectCategoryName } from "@/lib/categories";
 import { normalizeQuizList } from "@/lib/lesson-quiz";
 import { fileNameFromUrl } from "@/lib/lesson-bilingual-files";
 import { supabase } from "@/integrations/supabase/client";
 
-const L = (en: string, ar: string) => ({ en, ar });
 
 type LessonStatus = "not_started" | "in_progress" | "pending_review" | "completed";
 
@@ -97,7 +96,7 @@ function StatusBadge({ status, lang }: { status: LessonStatus; lang: "en" | "ar"
     <span
       className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${STATUS_STYLES[status]}`}
     >
-      {labels[status][locale]}
+      {labels[status][lang]}
     </span>
   );
 }
@@ -170,7 +169,7 @@ export function GradeLessonsSection({
   gradeSlug: string;
   lessons: CustomLesson[];
 }) {
-  const { lang, tr } = useI18n();
+  const { lang, tr, bi } = useI18n();
   const [submissions, setSubmissions] = useState<Record<string, SubmissionMeta>>({});
   const [touchVersion, setTouchVersion] = useState(0);
 
@@ -235,10 +234,10 @@ export function GradeLessonsSection({
           <div className="flex flex-wrap items-end justify-between gap-3 mb-3">
             <div>
               <div className="text-xs uppercase tracking-[0.2em] text-primary mb-1">
-                {L("Your Progress", "تقدّمك")[locale]}
+                {L("Your Progress", "تقدّمك")[lang]}
               </div>
               <p className="text-sm text-muted-foreground">
-                {L("Completed lessons", "الدروس المكتملة")[locale]}
+                {L("Completed lessons", "الدروس المكتملة")[lang]}
               </p>
             </div>
             <div className="font-display text-2xl text-foreground tabular-nums">
@@ -269,8 +268,8 @@ export function GradeLessonsSection({
 
           const quizLabel =
             status === "in_progress"
-              ? L("Continue Quiz", "متابعة الاختبار")[locale]
-              : L("Start Quiz", "بدء الاختبار")[locale];
+              ? L("Continue Quiz", "متابعة الاختبار")[lang]
+              : L("Start Quiz", "بدء الاختبار")[lang];
 
           return (
             <article
@@ -284,10 +283,10 @@ export function GradeLessonsSection({
                       {tr("lesson")} {index + 1} · {subject}
                     </div>
                     <h3 className="font-display text-xl sm:text-2xl font-semibold text-foreground leading-snug break-words">
-                      {lesson.title[locale]}
+                      {bi(lesson.title)}
                     </h3>
                     <p className="mt-1.5 text-sm text-muted-foreground break-words">
-                      {lesson.unit[locale]}
+                      {bi(lesson.unit)}
                     </p>
                   </div>
                   <StatusBadge status={status} lang={lang} />
@@ -302,7 +301,7 @@ export function GradeLessonsSection({
 
               <div className="p-5 sm:p-6 space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {L("Lesson Actions", "إجراءات الدرس")[locale]}
+                  {L("Lesson Actions", "إجراءات الدرس")[lang]}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                   <ActionButton
@@ -311,14 +310,14 @@ export function GradeLessonsSection({
                     hash="lesson-video"
                     onClick={() => touchLesson(custom.id)}
                     icon={PlayCircle}
-                    label={L("Watch Lesson Video", "مشاهدة فيديو الدرس")[locale]}
+                    label={L("Watch Lesson Video", "مشاهدة فيديو الدرس")[lang]}
                     disabled={!videoAvailable}
                   />
                   <ActionButton
                     href={pdfUrl ?? undefined}
                     onClick={() => touchLesson(custom.id)}
                     icon={FileText}
-                    label={L("Download PDF", "تحميل PDF")[locale]}
+                    label={L("Download PDF", "تحميل PDF")[lang]}
                     disabled={!pdfUrl}
                     external
                   />
@@ -328,7 +327,7 @@ export function GradeLessonsSection({
                       touchLesson(custom.id);
                     }}
                     icon={FileSpreadsheet}
-                    label={L("Download Worksheet", "تحميل ورقة العمل")[locale]}
+                    label={L("Download Worksheet", "تحميل ورقة العمل")[lang]}
                     disabled={!worksheetUrl}
                     external
                   />
@@ -347,7 +346,7 @@ export function GradeLessonsSection({
                     hash="lesson-result"
                     onClick={() => touchLesson(custom.id)}
                     icon={submission ? Award : BookOpen}
-                    label={L("View Result", "عرض النتيجة")[locale]}
+                    label={L("View Result", "عرض النتيجة")[lang]}
                     disabled={!submission}
                   />
                 </div>

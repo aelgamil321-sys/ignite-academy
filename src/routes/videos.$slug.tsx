@@ -12,7 +12,7 @@ export const Route = createFileRoute("/videos/$slug")({
 
 function VideoDetail() {
   const { slug } = Route.useLoaderData();
-  const { tr, lang } = useI18n();
+  const { tr, lang, bi } = useI18n();
   const { videos } = useCMS();
   const builtIn = getVideo(slug);
   const custom = videos.find((v) => v.id === slug && v.published);
@@ -25,13 +25,13 @@ function VideoDetail() {
 
   return (
     <PageShell
-      eyebrow={data.grade[locale]}
-      title={data.title[locale]}
-      lead={data.description[locale]}
-      crumbs={[{ label: tr("nav_videos"), to: "/videos" }, { label: data.title[locale] }]}
+      eyebrow={bi(data.grade)}
+      title={bi(data.title)}
+      lead={bi(data.description)}
+      crumbs={[{ label: tr("nav_videos"), to: "/videos" }, { label: bi(data.title) }]}
     >
       <div className="aspect-video w-full rounded-2xl overflow-hidden border border-border shadow-[var(--shadow-elegant)]">
-        <iframe className="h-full w-full" src={`https://www.youtube.com/embed/${data.ytId}`} title={data.title[locale]} allowFullScreen />
+        <iframe className="h-full w-full" src={`https://www.youtube.com/embed/${data.ytId}`} title={bi(data.title)} allowFullScreen />
       </div>
       {data.duration && <div className="mt-6 text-sm text-muted-foreground">Duration: {data.duration}</div>}
     </PageShell>

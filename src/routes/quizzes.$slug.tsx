@@ -16,7 +16,7 @@ export const Route = createFileRoute("/quizzes/$slug")({
 
 function QuizDetail() {
   const { slug } = Route.useLoaderData();
-  const { tr, lang } = useI18n();
+  const { tr, lang, bi } = useI18n();
   const quizzes = useQuizzesFromCMS();
   const quiz = quizzes.find((q) => q.slug === slug);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -35,10 +35,10 @@ function QuizDetail() {
 
   return (
     <PageShell
-      eyebrow={quiz.grade[locale]}
-      title={quiz.title[locale]}
-      lead={quiz.description[locale]}
-      crumbs={[{ label: tr("nav_quizzes"), to: "/quizzes" }, { label: quiz.title[locale] }]}
+      eyebrow={bi(quiz.grade)}
+      title={bi(quiz.title)}
+      lead={bi(quiz.description)}
+      crumbs={[{ label: tr("nav_quizzes"), to: "/quizzes" }, { label: bi(quiz.title) }]}
     >
       <div className="space-y-6 max-w-3xl">
         {quiz.questions.map((q, i) => {
@@ -49,7 +49,7 @@ function QuizDetail() {
               <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-primary mb-2">
                 <HelpCircle className="h-4 w-4" /> {tr("question")} {i + 1}
               </div>
-              <div className="font-medium mb-3">{q.q[locale]}</div>
+              <div className="font-medium mb-3">{bi(q.q)}</div>
               <div className="grid gap-2">
                 {q.options.map((opt, oi) => {
                   const chosen = sel === oi;
@@ -68,7 +68,7 @@ function QuizDetail() {
                           : "border-border hover:border-primary hover:text-primary",
                       ].join(" ")}
                     >
-                      {opt[locale]}
+                      {bi(opt)}
                     </button>
                   );
                 })}

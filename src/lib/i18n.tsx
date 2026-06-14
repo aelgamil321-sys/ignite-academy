@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import type { Bi } from "@/lib/curriculum";
 import {
   LANG_STORAGE_KEY,
   contentLocale,
   isLang,
   isRtlLang,
   langDir,
+  pickBiLocale,
   type ContentLocale,
   type Lang,
 } from "@/lib/i18n-config";
@@ -406,6 +408,10 @@ interface I18nCtx {
   setLang: (l: Lang) => void;
   toggle: () => void;
   tr: (key: TKey) => string;
+  /** Pick EN/AR lesson or CMS text for the active language (EN for fr/de/zh/ur). */
+  bi: (text: Bi) => string;
+  /** Safe variant when bilingual text may be undefined. */
+  biMaybe: (text?: Bi | null) => string;
 }
 
 const Ctx = createContext<I18nCtx | null>(null);
@@ -441,6 +447,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setLang,
     toggle: () => setLang(lang === "en" ? "ar" : "en"),
     tr: (key) => translate(key, lang),
+    bi: (text) => pickBiLocale(text, locale),
+    biMaybe: (text) => (text ? pickBiLocale(text, locale) : ""),
   };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

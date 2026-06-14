@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 import { Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import { useI18n } from "@/lib/i18n";
+import {useI18n, L } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteLessonFile, formatError, LESSON_FILES_BUCKET } from "@/lib/upload";
 import {
@@ -16,7 +16,6 @@ import {
 
 const UPLOAD_TIMEOUT_MS = 60_000;
 
-const L = (en: string, ar: string) => ({ en, ar });
 
 type FieldMeta = { name: string; path: string };
 
@@ -211,7 +210,7 @@ export function LessonBilingualFileFields({
           setMeta((prev) => ({ ...prev, [key]: { name: file.name, path: filePath } }));
           onChange((prev) => ({ ...prev, [key]: publicUrl }));
 
-          const success = L("File uploaded and saved successfully", "تم رفع الملف وحفظه بنجاح")[locale];
+          const success = L("File uploaded and saved successfully", "تم رفع الملف وحفظه بنجاح")[lang];
           setSuccessMsg((p) => ({ ...p, [key]: success }));
           toast.success(success);
         })(),
@@ -273,13 +272,13 @@ export function LessonBilingualFileFields({
       }
     }
 
-    toast.success(L("File removed", "تم إزالة الملف")[locale]);
+    toast.success(L("File removed", "تم إزالة الملف")[lang]);
   };
 
   return (
     <div className="space-y-4 rounded-xl border border-border bg-background p-4">
       <h4 className="font-display text-lg text-foreground">
-        {L("Bilingual Lesson Files", "ملفات الدرس ثنائية اللغة")[locale]}
+        {L("Bilingual Lesson Files", "ملفات الدرس ثنائية اللغة")[lang]}
       </h4>
       <p className="text-xs text-muted-foreground font-mono">
         bucket: {LESSON_FILES_BUCKET}
@@ -324,7 +323,7 @@ export function LessonBilingualFileFields({
               )}
               {!busy && !localUrl && !errors[slot.key] && !successMsg[slot.key] && (
                 <div className="text-xs text-muted-foreground italic">
-                  {L("No file uploaded", "لم يتم رفع ملف")[locale]}
+                  {L("No file uploaded", "لم يتم رفع ملف")[lang]}
                 </div>
               )}
 
@@ -340,7 +339,7 @@ export function LessonBilingualFileFields({
                     className="inline-flex items-center gap-1 text-primary hover:text-primary"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
-                    {L("View", "عرض")[locale]}
+                    {L("View", "عرض")[lang]}
                   </a>
                   <button
                     type="button"
@@ -349,7 +348,7 @@ export function LessonBilingualFileFields({
                     className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 disabled:opacity-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    {L("Remove", "إزالة")[locale]}
+                    {L("Remove", "إزالة")[lang]}
                   </button>
                 </div>
               )}

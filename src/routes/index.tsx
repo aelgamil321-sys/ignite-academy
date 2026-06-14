@@ -34,7 +34,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { tr, dir, lang } = useI18n();
+  const { tr, dir, lang, bi } = useI18n();
   const { lessons } = useCMS();
   const stats = useCMSStats();
   const announcements = useAllAnnouncements();
@@ -219,8 +219,8 @@ function Home() {
                   <div className="h-11 w-11 rounded-xl bg-primary flex items-center justify-center text-foreground font-display text-lg">
                     {i + 1}
                   </div>
-                  <div className="mt-4 font-display text-xl text-foreground group-hover:text-primary">{c.name[locale]}</div>
-                  <div className="mt-1 text-sm text-foreground/65">{c.desc[locale]}</div>
+                  <div className="mt-4 font-display text-xl text-foreground group-hover:text-primary">{bi(c.name)}</div>
+                  <div className="mt-1 text-sm text-foreground/65">{bi(c.desc)}</div>
                 </Link>
               ))}
             </div>
@@ -246,9 +246,9 @@ function Home() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">
-                      {gradeDisplayName(l.grade, lang)} · {l.unit[locale]}
+                      {gradeDisplayName(l.grade, lang)} · {bi(l.unit)}
                     </div>
-                    <div className="mt-1 font-display text-xl text-foreground truncate">{l.title[locale]}</div>
+                    <div className="mt-1 font-display text-xl text-foreground truncate">{bi(l.title)}</div>
                     <div className="text-xs text-foreground/60 mt-1">{l.quiz.length} {tr("questions")} · {tr("lesson_meta")}</div>
                   </div>
                   <ArrowRight className={`h-5 w-5 text-foreground/40 group-hover:text-primary transition-all ${dir === "rtl" ? "rotate-180 group-hover:-translate-x-1" : "group-hover:translate-x-1"}`} />
@@ -274,9 +274,9 @@ function Home() {
                       <div className="flex items-center gap-2 text-xs">
                         <Calendar className="h-3.5 w-3.5 text-primary" />
                         <span className="opacity-80">{a.date}</span>
-                        <span className="ms-auto rounded-full bg-primary/20 text-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{a.tag[locale]}</span>
+                        <span className="ms-auto rounded-full bg-primary/20 text-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{bi(a.tag)}</span>
                       </div>
-                      <div className="mt-2 font-medium leading-snug">{a.title[locale]}</div>
+                      <div className="mt-2 font-medium leading-snug">{bi(a.title)}</div>
                     </Link>
                   </li>
                 ))}

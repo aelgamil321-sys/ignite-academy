@@ -100,13 +100,13 @@ function StudentDashboardPage({
   parentLinkCode: string | null;
 }) {
   const navigate = useNavigate();
-  const { tr, lang } = useI18n();
+  const { tr, lang, bi } = useI18n();
   const [progress, setProgress] = useState<StudentProgressData | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const myGrade = grades.find((g) => g.slug === gradeSlug) ?? grades.find((g) => g.slug === "8")!;
-  const gradeName = gradeDisplayName(myGrade.slug, lang) || myGrade.name[locale];
+  const gradeName = gradeDisplayName(myGrade.slug, lang) || bi(myGrade.name);
 
   useEffect(() => {
     let active = true;
