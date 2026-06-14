@@ -157,10 +157,13 @@ export const t = {
   ft_built: { en: "Built with sincerity ✦ بسم الله", ar: "صُنع بإخلاص ✦ بسم الله" },
   ft_online: { en: "Online Worldwide", ar: "عبر الإنترنت حول العالم" },
 
-  // Ask Mr. Ahmed
-  ask_label: { en: "Ask Mr. Ahmed", ar: "اسأل الأستاذ أحمد" },
-  ask_sub: { en: "AI Islamic Studies Assistant", ar: "مساعد الدراسات الإسلامية الذكي" },
-  ask_greet: { en: "Peace be upon you! I'm Mr. Ahmed. Ask me anything about your Islamic Studies lessons — Quran, Hadith, Fiqh, Seerah, and more.", ar: "السلام عليكم! أنا الأستاذ أحمد. اسألني أي سؤال عن دروس الدراسات الإسلامية — القرآن والحديث والفقه والسيرة وغيرها." },
+  // Ask Ignite AI
+  ask_label: { en: "Ask Ignite", ar: "اسأل اجنايت" },
+  ask_sub: { en: "Ignite Islamic Academy AI Assistant", ar: "مساعد أكاديمية اجنايت الإسلامية الذكي" },
+  ask_greet: {
+    en: "Peace be upon you! I'm Ask Ignite. Ask me anything about your Islamic Studies lessons — Quran, Hadith, Fiqh, Seerah, and more.",
+    ar: "السلام عليكم! أنا مساعد اجنايت. اسألني أي سؤال عن دروس الدراسات الإسلامية — القرآن والحديث والفقه والسيرة وغيرها.",
+  },
   ask_placeholder: { en: "Type your question...", ar: "اكتب سؤالك..." },
 
   switch_lang: { en: "العربية", ar: "English" },
