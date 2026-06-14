@@ -39,42 +39,19 @@ function profileToLinkedChild(profile: StudentProfileRow, fallbackName = ""): Pa
   };
 }
 
-export async function fetchParentLinkedChildren(parentUserId: string): Promise<ParentChildrenResult> {
-  const { data: links, error: linksError } = await supabase
-    .from("parent_student_links")
-    .select("student_user_id")
-    .eq("parent_user_id", parentUserId)
-    .order("created_at", { ascending: true });
+function isMissingParentStudentLinksTable(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (
+    lower.includes("parent_student_links") &&
+    (lower.includes("does not exist") ||
+      lower.includes("could not find") ||
+      lower.includes("schema cache") ||
+      lower.includes("pgrst205") ||
+      lower.includes("42p01"))
+  );
+}
 
-  if (linksError) {
-    return { children: [], error: linksError.message, linkError: null, usesExplicitLinks: false };
-  }
-
-  if ((links ?? []).length > 0) {
-    const studentIds = links.map((link) => link.student_user_id);
-    const { data: profiles, error: profilesError } = await supabase
-      .from("profiles")
-      .select("user_id, full_name, arabic_name, english_name, grade")
-      .in("user_id", studentIds);
-
-    if (profilesError) {
-      return { children: [], error: profilesError.message, linkError: null, usesExplicitLinks: true };
-    }
-
-    const profileById = new Map((profiles ?? []).map((profile) => [profile.user_id, profile]));
-    const children = studentIds
-      .map((studentUserId) => profileById.get(studentUserId))
-      .filter((profile): profile is StudentProfileRow => Boolean(profile))
-      .map((profile) => profileToLinkedChild(profile));
-
-    return {
-      children,
-      error: null,
-      linkError: children.length === 0 ? "none" : null,
-      usesExplicitLinks: true,
-    };
-  }
-
+async function fetchLegacyParentChildren(parentUserId: string): Promise<ParentChildrenResult> {
   const { data: parentProfile, error: parentProfileError } = await supabase
     .from("parent_profiles")
     .select("student_name, student_grade")
@@ -122,6 +99,48 @@ export async function fetchParentLinkedChildren(parentUserId: string): Promise<P
     linkError: null,
     usesExplicitLinks: false,
   };
+}
+
+export async function fetchParentLinkedChildren(parentUserId: string): Promise<ParentChildrenResult> {
+  const { data: links, error: linksError } = await supabase
+    .from("parent_student_links")
+    .select("student_user_id")
+    .eq("parent_user_id", parentUserId)
+    .order("created_at", { ascending: true });
+
+  if (linksError) {
+    if (isMissingParentStudentLinksTable(linksError.message)) {
+      return fetchLegacyParentChildren(parentUserId);
+    }
+    return { children: [], error: linksError.message, linkError: null, usesExplicitLinks: false };
+  }
+
+  if ((links ?? []).length > 0) {
+    const studentIds = links.map((link) => link.student_user_id);
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("user_id, full_name, arabic_name, english_name, grade")
+      .in("user_id", studentIds);
+
+    if (profilesError) {
+      return { children: [], error: profilesError.message, linkError: null, usesExplicitLinks: true };
+    }
+
+    const profileById = new Map((profiles ?? []).map((profile) => [profile.user_id, profile]));
+    const children = studentIds
+      .map((studentUserId) => profileById.get(studentUserId))
+      .filter((profile): profile is StudentProfileRow => Boolean(profile))
+      .map((profile) => profileToLinkedChild(profile));
+
+    return {
+      children,
+      error: null,
+      linkError: children.length === 0 ? "none" : null,
+      usesExplicitLinks: true,
+    };
+  }
+
+  return fetchLegacyParentChildren(parentUserId);
 }
 
 export function parentSelectedChildStorageKey(parentUserId: string): string {
