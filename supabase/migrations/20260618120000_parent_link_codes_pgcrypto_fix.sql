@@ -42,6 +42,19 @@ BEGIN
 END;
 $$;
 
+-- Ensure column and helpers exist (idempotent if prior migration partially applied).
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS parent_link_code text;
+
+CREATE OR REPLACE FUNCTION public.normalize_parent_link_code(p_code text)
+RETURNS text
+LANGUAGE sql
+IMMUTABLE
+SET search_path = public
+AS $$
+  SELECT upper(regexp_replace(COALESCE(p_code, ''), '[^A-Z0-9]', '', 'g'));
+$$;
+
 CREATE OR REPLACE FUNCTION public.generate_parent_link_code(p_grade text DEFAULT '')
 RETURNS text
 LANGUAGE plpgsql
@@ -71,19 +84,6 @@ BEGIN
 
   RETURN candidate;
 END;
-$$;
-
--- Ensure column and helpers exist (idempotent if prior migration partially applied).
-ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS parent_link_code text;
-
-CREATE OR REPLACE FUNCTION public.normalize_parent_link_code(p_code text)
-RETURNS text
-LANGUAGE sql
-IMMUTABLE
-SET search_path = public
-AS $$
-  SELECT upper(regexp_replace(COALESCE(p_code, ''), '[^A-Z0-9]', '', 'g'));
 $$;
 
 DROP INDEX IF EXISTS idx_profiles_parent_link_code_unique;
@@ -157,5 +157,105 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION public.get_my_parent_link_code() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.get_my_parent_link_code() TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.redeem_parent_link_code(p_code text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  normalized_code text;
+  student_uid uuid;
+  parent_uid uuid;
+  already_linked boolean;
+BEGIN
+  parent_uid := auth.uid();
+  IF parent_uid IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_authenticated');
+  END IF;
+
+  IF NOT public.has_role(parent_uid, 'parent') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_parent');
+  END IF;
+
+  normalized_code := public.normalize_parent_link_code(p_code);
+  IF normalized_code = '' OR length(normalized_code) < 7 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_code');
+  END IF;
+
+  SELECT p.user_id
+  INTO student_uid
+  FROM public.profiles p
+  WHERE public.normalize_parent_link_code(p.parent_link_code) = normalized_code
+  LIMIT 1;
+
+  IF student_uid IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_code');
+  END IF;
+
+  IF student_uid = parent_uid THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_code');
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.parent_student_links psl
+    WHERE psl.parent_user_id = parent_uid
+      AND psl.student_user_id = student_uid
+  )
+  INTO already_linked;
+
+  INSERT INTO public.parent_student_links (parent_user_id, student_user_id)
+  VALUES (parent_uid, student_uid)
+  ON CONFLICT (parent_user_id, student_user_id) DO NOTHING;
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'student_user_id', student_uid,
+    'already_linked', already_linked
+  );
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.redeem_parent_link_code(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.redeem_parent_link_code(text) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_regenerate_parent_link_code(p_student_user_id uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  new_code text;
+  student_grade text;
+BEGIN
+  IF NOT public.has_role(auth.uid(), 'admin') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_admin');
+  END IF;
+
+  SELECT grade
+  INTO student_grade
+  FROM public.profiles
+  WHERE user_id = p_student_user_id;
+
+  IF student_grade IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'student_not_found');
+  END IF;
+
+  new_code := public.generate_parent_link_code(student_grade);
+
+  UPDATE public.profiles
+  SET parent_link_code = new_code,
+      updated_at = now()
+  WHERE user_id = p_student_user_id;
+
+  RETURN jsonb_build_object('ok', true, 'parent_link_code', new_code);
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.admin_regenerate_parent_link_code(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_regenerate_parent_link_code(uuid) TO authenticated;
 
 REVOKE EXECUTE ON FUNCTION public.parent_link_random_suffix() FROM PUBLIC, anon, authenticated;
