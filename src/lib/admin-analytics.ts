@@ -13,6 +13,9 @@ import {
 } from "@/lib/student-academics";
 
 export const ANALYTICS_UNSET_KEY = "__unset__";
+export const AT_RISK_SCORE_THRESHOLD = 60;
+export const TOP_STUDENTS_LIMIT = 25;
+export const TOP_SECTIONS_LIMIT = 10;
 
 export type AnalyticsFilters = {
   grade: string;
@@ -30,6 +33,64 @@ export type AnalyticsGroupRow = {
   certificatesEarned: number;
 };
 
+export type StudentLeaderboardRow = {
+  rank: number;
+  userId: string;
+  arabicName: string;
+  englishName: string;
+  profilePhotoPath: string | null;
+  gradeSlug: string;
+  gradeLabelEn: string;
+  gradeLabelAr: string;
+  section: StudentSection | null;
+  islamicGroup: IslamicGroup | null;
+  averageScorePct: number | null;
+  certificatesEarned: number;
+};
+
+export type SectionLeaderboardRow = {
+  rank: number;
+  section: StudentSection | null;
+  labelEn: string;
+  labelAr: string;
+  studentCount: number;
+  averageScorePct: number | null;
+  certificatesEarned: number;
+};
+
+export type IslamicGroupCard = {
+  group: IslamicGroup;
+  labelEn: string;
+  labelAr: string;
+  studentCount: number;
+  averageScorePct: number | null;
+  certificatesEarned: number;
+};
+
+export type LeadingInsightItem = {
+  labelEn: string;
+  labelAr: string;
+  averageScorePct: number;
+};
+
+export type LeadingInsights = {
+  grade: LeadingInsightItem | null;
+  section: LeadingInsightItem | null;
+  islamicGroup: LeadingInsightItem | null;
+};
+
+export type AtRiskStudentRow = {
+  userId: string;
+  nameEn: string;
+  nameAr: string;
+  gradeLabelEn: string;
+  gradeLabelAr: string;
+  section: StudentSection | null;
+  islamicGroup: IslamicGroup | null;
+  averageScorePct: number | null;
+  certificatesEarned: number;
+};
+
 export type AdminAnalyticsSnapshot = {
   byGrade: AnalyticsGroupRow[];
   bySection: AnalyticsGroupRow[];
@@ -40,18 +101,42 @@ export type AdminAnalyticsSnapshot = {
     certificateCount: number;
     averageScorePct: number | null;
   };
+  topStudents: StudentLeaderboardRow[];
+  topSections: SectionLeaderboardRow[];
+  islamicGroupCards: IslamicGroupCard[];
+  leading: LeadingInsights;
+  atRiskStudents: AtRiskStudentRow[];
 };
 
 type StudentRow = {
   user_id: string;
+  full_name: string;
+  arabic_name: string;
+  english_name: string;
+  profile_photo_path: string | null;
   grade: string;
   section: string | null;
   islamic_group: string | null;
 };
 
+type StudentPerformance = {
+  student: StudentRow;
+  averageScorePct: number | null;
+  certificatesEarned: number;
+  submissionCount: number;
+};
+
 function averageRounded(values: number[]): number | null {
   if (values.length === 0) return null;
   return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+}
+
+function countByStudent<T extends { student_id: string }>(rows: T[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    counts.set(row.student_id, (counts.get(row.student_id) ?? 0) + 1);
+  }
+  return counts;
 }
 
 function matchesFilters(student: StudentRow, filters: AnalyticsFilters): boolean {
@@ -116,6 +201,187 @@ function buildGroups(
   });
 }
 
+function computeStudentPerformance(
+  filteredStudents: StudentRow[],
+  filteredSubmissions: { student_id: string; percentage: number }[],
+  certificateCounts: Map<string, number>,
+): StudentPerformance[] {
+  const submissionsByStudent = new Map<string, number[]>();
+
+  for (const submission of filteredSubmissions) {
+    const bucket = submissionsByStudent.get(submission.student_id);
+    if (bucket) bucket.push(submission.percentage);
+    else submissionsByStudent.set(submission.student_id, [submission.percentage]);
+  }
+
+  return filteredStudents.map((student) => {
+    const percentages = submissionsByStudent.get(student.user_id) ?? [];
+    return {
+      student,
+      averageScorePct: averageRounded(percentages),
+      certificatesEarned: certificateCounts.get(student.user_id) ?? 0,
+      submissionCount: percentages.length,
+    };
+  });
+}
+
+function pickBestGroup(rows: AnalyticsGroupRow[]): LeadingInsightItem | null {
+  const eligible = rows.filter(
+    (row) =>
+      row.key !== ANALYTICS_UNSET_KEY &&
+      row.studentCount > 0 &&
+      row.averageScorePct !== null,
+  );
+
+  if (eligible.length === 0) return null;
+
+  const best = [...eligible].sort((a, b) => {
+    if (b.averageScorePct! !== a.averageScorePct!) {
+      return b.averageScorePct! - a.averageScorePct!;
+    }
+    return b.certificatesEarned - a.certificatesEarned;
+  })[0];
+
+  return {
+    labelEn: best.labelEn,
+    labelAr: best.labelAr,
+    averageScorePct: best.averageScorePct!,
+  };
+}
+
+function buildTopStudents(performances: StudentPerformance[]): StudentLeaderboardRow[] {
+  const ranked = [...performances]
+    .filter((row) => row.submissionCount > 0 && row.averageScorePct !== null)
+    .sort((a, b) => {
+      if (b.averageScorePct! !== a.averageScorePct!) {
+        return b.averageScorePct! - a.averageScorePct!;
+      }
+      if (b.certificatesEarned !== a.certificatesEarned) {
+        return b.certificatesEarned - a.certificatesEarned;
+      }
+      return b.submissionCount - a.submissionCount;
+    })
+    .slice(0, TOP_STUDENTS_LIMIT);
+
+  return ranked.map((row, index) => {
+    const gradeSlug = normalizeGradeSlug(row.student.grade) || ANALYTICS_UNSET_KEY;
+    return {
+      rank: index + 1,
+      userId: row.student.user_id,
+      arabicName:
+        row.student.arabic_name?.trim() ||
+        row.student.full_name?.trim() ||
+        row.student.english_name?.trim() ||
+        "—",
+      englishName:
+        row.student.english_name?.trim() ||
+        row.student.full_name?.trim() ||
+        row.student.arabic_name?.trim() ||
+        "—",
+      profilePhotoPath: row.student.profile_photo_path,
+      gradeSlug,
+      gradeLabelEn:
+        gradeSlug === ANALYTICS_UNSET_KEY
+          ? "Not set"
+          : gradeDisplayName(gradeSlug, "en"),
+      gradeLabelAr:
+        gradeSlug === ANALYTICS_UNSET_KEY
+          ? "غير محدد"
+          : gradeDisplayName(gradeSlug, "ar"),
+      section: normalizeStudentSection(row.student.section),
+      islamicGroup: normalizeIslamicGroup(row.student.islamic_group),
+      averageScorePct: row.averageScorePct,
+      certificatesEarned: row.certificatesEarned,
+    };
+  });
+}
+
+function buildTopSections(bySection: AnalyticsGroupRow[]): SectionLeaderboardRow[] {
+  const ranked = [...bySection]
+    .filter(
+      (row) =>
+        row.key !== ANALYTICS_UNSET_KEY &&
+        row.studentCount > 0 &&
+        row.averageScorePct !== null,
+    )
+    .sort((a, b) => {
+      if (b.averageScorePct! !== a.averageScorePct!) {
+        return b.averageScorePct! - a.averageScorePct!;
+      }
+      return b.certificatesEarned - a.certificatesEarned;
+    })
+    .slice(0, TOP_SECTIONS_LIMIT);
+
+  return ranked.map((row, index) => ({
+    rank: index + 1,
+    section: row.key as StudentSection,
+    labelEn: row.labelEn,
+    labelAr: row.labelAr,
+    studentCount: row.studentCount,
+    averageScorePct: row.averageScorePct,
+    certificatesEarned: row.certificatesEarned,
+  }));
+}
+
+function buildIslamicGroupCards(byIslamicGroup: AnalyticsGroupRow[]): IslamicGroupCard[] {
+  const rowByKey = new Map(byIslamicGroup.map((row) => [row.key, row]));
+
+  return ISLAMIC_GROUPS.map((group) => {
+    const row = rowByKey.get(group);
+    return {
+      group,
+      labelEn: islamicGroupLabel(group, "en"),
+      labelAr: islamicGroupLabel(group, "ar"),
+      studentCount: row?.studentCount ?? 0,
+      averageScorePct: row?.averageScorePct ?? null,
+      certificatesEarned: row?.certificatesEarned ?? 0,
+    };
+  });
+}
+
+function buildAtRiskStudents(performances: StudentPerformance[]): AtRiskStudentRow[] {
+  return performances
+    .filter(
+      (row) =>
+        row.certificatesEarned === 0 ||
+        (row.averageScorePct !== null && row.averageScorePct < AT_RISK_SCORE_THRESHOLD),
+    )
+    .sort((a, b) => {
+      const aScore = a.averageScorePct ?? -1;
+      const bScore = b.averageScorePct ?? -1;
+      if (aScore !== bScore) return aScore - bScore;
+      return a.certificatesEarned - b.certificatesEarned;
+    })
+    .map((row) => {
+      const gradeSlug = normalizeGradeSlug(row.student.grade) || ANALYTICS_UNSET_KEY;
+      return {
+        userId: row.student.user_id,
+        nameEn:
+          row.student.english_name?.trim() ||
+          row.student.full_name?.trim() ||
+          row.student.arabic_name?.trim() ||
+          "—",
+        nameAr:
+          row.student.arabic_name?.trim() ||
+          row.student.full_name?.trim() ||
+          row.student.english_name?.trim() ||
+          "—",
+        gradeLabelEn:
+          gradeSlug === ANALYTICS_UNSET_KEY
+            ? "Not set"
+            : gradeDisplayName(gradeSlug, "en"),
+        gradeLabelAr:
+          gradeSlug === ANALYTICS_UNSET_KEY
+            ? "غير محدد"
+            : gradeDisplayName(gradeSlug, "ar"),
+        section: normalizeStudentSection(row.student.section),
+        islamicGroup: normalizeIslamicGroup(row.student.islamic_group),
+        averageScorePct: row.averageScorePct,
+        certificatesEarned: row.certificatesEarned,
+      };
+    });
+}
+
 export function buildAdminAnalytics(
   students: StudentRow[],
   submissions: { student_id: string; percentage: number }[],
@@ -126,6 +392,12 @@ export function buildAdminAnalytics(
   const studentIds = new Set(filteredStudents.map((student) => student.user_id));
   const filteredSubmissions = submissions.filter((row) => studentIds.has(row.student_id));
   const filteredCertificates = certificates.filter((row) => studentIds.has(row.student_id));
+  const certificateCounts = countByStudent(filteredCertificates);
+  const performances = computeStudentPerformance(
+    filteredStudents,
+    filteredSubmissions,
+    certificateCounts,
+  );
 
   const gradeOrder = grades.map((grade) => grade.slug);
 
@@ -202,6 +474,15 @@ export function buildAdminAnalytics(
       certificateCount: filteredCertificates.length,
       averageScorePct: averageRounded(filteredSubmissions.map((row) => row.percentage)),
     },
+    topStudents: buildTopStudents(performances),
+    topSections: buildTopSections(bySection),
+    islamicGroupCards: buildIslamicGroupCards(byIslamicGroup),
+    leading: {
+      grade: pickBestGroup(byGrade),
+      section: pickBestGroup(bySection),
+      islamicGroup: pickBestGroup(byIslamicGroup),
+    },
+    atRiskStudents: buildAtRiskStudents(performances),
   };
 }
 
@@ -210,7 +491,9 @@ export async function fetchAdminAnalytics(filters: AnalyticsFilters): Promise<{
   error: string | null;
 }> {
   const [profilesRes, rolesRes, submissionsRes, certificatesRes] = await Promise.all([
-    supabase.from("profiles").select("user_id, grade, section, islamic_group"),
+    supabase.from("profiles").select(
+      "user_id, full_name, arabic_name, english_name, profile_photo_path, grade, section, islamic_group",
+    ),
     supabase.from("user_roles").select("user_id, role"),
     supabase.from("lesson_quiz_submissions").select("student_id, percentage"),
     supabase.from("quiz_certificates").select("student_id"),
