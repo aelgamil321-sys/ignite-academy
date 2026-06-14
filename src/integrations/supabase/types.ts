@@ -338,7 +338,9 @@ export type Database = {
           full_name: string
           grade: string
           id: string
+          islamic_group: string | null
           parent_link_code: string | null
+          section: string | null
           updated_at: string
           user_id: string
         }
@@ -350,7 +352,9 @@ export type Database = {
           full_name?: string
           grade?: string
           id?: string
+          islamic_group?: string | null
           parent_link_code?: string | null
+          section?: string | null
           updated_at?: string
           user_id: string
         }
@@ -362,7 +366,9 @@ export type Database = {
           full_name?: string
           grade?: string
           id?: string
+          islamic_group?: string | null
           parent_link_code?: string | null
+          section?: string | null
           updated_at?: string
           user_id?: string
         }

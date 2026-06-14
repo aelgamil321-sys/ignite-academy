@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, Save, User } from "lucide-react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
 import { ParentLinkCodeCard } from "@/components/parent-link-code-card";
+import { StudentAcademicFields } from "@/components/student-academic-fields";
 import { useI18n } from "@/lib/i18n";
 import { fetchMyParentLinkCode } from "@/lib/parent-link-code";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +14,7 @@ import {
   saveStudentProfile,
   type StudentProfileForm,
 } from "@/lib/student-profile";
+import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 
 export const Route = createFileRoute("/student/profile")({
   head: () => ({
@@ -36,7 +38,11 @@ function StudentProfilePage() {
     full_name: "",
     arabic_name: "",
     english_name: "",
+    section: null,
+    islamic_group: null,
   });
+  const [section, setSection] = useState<StudentSection | "">("");
+  const [islamicGroup, setIslamicGroup] = useState<IslamicGroup | "">("");
   const [parentLinkCode, setParentLinkCode] = useState<string | null>(null);
 
   const T = {
@@ -94,7 +100,11 @@ function StudentProfilePage() {
           english_name:
             profile?.english_name?.trim() ||
             (typeof meta.english_name === "string" ? meta.english_name.trim() : ""),
+          section: profile?.section ?? null,
+          islamic_group: profile?.islamic_group ?? null,
         });
+        setSection(profile?.section ?? "");
+        setIslamicGroup(profile?.islamic_group ?? "");
         setParentLinkCode(await fetchMyParentLinkCode());
       } catch (error) {
         console.error("[student profile load]", error);
@@ -131,12 +141,20 @@ function StudentProfilePage() {
       const user = authData.user;
       if (!user) throw new Error(lang === "ar" ? "يرجى تسجيل الدخول" : "Please sign in");
 
-      const updated = await saveStudentProfile(user.id, email, form);
+      const updated = await saveStudentProfile(user.id, email, {
+        ...form,
+        section: section || null,
+        islamic_group: islamicGroup || null,
+      });
       setForm({
         full_name: updated.full_name,
         arabic_name: updated.arabic_name,
         english_name: updated.english_name,
+        section: updated.section,
+        islamic_group: updated.islamic_group,
       });
+      setSection(updated.section ?? "");
+      setIslamicGroup(updated.islamic_group ?? "");
       toast.success(T.saved);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
@@ -240,6 +258,14 @@ function StudentProfilePage() {
                 className="mt-1 w-full rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground cursor-not-allowed"
               />
             </div>
+
+            <StudentAcademicFields
+              lang={lang}
+              section={section}
+              islamicGroup={islamicGroup}
+              onSectionChange={setSection}
+              onIslamicGroupChange={setIslamicGroup}
+            />
 
             <button
               type="submit"

@@ -7,6 +7,7 @@ import { grades } from "@/lib/curriculum";
 import { useCMS, type CustomLesson, type CustomVideo, type CustomFile, type CustomArticle, type FileType, type ArticleCategory } from "@/lib/cms";
 import { SUBJECT_CATEGORIES, type SubjectCategory } from "@/lib/categories";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
+import { formatStudentAcademics, normalizeIslamicGroup, normalizeStudentSection } from "@/lib/student-academics";
 import type { QuizQuestion } from "@/lib/curriculum";
 import { quizQuestionsForForm, serializeQuizForSave } from "@/lib/lesson-quiz";
 import {
@@ -1003,7 +1004,16 @@ function Empty({ lang }: { lang: "en" | "ar" }) {
 
 function ManageUsers() {
   const { lang } = useI18n();
-  const [profiles, setProfiles] = useState<Array<{ id: string; user_id: string; full_name: string; email: string; grade: string; parent_link_code: string | null }>>([]);
+  const [profiles, setProfiles] = useState<Array<{
+    id: string;
+    user_id: string;
+    full_name: string;
+    email: string;
+    grade: string;
+    section: string | null;
+    islamic_group: string | null;
+    parent_link_code: string | null;
+  }>>([]);
   const [roles, setRoles] = useState<Array<{ user_id: string; role: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [promoteEmail, setPromoteEmail] = useState("");
@@ -1012,7 +1022,7 @@ function ManageUsers() {
     setLoading(true);
     try {
       const [p, r] = await Promise.all([
-        supabase.from("profiles").select("id, user_id, full_name, email, grade, parent_link_code").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, user_id, full_name, email, grade, section, islamic_group, parent_link_code").order("created_at", { ascending: false }),
         supabase.from("user_roles").select("user_id, role"),
       ]);
       if (p.error) throw p.error;
@@ -1104,6 +1114,18 @@ function ManageUsers() {
                 <div className="font-medium">{p.full_name || p.email}</div>
                 <div className="text-xs text-muted-foreground">
                   {p.email} · {L("Grade", "الصف")[lang]}: {p.grade || "—"}
+                  {(p.section || p.islamic_group) ? (
+                    <span>
+                      {" · "}
+                      {formatStudentAcademics(
+                        {
+                          section: normalizeStudentSection(p.section),
+                          islamic_group: normalizeIslamicGroup(p.islamic_group),
+                        },
+                        lang,
+                      )}
+                    </span>
+                  ) : null}
                   {p.parent_link_code ? (
                     <span className="ms-2 font-mono text-primary"> · {p.parent_link_code}</span>
                   ) : null}
@@ -1142,7 +1164,14 @@ function ManageParentLinks() {
   const { lang } = useI18n();
   const [loading, setLoading] = useState(true);
   const [parents, setParents] = useState<Array<{ user_id: string; full_name: string; email: string }>>([]);
-  const [students, setStudents] = useState<Array<{ user_id: string; full_name: string; email: string; grade: string }>>([]);
+  const [students, setStudents] = useState<Array<{
+    user_id: string;
+    full_name: string;
+    email: string;
+    grade: string;
+    section: string | null;
+    islamic_group: string | null;
+  }>>([]);
   const [links, setLinks] = useState<Array<{ id: string; parent_user_id: string; student_user_id: string }>>([]);
   const [selectedParentId, setSelectedParentId] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState("");
@@ -1152,7 +1181,7 @@ function ManageParentLinks() {
     try {
       const [parentProfilesRes, profilesRes, linksRes, rolesRes] = await Promise.all([
         supabase.from("parent_profiles").select("user_id, full_name, email").order("full_name"),
-        supabase.from("profiles").select("user_id, full_name, email, grade").order("full_name"),
+        supabase.from("profiles").select("user_id, full_name, email, grade, section, islamic_group").order("full_name"),
         supabase.from("parent_student_links").select("id, parent_user_id, student_user_id"),
         supabase.from("user_roles").select("user_id, role"),
       ]);
@@ -1256,6 +1285,15 @@ function ManageParentLinks() {
                   {students.map((student) => (
                     <option key={student.user_id} value={student.user_id}>
                       {student.full_name || student.email} · {L("Grade", "الصف")[lang]} {student.grade || "—"}
+                      {(student.section || student.islamic_group)
+                        ? ` · ${formatStudentAcademics(
+                            {
+                              section: normalizeStudentSection(student.section),
+                              islamic_group: normalizeIslamicGroup(student.islamic_group),
+                            },
+                            lang,
+                          )}`
+                        : ""}
                     </option>
                   ))}
                 </select>
@@ -1292,6 +1330,18 @@ function ManageParentLinks() {
                   <div className="text-xs text-muted-foreground">
                     {parent?.full_name || parent?.email || link.parent_user_id}
                     {student?.grade ? ` · ${L("Grade", "الصف")[lang]}: ${student.grade}` : ""}
+                    {(student?.section || student?.islamic_group) ? (
+                      <span>
+                        {" · "}
+                        {formatStudentAcademics(
+                          {
+                            section: normalizeStudentSection(student.section),
+                            islamic_group: normalizeIslamicGroup(student.islamic_group),
+                          },
+                          lang,
+                        )}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
                 <button

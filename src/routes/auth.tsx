@@ -9,6 +9,8 @@ import { redeemParentLinkCode } from "@/lib/parent-link-code";
 import { toast } from "sonner";
 import { GraduationCap, LogIn, UserPlus, AlertCircle, Users } from "lucide-react";
 import { grades } from "@/lib/curriculum";
+import { StudentAcademicFields } from "@/components/student-academic-fields";
+import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -38,6 +40,8 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [grade, setGrade] = useState(grades.find((g) => g.slug === "8")?.slug ?? grades[0]?.slug ?? "");
+  const [section, setSection] = useState<StudentSection | "">("");
+  const [islamicGroup, setIslamicGroup] = useState<IslamicGroup | "">("");
   const [busy, setBusy] = useState(false);
   const [signupAlert, setSignupAlert] = useState<string | null>(null);
 
@@ -125,6 +129,8 @@ function AuthPage() {
       const submitArabicName = String(fd.get("arabic_name") ?? arabicName).trim();
       const submitEnglishName = String(fd.get("english_name") ?? englishName).trim();
       const submitGrade = String(fd.get("grade") ?? grade).trim();
+      const submitSection = String(fd.get("section") ?? section).trim();
+      const submitIslamicGroup = String(fd.get("islamic_group") ?? islamicGroup).trim();
 
       if (!submitEmail || !submitPassword) {
         toast.error(lang === "ar"
@@ -139,6 +145,14 @@ function AuthPage() {
             toast.error(lang === "ar" ? "يرجى إدخال الاسم الكامل." : "Please enter your full name.");
             return;
           }
+          if (!submitSection) {
+            toast.error(lang === "ar" ? "يرجى اختيار الشعبة." : "Please select your section.");
+            return;
+          }
+          if (!submitIslamicGroup) {
+            toast.error(lang === "ar" ? "يرجى اختيار المجموعة الإسلامية." : "Please select your Islamic group.");
+            return;
+          }
 
           const { data, error } = await supabase.auth.signUp({
             email: submitEmail,
@@ -151,6 +165,8 @@ function AuthPage() {
                 english_name: submitEnglishName || undefined,
                 role_intent: "student",
                 grade: submitGrade,
+                section: submitSection,
+                islamic_group: submitIslamicGroup,
               },
             },
           });
@@ -404,6 +420,14 @@ function AuthPage() {
                     ))}
                   </select>
                 </div>
+                <StudentAcademicFields
+                  lang={lang}
+                  section={section}
+                  islamicGroup={islamicGroup}
+                  onSectionChange={setSection}
+                  onIslamicGroupChange={setIslamicGroup}
+                  required
+                />
               </>
             )}
             {mode === "signup" && accountType === "parent" && (

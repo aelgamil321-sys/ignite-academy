@@ -13,6 +13,7 @@ import {
   type QuizSubmissionStatus,
 } from "@/lib/lesson-quiz";
 import type { QuizQuestion, Bi } from "@/lib/curriculum";
+import { formatStudentAcademics, normalizeIslamicGroup, normalizeStudentSection } from "@/lib/student-academics";
 
 const L = (en: string, ar: string) => ({ en, ar });
 
@@ -31,7 +32,14 @@ type SubmissionRow = {
   submitted_at: string;
 };
 
-type ProfileRow = { user_id: string; email: string | null; full_name: string | null };
+type ProfileRow = {
+  user_id: string;
+  email: string | null;
+  full_name: string | null;
+  grade: string | null;
+  section: string | null;
+  islamic_group: string | null;
+};
 
 export const Route = createFileRoute("/admin/quiz-submissions/")({
   head: () => ({
@@ -70,7 +78,7 @@ function AdminQuizSubmissionsPage() {
         .from("lesson_quiz_submissions")
         .select("*")
         .order("submitted_at", { ascending: false }),
-      supabase.from("profiles").select("user_id, email, full_name"),
+      supabase.from("profiles").select("user_id, email, full_name, grade, section, islamic_group"),
     ]);
 
     if (subRes.error) {
@@ -246,6 +254,19 @@ function AdminQuizSubmissionsPage() {
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {profile?.full_name || profile?.email || row.student_id}
+                      {profile?.grade ? ` · ${L("Grade", "الصف")[lang]} ${profile.grade}` : ""}
+                      {(profile?.section || profile?.islamic_group) ? (
+                        <span>
+                          {" · "}
+                          {formatStudentAcademics(
+                            {
+                              section: normalizeStudentSection(profile.section),
+                              islamic_group: normalizeIslamicGroup(profile.islamic_group),
+                            },
+                            lang,
+                          )}
+                        </span>
+                      ) : null}
                       {" · "}
                       {new Date(row.submitted_at).toLocaleString(lang === "ar" ? "ar" : "en")}
                     </div>

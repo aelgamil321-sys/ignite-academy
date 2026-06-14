@@ -1,4 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
+import {
+  normalizeIslamicGroup,
+  normalizeStudentSection,
+  type IslamicGroup,
+  type StudentSection,
+} from "@/lib/student-academics";
 
 export type StudentProfileRow = {
   user_id: string;
@@ -7,12 +13,16 @@ export type StudentProfileRow = {
   english_name: string;
   email: string;
   grade: string;
+  section: StudentSection | null;
+  islamic_group: IslamicGroup | null;
 };
 
 export type StudentProfileForm = {
   full_name: string;
   arabic_name: string;
   english_name: string;
+  section?: StudentSection | null;
+  islamic_group?: IslamicGroup | null;
 };
 
 export const CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE =
@@ -22,6 +32,31 @@ export type StudentProfileCertificateFields = Pick<
   StudentProfileRow,
   "full_name" | "arabic_name" | "english_name"
 >;
+
+const profileSelect =
+  "user_id, full_name, arabic_name, english_name, email, grade, section, islamic_group";
+
+function mapProfileRow(data: {
+  user_id: string;
+  full_name: string | null;
+  arabic_name: string | null;
+  english_name: string | null;
+  email: string | null;
+  grade: string | null;
+  section: string | null;
+  islamic_group: string | null;
+}): StudentProfileRow {
+  return {
+    user_id: data.user_id,
+    full_name: data.full_name ?? "",
+    arabic_name: data.arabic_name ?? "",
+    english_name: data.english_name ?? "",
+    email: data.email ?? "",
+    grade: data.grade ?? "",
+    section: normalizeStudentSection(data.section),
+    islamic_group: normalizeIslamicGroup(data.islamic_group),
+  };
+}
 
 /** Certificate names require both English and Arabic names on the student profile. */
 export function isStudentProfileComplete(
@@ -33,7 +68,7 @@ export function isStudentProfileComplete(
 export async function fetchStudentProfile(userId: string): Promise<StudentProfileRow | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("user_id, full_name, arabic_name, english_name, email, grade")
+    .select(profileSelect)
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -44,14 +79,7 @@ export async function fetchStudentProfile(userId: string): Promise<StudentProfil
 
   if (!data) return null;
 
-  return {
-    user_id: data.user_id,
-    full_name: data.full_name ?? "",
-    arabic_name: data.arabic_name ?? "",
-    english_name: data.english_name ?? "",
-    email: data.email ?? "",
-    grade: data.grade ?? "",
-  };
+  return mapProfileRow(data);
 }
 
 export async function saveStudentProfile(
@@ -65,6 +93,8 @@ export async function saveStudentProfile(
     full_name: form.full_name.trim(),
     arabic_name: form.arabic_name.trim(),
     english_name: form.english_name.trim(),
+    section: form.section ?? null,
+    islamic_group: form.islamic_group ?? null,
   };
 
   const { data: existing } = await supabase
@@ -80,10 +110,12 @@ export async function saveStudentProfile(
         full_name: payload.full_name,
         arabic_name: payload.arabic_name,
         english_name: payload.english_name,
+        section: payload.section,
+        islamic_group: payload.islamic_group,
         updated_at: new Date().toISOString(),
       })
       .eq("user_id", userId)
-      .select("user_id, full_name, arabic_name, english_name, email, grade")
+      .select(profileSelect)
       .single();
 
     if (error) {
@@ -92,13 +124,13 @@ export async function saveStudentProfile(
     }
 
     await syncProfileUserMetadata(form);
-    return data as StudentProfileRow;
+    return mapProfileRow(data);
   }
 
   const { data, error } = await supabase
     .from("profiles")
     .insert(payload)
-    .select("user_id, full_name, arabic_name, english_name, email, grade")
+    .select(profileSelect)
     .single();
 
   if (error) {
@@ -107,7 +139,7 @@ export async function saveStudentProfile(
   }
 
   await syncProfileUserMetadata(form);
-  return data as StudentProfileRow;
+  return mapProfileRow(data);
 }
 
 async function syncProfileUserMetadata(form: StudentProfileForm): Promise<void> {
@@ -116,6 +148,8 @@ async function syncProfileUserMetadata(form: StudentProfileForm): Promise<void> 
       full_name: form.full_name.trim(),
       arabic_name: form.arabic_name.trim(),
       english_name: form.english_name.trim(),
+      ...(form.section ? { section: form.section } : {}),
+      ...(form.islamic_group ? { islamic_group: form.islamic_group } : {}),
     },
   });
 
