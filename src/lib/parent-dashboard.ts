@@ -1,10 +1,13 @@
 import type { Bi } from "@/lib/curriculum";
-import { supabase } from "@/integrations/supabase/client";
-import { normalizeGradeSlug } from "@/lib/grade-utils";
-import { resolveParentStudentLink } from "@/lib/parent-student-link";
+import {
+  fetchParentLinkedChildren,
+  type ParentChildrenResult,
+  type ParentLinkedChild,
+} from "@/lib/parent-children";
 import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-progress";
 
 export type ParentDashboardData = {
+  studentUserId: string;
   studentName: Bi;
   gradeSlug: string;
   progress: StudentProgressData;
@@ -18,48 +21,16 @@ export type ParentDashboardResult = {
   linkError: ParentDashboardLinkError | null;
 };
 
-export async function fetchParentDashboardData(parentUserId: string): Promise<ParentDashboardResult> {
-  const { data: parentProfile, error: parentProfileError } = await supabase
-    .from("parent_profiles")
-    .select("full_name, email, student_name, student_grade")
-    .eq("user_id", parentUserId)
-    .maybeSingle();
+export type ParentDashboardBundle = ParentChildrenResult & {
+  dashboard: ParentDashboardData | null;
+  dashboardError: string | null;
+};
 
-  if (parentProfileError) {
-    return { data: null, error: parentProfileError.message, linkError: null };
-  }
-  if (!parentProfile) {
-    return {
-      data: null,
-      error: "Parent profile not found.",
-      linkError: null,
-    };
-  }
-
-  const studentGrade = normalizeGradeSlug(parentProfile.student_grade) || parentProfile.student_grade;
-  const { data: studentProfiles, error: studentsError } = await supabase
-    .from("profiles")
-    .select("user_id, full_name, arabic_name, english_name, grade")
-    .eq("grade", studentGrade);
-
-  if (studentsError) {
-    return { data: null, error: studentsError.message, linkError: null };
-  }
-
-  const link = resolveParentStudentLink(
-    studentProfiles ?? [],
-    parentProfile.student_name,
-    studentGrade,
-  );
-
-  if (link.status === "none") {
-    return { data: null, error: null, linkError: "none" };
-  }
-  if (link.status === "multiple") {
-    return { data: null, error: null, linkError: "multiple" };
-  }
-
-  const { data: progress, error: progressError } = await fetchStudentProgress(link.studentUserId);
+export async function fetchParentDashboardForStudent(
+  studentUserId: string,
+  childMeta?: Pick<ParentLinkedChild, "studentName" | "gradeSlug">,
+): Promise<ParentDashboardResult> {
+  const { data: progress, error: progressError } = await fetchStudentProgress(studentUserId);
   if (progressError) {
     return { data: null, error: progressError, linkError: null };
   }
@@ -67,19 +38,62 @@ export async function fetchParentDashboardData(parentUserId: string): Promise<Pa
     return { data: null, error: "Progress data unavailable.", linkError: null };
   }
 
-  const fullName = link.profile.full_name?.trim() || parentProfile.student_name.trim() || "Student";
-  const studentName: Bi = {
-    en: link.profile.english_name?.trim() || fullName,
-    ar: link.profile.arabic_name?.trim() || fullName,
-  };
+  const studentName = childMeta?.studentName ?? { en: "Student", ar: "Student" };
 
   return {
     data: {
+      studentUserId,
       studentName,
-      gradeSlug: progress.gradeSlug,
+      gradeSlug: childMeta?.gradeSlug ?? progress.gradeSlug,
       progress,
     },
     error: null,
     linkError: null,
   };
 }
+
+/** @deprecated Use fetchParentDashboardBundle for multi-child support. */
+export async function fetchParentDashboardData(parentUserId: string): Promise<ParentDashboardResult> {
+  const bundle = await fetchParentDashboardBundle(parentUserId);
+  if (bundle.linkError) {
+    return { data: null, error: null, linkError: bundle.linkError };
+  }
+  if (bundle.error) {
+    return { data: null, error: bundle.error, linkError: null };
+  }
+  if (bundle.dashboardError) {
+    return { data: null, error: bundle.dashboardError, linkError: null };
+  }
+  return { data: bundle.dashboard, error: null, linkError: null };
+}
+
+export async function fetchParentDashboardBundle(
+  parentUserId: string,
+  selectedStudentUserId?: string | null,
+): Promise<ParentDashboardBundle> {
+  const childrenResult = await fetchParentLinkedChildren(parentUserId);
+  if (childrenResult.error || childrenResult.linkError || childrenResult.children.length === 0) {
+    return {
+      ...childrenResult,
+      dashboard: null,
+      dashboardError: null,
+    };
+  }
+
+  const selectedChild =
+    childrenResult.children.find((child) => child.studentUserId === selectedStudentUserId) ??
+    childrenResult.children[0];
+
+  const dashboardResult = await fetchParentDashboardForStudent(
+    selectedChild.studentUserId,
+    selectedChild,
+  );
+
+  return {
+    ...childrenResult,
+    dashboard: dashboardResult.data,
+    dashboardError: dashboardResult.error,
+  };
+}
+
+export type { ParentLinkedChild, ParentChildrenResult };

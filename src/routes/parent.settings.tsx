@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, UserRound } from "lucide-react";
+import { GraduationCap, LogOut, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
 import { getAccountRole, isParentAccount, postAuthPathForRole } from "@/lib/account-role";
+import { fetchParentLinkedChildren, type ParentLinkedChild } from "@/lib/parent-children";
 import { supabase } from "@/integrations/supabase/client";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { grades } from "@/lib/curriculum";
@@ -25,8 +26,8 @@ function ParentSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [studentName, setStudentName] = useState("");
-  const [studentGrade, setStudentGrade] = useState("");
+  const [children, setChildren] = useState<ParentLinkedChild[]>([]);
+  const [linkError, setLinkError] = useState<"none" | "multiple" | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -43,16 +44,19 @@ function ParentSettingsPage() {
         navigate({ to: postAuthPathForRole(role) });
         return;
       }
-      const { data: profile } = await supabase
-        .from("parent_profiles")
-        .select("full_name, email, student_name, student_grade")
-        .eq("user_id", auth.user.id)
-        .maybeSingle();
+      const [{ data: profile }, childrenResult] = await Promise.all([
+        supabase
+          .from("parent_profiles")
+          .select("full_name, email")
+          .eq("user_id", auth.user.id)
+          .maybeSingle(),
+        fetchParentLinkedChildren(auth.user.id),
+      ]);
       if (!active) return;
       setFullName(profile?.full_name ?? "");
       setEmail(profile?.email ?? auth.user.email ?? "");
-      setStudentName(profile?.student_name ?? "");
-      setStudentGrade(profile?.student_grade ?? "");
+      setChildren(childrenResult.children);
+      setLinkError(childrenResult.linkError);
       setLoading(false);
     })();
     return () => {
@@ -65,11 +69,6 @@ function ParentSettingsPage() {
     toast.success(lang === "ar" ? "تم تسجيل الخروج" : "Signed out");
     navigate({ to: "/auth", search: { mode: "login", accountType: "parent" } });
   }
-
-  const gradeName =
-    gradeDisplayName(studentGrade, lang) ||
-    grades.find((g) => g.slug === studentGrade)?.name[lang] ||
-    studentGrade;
 
   return (
     <PageShell
@@ -94,7 +93,7 @@ function ParentSettingsPage() {
               <div className="space-y-4 flex-1">
                 <div>
                   <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {lang === "ar" ? "اسم ولي الأمر" : "Parent name"}
+                    {tr("parent_name_label")}
                   </div>
                   <div className="font-display text-xl text-foreground mt-1">{fullName || "—"}</div>
                 </div>
@@ -102,18 +101,60 @@ function ParentSettingsPage() {
                   <div className="text-xs uppercase tracking-wider text-muted-foreground">{tr("your_email")}</div>
                   <div className="text-sm mt-1">{email || "—"}</div>
                 </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {lang === "ar" ? "الطالب المرتبط" : "Linked student"}
-                  </div>
-                  <div className="text-sm mt-1">
-                    {studentName || "—"}
-                    {studentGrade ? ` · ${gradeName}` : ""}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
+
+          <section className="space-y-3">
+            <div>
+              <h2 className="font-display text-lg text-foreground">{tr("parent_linked_children_title")}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{tr("parent_linked_children_lead")}</p>
+            </div>
+
+            {linkError === "multiple" ? (
+              <div className="rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900">
+                {tr("parent_link_multiple_error")}
+              </div>
+            ) : linkError === "none" || children.length === 0 ? (
+              <div className="rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900">
+                {tr("parent_link_none_error")}
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {children.map((child) => {
+                  const gradeName =
+                    gradeDisplayName(child.gradeSlug, lang) ||
+                    grades.find((g) => g.slug === child.gradeSlug)?.name[lang] ||
+                    child.gradeSlug;
+                  return (
+                    <article
+                      key={child.studentUserId}
+                      className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <UserRound className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                            {tr("parent_child_name_label")}
+                          </div>
+                          <div className="font-display text-lg text-foreground mt-1 leading-snug">
+                            {child.studentName[lang] || child.studentName.en}
+                          </div>
+                          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-primary">
+                            <GraduationCap className="h-3.5 w-3.5" />
+                            {gradeName}
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
           <div className="flex flex-wrap gap-3">
             <Link
               to="/parent/dashboard"

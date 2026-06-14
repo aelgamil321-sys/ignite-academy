@@ -227,6 +227,8 @@ export const t = {
   parent_dashboard_title: { en: "Parent Dashboard", ar: "لوحة ولي الأمر" },
   parent_dashboard_lead: { en: "Monitor your child's progress, certificates, badges, and recent learning activity.", ar: "راقب تقدّم ابنك/ابنتك والشهادات والشارات وآخر نشاط تعليمي." },
   parent_dashboard_cta: { en: "Open Parent Dashboard", ar: "فتح لوحة ولي الأمر" },
+  parent_dashboard_loading: { en: "Loading parent dashboard…", ar: "جارٍ تحميل لوحة ولي الأمر…" },
+  parent_dashboard_switching: { en: "Loading selected child…", ar: "جارٍ تحميل بيانات الطفل المحدد…" },
   parent_corner_student_msg: {
     en: "Please sign in with a parent account to access Parent Corner and track your child's progress.",
     ar: "يرجى تسجيل الدخول بحساب ولي أمر للوصول إلى ركن الوالدين ومتابعة تقدّم ابنك/ابنتك.",
@@ -235,10 +237,25 @@ export const t = {
   parent_corner_parent_signup: { en: "Create parent account", ar: "إنشاء حساب ولي أمر" },
   parent_profile_title: { en: "Parent Profile", ar: "ملف ولي الأمر" },
   parent_profile_lead: {
-    en: "View your parent account details and linked student information.",
-    ar: "اعرض تفاصيل حساب ولي الأمر والطالب المرتبط.",
+    en: "View your parent account details and all linked children.",
+    ar: "اعرض تفاصيل حساب ولي الأمر وجميع الأبناء المرتبطين.",
   },
   parent_profile_loading: { en: "Loading parent profile…", ar: "جارٍ تحميل ملف ولي الأمر…" },
+  parent_name_label: { en: "Parent name", ar: "اسم ولي الأمر" },
+  parent_linked_children_title: { en: "Linked children", ar: "الأبناء المرتبطون" },
+  parent_linked_children_lead: {
+    en: "Students linked to your parent account.",
+    ar: "الطلاب المرتبطون بحساب ولي الأمر.",
+  },
+  parent_child_name_label: { en: "Student name", ar: "اسم الطالب" },
+  parent_link_none_error: {
+    en: "No matching student found. Please contact the school if this looks incorrect.",
+    ar: "لم يتم العثور على طالب مطابق. يرجى التواصل مع المدرسة إذا كان ذلك غير صحيح.",
+  },
+  parent_link_multiple_error: {
+    en: "More than one student matched your account. Please contact the school to confirm links.",
+    ar: "تم العثور على أكثر من طالب مطابق. يرجى التواصل مع المدرسة لتأكيد الربط.",
+  },
 
   // Resources
   res_title: { en: "Resource Library", ar: "المكتبة التعليمية" },

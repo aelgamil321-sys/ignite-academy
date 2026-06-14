@@ -1,13 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BookOpen, Video, FileUp, Newspaper, Folder, GraduationCap,
-  Layers, ClipboardCheck, Megaphone, LogOut,
+  Layers, ClipboardCheck, Megaphone, LogOut, Users,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 export type AdminTab =
   | "overview" | "new-lesson" | "new-article" | "new-video" | "new-file"
-  | "manage-resources" | "manage-grades" | "manage-units" | "manage-quizzes" | "manage-announcements" | "manage-users";
+  | "manage-resources" | "manage-grades" | "manage-units" | "manage-quizzes" | "manage-announcements" | "manage-users" | "manage-parent-links";
 
 const L = (en: string, ar: string) => ({ en, ar });
 
@@ -26,6 +26,7 @@ const manageTabItems: Array<{ key: AdminTab; label: ReturnType<typeof L>; icon: 
   { key: "manage-quizzes", label: L("Manage Quizzes", "إدارة الاختبارات"), icon: ClipboardCheck },
   { key: "manage-announcements", label: L("Manage Announcements", "إدارة الإعلانات"), icon: Megaphone },
   { key: "manage-users", label: L("Manage Users", "إدارة المستخدمين"), icon: GraduationCap },
+  { key: "manage-parent-links", label: L("Parent Links", "ربط أولياء الأمور"), icon: Users },
 ];
 
 function sideClass(active: boolean) {

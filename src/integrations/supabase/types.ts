@@ -305,6 +305,30 @@ export type Database = {
         }
         Relationships: []
       }
+      parent_student_links: {
+        Row: {
+          id: string
+          parent_user_id: string
+          student_user_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          parent_user_id: string
+          student_user_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          parent_user_id?: string
+          student_user_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           arabic_name: string

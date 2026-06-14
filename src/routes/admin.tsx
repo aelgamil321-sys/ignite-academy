@@ -175,6 +175,7 @@ export function AdminDashboard() {
       {tab === "manage-quizzes" && <ManageQuizzes />}
       {tab === "manage-announcements" && <ManageAnnouncements />}
       {tab === "manage-users" && <ManageUsers />}
+      {tab === "manage-parent-links" && <ManageParentLinks />}
     </>
   );
 }
@@ -1107,5 +1108,178 @@ function ManageUsers() {
     </div>
   );
 }
+
+function ManageParentLinks() {
+  const { lang } = useI18n();
+  const [loading, setLoading] = useState(true);
+  const [parents, setParents] = useState<Array<{ user_id: string; full_name: string; email: string }>>([]);
+  const [students, setStudents] = useState<Array<{ user_id: string; full_name: string; email: string; grade: string }>>([]);
+  const [links, setLinks] = useState<Array<{ id: string; parent_user_id: string; student_user_id: string }>>([]);
+  const [selectedParentId, setSelectedParentId] = useState("");
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [parentProfilesRes, profilesRes, linksRes, rolesRes] = await Promise.all([
+        supabase.from("parent_profiles").select("user_id, full_name, email").order("full_name"),
+        supabase.from("profiles").select("user_id, full_name, email, grade").order("full_name"),
+        supabase.from("parent_student_links").select("id, parent_user_id, student_user_id"),
+        supabase.from("user_roles").select("user_id, role"),
+      ]);
+      if (parentProfilesRes.error) throw parentProfilesRes.error;
+      if (profilesRes.error) throw profilesRes.error;
+      if (linksRes.error) throw linksRes.error;
+      if (rolesRes.error) throw rolesRes.error;
+
+      const parentIds = new Set(
+        (rolesRes.data ?? []).filter((row) => row.role === "parent").map((row) => row.user_id),
+      );
+      const parentRows = (parentProfilesRes.data ?? []).filter((row) => parentIds.has(row.user_id));
+      const adminIds = new Set(
+        (rolesRes.data ?? []).filter((row) => row.role === "admin").map((row) => row.user_id),
+      );
+      const studentRows = (profilesRes.data ?? []).filter((row) => !adminIds.has(row.user_id));
+
+      setParents(parentRows);
+      setStudents(studentRows);
+      setLinks(linksRes.data ?? []);
+      if (!selectedParentId && parentRows[0]) setSelectedParentId(parentRows[0].user_id);
+    } catch (e) {
+      toast.error(formatError(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  const parentById = new Map(parents.map((parent) => [parent.user_id, parent]));
+  const studentById = new Map(students.map((student) => [student.user_id, student]));
+  const linksForParent = links.filter((link) => link.parent_user_id === selectedParentId);
+
+  const addLink = async () => {
+    if (!selectedParentId || !selectedStudentId) {
+      toast.error(L("Select a parent and a student.", "اختر ولي أمر وطالبًا.")[lang]);
+      return;
+    }
+    if (links.some((link) => link.parent_user_id === selectedParentId && link.student_user_id === selectedStudentId)) {
+      toast.error(L("This link already exists.", "هذا الربط موجود بالفعل.")[lang]);
+      return;
+    }
+    try {
+      const { error } = await supabase.from("parent_student_links").insert({
+        parent_user_id: selectedParentId,
+        student_user_id: selectedStudentId,
+      });
+      if (error) throw error;
+      toast.success(L("Student linked to parent.", "تم ربط الطالب بولي الأمر.")[lang]);
+      setSelectedStudentId("");
+      await load();
+    } catch (e) {
+      toast.error(formatError(e));
+    }
+  };
+
+  const removeLink = async (linkId: string) => {
+    try {
+      const { error } = await supabase.from("parent_student_links").delete().eq("id", linkId);
+      if (error) throw error;
+      toast.success(L("Link removed.", "تم إزالة الربط.")[lang]);
+      await load();
+    } catch (e) {
+      toast.error(formatError(e));
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionCard title={L("Link student to parent", "ربط طالب بولي أمر")[lang]}>
+        {loading ? (
+          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</div>
+        ) : parents.length === 0 ? (
+          <Empty lang={lang} />
+        ) : (
+          <div className="space-y-4">
+            <Row>
+              <Field label={L("Parent account", "حساب ولي الأمر")[lang]} required>
+                <select
+                  className="input w-full"
+                  value={selectedParentId}
+                  onChange={(e) => setSelectedParentId(e.target.value)}
+                >
+                  {parents.map((parent) => (
+                    <option key={parent.user_id} value={parent.user_id}>
+                      {parent.full_name || parent.email} ({parent.email})
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label={L("Student", "الطالب")[lang]} required>
+                <select
+                  className="input w-full"
+                  value={selectedStudentId}
+                  onChange={(e) => setSelectedStudentId(e.target.value)}
+                >
+                  <option value="">{L("Select student…", "اختر طالبًا…")[lang]}</option>
+                  {students.map((student) => (
+                    <option key={student.user_id} value={student.user_id}>
+                      {student.full_name || student.email} · {L("Grade", "الصف")[lang]} {student.grade || "—"}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </Row>
+            <button
+              type="button"
+              onClick={() => void addLink()}
+              className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
+            >
+              {L("Add link", "إضافة ربط")[lang]}
+            </button>
+          </div>
+        )}
+      </SectionCard>
+
+      <SectionCard title={L("Linked children", "الأبناء المرتبطون")[lang]}>
+        {loading ? (
+          <div className="text-sm text-muted-foreground">{L("Loading…", "جارٍ التحميل…")[lang]}</div>
+        ) : !selectedParentId ? (
+          <Empty lang={lang} />
+        ) : linksForParent.length === 0 ? (
+          <p className="text-sm text-muted-foreground italic">
+            {L("No linked students for this parent yet.", "لا يوجد طلاب مرتبطون بهذا ولي الأمر بعد.")[lang]}
+          </p>
+        ) : (
+          linksForParent.map((link) => {
+            const student = studentById.get(link.student_user_id);
+            const parent = parentById.get(link.parent_user_id);
+            return (
+              <div key={link.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium">{student?.full_name || student?.email || link.student_user_id}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {parent?.full_name || parent?.email || link.parent_user_id}
+                    {student?.grade ? ` · ${L("Grade", "الصف")[lang]}: ${student.grade}` : ""}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void removeLink(link.id)}
+                  className="text-xs text-destructive hover:underline"
+                >
+                  {L("Remove link", "إزالة الربط")[lang]}
+                </button>
+              </div>
+            );
+          })
+        )}
+      </SectionCard>
+    </div>
+  );
+}
+
 // suppress unused
 void X;
