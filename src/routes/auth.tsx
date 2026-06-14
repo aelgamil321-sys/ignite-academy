@@ -5,6 +5,7 @@ import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
 import { getAccountRole, getPostAuthPath, postAuthPathForRole } from "@/lib/account-role";
 import { parseAuthAccountType } from "@/lib/parent-corner-access";
+import { redeemParentLinkCode } from "@/lib/parent-link-code";
 import { toast } from "sonner";
 import { GraduationCap, LogIn, UserPlus, AlertCircle, Users } from "lucide-react";
 import { grades } from "@/lib/curriculum";
@@ -33,8 +34,7 @@ function AuthPage() {
   const [arabicName, setArabicName] = useState("");
   const [englishName, setEnglishName] = useState("");
   const [parentFullName, setParentFullName] = useState("");
-  const [studentName, setStudentName] = useState("");
-  const [studentGrade, setStudentGrade] = useState(grades.find((g) => g.slug === "8")?.slug ?? grades[0]?.slug ?? "");
+  const [parentLinkCode, setParentLinkCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [grade, setGrade] = useState(grades.find((g) => g.slug === "8")?.slug ?? grades[0]?.slug ?? "");
@@ -90,8 +90,10 @@ function AuthPage() {
     studentAccount: lang === "ar" ? "حساب طالب" : "Student Account",
     parentAccount: lang === "ar" ? "حساب ولي أمر" : "Parent Account",
     parentFullName: lang === "ar" ? "الاسم الكامل لولي الأمر" : "Parent full name",
-    studentName: lang === "ar" ? "اسم الطالب" : "Student name",
-    studentGrade: lang === "ar" ? "صف الطالب" : "Student grade",
+    parentLinkCode: lang === "ar" ? "رمز ربط ولي الأمر" : "Parent Link Code",
+    parentLinkCodeHint: lang === "ar"
+      ? "أدخل الرمز من لوحة الطالب"
+      : "Enter the code from your child's student dashboard",
     fullName: lang === "ar" ? "الاسم الكامل" : "Full Name",
     fullNameHint: lang === "ar" ? "الاسم الكامل" : "Full Name / الاسم الكامل",
     arabicName: lang === "ar" ? "الاسم باللغة العربية" : "Arabic Name",
@@ -178,19 +180,14 @@ function AuthPage() {
         }
 
         const submitParentFullName = String(fd.get("parent_full_name") ?? parentFullName).trim();
-        const submitStudentName = String(fd.get("student_name") ?? studentName).trim();
-        const submitStudentGrade = String(fd.get("student_grade") ?? studentGrade).trim();
+        const submitParentLinkCode = String(fd.get("parent_link_code") ?? parentLinkCode).trim();
 
         if (!submitParentFullName) {
           toast.error(lang === "ar" ? "يرجى إدخال اسم ولي الأمر." : "Please enter the parent full name.");
           return;
         }
-        if (!submitStudentName) {
-          toast.error(lang === "ar" ? "يرجى إدخال اسم الطالب." : "Please enter the student name.");
-          return;
-        }
-        if (!submitStudentGrade) {
-          toast.error(lang === "ar" ? "يرجى اختيار صف الطالب." : "Please select the student grade.");
+        if (!submitParentLinkCode) {
+          toast.error(lang === "ar" ? "يرجى إدخال رمز ربط ولي الأمر." : "Please enter the Parent Link Code.");
           return;
         }
 
@@ -202,8 +199,7 @@ function AuthPage() {
             data: {
               full_name: submitParentFullName,
               role_intent: "parent",
-              student_name: submitStudentName,
-              grade: submitStudentGrade,
+              parent_link_code: submitParentLinkCode,
             },
           },
         });
@@ -215,16 +211,33 @@ function AuthPage() {
               user_id: data.user.id,
               full_name: submitParentFullName,
               email: submitEmail,
-              student_name: submitStudentName,
-              student_grade: submitStudentGrade,
+              student_name: "",
+              student_grade: "",
             },
             { onConflict: "user_id" },
           );
         }
 
+        const completeParentSignup = async () => {
+          const redeem = await redeemParentLinkCode(submitParentLinkCode);
+          if (!redeem.ok) {
+            toast.error(
+              lang === "ar"
+                ? "تعذر ربط الطالب. تحقق من الرمز في إعدادات ولي الأمر بعد تسجيل الدخول."
+                : "Could not link student. Check the code in Parent Settings after signing in.",
+            );
+          } else if (redeem.alreadyLinked) {
+            toast.success(lang === "ar" ? "هذا الطالب مرتبط بالفعل." : "This student is already linked.");
+          } else {
+            toast.success(lang === "ar" ? "تم ربط الطالب بنجاح." : "Student linked successfully.");
+          }
+          await supabase.auth.updateUser({ data: { parent_link_code: null } });
+          window.location.assign("/parent/dashboard");
+        };
+
         if (data.session) {
           toast.success(T.welcome);
-          window.location.assign("/parent/dashboard");
+          await completeParentSignup();
           return;
         }
 
@@ -234,7 +247,7 @@ function AuthPage() {
         });
         if (!loginError && loginData.session) {
           toast.success(T.welcome);
-          window.location.assign("/parent/dashboard");
+          await completeParentSignup();
           return;
         }
 
@@ -409,30 +422,19 @@ function AuthPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.studentName}</label>
+                  <label className="text-xs font-medium text-muted-foreground">{T.parentLinkCode}</label>
                   <input
                     type="text"
-                    name="student_name"
+                    name="parent_link_code"
                     required
-                    value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)}
-                    maxLength={100}
-                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
+                    value={parentLinkCode}
+                    onChange={(e) => setParentLinkCode(e.target.value.toUpperCase())}
+                    maxLength={20}
+                    placeholder="IIA-8-X7K92"
+                    autoComplete="off"
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-mono tracking-wider uppercase"
                   />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.studentGrade}</label>
-                  <select
-                    name="student_grade"
-                    required
-                    value={studentGrade}
-                    onChange={(e) => setStudentGrade(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
-                  >
-                    {grades.map((g) => (
-                      <option key={g.slug} value={g.slug}>{g.name[lang]}</option>
-                    ))}
-                  </select>
+                  <p className="mt-1 text-xs text-muted-foreground">{T.parentLinkCodeHint}</p>
                 </div>
               </>
             )}

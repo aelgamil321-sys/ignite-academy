@@ -18,6 +18,7 @@ import {
   resolveSelectedChild,
   storeParentChildId,
 } from "@/lib/parent-children";
+import { redeemPendingParentLinkCodeFromMetadata } from "@/lib/parent-link-code";
 import { isParentAccount } from "@/lib/account-role";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -115,6 +116,10 @@ function ParentDashboardPage({ userId }: { userId: string }) {
 
       setLoadError(null);
       setLinkError(null);
+
+      if (isInitial) {
+        await redeemPendingParentLinkCodeFromMetadata();
+      }
 
       const bundle = await fetchParentDashboardBundle(userId, studentUserId);
 
@@ -228,10 +233,15 @@ function ParentDashboardPage({ userId }: { userId: string }) {
         </div>
       ) : linkError === "none" ? (
         <div className="rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900">
-          {L(
-            "No matching student found. Please check the student name and grade.",
-            "لم يتم العثور على طالب مطابق. يرجى التحقق من اسم الطالب والصف.",
-          )[lang]}
+          {tr("parent_link_none_error")}
+          <div className="mt-3">
+            <Link
+              to="/parent/settings"
+              className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover"
+            >
+              {tr("parent_add_child_submit")}
+            </Link>
+          </div>
         </div>
       ) : loadError ? (
         <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-sm text-destructive">

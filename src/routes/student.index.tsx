@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
 import { StudentProgressDashboard } from "@/components/student-progress-dashboard";
+import { ParentLinkCodeCard } from "@/components/parent-link-code-card";
 import { useI18n } from "@/lib/i18n";
 import { grades } from "@/lib/curriculum";
 import { gradeDisplayName, normalizeGradeSlug } from "@/lib/grade-utils";
@@ -29,6 +30,7 @@ function StudentGate() {
   const [email, setEmail] = useState("");
   const [gradeSlug, setGradeSlug] = useState("8");
   const [profileComplete, setProfileComplete] = useState(true);
+  const [parentLinkCode, setParentLinkCode] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -40,16 +42,27 @@ function StudentGate() {
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("email, grade, arabic_name, english_name")
+        .select("email, grade, arabic_name, english_name, parent_link_code")
         .eq("user_id", data.user.id)
         .maybeSingle();
 
+      const profileRow = profileError?.message?.includes("parent_link_code")
+        ? (
+            await supabase
+              .from("profiles")
+              .select("email, grade, arabic_name, english_name")
+              .eq("user_id", data.user.id)
+              .maybeSingle()
+          ).data
+        : profile;
+
       setUserId(data.user.id);
-      setEmail(profile?.email ?? data.user.email ?? "");
-      setGradeSlug(normalizeGradeSlug(profile?.grade ?? "8") || "8");
-      setProfileComplete(isStudentProfileComplete(profile));
+      setEmail(profileRow?.email ?? data.user.email ?? "");
+      setGradeSlug(normalizeGradeSlug(profileRow?.grade ?? "8") || "8");
+      setParentLinkCode(profileRow && "parent_link_code" in profileRow ? profileRow.parent_link_code ?? null : null);
+      setProfileComplete(isStudentProfileComplete(profileRow));
       setState("ok");
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
@@ -75,6 +88,7 @@ function StudentGate() {
       email={email}
       gradeSlug={gradeSlug}
       profileComplete={profileComplete}
+      parentLinkCode={parentLinkCode}
     />
   );
 }
@@ -84,11 +98,13 @@ function StudentDashboardPage({
   email,
   gradeSlug,
   profileComplete,
+  parentLinkCode,
 }: {
   userId: string;
   email: string;
   gradeSlug: string;
   profileComplete: boolean;
+  parentLinkCode: string | null;
 }) {
   const navigate = useNavigate();
   const { tr, lang } = useI18n();
@@ -167,6 +183,8 @@ function StudentDashboardPage({
           </Link>
         </div>
       )}
+
+      {parentLinkCode ? <ParentLinkCodeCard code={parentLinkCode} /> : null}
 
       {loading ? (
         <div className="text-sm text-muted-foreground py-12 text-center">

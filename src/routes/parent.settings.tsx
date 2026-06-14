@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { GraduationCap, LogOut, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
+import { ParentLinkChildForm } from "@/components/parent-link-child-form";
 import { useI18n } from "@/lib/i18n";
 import { getAccountRole, isParentAccount, postAuthPathForRole } from "@/lib/account-role";
 import { fetchParentLinkedChildren, type ParentLinkedChild } from "@/lib/parent-children";
@@ -28,6 +29,13 @@ function ParentSettingsPage() {
   const [email, setEmail] = useState("");
   const [children, setChildren] = useState<ParentLinkedChild[]>([]);
   const [linkError, setLinkError] = useState<"none" | "multiple" | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const loadChildren = async (parentUserId: string) => {
+    const childrenResult = await fetchParentLinkedChildren(parentUserId);
+    setChildren(childrenResult.children);
+    setLinkError(childrenResult.linkError);
+  };
 
   useEffect(() => {
     let active = true;
@@ -55,6 +63,7 @@ function ParentSettingsPage() {
       if (!active) return;
       setFullName(profile?.full_name ?? "");
       setEmail(profile?.email ?? auth.user.email ?? "");
+      setUserId(auth.user.id);
       setChildren(childrenResult.children);
       setLinkError(childrenResult.linkError);
       setLoading(false);
@@ -154,6 +163,12 @@ function ParentSettingsPage() {
               </div>
             )}
           </section>
+
+          <ParentLinkChildForm
+            onLinked={() => {
+              if (userId) void loadChildren(userId);
+            }}
+          />
 
           <div className="flex flex-wrap gap-3">
             <Link

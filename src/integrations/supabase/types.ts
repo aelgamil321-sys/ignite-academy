@@ -338,6 +338,7 @@ export type Database = {
           full_name: string
           grade: string
           id: string
+          parent_link_code: string | null
           updated_at: string
           user_id: string
         }
@@ -349,6 +350,7 @@ export type Database = {
           full_name?: string
           grade?: string
           id?: string
+          parent_link_code?: string | null
           updated_at?: string
           user_id: string
         }
@@ -360,6 +362,7 @@ export type Database = {
           full_name?: string
           grade?: string
           id?: string
+          parent_link_code?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -515,6 +518,18 @@ export type Database = {
           p_answers: Json
         }
         Returns: Database["public"]["Tables"]["lesson_quiz_submissions"]["Row"]
+      }
+      redeem_parent_link_code: {
+        Args: {
+          p_code: string
+        }
+        Returns: Json
+      }
+      admin_regenerate_parent_link_code: {
+        Args: {
+          p_student_user_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {

@@ -249,13 +249,43 @@ export const t = {
   },
   parent_child_name_label: { en: "Student name", ar: "اسم الطالب" },
   parent_link_none_error: {
-    en: "No matching student found. Please contact the school if this looks incorrect.",
-    ar: "لم يتم العثور على طالب مطابق. يرجى التواصل مع المدرسة إذا كان ذلك غير صحيح.",
+    en: "No linked students yet. Enter a Parent Link Code below to connect your child.",
+    ar: "لا يوجد طلاب مرتبطون بعد. أدخل رمز ربط ولي الأمر أدناه لربط طفلك.",
   },
   parent_link_multiple_error: {
     en: "More than one student matched your account. Please contact the school to confirm links.",
     ar: "تم العثور على أكثر من طالب مطابق. يرجى التواصل مع المدرسة لتأكيد الربط.",
   },
+  parent_link_code_label: { en: "Parent Link Code", ar: "رمز ربط ولي الأمر" },
+  parent_link_code_hint: {
+    en: "Enter the code from your child's student dashboard.",
+    ar: "أدخل الرمز من لوحة الطالب.",
+  },
+  parent_link_code_title: { en: "Parent Link Code", ar: "رمز ربط ولي الأمر" },
+  parent_link_code_note: {
+    en: "Share this code only with your parent.",
+    ar: "شارك هذا الرمز مع ولي أمرك فقط.",
+  },
+  parent_link_code_copy: { en: "Copy code", ar: "نسخ الرمز" },
+  parent_link_code_copied: { en: "Code copied!", ar: "تم نسخ الرمز!" },
+  parent_link_code_invalid: {
+    en: "That link code is not valid. Please check the code and try again.",
+    ar: "رمز الربط غير صالح. يرجى التحقق من الرمز والمحاولة مرة أخرى.",
+  },
+  parent_link_code_success: {
+    en: "Student linked successfully.",
+    ar: "تم ربط الطالب بنجاح.",
+  },
+  parent_link_code_already: {
+    en: "This student is already linked to your account.",
+    ar: "هذا الطالب مرتبط بحسابك بالفعل.",
+  },
+  parent_add_child_title: { en: "Link another child", ar: "ربط طفل آخر" },
+  parent_add_child_lead: {
+    en: "Enter a Parent Link Code from your child's student dashboard.",
+    ar: "أدخل رمز ربط ولي الأمر من لوحة الطالب.",
+  },
+  parent_add_child_submit: { en: "Link child", ar: "ربط الطفل" },
 
   // Resources
   res_title: { en: "Resource Library", ar: "المكتبة التعليمية" },

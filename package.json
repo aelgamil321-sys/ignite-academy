@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "db:apply-parent-links": "node scripts/apply-parent-student-links-migration.mjs"
+    "db:apply-parent-links": "node scripts/apply-parent-student-links-migration.mjs",
+    "db:apply-parent-link-codes": "node scripts/apply-parent-link-codes-migration.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -1003,7 +1003,7 @@ function Empty({ lang }: { lang: "en" | "ar" }) {
 
 function ManageUsers() {
   const { lang } = useI18n();
-  const [profiles, setProfiles] = useState<Array<{ id: string; user_id: string; full_name: string; email: string; grade: string }>>([]);
+  const [profiles, setProfiles] = useState<Array<{ id: string; user_id: string; full_name: string; email: string; grade: string; parent_link_code: string | null }>>([]);
   const [roles, setRoles] = useState<Array<{ user_id: string; role: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [promoteEmail, setPromoteEmail] = useState("");
@@ -1012,7 +1012,7 @@ function ManageUsers() {
     setLoading(true);
     try {
       const [p, r] = await Promise.all([
-        supabase.from("profiles").select("id, user_id, full_name, email, grade").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, user_id, full_name, email, grade, parent_link_code").order("created_at", { ascending: false }),
         supabase.from("user_roles").select("user_id, role"),
       ]);
       if (p.error) throw p.error;
@@ -1062,6 +1062,21 @@ function ManageUsers() {
     setPromoteEmail("");
   };
 
+  const regenerateCode = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.rpc("admin_regenerate_parent_link_code", {
+        p_student_user_id: userId,
+      });
+      if (error) throw error;
+      const payload = (data ?? {}) as { ok?: boolean; parent_link_code?: string; error?: string };
+      if (!payload.ok) throw new Error(payload.error ?? "unknown");
+      toast.success(L("Link code regenerated", "تم تجديد رمز الربط")[lang]);
+      await load();
+    } catch (e) {
+      toast.error(formatError(e));
+    }
+  };
+
   return (
     <div className="space-y-6">
       <SectionCard title={L("Grant Admin Access", "منح صلاحية المدير")[lang]}>
@@ -1087,11 +1102,25 @@ function ManageUsers() {
             <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
               <div className="flex-1 min-w-0">
                 <div className="font-medium">{p.full_name || p.email}</div>
-                <div className="text-xs text-muted-foreground">{p.email} · {L("Grade", "الصف")[lang]}: {p.grade || "—"}</div>
+                <div className="text-xs text-muted-foreground">
+                  {p.email} · {L("Grade", "الصف")[lang]}: {p.grade || "—"}
+                  {p.parent_link_code ? (
+                    <span className="ms-2 font-mono text-primary"> · {p.parent_link_code}</span>
+                  ) : null}
+                </div>
               </div>
               <span className="text-xs rounded-full border border-border px-2 py-1">
                 {isAdmin(p.user_id) ? "Admin" : "Student"}
               </span>
+              {!isAdmin(p.user_id) && (
+                <button
+                  type="button"
+                  onClick={() => void regenerateCode(p.user_id)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  {L("Regenerate code", "تجديد الرمز")[lang]}
+                </button>
+              )}
               {isAdmin(p.user_id) ? (
                 <button onClick={() => void revokeAdmin(p.user_id)} className="text-xs text-destructive hover:underline">
                   {L("Revoke Admin", "إلغاء المدير")[lang]}
