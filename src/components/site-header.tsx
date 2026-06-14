@@ -113,6 +113,16 @@ export function SiteHeader() {
   const schoolLogoUrl = certificateSchoolLogoUrl();
   const schoolLogoAlt = lang === "ar" ? "مدرسة اجنايت" : "Ignite School";
 
+  const bookIconButton = (
+    <Link
+      to="/"
+      aria-label={tr("brand_name")}
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[var(--shadow-soft)]"
+    >
+      <BookOpen className="h-4 w-4" />
+    </Link>
+  );
+
   const brandLink = (compact?: boolean) => (
     <Link to="/" className="group flex min-w-0 items-center gap-2 sm:gap-2.5">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[var(--shadow-soft)] sm:h-10 sm:w-10">
@@ -122,7 +132,7 @@ export function SiteHeader() {
         className={cn(
           "min-w-0 leading-tight",
           compact
-            ? "hidden min-[400px]:block max-w-[9.5rem] sm:max-w-[13rem]"
+            ? "hidden md:block max-w-[9.5rem] sm:max-w-[13rem]"
             : "max-w-[10rem] sm:max-w-[12rem] 2xl:max-w-[16rem]",
         )}
       >
@@ -195,10 +205,10 @@ export function SiteHeader() {
     <button
       onClick={toggle}
       aria-label="Toggle language"
-      className={cn(headerPillBase, "h-8 shrink-0 gap-1 px-2 text-[11px] font-semibold sm:px-2.5")}
+      className={cn(headerPillBase, "h-8 w-8 shrink-0 gap-1 px-2 text-[11px] font-semibold md:h-8 md:w-auto md:px-2.5")}
     >
       <Languages className="h-3.5 w-3.5" />
-      <span className="hidden sm:inline">{lang === "en" ? "العربية" : "EN"}</span>
+      <span className="hidden md:inline">{lang === "en" ? "العربية" : "EN"}</span>
     </button>
   );
 
@@ -232,12 +242,21 @@ export function SiteHeader() {
     <>
     <header ref={headerRef} className="fixed top-0 inset-x-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-lg">
       <div data-site-header-chrome>
-      <div className="container-page py-3 md:py-3.5 lg:py-4">
-        {/* Mobile & tablet (< xl) */}
-        <div data-site-header-bar className="flex min-h-11 items-center gap-2 sm:gap-3 xl:hidden">
+      <div className="container-page py-2 md:py-3.5 lg:py-4">
+        {/* Mobile (< md): menu, language, school logo, book icon only */}
+        <div data-site-header-bar className="flex md:hidden min-h-10 items-center gap-2">
+          {menuButton}
+          {langButton}
+          <div className="flex min-w-0 flex-1 items-center justify-center px-1">
+            {schoolLogoMobile}
+          </div>
+          {bookIconButton}
+        </div>
+
+        {/* Tablet (md to xl) */}
+        <div data-site-header-bar className="hidden md:flex xl:hidden min-h-11 items-center gap-2 sm:gap-3">
           {brandLink(true)}
           <div className="min-w-0 flex-1" aria-hidden />
-          {schoolLogoMobile}
           {schoolLogoTablet}
           <div className="flex shrink-0 items-center gap-1.5">
             {langButton}
