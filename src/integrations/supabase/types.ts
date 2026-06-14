@@ -550,6 +550,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_hall_of_fame: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "student" | "parent"

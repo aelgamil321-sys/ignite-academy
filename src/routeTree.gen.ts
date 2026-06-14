@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentDashboardRouteImport } from './routes/student-dashboard'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as HallOfFameRouteImport } from './routes/hall-of-fame'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminLoginRouteImport } from './routes/admin-login'
@@ -55,6 +56,11 @@ const StudentRoute = StudentRouteImport.update({
 const ResourcesRoute = ResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HallOfFameRoute = HallOfFameRouteImport.update({
+  id: '/hall-of-fame',
+  path: '/hall-of-fame',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/admin-login': typeof AdminLoginRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/hall-of-fame': typeof HallOfFameRoute
   '/resources': typeof ResourcesRoute
   '/student': typeof StudentRouteWithChildren
   '/student-dashboard': typeof StudentDashboardRoute
@@ -245,6 +252,7 @@ export interface FileRoutesByTo {
   '/admin-login': typeof AdminLoginRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/hall-of-fame': typeof HallOfFameRoute
   '/resources': typeof ResourcesRoute
   '/student-dashboard': typeof StudentDashboardRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/admin-login': typeof AdminLoginRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/hall-of-fame': typeof HallOfFameRoute
   '/resources': typeof ResourcesRoute
   '/student': typeof StudentRouteWithChildren
   '/student-dashboard': typeof StudentDashboardRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/auth'
     | '/contact'
+    | '/hall-of-fame'
     | '/resources'
     | '/student'
     | '/student-dashboard'
@@ -348,6 +358,7 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/auth'
     | '/contact'
+    | '/hall-of-fame'
     | '/resources'
     | '/student-dashboard'
     | '/admin/upload-test'
@@ -381,6 +392,7 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/auth'
     | '/contact'
+    | '/hall-of-fame'
     | '/resources'
     | '/student'
     | '/student-dashboard'
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  HallOfFameRoute: typeof HallOfFameRoute
   ResourcesRoute: typeof ResourcesRoute
   StudentRoute: typeof StudentRouteWithChildren
   StudentDashboardRoute: typeof StudentDashboardRoute
@@ -457,6 +470,13 @@ declare module '@tanstack/react-router' {
       path: '/resources'
       fullPath: '/resources'
       preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hall-of-fame': {
+      id: '/hall-of-fame'
+      path: '/hall-of-fame'
+      fullPath: '/hall-of-fame'
+      preLoaderRoute: typeof HallOfFameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -707,6 +727,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  HallOfFameRoute: HallOfFameRoute,
   ResourcesRoute: ResourcesRoute,
   StudentRoute: StudentRouteWithChildren,
   StudentDashboardRoute: StudentDashboardRoute,

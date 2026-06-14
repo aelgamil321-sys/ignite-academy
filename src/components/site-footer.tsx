@@ -21,12 +21,14 @@ export function SiteFooter() {
         { label: tr("nav_parent"), to: "/parent" },
         { label: tr("parent_dashboard_title"), to: "/parent/dashboard" },
         { label: tr("nav_announcements"), to: "/announcements" },
+        { label: tr("nav_hall_of_fame"), to: "/hall-of-fame" },
         { label: tr("admin_title"), to: "/admin" },
       ]
     : [
         { label: tr("nav_resources"), to: "/resources" },
         { label: tr("nav_videos"), to: "/videos" },
         { label: tr("nav_quizzes"), to: "/quizzes" },
+        { label: tr("nav_hall_of_fame"), to: "/hall-of-fame" },
         { label: tr("nav_parent"), to: "/parent" },
         { label: tr("nav_announcements"), to: "/announcements" },
         { label: tr("admin_title"), to: "/admin" },
