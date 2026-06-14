@@ -113,7 +113,11 @@ function LessonPage() {
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 md:mb-5 md:text-muted-foreground md:hover:text-primary"
             >
               <ChevronLeft className={`h-4 w-4 shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
-              <span>{tr("back_to_grade")} {grade.name[lang]}</span>
+              <span>
+                {lang === "ar"
+                  ? `العودة إلى ${grade.name[lang]}`
+                  : `${tr("back_to_grade")} ${grade.name[lang]}`}
+              </span>
             </Link>
             <div className="mt-2 hidden text-xs uppercase tracking-[0.22em] text-primary md:mb-2 md:block">
               {lesson.subject[lang]} · {lesson.unit[lang]}
