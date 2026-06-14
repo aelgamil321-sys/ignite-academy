@@ -86,7 +86,7 @@ function Home() {
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
                 <span>{tr("hero_badge")}</span>
               </div>
-              <h1 className="mt-5 font-display text-3xl font-semibold leading-[1.12] tracking-tight sm:mt-6 sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.08] xl:text-6xl">
+              <h1 className="mt-5 font-display text-3xl font-semibold leading-[1.12] tracking-tight text-[#F4B400] sm:mt-6 sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.08] xl:text-6xl">
                 {tr("brand_name")}
               </h1>
               <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-primary/90 sm:mt-4 sm:text-base md:text-lg">
