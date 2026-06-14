@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import {
@@ -8,7 +9,9 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { useI18n, type TKey } from "@/lib/i18n";
+import { useI18n, type TKey, prefetchTranslations } from "@/lib/i18n";
+import { needsDynamicTranslation } from "@/lib/translate-content";
+import type { Bi } from "@/lib/curriculum";
 import { getGrade } from "@/lib/curriculum";
 import { useResolveLesson, lessonVideoEmbeds, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
 import { studentDownloadItems, fileNameFromUrl, type StudentDownloadItem } from "@/lib/lesson-bilingual-files";
@@ -36,6 +39,27 @@ function LessonPage() {
   const resolved = useResolveLesson(gradeSlug, lessonSlug);
   const { tr, lang, dir, bi } = useI18n();
   const lessonReady = !cmsLoading && Boolean(resolved?.lesson);
+
+  useEffect(() => {
+    if (!resolved?.lesson || !needsDynamicTranslation(lang)) return;
+    const lesson = resolved.lesson;
+    const source = (b: Bi) => b.en?.trim() || b.ar?.trim() || "";
+    const texts = [
+      source(lesson.title),
+      source(lesson.outcome),
+      source(lesson.explanation),
+      source(lesson.activity),
+      source(lesson.worksheet),
+      source(resolved.grade.name),
+      ...lesson.vocab.flatMap((v) => [source(v.term), source(v.def)]),
+      ...normalizeQuizList(resolved.custom?.quiz ?? lesson.quiz).flatMap((q) => [
+        source(q.q),
+        ...q.options.map((o) => source(o)),
+      ]),
+    ].filter(Boolean);
+    prefetchTranslations(texts, lang);
+  }, [resolved, lang]);
+
   useLessonHashScroll(lessonReady, lessonSlug);
 
   if (cmsLoading) {

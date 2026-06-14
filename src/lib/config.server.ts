@@ -19,8 +19,8 @@ import process from "node:process";
 export function getServerConfig() {
   return {
     nodeEnv: process.env.NODE_ENV,
-    // Add server-only values here, e.g.:
-    //   databaseUrl: process.env.DATABASE_URL,
-    //   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    // Optional: set GOOGLE_TRANSLATE_API_KEY on Cloudflare Workers for production translation.
+    // The key is read only inside server handlers — never exposed to the browser.
+    hasTranslationApi: Boolean(process.env.GOOGLE_TRANSLATE_API_KEY),
   };
 }

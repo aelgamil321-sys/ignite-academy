@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Bi } from "@/lib/curriculum";
 import {
   LANG_STORAGE_KEY,
@@ -14,9 +14,16 @@ import { de } from "@/lib/i18n/locales/de";
 import { fr } from "@/lib/i18n/locales/fr";
 import { ur } from "@/lib/i18n/locales/ur";
 import { zh } from "@/lib/i18n/locales/zh";
+import { getCachedTranslation, setCachedTranslation } from "@/lib/translation-cache";
+import {
+  biDisplayFallback,
+  needsDynamicTranslation,
+  translateBi,
+} from "@/lib/translate-content";
 
 export type { Lang, ContentLocale } from "@/lib/i18n-config";
 export { L, LANG_OPTIONS, pickBi, pickBiLocale } from "@/lib/i18n-config";
+export { translateContent, translateBi, prefetchTranslations } from "@/lib/translate-content";
 
 type Dict = Record<string, { en: string; ar: string }>;
 
@@ -493,6 +500,7 @@ export const t = {
     en: "Could not load parent dashboard:",
     ar: "تعذر تحميل لوحة ولي الأمر:",
   },
+  content_translating: { en: "Translating…", ar: "جارٍ الترجمة…" },
 } satisfies Dict;
 
 export type TKey = keyof typeof t;
@@ -521,16 +529,21 @@ interface I18nCtx {
   setLang: (l: Lang) => void;
   toggle: () => void;
   tr: (key: TKey) => string;
-  /** Pick EN/AR lesson or CMS text for the active language (EN for fr/de/zh/ur). */
+  /** Pick lesson/CMS text; dynamically translates for fr/de/ur/zh. */
   bi: (text: Bi) => string;
   /** Safe variant when bilingual text may be undefined. */
   biMaybe: (text?: Bi | null) => string;
+  /** Number of in-flight content translations (for loading UI). */
+  contentTranslating: number;
 }
 
 const Ctx = createContext<I18nCtx | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("ar");
+  const [contentRev, setContentRev] = useState(0);
+  const [contentTranslating, setContentTranslating] = useState(0);
+  const inflightRef = useRef(new Set<string>());
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -553,6 +566,51 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const locale = contentLocale(lang);
 
+  const requestBiTranslation = useCallback(
+    (text: Bi) => {
+      const source = text.en?.trim() || text.ar?.trim() || "";
+      if (!source || !needsDynamicTranslation(lang)) return;
+      const inflightKey = `${lang}:${source}`;
+      if (inflightRef.current.has(inflightKey)) return;
+      inflightRef.current.add(inflightKey);
+      setContentTranslating((n) => n + 1);
+      void translateBi(text, lang)
+        .then((translated) => {
+          setCachedTranslation(lang, source, translated);
+          setContentRev((v) => v + 1);
+        })
+        .catch(() => {
+          setCachedTranslation(lang, source, biDisplayFallback(text, lang));
+          setContentRev((v) => v + 1);
+        })
+        .finally(() => {
+          inflightRef.current.delete(inflightKey);
+          setContentTranslating((n) => Math.max(0, n - 1));
+        });
+    },
+    [lang],
+  );
+
+  const bi = useCallback(
+    (text: Bi) => {
+      if (!needsDynamicTranslation(lang)) {
+        return pickBiLocale(text, locale);
+      }
+      const source = text.en?.trim() || text.ar?.trim() || "";
+      if (!source) return "";
+      const cached = getCachedTranslation(lang, source);
+      if (cached) return cached;
+      requestBiTranslation(text);
+      return biDisplayFallback(text, lang);
+    },
+    [lang, locale, contentRev, requestBiTranslation],
+  );
+
+  const biMaybe = useCallback(
+    (text?: Bi | null) => (text ? bi(text) : ""),
+    [bi],
+  );
+
   const value: I18nCtx = {
     lang,
     locale,
@@ -560,8 +618,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setLang,
     toggle: () => setLang(lang === "en" ? "ar" : "en"),
     tr: (key) => translate(key, lang),
-    bi: (text) => pickBiLocale(text, locale),
-    biMaybe: (text) => (text ? pickBiLocale(text, locale) : ""),
+    bi,
+    biMaybe,
+    contentTranslating,
   };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -309,6 +309,7 @@ export const fr: Record<string, string> = {
   auth_err_email_password: "Veuillez saisir votre e-mail et votre mot de passe.",
   auth_invalid_link_code: "Ce code de liaison étudiant n'est pas valide. Vérifiez le code dans les paramètres parent après connexion.",
   parent_dashboard_load_failed: "Impossible de charger le tableau de bord parent :",
+  content_translating: "Traduction…",
 };
 
 /** FR translations for L() English strings. */

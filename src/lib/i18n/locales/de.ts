@@ -309,6 +309,7 @@ export const de: Record<string, string> = {
   auth_err_email_password: "Bitte geben Sie Ihre E-Mail und Ihr Passwort ein.",
   auth_invalid_link_code: "Dieser Schüler-Verknüpfungscode ist ungültig. Überprüfen Sie den Code in den Elterneinstellungen nach der Anmeldung.",
   parent_dashboard_load_failed: "Eltern-Dashboard konnte nicht geladen werden:",
+  content_translating: "Übersetzung…",
 };
 
 /** DE translations for L() English strings. */

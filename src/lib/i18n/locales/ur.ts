@@ -309,6 +309,7 @@ export const ur: Record<string, string> = {
   auth_err_email_password: "براہ کرم اپنا ای میل اور پاس ورڈ درج کریں۔",
   auth_invalid_link_code: "یہ طالب علم لنک کوڈ درست نہیں۔ سائن ان کے بعد والدین کی ترتیبات میں کوڈ چیک کریں۔",
   parent_dashboard_load_failed: "والدین ڈیش بورڈ لوڈ نہیں ہو سکا:",
+  content_translating: "ترجمہ ہو رہا ہے…",
 };
 
 /** UR translations for L() English strings. */

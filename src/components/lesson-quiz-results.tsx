@@ -3,7 +3,6 @@ import {useI18n, L } from "@/lib/i18n";
 import type { QuizQuestion } from "@/lib/curriculum";
 import {
   gradeLabelForPercentage,
-  optionLabel,
   type QuizSubmissionAnswerItem,
   type SavedQuizSubmission,
 } from "@/lib/lesson-quiz";
@@ -179,7 +178,7 @@ export function LessonQuizResults({
                       {L("Your answer", "إجابتك")[lang]}:{" "}
                     </span>
                     <span className="font-medium">
-                      {optionLabel(q.options, saved.selectedIndex, lang)}
+                      {bi(q.options[saved.selectedIndex] ?? { en: "", ar: "" })}
                     </span>
                   </div>
                   <div>
@@ -187,7 +186,7 @@ export function LessonQuizResults({
                       {L("Correct answer", "الإجابة الصحيحة")[lang]}:{" "}
                     </span>
                     <span className="font-medium">
-                      {optionLabel(q.options, saved.correctIndex, lang)}
+                      {bi(q.options[saved.correctIndex] ?? { en: "", ar: "" })}
                     </span>
                   </div>
                   <div

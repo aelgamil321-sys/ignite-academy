@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, X, BookOpen, User, LayoutDashboard } from "lucide-react";
 import { LanguageSelector } from "@/components/language-selector";
+import { TranslationLoadingIndicator } from "@/components/translation-loading-indicator";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
@@ -167,7 +168,12 @@ export function SiteHeader() {
     </>
   );
 
-  const langButton = <LanguageSelector />;
+  const langButton = (
+    <>
+      <TranslationLoadingIndicator className="hidden sm:inline-flex" />
+      <LanguageSelector />
+    </>
+  );
 
   const menuButton = (
     <button
