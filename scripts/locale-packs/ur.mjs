@@ -1,5 +1,5 @@
-/** UR translations for Ignite Islamic Academy UI. */
-export const ur: Record<string, string> = {
+/** Urdu translations for Ignite Islamic Academy UI. */
+export const urT = {
   nav_home: "صفحۂ اول",
   nav_about: "تعارف",
   nav_student: "طالب علم پورٹل",
@@ -305,14 +305,10 @@ export const ur: Record<string, string> = {
   hof_avg_score_label: "اوسط اسکور",
   hof_certificates_label: "سرٹیفکیٹس",
   grade_champion_suffix: "چیمپئن",
-  not_set: "مقرر نہیں",
-  auth_err_email_password: "براہ کرم اپنا ای میل اور پاس ورڈ درج کریں۔",
-  auth_invalid_link_code: "یہ طالب علم لنک کوڈ درست نہیں۔ سائن ان کے بعد والدین کی ترتیبات میں کوڈ چیک کریں۔",
-  parent_dashboard_load_failed: "والدین ڈیش بورڈ لوڈ نہیں ہو سکا:",
 };
 
-/** UR translations for L() English strings. */
-export const urByEn: Record<string, string> = {
+/** Urdu translations for L() English strings. */
+export const urL = {
   "(empty)": "(خالی)",
   "Academic progress overview for your child.": "آپ کے بچے کی تعلیمی پیشرفت کا جائزہ۔",
   "Achievements & Badges": "کامیابیاں اور بیجز",

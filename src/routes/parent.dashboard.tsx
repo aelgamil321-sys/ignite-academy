@@ -163,7 +163,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
 
   async function signOut() {
     await supabase.auth.signOut();
-    toast.success(lang === "ar" ? "تم تسجيل الخروج" : "Signed out");
+    toast.success(tr("signed_out"));
     navigate({ to: "/auth", search: { mode: "login", accountType: "parent" } });
   }
 
@@ -209,7 +209,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
             className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
           >
             <LogOut className="h-3.5 w-3.5" />
-            {lang === "ar" ? "تسجيل الخروج" : "Sign out"}
+            {tr("sign_out")}
           </button>
         </div>
       </div>
@@ -239,9 +239,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
         </div>
       ) : loadError ? (
         <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-sm text-destructive">
-          {lang === "ar"
-            ? `تعذر تحميل لوحة ولي الأمر: ${loadError}`
-            : `Could not load parent dashboard: ${loadError}`}
+          {`${tr("parent_dashboard_load_failed")} ${loadError}`}
         </div>
       ) : dashboard && selectedStudentUserId ? (
         <div className="space-y-6">

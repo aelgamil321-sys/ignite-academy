@@ -162,7 +162,7 @@ function Home() {
 
                 <DepartmentLogoCard
                   src={certificateIslamicLogoUrl()}
-                  alt={lang === "ar" ? "قسم التربية الإسلامية" : "Department of Islamic Education"}
+                  alt={tr("dept_islamic_ed")}
                   className="min-w-[260px]"
                 />
               </div>
@@ -233,7 +233,7 @@ function Home() {
             <SectionHeader eyebrow={tr("lessons_eyebrow")} title={tr("lessons_title")} align="left" />
             <div className="mt-10 space-y-4">
               {featuredLessons.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{lang === "ar" ? "لا توجد دروس منشورة بعد." : "No published lessons yet."}</p>
+                <p className="text-sm text-muted-foreground">{tr("empty_published_lessons")}</p>
               ) : featuredLessons.map((l) => (
                 <Link
                   key={l.id}
@@ -267,7 +267,7 @@ function Home() {
               </div>
               <ul className="mt-6 space-y-5">
                 {announcements.length === 0 ? (
-                  <li className="text-sm opacity-80">{lang === "ar" ? "لا توجد إعلانات بعد." : "No announcements yet."}</li>
+                  <li className="text-sm opacity-80">{tr("empty_announcements_short")}</li>
                 ) : announcements.slice(0, 3).map((a) => (
                   <li key={a.slug} className="border-b border-white/10 last:border-0 pb-5 last:pb-0">
                     <Link to="/announcements/$slug" params={{ slug: a.slug }} className="block hover:opacity-90">

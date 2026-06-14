@@ -1,5 +1,5 @@
-/** DE translations for Ignite Islamic Academy UI. */
-export const de: Record<string, string> = {
+/** German translations for Ignite Islamic Academy UI. */
+export const deT = {
   nav_home: "Startseite",
   nav_about: "Über uns",
   nav_student: "Schülerportal",
@@ -305,14 +305,10 @@ export const de: Record<string, string> = {
   hof_avg_score_label: "Durchschn. Ergebnis",
   hof_certificates_label: "Zertifikate",
   grade_champion_suffix: "Sieger",
-  not_set: "Nicht festgelegt",
-  auth_err_email_password: "Bitte geben Sie Ihre E-Mail und Ihr Passwort ein.",
-  auth_invalid_link_code: "Dieser Schüler-Verknüpfungscode ist ungültig. Überprüfen Sie den Code in den Elterneinstellungen nach der Anmeldung.",
-  parent_dashboard_load_failed: "Eltern-Dashboard konnte nicht geladen werden:",
 };
 
-/** DE translations for L() English strings. */
-export const deByEn: Record<string, string> = {
+/** German translations for L() English strings. */
+export const deL = {
   "(empty)": "(leer)",
   "Academic progress overview for your child.": "Überblick über den schulischen Fortschritt Ihres Kindes.",
   "Achievements & Badges": "Erfolge & Abzeichen",

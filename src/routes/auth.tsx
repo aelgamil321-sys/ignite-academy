@@ -31,7 +31,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { mode: initialMode, accountType: initialAccountType } = Route.useSearch();
-  const { lang, bi } = useI18n();
+  const { lang, bi, tr } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [accountType, setAccountType] = useState<"student" | "parent">(initialAccountType);
   const [arabicName, setArabicName] = useState("");
@@ -83,40 +83,6 @@ function AuthPage() {
     };
   }, [initialAccountType]);
 
-
-  const T = {
-    title: lang === "ar" ? "حساب الطالب" : "Student Account",
-    lead: lang === "ar"
-      ? "أنشئ حسابك أو سجّل الدخول للوصول إلى الدروس والاختبارات وتتبع تقدمك."
-      : "Create your account or sign in to access your lessons, quizzes, and progress.",
-    signup: lang === "ar" ? "إنشاء حساب طالب" : "Create Student Account",
-    parentSignup: lang === "ar" ? "إنشاء حساب ولي أمر" : "Create Parent Account",
-    login: lang === "ar" ? "تسجيل الدخول" : "Login",
-    accountType: lang === "ar" ? "نوع الحساب" : "Account type",
-    studentAccount: lang === "ar" ? "حساب طالب" : "Student Account",
-    parentAccount: lang === "ar" ? "حساب ولي أمر" : "Parent Account",
-    parentFullName: lang === "ar" ? "الاسم الكامل لولي الأمر" : "Parent full name",
-    parentLinkCode: lang === "ar" ? "كود الطالب / Student Link Code" : "Student Link Code",
-    parentLinkCodeHint: lang === "ar"
-      ? "أدخل الكود من لوحة الطالب"
-      : "Enter the code from your child's student dashboard",
-    arabicName: lang === "ar" ? "اسم الطالب بالعربية" : "Arabic Student Name",
-    arabicNameHint: lang === "ar" ? "اسم الطالب بالعربية" : "Arabic Student Name / اسم الطالب بالعربية",
-    englishName: lang === "ar" ? "اسم الطالب بالإنجليزية" : "English Student Name",
-    englishNameHint: lang === "ar" ? "اسم الطالب بالإنجليزية" : "English Student Name / اسم الطالب بالإنجليزية",
-    email: lang === "ar" ? "البريد الإلكتروني" : "Email",
-    password: lang === "ar" ? "كلمة المرور" : "Password",
-    grade: lang === "ar" ? "الصف الدراسي" : "Grade",
-    submitSignup: lang === "ar" ? "إنشاء الحساب" : "Create account",
-    submitLogin: lang === "ar" ? "دخول" : "Sign in",
-    toLogin: lang === "ar" ? "لديك حساب؟ سجّل الدخول" : "Have an account? Sign in",
-    toSignup: lang === "ar" ? "جديد هنا؟ أنشئ حسابًا" : "New here? Create an account",
-    welcome: lang === "ar" ? "مرحبًا بك في الأكاديمية" : "Welcome to the Academy",
-    duplicateEmail: lang === "ar"
-      ? "هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول أو استخدام بريد إلكتروني آخر."
-      : "This email is already registered. Please sign in or use a different email.",
-  };
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
@@ -132,38 +98,36 @@ function AuthPage() {
       const submitIslamicGroup = String(fd.get("islamic_group") ?? islamicGroup).trim();
 
       if (!submitEmail || !submitPassword) {
-        toast.error(lang === "ar"
-          ? "يرجى إدخال البريد الإلكتروني وكلمة المرور."
-          : "Please enter your email and password.");
+        toast.error(tr("auth_err_email_password"));
         return;
       }
 
       if (mode === "signup") {
         if (accountType === "student") {
           if (!submitArabicName) {
-            toast.error(lang === "ar" ? "يرجى إدخال اسم الطالب بالعربية." : "Please enter the Arabic student name.");
+            toast.error(tr("auth_err_arabic_name"));
             return;
           }
           if (!submitEnglishName) {
-            toast.error(lang === "ar" ? "يرجى إدخال اسم الطالب بالإنجليزية." : "Please enter the English student name.");
+            toast.error(tr("auth_err_english_name"));
             return;
           }
           if (!submitSection) {
-            toast.error(lang === "ar" ? "يرجى اختيار الشعبة." : "Please select your section.");
+            toast.error(tr("auth_err_section"));
             return;
           }
           if (!submitIslamicGroup) {
-            toast.error(lang === "ar" ? "يرجى اختيار المجموعة الإسلامية." : "Please select your Islamic group.");
+            toast.error(tr("auth_err_islamic_group"));
             return;
           }
           if (!profilePhotoFile) {
-            toast.error(lang === "ar" ? "يرجى رفع صورة الملف الشخصي." : "Please upload a profile photo.");
+            toast.error(tr("auth_err_photo"));
             return;
           }
 
           const completeStudentSignup = async (userId: string) => {
             await uploadProfilePhoto(userId, profilePhotoFile);
-            toast.success(T.welcome);
+            toast.success(tr("auth_welcome"));
             window.location.assign("/student");
           };
 
@@ -199,9 +163,7 @@ function AuthPage() {
             return;
           }
 
-          toast.success(lang === "ar"
-            ? "تم إنشاء حسابك. يرجى مراجعة بريدك الإلكتروني لتأكيده ثم تسجيل الدخول."
-            : "Your account was created. Please check your email to confirm it, then sign in.");
+          toast.success(tr("auth_success_student"));
           setMode("login");
           return;
         }
@@ -210,11 +172,11 @@ function AuthPage() {
         const submitParentLinkCode = String(fd.get("parent_link_code") ?? parentLinkCode).trim();
 
         if (!submitParentFullName) {
-          toast.error(lang === "ar" ? "يرجى إدخال اسم ولي الأمر." : "Please enter the parent full name.");
+          toast.error(tr("auth_err_parent_name"));
           return;
         }
         if (!submitParentLinkCode) {
-          toast.error(lang === "ar" ? "يرجى إدخال رمز ربط ولي الأمر." : "Please enter the Parent Link Code.");
+          toast.error(tr("auth_err_link_code"));
           return;
         }
 
@@ -248,22 +210,18 @@ function AuthPage() {
         const completeParentSignup = async () => {
           const redeem = await redeemParentLinkCode(submitParentLinkCode);
           if (!redeem.ok) {
-            toast.error(
-              lang === "ar"
-                ? "كود الطالب غير صالح. تحقق من الكود في إعدادات ولي الأمر بعد تسجيل الدخول."
-                : "That student link code is not valid. Check the code in Parent Settings after signing in.",
-            );
+            toast.error(tr("auth_invalid_link_code"));
           } else if (redeem.alreadyLinked) {
-            toast.success(lang === "ar" ? "هذا الطالب مرتبط بالفعل." : "This student is already linked.");
+            toast.success(tr("auth_already_linked"));
           } else {
-            toast.success(lang === "ar" ? "تم ربط الطالب بنجاح." : "Student linked successfully.");
+            toast.success(tr("auth_linked_success"));
           }
           await supabase.auth.updateUser({ data: { parent_link_code: null } });
           window.location.assign("/parent/dashboard");
         };
 
         if (data.session) {
-          toast.success(T.welcome);
+          toast.success(tr("auth_welcome"));
           await completeParentSignup();
           return;
         }
@@ -273,14 +231,12 @@ function AuthPage() {
           password: submitPassword,
         });
         if (!loginError && loginData.session) {
-          toast.success(T.welcome);
+          toast.success(tr("auth_welcome"));
           await completeParentSignup();
           return;
         }
 
-        toast.success(lang === "ar"
-          ? "تم إنشاء حسابك. يرجى مراجعة بريدك الإلكتروني لتأكيده ثم تسجيل الدخول."
-          : "Your account was created. Please check your email to confirm it, then sign in.");
+        toast.success(tr("auth_success_parent"));
         setMode("login");
         return;
       }
@@ -290,14 +246,14 @@ function AuthPage() {
         password: submitPassword,
       });
       if (error) throw error;
-      toast.success(T.welcome);
+      toast.success(tr("auth_success_login"));
       const redirectPath = loginData.user
         ? await getPostAuthPath(loginData.user.id)
         : "/student";
       window.location.assign(redirectPath);
     } catch (err) {
       if (mode === "signup" && isDuplicateEmailError(err)) {
-        setSignupAlert(T.duplicateEmail);
+        setSignupAlert(tr("auth_duplicate_email"));
         return;
       }
       toast.error(err instanceof Error ? err.message : String(err));
@@ -309,10 +265,10 @@ function AuthPage() {
 
   return (
     <PageShell
-      eyebrow={lang === "ar" ? "بوابة الطالب" : "Student Portal"}
-      title={T.title}
-      lead={T.lead}
-      crumbs={[{ label: T.title }]}
+      eyebrow={tr("student_title")}
+      title={tr("auth_title")}
+      lead={tr("auth_lead")}
+      crumbs={[{ label: tr("auth_title") }]}
     >
       <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2 items-start">
         {/* Form card */}
@@ -323,14 +279,14 @@ function AuthPage() {
               onClick={() => { setMode("signup"); setSignupAlert(null); }}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${mode === "signup" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
             >
-              <UserPlus className="h-4 w-4" /> {accountType === "parent" ? T.parentSignup : T.signup}
+              <UserPlus className="h-4 w-4" /> {accountType === "parent" ? tr("auth_create_parent") : tr("auth_create_student")}
             </button>
             <button
               type="button"
               onClick={() => { setMode("login"); setSignupAlert(null); }}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${mode === "login" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
             >
-              <LogIn className="h-4 w-4" /> {T.login}
+              <LogIn className="h-4 w-4" /> {tr("auth_login")}
             </button>
           </div>
 
@@ -348,7 +304,7 @@ function AuthPage() {
                     onClick={() => { setMode("login"); setSignupAlert(null); }}
                     className="inline-flex rounded-full border border-destructive/40 bg-background px-4 py-2 text-xs font-semibold text-destructive hover:bg-destructive/5 transition-colors"
                   >
-                    {T.login}
+                    {tr("auth_login")}
                   </button>
                 </div>
               </div>
@@ -358,21 +314,21 @@ function AuthPage() {
           <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             {mode === "signup" && (
               <div>
-                <label className="text-xs font-medium text-muted-foreground">{T.accountType}</label>
+                <label className="text-xs font-medium text-muted-foreground">{tr("auth_account_type")}</label>
                 <div className="mt-2 inline-flex w-full rounded-full border border-border p-1">
                   <button
                     type="button"
                     onClick={() => setAccountType("student")}
                     className={`inline-flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "student" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
                   >
-                    <GraduationCap className="h-4 w-4" /> {T.studentAccount}
+                    <GraduationCap className="h-4 w-4" /> {tr("auth_student_account")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setAccountType("parent")}
                     className={`inline-flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "parent" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
                   >
-                    <Users className="h-4 w-4" /> {T.parentAccount}
+                    <Users className="h-4 w-4" /> {tr("auth_parent_account")}
                   </button>
                 </div>
               </div>
@@ -380,7 +336,7 @@ function AuthPage() {
             {mode === "signup" && accountType === "student" && (
               <>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.arabicNameHint} *</label>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("auth_arabic_name_hint")} *</label>
                   <input
                     type="text"
                     name="arabic_name"
@@ -394,7 +350,7 @@ function AuthPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.englishNameHint} *</label>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("auth_english_name_hint")} *</label>
                   <input
                     type="text"
                     name="english_name"
@@ -407,7 +363,7 @@ function AuthPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.grade}</label>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("auth_grade")}</label>
                   <select
                     name="grade"
                     required
@@ -439,7 +395,7 @@ function AuthPage() {
             {mode === "signup" && accountType === "parent" && (
               <>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.parentFullName}</label>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("auth_parent_full_name")}</label>
                   <input
                     type="text"
                     name="parent_full_name"
@@ -452,7 +408,7 @@ function AuthPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{T.parentLinkCode}</label>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("auth_parent_link_code")}</label>
                   <input
                     type="text"
                     name="parent_link_code"
@@ -464,12 +420,12 @@ function AuthPage() {
                     autoComplete="off"
                     className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-mono tracking-wider uppercase"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">{T.parentLinkCodeHint}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{tr("auth_parent_link_code_hint")}</p>
                 </div>
               </>
             )}
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{T.email}</label>
+              <label className="text-xs font-medium text-muted-foreground">{tr("auth_email")}</label>
               <input
                 type="email"
                 name="email"
@@ -482,7 +438,7 @@ function AuthPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{T.password}</label>
+              <label className="text-xs font-medium text-muted-foreground">{tr("auth_password")}</label>
               <input
                 type="password"
                 name="password"
@@ -499,7 +455,7 @@ function AuthPage() {
               disabled={busy}
               className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-60"
             >
-              {busy ? "…" : mode === "signup" ? (accountType === "parent" ? T.parentSignup : T.submitSignup) : T.submitLogin}
+              {busy ? "…" : mode === "signup" ? (accountType === "parent" ? tr("auth_create_parent") : tr("auth_submit_signup")) : tr("auth_submit_login")}
             </button>
           </form>
 
@@ -509,7 +465,7 @@ function AuthPage() {
               onClick={() => { setMode(mode === "login" ? "signup" : "login"); setSignupAlert(null); }}
               className="underline hover:text-primary"
             >
-              {mode === "login" ? T.toSignup : T.toLogin}
+              {mode === "login" ? tr("auth_to_signup") : tr("auth_to_login")}
             </button>
           </div>
         </div>
@@ -518,20 +474,17 @@ function AuthPage() {
         <div className="rounded-3xl bg-gradient-to-br from-brand-dark to-primary text-primary-foreground p-8 shadow-[var(--shadow-elegant)]">
           <GraduationCap className="h-10 w-10 text-gold" />
           <h3 className="mt-4 font-display text-2xl">
-            {lang === "ar" ? "ابدأ رحلتك التعليمية" : "Start your learning journey"}
+            {tr("auth_start_journey")}
           </h3>
           <ul className="mt-5 space-y-3 text-sm opacity-90">
-            {(lang === "ar"
-              ? ["دروسي ومتابعتي", "اختباراتي وتقدمي", "مكتبة الفيديوهات والملفات", "ركن الوالدين"]
-              : ["My lessons & tracking", "My quizzes & progress", "Videos & files library", "Parent corner"]
-            ).map((x) => (
+            {tr("auth_hero_bullets").split("|").map((x) => (
               <li key={x} className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-gold" /> {x}
               </li>
             ))}
           </ul>
           <Link to="/grades" className="mt-8 inline-flex rounded-full border border-primary-foreground/30 px-5 py-2.5 text-sm font-semibold hover:bg-primary-foreground/10">
-            {lang === "ar" ? "استكشف الأكاديمية" : "Explore the Academy"}
+            {tr("auth_explore_academy")}
           </Link>
         </div>
       </div>

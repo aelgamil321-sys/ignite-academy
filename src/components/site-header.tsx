@@ -67,7 +67,7 @@ export function SiteHeader() {
     { label: tr("nav_parent"), to: "/parent" },
     { label: tr("nav_student"), to: "/student" },
     { label: tr("nav_contact"), to: "/contact" },
-    { label: locale === "ar" ? "الإدارة" : "Admin", to: "/admin" },
+    { label: tr("nav_admin"), to: "/admin" },
   ];
 
   const parentNav: Array<{ label: string; to: string }> = [
@@ -78,15 +78,13 @@ export function SiteHeader() {
     { label: tr("nav_parent"), to: "/parent" },
     { label: tr("parent_dashboard_title"), to: "/parent/dashboard" },
     { label: tr("nav_contact"), to: "/contact" },
-    { label: locale === "ar" ? "الإدارة" : "Admin", to: "/admin" },
+    { label: tr("nav_admin"), to: "/admin" },
   ];
 
   const nav = signedIn && isParent ? parentNav : allNav.filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
   const desktopNav = signedIn && isParent ? parentNav : allNav.slice(0, 8).filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
   const profilePath = signedIn && isParent ? "/parent/settings" : "/student/profile";
-  const profileLabel = signedIn && isParent
-    ? (locale === "ar" ? "ملف ولي الأمر" : "Parent Profile")
-    : (locale === "ar" ? "الملف الشخصي" : "Profile");
+  const profileLabel = signedIn && isParent ? tr("profile_parent") : tr("profile_student");
 
   const schoolLogoUrl = certificateSchoolLogoUrl();
   const schoolLogoAlt = locale === "ar" ? "مدرسة اجنايت" : "Ignite School";

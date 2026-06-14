@@ -1,5 +1,5 @@
-/** ZH translations for Ignite Islamic Academy UI. */
-export const zh: Record<string, string> = {
+/** Simplified Chinese translations for Ignite Islamic Academy UI. */
+export const zhT = {
   nav_home: "首页",
   nav_about: "关于我们",
   nav_student: "学生门户",
@@ -305,14 +305,10 @@ export const zh: Record<string, string> = {
   hof_avg_score_label: "平均分",
   hof_certificates_label: "证书",
   grade_champion_suffix: "冠军",
-  not_set: "未设置",
-  auth_err_email_password: "请输入您的电子邮件和密码。",
-  auth_invalid_link_code: "该学生关联码无效。登录后请在家长设置中核对关联码。",
-  parent_dashboard_load_failed: "无法加载家长仪表板：",
 };
 
-/** ZH translations for L() English strings. */
-export const zhByEn: Record<string, string> = {
+/** Simplified Chinese translations for L() English strings. */
+export const zhL = {
   "(empty)": "（空）",
   "Academic progress overview for your child.": "您孩子的学业进度概览。",
   "Achievements & Badges": "成就与徽章",

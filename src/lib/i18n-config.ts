@@ -1,4 +1,8 @@
 import type { Bi } from "@/lib/curriculum";
+import { deByEn } from "@/lib/i18n/locales/de";
+import { frByEn } from "@/lib/i18n/locales/fr";
+import { urByEn } from "@/lib/i18n/locales/ur";
+import { zhByEn } from "@/lib/i18n/locales/zh";
 
 export const LANG_STORAGE_KEY = "iia.lang";
 
@@ -58,9 +62,22 @@ export function localeForFormatting(lang: Lang): string {
   }
 }
 
+const L_BY_EN: Record<Exclude<Lang, "en" | "ar">, Record<string, string>> = {
+  fr: frByEn,
+  de: deByEn,
+  ur: urByEn,
+  zh: zhByEn,
+};
+
 export function L(en: string, ar: string): Record<Lang, string> {
-  const fallback = en || ar;
-  return { en, ar, fr: fallback, de: fallback, ur: fallback, zh: fallback };
+  return {
+    en,
+    ar,
+    fr: L_BY_EN.fr[en] ?? en,
+    de: L_BY_EN.de[en] ?? en,
+    ur: L_BY_EN.ur[en] ?? en,
+    zh: L_BY_EN.zh[en] ?? en,
+  };
 }
 
 export function pickBi(text: Bi, lang: Lang): string {

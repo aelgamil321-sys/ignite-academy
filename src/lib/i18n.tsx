@@ -380,11 +380,124 @@ export const t = {
   recent: { en: "Recent", ar: "الأحدث" },
   add_content: { en: "Add content", ar: "إضافة محتوى" },
   admin_only: { en: "Admin only", ar: "للإداريين فقط" },
+
+  // Auth (platform UI)
+  auth_title: { en: "Student Account", ar: "حساب الطالب" },
+  auth_lead: {
+    en: "Create your account or sign in to access your lessons, quizzes, and progress.",
+    ar: "أنشئ حسابك أو سجّل الدخول للوصول إلى دروسك واختباراتك وتقدّمك.",
+  },
+  auth_create_student: { en: "Create Student Account", ar: "إنشاء حساب طالب" },
+  auth_create_parent: { en: "Create Parent Account", ar: "إنشاء حساب ولي أمر" },
+  auth_login: { en: "Login", ar: "تسجيل الدخول" },
+  auth_account_type: { en: "Account type", ar: "نوع الحساب" },
+  auth_student_account: { en: "Student Account", ar: "حساب طالب" },
+  auth_parent_account: { en: "Parent Account", ar: "حساب ولي أمر" },
+  auth_parent_full_name: { en: "Parent full name", ar: "الاسم الكامل لولي الأمر" },
+  auth_parent_link_code: { en: "Student Link Code", ar: "كود الطالب" },
+  auth_parent_link_code_hint: {
+    en: "Enter the code from your child's student dashboard.",
+    ar: "أدخل الرمز من لوحة الطالب.",
+  },
+  auth_arabic_name: { en: "Arabic Student Name", ar: "اسم الطالب بالعربية" },
+  auth_arabic_name_hint: {
+    en: "Arabic Student Name / اسم الطالب بالعربية",
+    ar: "اسم الطالب بالعربية",
+  },
+  auth_english_name: { en: "English Student Name", ar: "اسم الطالب بالإنجليزية" },
+  auth_english_name_hint: {
+    en: "English Student Name / اسم الطالب بالإنجليزية",
+    ar: "اسم الطالب بالإنجليزية",
+  },
+  auth_email: { en: "Email", ar: "البريد الإلكتروني" },
+  auth_password: { en: "Password", ar: "كلمة المرور" },
+  auth_grade: { en: "Grade", ar: "الصف الدراسي" },
+  auth_section: { en: "Section", ar: "الشعبة" },
+  auth_islamic_group: { en: "Islamic Group", ar: "المجموعة الإسلامية" },
+  auth_profile_photo: { en: "Profile photo", ar: "صورة الملف الشخصي" },
+  auth_submit_signup: { en: "Create account", ar: "إنشاء الحساب" },
+  auth_submit_login: { en: "Sign in", ar: "دخول" },
+  auth_to_login: { en: "Have an account? Sign in", ar: "لديك حساب؟ سجّل الدخول" },
+  auth_to_signup: { en: "New here? Create an account", ar: "جديد هنا؟ أنشئ حسابًا" },
+  auth_welcome: { en: "Welcome to the Academy", ar: "مرحبًا بك في الأكاديمية" },
+  auth_explore_academy: { en: "Explore the Academy", ar: "استكشف الأكاديمية" },
+  auth_start_journey: { en: "Start your learning journey", ar: "ابدأ رحلتك التعليمية" },
+  auth_hero_bullets: {
+    en: "My lessons & progress|My quizzes & scores|Video & file library|Parent corner",
+    ar: "دروسي وتقدّمي|اختباراتي ودرجاتي|مكتبة الفيديو والملفات|ركن الوالدين",
+  },
+  auth_duplicate_email: {
+    en: "This email is already registered. Please sign in or use a different email.",
+    ar: "هذا البريد مسجّل بالفعل. يرجى تسجيل الدخول أو استخدام بريد آخر.",
+  },
+  auth_err_arabic_name: {
+    en: "Please enter the Arabic student name.",
+    ar: "يرجى إدخال اسم الطالب بالعربية.",
+  },
+  auth_err_english_name: {
+    en: "Please enter the English student name.",
+    ar: "يرجى إدخال اسم الطالب بالإنجليزية.",
+  },
+  auth_err_section: { en: "Please select your section.", ar: "يرجى اختيار الشعبة." },
+  auth_err_islamic_group: {
+    en: "Please select your Islamic group.",
+    ar: "يرجى اختيار المجموعة الإسلامية.",
+  },
+  auth_err_photo: { en: "Please upload a profile photo.", ar: "يرجى رفع صورة الملف الشخصي." },
+  auth_err_parent_name: {
+    en: "Please enter the parent full name.",
+    ar: "يرجى إدخال اسم ولي الأمر.",
+  },
+  auth_err_link_code: {
+    en: "Please enter the Parent Link Code.",
+    ar: "يرجى إدخال رمز ربط ولي الأمر.",
+  },
+  auth_success_student: {
+    en: "Your account was created. Please check your email to confirm, then sign in.",
+    ar: "تم إنشاء حسابك. يرجى التحقق من بريدك الإلكتروني ثم تسجيل الدخول.",
+  },
+  auth_success_parent: {
+    en: "Your account was created. Please check your email to confirm, then sign in.",
+    ar: "تم إنشاء حسابك. يرجى التحقق من بريدك الإلكتروني ثم تسجيل الدخول.",
+  },
+  auth_success_login: { en: "Welcome to the Academy", ar: "مرحبًا بك في الأكاديمية" },
+  auth_already_linked: {
+    en: "This student is already linked.",
+    ar: "هذا الطالب مرتبط بالفعل.",
+  },
+  auth_linked_success: { en: "Student linked successfully.", ar: "تم ربط الطالب بنجاح." },
+  sign_out: { en: "Sign out", ar: "تسجيل الخروج" },
+  signed_out: { en: "Signed out", ar: "تم تسجيل الخروج" },
+  nav_admin: { en: "Admin", ar: "الإدارة" },
+  profile_parent: { en: "Parent Profile", ar: "ملف ولي الأمر" },
+  profile_student: { en: "Profile", ar: "الملف الشخصي" },
+  dept_islamic_ed: {
+    en: "Department of Islamic Education – Ignite School",
+    ar: "قسم التربية الإسلامية – مدرسة اجنايت",
+  },
+  empty_published_lessons: { en: "No published lessons yet.", ar: "لا توجد دروس منشورة بعد." },
+  empty_announcements_short: { en: "No announcements yet.", ar: "لا توجد إعلانات بعد." },
+  hof_avg_score_label: { en: "Avg. score", ar: "متوسط الدرجات" },
+  hof_certificates_label: { en: "Certificates", ar: "الشهادات" },
+  grade_champion_suffix: { en: "Champion", ar: "بطل" },
+  not_set: { en: "Not set", ar: "غير محدد" },
+  auth_err_email_password: {
+    en: "Please enter your email and password.",
+    ar: "يرجى إدخال البريد الإلكتروني وكلمة المرور.",
+  },
+  auth_invalid_link_code: {
+    en: "That student link code is not valid. Check the code in Parent Settings after signing in.",
+    ar: "كود الطالب غير صالح. تحقق من الكود في إعدادات ولي الأمر بعد تسجيل الدخول.",
+  },
+  parent_dashboard_load_failed: {
+    en: "Could not load parent dashboard:",
+    ar: "تعذر تحميل لوحة ولي الأمر:",
+  },
 } satisfies Dict;
 
 export type TKey = keyof typeof t;
 
-const LOCALE_OVERRIDES: Record<Lang, Partial<Record<TKey, string>>> = {
+const LOCALE_OVERRIDES: Record<Lang, Record<string, string>> = {
   en: {},
   ar: {},
   fr,

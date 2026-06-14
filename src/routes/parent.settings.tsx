@@ -75,7 +75,7 @@ function ParentSettingsPage() {
 
   async function signOut() {
     await supabase.auth.signOut();
-    toast.success(lang === "ar" ? "تم تسجيل الخروج" : "Signed out");
+    toast.success(tr("signed_out"));
     navigate({ to: "/auth", search: { mode: "login", accountType: "parent" } });
   }
 
@@ -185,7 +185,7 @@ function ParentSettingsPage() {
               className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors"
             >
               <LogOut className="h-4 w-4" />
-              {lang === "ar" ? "تسجيل الخروج" : "Sign out"}
+              {tr("sign_out")}
             </button>
           </div>
         </div>

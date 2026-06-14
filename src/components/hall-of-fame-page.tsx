@@ -3,10 +3,11 @@ import { Award, Loader2, Medal, Star, Trophy } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
 import { EmptyState } from "@/components/empty-state";
 import { StudentProfileAvatar } from "@/components/student-profile-avatar";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, type TKey } from "@/lib/i18n";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { islamicGroupLabel } from "@/lib/student-academics";
 import { fetchHallOfFame, type HallOfFameData, type HallOfFameStudent } from "@/lib/hall-of-fame";
+import type { Lang } from "@/lib/i18n-config";
 import { cn } from "@/lib/utils";
 
 function MetricPill({ label, value }: { label: string; value: string }) {
@@ -21,17 +22,17 @@ function MetricPill({ label, value }: { label: string; value: string }) {
 function StudentCard({
   student,
   lang,
+  tr,
   featured = false,
 }: {
   student: HallOfFameStudent;
-  lang: "en" | "ar";
+  lang: Lang;
+  tr: (key: TKey) => string;
   featured?: boolean;
 }) {
   const gradeLabel = student.grade
     ? gradeDisplayName(student.grade, lang)
-    : lang === "ar"
-      ? "غير محدد"
-      : "Not set";
+    : tr("not_set");
 
   return (
     <article
@@ -54,11 +55,11 @@ function StudentCard({
       </p>
       <div className="mt-4 grid w-full grid-cols-2 gap-2">
         <MetricPill
-          label={lang === "ar" ? "متوسط الدرجات" : "Avg. score"}
+          label={tr("hof_avg_score_label")}
           value={`${student.averageScorePct}%`}
         />
         <MetricPill
-          label={lang === "ar" ? "الشهادات" : "Certificates"}
+          label={tr("hof_certificates_label")}
           value={String(student.certificatesEarned)}
         />
       </div>
@@ -67,7 +68,7 @@ function StudentCard({
 }
 
 export function HallOfFamePage() {
-  const { tr, lang, locale } = useI18n();
+  const { tr, lang } = useI18n();
   const [data, setData] = useState<HallOfFameData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +101,12 @@ export function HallOfFamePage() {
     data.topStudents.length === 0 &&
     !data.studentOfMonth &&
     data.gradeChampions.length === 0;
+
+  function gradeChampionLabel(gradeSlug: string): string {
+    const grade = gradeDisplayName(gradeSlug, lang);
+    if (lang === "ar") return `${tr("grade_champion_suffix")} ${grade}`;
+    return `${grade} ${tr("grade_champion_suffix")}`;
+  }
 
   return (
     <PageShell
@@ -145,19 +152,17 @@ export function HallOfFamePage() {
                     <p className="mt-2 text-sm text-muted-foreground">
                       {data.studentOfMonth.grade
                         ? gradeDisplayName(data.studentOfMonth.grade, lang)
-                        : lang === "ar"
-                          ? "غير محدد"
-                          : "Not set"}
+                        : tr("not_set")}
                       {" · "}
                       {islamicGroupLabel(data.studentOfMonth.islamicGroup, lang)}
                     </p>
                     <div className="mt-5 grid max-w-md grid-cols-2 gap-3 sm:grid-cols-2">
                       <MetricPill
-                        label={lang === "ar" ? "متوسط الدرجات" : "Avg. score"}
+                        label={tr("hof_avg_score_label")}
                         value={`${data.studentOfMonth.averageScorePct}%`}
                       />
                       <MetricPill
-                        label={lang === "ar" ? "الشهادات" : "Certificates"}
+                        label={tr("hof_certificates_label")}
                         value={String(data.studentOfMonth.certificatesEarned)}
                       />
                     </div>
@@ -188,9 +193,7 @@ export function HallOfFamePage() {
                     />
                     <div className="min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                        {lang === "ar"
-                          ? `بطل ${gradeDisplayName(champion.gradeSlug, "ar")}`
-                          : `${gradeDisplayName(champion.gradeSlug, "en")} Champion`}
+                        {gradeChampionLabel(champion.gradeSlug)}
                       </p>
                       <h3 className="mt-1 truncate font-display text-lg font-semibold text-foreground">
                         {champion.arabicName}
@@ -215,7 +218,7 @@ export function HallOfFamePage() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {data.topStudents.map((student, index) => (
-                  <StudentCard key={index} student={student} lang={lang} />
+                  <StudentCard key={index} student={student} lang={lang} tr={tr} />
                 ))}
               </div>
             </section>

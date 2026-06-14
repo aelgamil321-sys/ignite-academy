@@ -1,5 +1,5 @@
-/** FR translations for Ignite Islamic Academy UI. */
-export const fr: Record<string, string> = {
+/** French translations for Ignite Islamic Academy UI. */
+export const frT = {
   nav_home: "Accueil",
   nav_about: "À propos",
   nav_student: "Portail étudiant",
@@ -305,14 +305,10 @@ export const fr: Record<string, string> = {
   hof_avg_score_label: "Score moy.",
   hof_certificates_label: "Certificats",
   grade_champion_suffix: "Champion",
-  not_set: "Non défini",
-  auth_err_email_password: "Veuillez saisir votre e-mail et votre mot de passe.",
-  auth_invalid_link_code: "Ce code de liaison étudiant n'est pas valide. Vérifiez le code dans les paramètres parent après connexion.",
-  parent_dashboard_load_failed: "Impossible de charger le tableau de bord parent :",
 };
 
-/** FR translations for L() English strings. */
-export const frByEn: Record<string, string> = {
+/** French translations for L() English strings. */
+export const frL = {
   "(empty)": "(vide)",
   "Academic progress overview for your child.": "Aperçu des progrès scolaires de votre enfant.",
   "Achievements & Badges": "Réussites et badges",
