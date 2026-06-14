@@ -4,9 +4,6 @@ import {
   ChevronLeft, Clock, Target, BookOpen, Sparkles, ClipboardList,
   FileText, Video, HelpCircle, Download,
 } from "lucide-react";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { getGrade } from "@/lib/curriculum";
@@ -26,8 +23,8 @@ export const Route = createFileRoute("/grades/$grade/$lesson")({
   },
   head: () => ({ meta: [{ title: "Lesson — Ignite Islamic Academy" }] }),
   component: LessonPage,
-  notFoundComponent: () => <div className="container-page py-20">Lesson not found.</div>,
-  errorComponent: ({ error }) => <div className="container-page py-20">Error: {error.message}</div>,
+  notFoundComponent: () => <main className="flex-1 container-page py-20">Lesson not found.</main>,
+  errorComponent: ({ error }) => <main className="flex-1 container-page py-20">Error: {error.message}</main>,
 });
 
 function LessonPage() {
@@ -40,31 +37,23 @@ function LessonPage() {
 
   if (cmsLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <SiteHeader />
-        <main className="flex-1 container-page py-20 text-muted-foreground">Loading lesson…</main>
-        <SiteFooter />
-      </div>
+      <main className="flex-1 container-page py-20 text-muted-foreground">Loading lesson…</main>
     );
   }
 
   if (!resolved?.grade) {
-    return <div className="container-page py-20">Grade not found.</div>;
+    return <main className="flex-1 container-page py-20">Grade not found.</main>;
   }
   const { grade, lesson, custom, lessonFiles } = resolved;
   if (!lesson) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <SiteHeader />
-        <main className="flex-1 container-page py-20">
+      <main className="flex-1 container-page py-20">
           <Link to="/grades/$grade" params={{ grade: grade.slug }} className="text-primary hover:text-primary inline-flex items-center gap-2">
             <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
             {tr("back_to_grade")} · {grade.name[lang]}
           </Link>
           <p className="mt-6 text-muted-foreground">Lesson not found.</p>
-        </main>
-        <SiteFooter />
-      </div>
+      </main>
     );
   }
 
@@ -83,11 +72,9 @@ function LessonPage() {
   const lessonVideos = lessonVideoEmbeds(custom, lang);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <SiteHeader />
-      <main className="flex-1">
+    <main className="flex-1 pb-24">
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
-          <div className="container-page py-10">
+          <div className="container-page py-12">
             <div className="mb-5"><Breadcrumbs items={[
               { label: tr("nav_stages"), to: "/grades" },
               { label: grade.name[lang], to: "/grades/$grade", params: { grade: grade.slug } },
@@ -109,14 +96,30 @@ function LessonPage() {
           </div>
         </section>
 
-        <section className="container-page py-12 grid gap-10 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
+        <section className="container-page py-12 grid gap-8 lg:gap-10 lg:grid-cols-3">
+          {lessonFiles.length > 0 && (
+            <aside className="order-first space-y-6 lg:order-last lg:col-span-1">
+              <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-[var(--shadow-soft)] lg:sticky lg:top-24">
+                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{tr("ls_resources")}</div>
+                <div className="space-y-2">
+                  {lessonFiles.map((f: CustomFile) => (
+                    <a key={f.id} href={f.fileUrl} download={f.fileName}
+                      className="block rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-primary hover:text-primary">
+                      {f.title[lang]} <span className="opacity-60">· {f.type.toUpperCase()}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          )}
+
+          <div className={`space-y-6 ${lessonFiles.length > 0 ? "lg:col-span-2" : "lg:col-span-3"}`}>
             {sections.map((s) => {
               const Icon = s.icon;
               const fallback = lang === "ar" ? "لم تتم إضافة هذا المحتوى بعد" : "This content has not been added yet";
               const body = (s.body ?? "").trim();
               return (
-                <div key={s.key} className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
+                <div key={s.key} className="rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)]">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Icon className="h-5 w-5" />
@@ -133,7 +136,7 @@ function LessonPage() {
             })}
 
             {lesson.vocab.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
+              <div className="rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)]">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <FileText className="h-5 w-5" />
@@ -154,7 +157,7 @@ function LessonPage() {
             <div
               id="lesson-video"
               tabIndex={-1}
-              className="scroll-mt-28 rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] outline-none"
+              className="scroll-mt-28 rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)] outline-none"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -206,27 +209,8 @@ function LessonPage() {
               </div>
             )}
           </div>
-
-          <aside className="space-y-6">
-            {lessonFiles.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] sticky top-24">
-                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{tr("ls_resources")}</div>
-                <div className="space-y-2">
-                  {lessonFiles.map((f: CustomFile) => (
-                    <a key={f.id} href={f.fileUrl} download={f.fileName}
-                      className="block rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-primary hover:text-primary">
-                      {f.title[lang]} <span className="opacity-60">· {f.type.toUpperCase()}</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-          </aside>
         </section>
-      </main>
-      <SiteFooter />
-      <AskMrAhmed />
-    </div>
+    </main>
   );
 }
 
@@ -301,7 +285,7 @@ function LessonFileSection({
     <div
       id={id}
       tabIndex={-1}
-      className="scroll-mt-28 rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] outline-none"
+      className="scroll-mt-28 rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)] outline-none"
     >
       <div className="flex items-center gap-3 mb-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
