@@ -44,23 +44,26 @@ export function SiteHeader() {
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
+    const chrome = header.querySelector<HTMLElement>("[data-site-header-chrome]");
+    if (!chrome) return;
 
     const updateHeaderOffset = () => {
-      const bar = header.querySelector<HTMLElement>("[data-site-header-bar]");
-      const height = bar?.getBoundingClientRect().height ?? header.getBoundingClientRect().height;
-      document.documentElement.style.setProperty("--site-header-offset", `${Math.ceil(height)}px`);
+      const height = Math.ceil(chrome.getBoundingClientRect().height + 1);
+      if (height > 0) {
+        document.documentElement.style.setProperty("--site-header-offset", `${height}px`);
+      }
     };
 
     updateHeaderOffset();
     const observer = new ResizeObserver(updateHeaderOffset);
-    observer.observe(header);
+    observer.observe(chrome);
     window.addEventListener("resize", updateHeaderOffset);
 
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", updateHeaderOffset);
     };
-  }, [open, signedIn, isParent, roleLoading, lang]);
+  }, [signedIn, isParent, roleLoading, lang]);
 
   useEffect(() => {
     let active = true;
@@ -226,7 +229,9 @@ export function SiteHeader() {
   );
 
   return (
+    <>
     <header ref={headerRef} className="fixed top-0 inset-x-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-lg">
+      <div data-site-header-chrome>
       <div className="container-page py-3 md:py-3.5 lg:py-4">
         {/* Mobile & tablet (< xl) */}
         <div data-site-header-bar className="flex min-h-11 items-center gap-2 sm:gap-3 xl:hidden">
@@ -250,6 +255,7 @@ export function SiteHeader() {
             {schoolLogoDesktop}
           </div>
         </div>
+      </div>
       </div>
 
       {open && (
@@ -304,5 +310,7 @@ export function SiteHeader() {
         </div>
       )}
     </header>
+    <div data-site-header-spacer className="site-header-spacer shrink-0" aria-hidden />
+    </>
   );
 }

@@ -116,7 +116,7 @@
   --cream: #F8F8F6;
 
   /* Layout chrome — updated by SiteHeader at runtime; fallbacks for SSR */
-  --site-header-offset: 4.25rem;
+  --site-header-offset: 4.5rem;
   --site-fab-clearance: 5.5rem;
 }
 
@@ -162,8 +162,11 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
+  .site-header-spacer {
+    height: var(--site-header-offset);
+    min-height: 4.5rem;
+  }
   .site-content-shell {
-    padding-top: var(--site-header-offset);
     padding-bottom: max(
       var(--site-fab-clearance),
       calc(env(safe-area-inset-bottom, 0px) + 4.5rem)
