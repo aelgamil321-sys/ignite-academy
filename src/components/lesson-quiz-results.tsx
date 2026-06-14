@@ -43,7 +43,7 @@ export function LessonQuizResults({
   };
 
   return (
-    <div className="space-y-6 scroll-mt-header outline-none" id="lesson-result" tabIndex={-1}>
+    <div className="space-y-6 scroll-mt-28 outline-none" id="lesson-result" tabIndex={-1}>
       <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 space-y-3">
         <h3 className="font-display text-lg text-foreground">
           {L("Quiz Results", "نتيجة الاختبار")[lang]}

@@ -8,6 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero.jpg";
 import patternImg from "@/assets/pattern.jpg";
 import { HOMEPAGE_STAGE_CARDS, STAGE_CARD_CONFIG, STAGE_CARD_IMAGES } from "@/lib/stage-images";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { SUBJECT_CATEGORIES } from "@/lib/categories";
 import { useCMS, useCMSStats, useAllAnnouncements } from "@/lib/cms";
@@ -67,7 +70,9 @@ function Home() {
   }));
 
   return (
-    <main className="flex-1 bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
+      <main>
         {/* HERO */}
         <section className="relative overflow-hidden bg-brand-dark text-white">
           <div
@@ -349,7 +354,10 @@ function Home() {
             </div>
           </div>
         </section>
-    </main>
+      </main>
+      <SiteFooter />
+      <AskMrAhmed />
+    </div>
   );
 }
 

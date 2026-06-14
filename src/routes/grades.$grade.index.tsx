@@ -2,6 +2,9 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import { useMemo, useState } from "react";
 import { ArrowRight, BookOpen, ChevronLeft, Search, Layers, Video as VideoIcon, FileText } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { EmptyState } from "@/components/empty-state";
 import { useI18n } from "@/lib/i18n";
@@ -32,8 +35,8 @@ export const Route = createFileRoute("/grades/$grade/")({
     };
   },
   component: GradePage,
-  notFoundComponent: () => <main className="flex-1 container-page py-20">Grade not found.</main>,
-  errorComponent: ({ error }) => <main className="flex-1 container-page py-20">Error: {error.message}</main>,
+  notFoundComponent: () => <div className="container-page py-20">Grade not found.</div>,
+  errorComponent: ({ error }) => <div className="container-page py-20">Error: {error.message}</div>,
 });
 
 function GradePage() {
@@ -80,7 +83,9 @@ function GradePage() {
   }, [gradeCustomLessons, q]);
 
   return (
-    <main className="flex-1">
+    <div className="min-h-screen flex flex-col">
+      <SiteHeader />
+      <main className="flex-1">
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
           <div className="container-page py-12">
             <div className="mb-5"><Breadcrumbs items={[{ label: tr("nav_stages"), to: "/grades" }, { label: grade.name[lang] }]} /></div>
@@ -191,7 +196,10 @@ function GradePage() {
             </div>
           </section>
         )}
-    </main>
+      </main>
+      <SiteFooter />
+      <AskMrAhmed />
+    </div>
   );
 }
 
