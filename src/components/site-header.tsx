@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, X, BookOpen, Languages, User, LayoutDashboard } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccountRole } from "@/hooks/use-account-role";
@@ -37,8 +37,30 @@ const mobileNavPillActive = cn(
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const { tr, toggle, lang } = useI18n();
   const { isParent, loading: roleLoading } = useAccountRole();
+
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+
+    const updateHeaderOffset = () => {
+      const bar = header.querySelector<HTMLElement>("[data-site-header-bar]");
+      const height = bar?.getBoundingClientRect().height ?? header.getBoundingClientRect().height;
+      document.documentElement.style.setProperty("--site-header-offset", `${Math.ceil(height)}px`);
+    };
+
+    updateHeaderOffset();
+    const observer = new ResizeObserver(updateHeaderOffset);
+    observer.observe(header);
+    window.addEventListener("resize", updateHeaderOffset);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateHeaderOffset);
+    };
+  }, [open, signedIn, isParent, roleLoading, lang]);
 
   useEffect(() => {
     let active = true;
@@ -204,10 +226,10 @@ export function SiteHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-lg">
+    <header ref={headerRef} className="fixed top-0 inset-x-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-lg">
       <div className="container-page py-3 md:py-3.5 lg:py-4">
         {/* Mobile & tablet (< xl) */}
-        <div className="flex min-h-11 items-center gap-2 sm:gap-3 xl:hidden">
+        <div data-site-header-bar className="flex min-h-11 items-center gap-2 sm:gap-3 xl:hidden">
           {brandLink(true)}
           <div className="min-w-0 flex-1" aria-hidden />
           {schoolLogoMobile}
@@ -219,7 +241,7 @@ export function SiteHeader() {
         </div>
 
         {/* Desktop (xl+) — brand | nav pills | utilities + logo */}
-        <div className="hidden xl:flex xl:items-center xl:gap-3 2xl:gap-4">
+        <div data-site-header-bar className="hidden xl:flex xl:items-center xl:gap-3 2xl:gap-4">
           <div className="shrink-0">{brandLink()}</div>
           {desktopNavEl}
           <div className="flex shrink-0 items-center gap-1.5 2xl:gap-2">

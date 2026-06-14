@@ -8,8 +8,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
-      {children}
-      <SiteFooter />
+      <div className="site-content-shell flex flex-1 flex-col">
+        {children}
+        <SiteFooter />
+      </div>
       <AskMrAhmed />
     </div>
   );

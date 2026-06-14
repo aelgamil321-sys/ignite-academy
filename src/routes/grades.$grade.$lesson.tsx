@@ -72,7 +72,7 @@ function LessonPage() {
   const lessonVideos = lessonVideoEmbeds(custom, lang);
 
   return (
-    <main className="flex-1 pb-24">
+    <main className="flex-1">
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
           <div className="container-page py-12">
             <div className="mb-5"><Breadcrumbs items={[
@@ -99,7 +99,7 @@ function LessonPage() {
         <section className="container-page py-12 grid gap-8 lg:gap-10 lg:grid-cols-3">
           {lessonFiles.length > 0 && (
             <aside className="order-first space-y-6 lg:order-last lg:col-span-1">
-              <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-[var(--shadow-soft)] lg:sticky lg:top-24">
+              <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-[var(--shadow-soft)] lg:sticky lg:top-[calc(var(--site-header-offset)+1rem)]">
                 <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{tr("ls_resources")}</div>
                 <div className="space-y-2">
                   {lessonFiles.map((f: CustomFile) => (
@@ -157,7 +157,7 @@ function LessonPage() {
             <div
               id="lesson-video"
               tabIndex={-1}
-              className="scroll-mt-28 rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)] outline-none"
+              className="scroll-mt-header rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)] outline-none"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -199,7 +199,7 @@ function LessonPage() {
             <LessonDownloads custom={custom} />
 
             {custom && normalizeQuizList(custom.quiz).length > 0 && (
-              <div id="lesson-quiz" tabIndex={-1} className="scroll-mt-28 outline-none">
+              <div id="lesson-quiz" tabIndex={-1} className="scroll-mt-header outline-none">
                 <LessonQuizStudent
                   lessonId={custom.id}
                   questions={custom.quiz}
@@ -285,7 +285,7 @@ function LessonFileSection({
     <div
       id={id}
       tabIndex={-1}
-      className="scroll-mt-28 rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)] outline-none"
+      className="scroll-mt-header rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)] outline-none"
     >
       <div className="flex items-center gap-3 mb-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">

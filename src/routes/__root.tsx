@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: SITE_NAME },
       { name: "description", content: "Online Islamic education for KG1–Grade 12: lessons, worksheets, videos, quizzes and parent resources." },
       { property: "og:site_name", content: SITE_NAME },
