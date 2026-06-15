@@ -47,54 +47,73 @@ export async function fetchNotifications(limit = 30): Promise<{
   data: NotificationRow[];
   error: string | null;
 }> {
-  const { data, error } = await supabase
-    .from("notifications")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+  try {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
-  if (error) return { data: [], error: error.message };
-  return { data: (data ?? []).map((r) => normalizeRow(r as Record<string, unknown>)), error: null };
+    if (error) return { data: [], error: error.message };
+    return { data: (data ?? []).map((r) => normalizeRow(r as Record<string, unknown>)), error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to load notifications";
+    return { data: [], error: message };
+  }
 }
 
 export async function fetchUnreadNotificationCount(): Promise<{
   count: number;
   error: string | null;
 }> {
-  const { count, error } = await supabase
-    .from("notifications")
-    .select("id", { count: "exact", head: true })
-    .is("read_at", null);
+  try {
+    const { count, error } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .is("read_at", null);
 
-  if (error) return { count: 0, error: error.message };
-  return { count: count ?? 0, error: null };
+    if (error) return { count: 0, error: error.message };
+    return { count: count ?? 0, error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to load unread count";
+    return { count: 0, error: message };
+  }
+}
+
+async function callNotificationRpc(
+  fn: string,
+  args?: Record<string, unknown>,
+): Promise<{ error: string | null }> {
+  try {
+    const { error } = await supabase.rpc(fn as "has_role", args as never);
+    return { error: error?.message ?? null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : `RPC ${fn} failed`;
+    return { error: message };
+  }
 }
 
 export async function markNotificationRead(notificationId: string): Promise<{ error: string | null }> {
-  const { error } = await supabase.rpc("mark_notification_read", {
-    p_notification_id: notificationId,
-  });
-  return { error: error?.message ?? null };
+  return callNotificationRpc("mark_notification_read", { p_notification_id: notificationId });
 }
 
 export async function markAllNotificationsRead(): Promise<{ error: string | null }> {
-  const { error } = await supabase.rpc("mark_all_notifications_read");
-  return { error: error?.message ?? null };
+  return callNotificationRpc("mark_all_notifications_read");
 }
 
 export async function syncParentMissingAssignmentNotifications(): Promise<void> {
-  const { error } = await supabase.rpc("sync_parent_missing_assignment_notifications");
-  if (error) console.warn("[notifications parent missing]", error.message);
+  const { error } = await callNotificationRpc("sync_parent_missing_assignment_notifications");
+  if (error) console.warn("[notifications parent missing]", error);
 }
 
 export async function syncAssignmentDueSoonNotifications(): Promise<void> {
-  const { error } = await supabase.rpc("sync_assignment_due_soon_notifications");
-  if (error) console.warn("[notifications due soon]", error.message);
+  const { error } = await callNotificationRpc("sync_assignment_due_soon_notifications");
+  if (error) console.warn("[notifications due soon]", error);
 }
 
 export async function notifyBadgeUnlocked(badgeId: StudentBadgeId): Promise<void> {
-  const { error } = await supabase.rpc("notify_badge_unlocked", { p_badge_id: badgeId });
-  if (error) console.warn("[notifications badge]", error.message);
+  const { error } = await callNotificationRpc("notify_badge_unlocked", { p_badge_id: badgeId });
+  if (error) console.warn("[notifications badge]", error);
 }
 
 function readSeenBadges(userId: string): Set<string> {
@@ -138,17 +157,20 @@ export async function refreshNotificationSources(
   unlockedBadgeIds: StudentBadgeId[],
   role: "student" | "parent" | "admin" | null,
 ): Promise<void> {
-  if (role === "student") {
-    await Promise.all([
-      syncAssignmentDueSoonNotifications(),
-      syncBadgeNotifications(userId, unlockedBadgeIds),
-    ]);
-    return;
-  }
+  try {
+    if (role === "student") {
+      await Promise.all([
+        syncAssignmentDueSoonNotifications(),
+        syncBadgeNotifications(userId, unlockedBadgeIds),
+      ]);
+      return;
+    }
 
-  if (role === "parent") {
-    await syncParentMissingAssignmentNotifications();
-    return;
+    if (role === "parent") {
+      await syncParentMissingAssignmentNotifications();
+    }
+  } catch (error) {
+    console.warn("[notifications refresh]", error);
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Component, type ErrorInfo, type ReactNode, useState } from "react";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useI18n } from "@/lib/i18n";
@@ -89,13 +89,21 @@ export function NotificationBell({ className }: { className?: string }) {
   }
 
   async function handleRead(id: string) {
-    await markNotificationRead(id);
-    await reload();
+    try {
+      await markNotificationRead(id);
+      await reload();
+    } catch (error) {
+      console.warn("[notifications read]", error);
+    }
   }
 
   async function handleMarkAll() {
-    await markAllNotificationsRead();
-    await reload();
+    try {
+      await markAllNotificationsRead();
+      await reload();
+    } catch (error) {
+      console.warn("[notifications mark all]", error);
+    }
   }
 
   const badgeLabel =
@@ -164,4 +172,37 @@ export function NotificationBell({ className }: { className?: string }) {
       </PopoverContent>
     </Popover>
   );
+}
+
+type NotificationBellBoundaryProps = {
+  className?: string;
+};
+
+type NotificationBellBoundaryState = {
+  failed: boolean;
+};
+
+/** Isolates notification UI failures so pages (e.g. admin assignments) still load. */
+class NotificationBellBoundary extends Component<
+  NotificationBellBoundaryProps,
+  NotificationBellBoundaryState
+> {
+  state: NotificationBellBoundaryState = { failed: false };
+
+  static getDerivedStateFromError(): NotificationBellBoundaryState {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.warn("[NotificationBell]", error, info.componentStack);
+  }
+
+  render(): ReactNode {
+    if (this.state.failed) return null;
+    return <NotificationBell className={this.props.className} />;
+  }
+}
+
+export function SafeNotificationBell(props: NotificationBellBoundaryProps) {
+  return <NotificationBellBoundary {...props} />;
 }

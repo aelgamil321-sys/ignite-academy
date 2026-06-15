@@ -79,22 +79,22 @@ export function AdminSidebar({
         {L("Manage", "إدارة")[lang]}
       </div>
 
-      <Link to="/admin/lessons" className={sideClass(onLessonsRoute)}>
+      <Link to="/admin/lessons" search={{}} className={sideClass(onLessonsRoute)}>
         <BookOpen className="h-4 w-4 shrink-0" />
         <span className="text-start">{L("Manage Lessons", "إدارة الدروس")[lang]}</span>
       </Link>
 
-      <Link to="/admin/quiz-submissions" className={sideClass(onQuizSubmissionsRoute)}>
+      <Link to="/admin/quiz-submissions" search={{}} className={sideClass(onQuizSubmissionsRoute)}>
         <ClipboardCheck className="h-4 w-4 shrink-0" />
         <span className="text-start">{L("Quiz Submissions", "إرسالات الاختبارات")[lang]}</span>
       </Link>
 
-      <Link to="/admin/assignments" className={sideClass(onAssignmentsRoute)}>
+      <Link to="/admin/assignments" search={{}} className={sideClass(onAssignmentsRoute)}>
         <FileText className="h-4 w-4 shrink-0" />
         <span className="text-start">{L("Assignments", "الواجبات")[lang]}</span>
       </Link>
 
-      <Link to="/admin/analytics" className={sideClass(onAnalyticsRoute)}>
+      <Link to="/admin/analytics" search={{}} className={sideClass(onAnalyticsRoute)}>
         <BarChart3 className="h-4 w-4 shrink-0" />
         <span className="text-start">{L("Analytics", "التحليلات")[lang]}</span>
       </Link>

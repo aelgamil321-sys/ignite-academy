@@ -42,29 +42,44 @@ export function useNotifications(enabled: boolean) {
   const load = useCallback(async () => {
     if (!enabled || !userId) return;
     setLoading(true);
-    const [listRes, countRes] = await Promise.all([
-      fetchNotifications(),
-      fetchUnreadNotificationCount(),
-    ]);
-    setItems(listRes.data);
-    setUnreadCount(countRes.count);
-    setLoading(false);
+    try {
+      const [listRes, countRes] = await Promise.all([
+        fetchNotifications(),
+        fetchUnreadNotificationCount(),
+      ]);
+      setItems(listRes.data);
+      setUnreadCount(countRes.count);
+      if (listRes.error || countRes.error) {
+        console.warn("[notifications load]", listRes.error ?? countRes.error);
+      }
+    } catch (error) {
+      console.warn("[notifications load]", error);
+      setItems([]);
+      setUnreadCount(0);
+    } finally {
+      setLoading(false);
+    }
   }, [enabled, userId]);
 
   const syncSources = useCallback(async () => {
     if (!userId || syncedRef.current) return;
     syncedRef.current = true;
 
-    const role = await getAccountRole(userId);
-    if (role === "student") {
-      const { data: progress } = await fetchStudentProgress(userId);
-      if (progress) {
-        await refreshNotificationSources(userId, evaluateStudentBadges(progress), role);
+    try {
+      const role = await getAccountRole(userId);
+      if (role === "student") {
+        const { data: progress } = await fetchStudentProgress(userId);
+        if (progress) {
+          await refreshNotificationSources(userId, evaluateStudentBadges(progress), role);
+        } else {
+          await refreshNotificationSources(userId, [], role);
+        }
       } else {
         await refreshNotificationSources(userId, [], role);
       }
-    } else {
-      await refreshNotificationSources(userId, [], role);
+    } catch (error) {
+      console.warn("[notifications sync]", error);
+      syncedRef.current = false;
     }
   }, [userId]);
 

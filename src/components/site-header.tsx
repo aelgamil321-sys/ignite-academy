@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccountRole } from "@/hooks/use-account-role";
 import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
 import { BrandLogo } from "@/components/brand-logo";
-import { NotificationBell } from "@/components/notification-bell";
+import { SafeNotificationBell } from "@/components/notification-bell";
 import { cn } from "@/lib/utils";
 
 const STUDENT_ONLY_PATHS = new Set(["/grades", "/quizzes", "/assignments", "/student"]);
@@ -131,7 +131,7 @@ export function SiteHeader() {
 
   const authButtons = () => (
     <>
-      {signedIn && !roleLoading && <NotificationBell className="hidden md:inline-flex" />}
+      {signedIn && !roleLoading && <SafeNotificationBell className="hidden md:inline-flex" />}
       {signedIn && isParent && (
         <Link
           to="/parent/dashboard"
@@ -215,7 +215,7 @@ export function SiteHeader() {
           {schoolLogoTablet}
           <div className="flex shrink-0 items-center gap-1.5">
             {langButton}
-            {signedIn && !roleLoading && <NotificationBell className="md:hidden" />}
+            {signedIn && !roleLoading && <SafeNotificationBell className="md:hidden" />}
             {menuButton}
           </div>
         </div>

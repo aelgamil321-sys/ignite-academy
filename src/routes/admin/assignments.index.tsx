@@ -32,6 +32,7 @@ import {
 } from "@/lib/assignment";
 import { AdminAssignmentSubmissionFile } from "@/components/admin-assignment-submission-file";
 import {
+  ASSIGNMENT_ATTACHMENT_ACCEPT,
   deleteAssignmentStorageFile,
   uploadAssignmentAttachment,
 } from "@/lib/assignment-upload";
