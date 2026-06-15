@@ -1,12 +1,20 @@
 /** Islamic education stage card imagery — served from /public/images */
 export const STAGE_CARD_IMAGES = {
-  kg: "/images/stage-kg.jpg",
-  elementary: "/images/stage-elementary.jpg",
-  middle: "/images/stage-middle.jpg",
-  high: "/images/secondary.jpg",
+  kg: "/images/stage-kg.jpeg",
+  elementary: "/images/stage-elementary.jpeg",
+  middle: "/images/stage-middle.jpeg",
+  high: "/images/secondary.jpeg",
 } as const;
 
 export type StageCardKey = keyof typeof STAGE_CARD_IMAGES;
+
+/** Browser src for stage cards — served from /public/images */
+export const STAGE_CARD_IMAGE_SRC: Record<StageCardKey, string> = {
+  kg: STAGE_CARD_IMAGES.kg,
+  elementary: STAGE_CARD_IMAGES.elementary,
+  middle: STAGE_CARD_IMAGES.middle,
+  high: STAGE_CARD_IMAGES.high,
+};
 
 /** Per-stage focal point and light overlay (target ~35–45% visual density). */
 export const STAGE_CARD_CONFIG: Record<
