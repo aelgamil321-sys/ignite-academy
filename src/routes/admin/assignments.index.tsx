@@ -44,6 +44,7 @@ import {
   normalizeStudentSection,
 } from "@/lib/student-academics";
 import { formatError } from "@/lib/upload";
+import { syncAssignmentPublishNotifications } from "@/lib/notifications";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -233,6 +234,10 @@ function AdminAssignmentsPage() {
           attachment_mime: uploaded.mime,
         });
         if (error) throw new Error(error);
+      }
+
+      if (payload.published && assignmentId) {
+        await syncAssignmentPublishNotifications(assignmentId);
       }
 
       toast.success(L("Assignment saved", "تم حفظ الواجب")[lang]);

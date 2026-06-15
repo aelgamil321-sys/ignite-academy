@@ -152,6 +152,13 @@ export async function syncBadgeNotifications(
   if (changed) writeSeenBadges(userId, next);
 }
 
+export async function syncAssignmentPublishNotifications(assignmentId: string): Promise<void> {
+  const { error } = await callNotificationRpc("sync_assignment_notifications", {
+    p_assignment_id: assignmentId,
+  });
+  if (error) console.warn("[notifications assignment publish]", error);
+}
+
 export async function refreshNotificationSources(
   userId: string,
   unlockedBadgeIds: StudentBadgeId[],
@@ -193,10 +200,12 @@ export function notificationIcon(type: string): string {
     case "assignment_created":
     case "assignment_due_soon":
     case "assignment_graded":
+    case "child_assignment_created":
     case "child_assignment_submitted":
     case "child_assignment_graded":
     case "child_assignment_missing":
     case "admin_assignment_submitted":
+    case "admin_assignment_published":
     case "admin_student_registered":
     case "admin_parent_registered":
       return "📋";
