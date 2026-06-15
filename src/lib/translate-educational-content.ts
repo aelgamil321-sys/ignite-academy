@@ -103,6 +103,8 @@ export function educationalDisplayFallback(
 
 let translationServiceAvailable: boolean | null = null;
 const availabilityListeners = new Set<(available: boolean) => void>();
+let sessionSuccessCount = 0;
+let sessionExhaustedFailureCount = 0;
 
 export function isTranslationServiceAvailable(): boolean {
   return translationServiceAvailable !== false;
@@ -213,10 +215,20 @@ let onContentUpdate: (() => void) | null = null;
 let onTranslatingChange: ((activeCount: number) => void) | null = null;
 let updateTimer: ReturnType<typeof setTimeout> | null = null;
 
+function recomputeTranslationAvailability() {
+  const busy = activeJobs > 0 || browserQueue.length > 0;
+  if (busy) return;
+  const available = sessionSuccessCount > 0 || sessionExhaustedFailureCount === 0;
+  setTranslationServiceAvailable(available);
+}
+
 /** Clear in-flight tracking when the user switches language. */
 export function resetTranslationSession(): void {
   attemptCounts.clear();
   queuedKeys.clear();
+  sessionSuccessCount = 0;
+  sessionExhaustedFailureCount = 0;
+  setTranslationServiceAvailable(true);
 }
 
 /** Register UI refresh + in-flight count callbacks (from I18nProvider via useEffect). */
@@ -289,7 +301,7 @@ function pumpBrowserQueue() {
 
         if (translated) {
           setCachedEducationalTranslation(cacheInput, translated);
-          setTranslationServiceAvailable(true);
+          sessionSuccessCount += 1;
           debugTranslate("browser-ok", job, { resultPreview: translated.slice(0, 80) });
           resolveJob(job, {
             text: translated,
@@ -297,17 +309,18 @@ function pumpBrowserQueue() {
             serviceUnavailable: false,
           });
         } else {
-          setTranslationServiceAvailable(false);
+          const exhausted = attempts >= MAX_FIELD_ATTEMPTS;
+          if (exhausted) sessionExhaustedFailureCount += 1;
           const fallback = educationalDisplayFallback(job.text, job.targetLanguage);
           debugTranslate("browser-fail", job, { fallback: true, attempts });
           resolveJob(job, {
             text: fallback,
             fromCache: false,
-            serviceUnavailable: attempts >= MAX_FIELD_ATTEMPTS,
+            serviceUnavailable: exhausted,
           });
         }
       } catch {
-        setTranslationServiceAvailable(false);
+        sessionExhaustedFailureCount += 1;
         resolveJob(job, {
           text: educationalDisplayFallback(job.text, job.targetLanguage),
           fromCache: false,
@@ -318,6 +331,7 @@ function pumpBrowserQueue() {
         queuedKeys.delete(key);
         activeJobs--;
         notifyTranslatingCount();
+        recomputeTranslationAvailability();
         scheduleContentUpdate();
         pumpBrowserQueue();
       }
@@ -385,6 +399,8 @@ export async function translateEducationalContent(
 
   const cached = getCachedEducationalTranslation(cacheInput);
   if (cached) {
+    sessionSuccessCount += 1;
+    recomputeTranslationAvailability();
     debugTranslate("cache-hit", input, { resultPreview: cached.slice(0, 80) });
     return { text: cached, fromCache: true, serviceUnavailable: false };
   }
@@ -450,7 +466,10 @@ export function prefetchEducationalTranslations(
       fieldName: field.fieldName,
       source: trimmed,
     };
-    if (getCachedEducationalTranslation(cacheInput)) continue;
+    if (getCachedEducationalTranslation(cacheInput)) {
+      sessionSuccessCount += 1;
+      continue;
+    }
 
     const key = buildEducationalCacheKey(cacheInput);
     if ((attemptCounts.get(key) ?? 0) >= MAX_FIELD_ATTEMPTS) continue;
@@ -465,6 +484,8 @@ export function prefetchEducationalTranslations(
       sourceLanguage: /[\u0600-\u06FF]/.test(trimmed) && !/[A-Za-z]{4,}/.test(trimmed) ? "ar" : "en",
     });
   }
+
+  recomputeTranslationAvailability();
 }
 
 export { contentLocale } from "@/lib/i18n-config";
