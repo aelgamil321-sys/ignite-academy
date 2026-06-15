@@ -1,9 +1,11 @@
 /** Islamic education stage card imagery — served from /public/images */
+const STAGE_IMAGE_CACHE_VERSION = "3";
+
 export const STAGE_CARD_IMAGES = {
-  kg: "/images/stage-kg.jpeg",
-  elementary: "/images/stage-elementary.jpeg",
-  middle: "/images/stage-middle.jpeg",
-  high: "/images/secondary.jpeg",
+  kg: `/images/stage-kg.jpg?v=${STAGE_IMAGE_CACHE_VERSION}`,
+  elementary: `/images/stage-elementary.jpg?v=${STAGE_IMAGE_CACHE_VERSION}`,
+  middle: `/images/stage-middle.jpg?v=${STAGE_IMAGE_CACHE_VERSION}`,
+  high: `/images/secondary.jpg?v=${STAGE_IMAGE_CACHE_VERSION}`,
 } as const;
 
 export type StageCardKey = keyof typeof STAGE_CARD_IMAGES;
