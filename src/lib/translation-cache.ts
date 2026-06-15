@@ -1,8 +1,11 @@
 import type { Lang } from "@/lib/i18n-config";
 import type { EducationalContentType } from "@/lib/translate-educational-content";
 
-const CACHE_STORAGE_KEY = "iia.translation.cache.v3";
-const LEGACY_CACHE_STORAGE_KEY = "iia.translation.cache.v1";
+const CACHE_STORAGE_KEY = "iia.translation.cache.v4";
+const LEGACY_CACHE_STORAGE_KEYS = [
+  "iia.translation.cache.v3",
+  "iia.translation.cache.v1",
+] as const;
 const MAX_CACHE_ENTRIES = 5000;
 
 type CacheStore = Record<string, string>;
@@ -16,14 +19,26 @@ function loadStore(): CacheStore {
     return memoryCache;
   }
   try {
-    const raw =
-      window.localStorage.getItem(CACHE_STORAGE_KEY) ??
-      window.localStorage.getItem(LEGACY_CACHE_STORAGE_KEY);
+    const raw = window.localStorage.getItem(CACHE_STORAGE_KEY);
     memoryCache = raw ? (JSON.parse(raw) as CacheStore) : {};
+    for (const legacyKey of LEGACY_CACHE_STORAGE_KEYS) {
+      window.localStorage.removeItem(legacyKey);
+    }
   } catch {
     memoryCache = {};
   }
   return memoryCache;
+}
+
+/** Reject stale entries that stored untranslated source text as the target language. */
+function isValidEducationalCacheHit(
+  translated: string,
+  input: EducationalCacheKeyInput,
+): boolean {
+  const out = translated?.trim();
+  if (!out) return false;
+  if (input.lang === "en" || input.lang === "ar") return true;
+  return out !== input.source.trim();
 }
 
 function persistStore(store: CacheStore) {
@@ -78,29 +93,35 @@ export function getCachedEducationalTranslation(input: EducationalCacheKeyInput)
   const store = loadStore();
   const key = buildEducationalCacheKey(input);
   const hit = store[key];
-  if (hit) return hit;
-  return store[translationCacheKey(input.lang, input.source)] ?? null;
+  if (hit && isValidEducationalCacheHit(hit, input)) return hit;
+
+  const legacy = store[translationCacheKey(input.lang, input.source)];
+  if (legacy && isValidEducationalCacheHit(legacy, input)) return legacy;
+  return null;
 }
 
 export function setCachedEducationalTranslation(
   input: EducationalCacheKeyInput,
   translated: string,
 ): void {
-  if (!input.source) return;
+  if (!input.source || !isValidEducationalCacheHit(translated, input)) return;
   const store = loadStore();
   store[buildEducationalCacheKey(input)] = translated;
-  store[translationCacheKey(input.lang, input.source)] = translated;
   persistStore(store);
 }
 
 export function getCachedTranslation(lang: Lang, source: string): string | null {
   if (!source) return null;
   const store = loadStore();
-  return store[translationCacheKey(lang, source)] ?? null;
+  const hit = store[translationCacheKey(lang, source)];
+  if (!hit) return null;
+  if (lang !== "en" && lang !== "ar" && hit.trim() === source.trim()) return null;
+  return hit;
 }
 
 export function setCachedTranslation(lang: Lang, source: string, translated: string): void {
   if (!source) return;
+  if (lang !== "en" && lang !== "ar" && translated.trim() === source.trim()) return;
   const store = loadStore();
   store[translationCacheKey(lang, source)] = translated;
   persistStore(store);
