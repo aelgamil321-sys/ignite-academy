@@ -52,3 +52,15 @@ export function isEmailNotConfirmedError(err: unknown): boolean {
   }
   return false;
 }
+
+export function isEmailRateLimitError(err: unknown): boolean {
+  if (err && typeof err === "object") {
+    const o = err as { code?: string; message?: string; status?: number };
+    if (o.code === "over_email_send_rate_limit") return true;
+    if (o.status === 429) return true;
+    const msg = (o.message ?? "").toLowerCase();
+    if (msg.includes("rate limit")) return true;
+    if (msg.includes("email rate limit")) return true;
+  }
+  return false;
+}

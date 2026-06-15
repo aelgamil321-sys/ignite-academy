@@ -5,7 +5,6 @@ import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
 import { getAccountRole, getPostAuthPath, postAuthPathForRole } from "@/lib/account-role";
 import { parseAuthAccountType } from "@/lib/parent-corner-access";
-import { redeemParentLinkCode } from "@/lib/parent-link-code";
 import { toast } from "sonner";
 import { GraduationCap, LogIn, UserPlus, AlertCircle, Users, CheckCircle } from "lucide-react";
 import { grades } from "@/lib/curriculum";
@@ -18,6 +17,7 @@ import {
   clearAuthCallbackUrl,
   hasSupabaseAuthHash,
   isEmailNotConfirmedError,
+  isEmailRateLimitError,
   parseEmailConfirmedParam,
   waitForSupabaseHashSession,
 } from "@/lib/auth-redirect";
@@ -60,6 +60,8 @@ function AuthPage() {
   const [emailConfirmedAlert, setEmailConfirmedAlert] = useState<string | null>(null);
   const [emailNotConfirmedAlert, setEmailNotConfirmedAlert] = useState<string | null>(null);
   const authInitDone = useRef(false);
+  const signupInFlight = useRef(false);
+  const signUpCallCount = useRef(0);
 
   useEffect(() => { setMode(initialMode); }, [initialMode]);
   useEffect(() => { setAccountType(initialAccountType); }, [initialAccountType]);
@@ -154,8 +156,48 @@ function AuthPage() {
     return null;
   }
 
+  async function callSignUpOnce(
+    label: "student" | "parent",
+    params: Parameters<typeof supabase.auth.signUp>[0],
+  ) {
+    signUpCallCount.current += 1;
+    const callId = signUpCallCount.current;
+    console.debug(`[auth signup] auth.signUp call #${callId} START (${label})`, {
+      email: params.email,
+      emailRedirectTo: params.options?.emailRedirectTo,
+      totalCallsThisPage: callId,
+    });
+    const result = await supabase.auth.signUp(params);
+    console.debug(`[auth signup] auth.signUp call #${callId} END (${label})`, {
+      error: result.error?.message ?? null,
+      userId: result.data.user?.id ?? null,
+      hasSession: Boolean(result.data.session),
+      emailConfirmed: Boolean(result.data.user?.email_confirmed_at),
+      totalCallsThisPage: callId,
+    });
+    return result;
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const isSignup = mode === "signup";
+
+    if (busy || (isSignup && signupInFlight.current)) {
+      console.warn("[auth signup] submit blocked — request already in progress", {
+        busy,
+        signupInFlight: signupInFlight.current,
+      });
+      return;
+    }
+
+    if (isSignup) {
+      signupInFlight.current = true;
+      console.debug("[auth signup] submit handler entered", {
+        accountType,
+        signUpCallsSoFar: signUpCallCount.current,
+      });
+    }
+
     setBusy(true);
     setSignupAlert(null);
     setSignupSuccessAlert(null);
@@ -173,8 +215,6 @@ function AuthPage() {
       const submitIslamicGroup = String(fd.get("islamic_group") ?? islamicGroup).trim();
 
       if (mode === "signup") {
-        console.debug("[auth signup] submit started", { accountType });
-
         if (accountType === "student") {
           const validationError = validateStudentSignupFields({
             arabicName: submitArabicName,
@@ -191,12 +231,7 @@ function AuthPage() {
             return;
           }
 
-          console.debug("[auth signup] calling supabase.auth.signUp", {
-            email: submitEmail,
-            emailRedirectTo: SIGNUP_EMAIL_REDIRECT_URL,
-          });
-
-          const { data, error } = await supabase.auth.signUp({
+          const { data, error } = await callSignUpOnce("student", {
             email: submitEmail,
             password: submitPassword,
             options: {
@@ -217,22 +252,20 @@ function AuthPage() {
             throw error;
           }
 
-          console.debug("[auth signup] signUp response", {
-            userId: data.user?.id,
-            hasSession: Boolean(data.session),
-            emailConfirmed: Boolean(data.user?.email_confirmed_at),
+          if (data.user && profilePhotoFile && data.session) {
+            try {
+              await uploadProfilePhoto(data.user.id, profilePhotoFile);
+              console.debug("[auth signup] profile photo uploaded during signup session");
+            } catch (photoErr) {
+              console.error("[auth signup] profile photo upload failed", photoErr);
+            }
+          }
+
+          await supabase.auth.signOut();
+          console.debug("[auth signup] signed out after signup — awaiting email confirmation", {
+            signUpCallsThisSubmit: 1,
+            totalSignUpCalls: signUpCallCount.current,
           });
-
-          if (data.session && data.user?.email_confirmed_at) {
-            await uploadProfilePhoto(data.user.id, profilePhotoFile!);
-            toast.success(tr("auth_welcome"));
-            window.location.assign("/student");
-            return;
-          }
-
-          if (data.session && !data.user?.email_confirmed_at) {
-            await supabase.auth.signOut();
-          }
 
           setSignupSuccessAlert(tr("auth_success_student"));
           return;
@@ -258,12 +291,7 @@ function AuthPage() {
           return;
         }
 
-        console.debug("[auth signup] calling supabase.auth.signUp (parent)", {
-          email: submitEmail,
-          emailRedirectTo: SIGNUP_EMAIL_REDIRECT_URL,
-        });
-
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await callSignUpOnce("parent", {
           email: submitEmail,
           password: submitPassword,
           options: {
@@ -296,28 +324,11 @@ function AuthPage() {
           }
         }
 
-        const completeParentSignup = async () => {
-          const redeem = await redeemParentLinkCode(submitParentLinkCode);
-          if (!redeem.ok) {
-            toast.error(tr("auth_invalid_link_code"));
-          } else if (redeem.alreadyLinked) {
-            toast.success(tr("auth_already_linked"));
-          } else {
-            toast.success(tr("auth_linked_success"));
-          }
-          await supabase.auth.updateUser({ data: { parent_link_code: null } });
-          window.location.assign("/parent/dashboard");
-        };
-
-        if (data.session && data.user?.email_confirmed_at) {
-          toast.success(tr("auth_welcome"));
-          await completeParentSignup();
-          return;
-        }
-
-        if (data.session && !data.user?.email_confirmed_at) {
-          await supabase.auth.signOut();
-        }
+        await supabase.auth.signOut();
+        console.debug("[auth signup] signed out after parent signup — awaiting email confirmation", {
+          signUpCallsThisSubmit: 1,
+          totalSignUpCalls: signUpCallCount.current,
+        });
 
         setSignupSuccessAlert(tr("auth_success_parent"));
         return;
@@ -351,6 +362,10 @@ function AuthPage() {
       const redirectPath = await getPostAuthPath(loginData.user.id);
       window.location.assign(redirectPath);
     } catch (err) {
+      if (mode === "signup" && isEmailRateLimitError(err)) {
+        showSignupError(tr("auth_err_rate_limit"), err);
+        return;
+      }
       if (mode === "signup" && isDuplicateEmailError(err)) {
         showSignupError(tr("auth_duplicate_email"), err);
         return;
@@ -368,6 +383,7 @@ function AuthPage() {
       toast.error(err instanceof Error ? err.message : String(err));
     } finally {
       setBusy(false);
+      signupInFlight.current = false;
     }
   }
 
@@ -456,7 +472,11 @@ function AuthPage() {
             </div>
           )}
 
-          <form noValidate onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+          <form
+            noValidate
+            onSubmit={(e) => void handleSubmit(e)}
+            className={`space-y-4${busy ? " pointer-events-none" : ""}`}
+          >
             {mode === "signup" && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground">{tr("auth_account_type")}</label>
@@ -588,9 +608,16 @@ function AuthPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-60"
+              aria-busy={busy}
+              className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {busy ? "…" : mode === "signup" ? (accountType === "parent" ? tr("auth_create_parent") : tr("auth_submit_signup")) : tr("auth_submit_login")}
+              {busy
+                ? tr("auth_submitting")
+                : mode === "signup"
+                  ? accountType === "parent"
+                    ? tr("auth_create_parent")
+                    : tr("auth_submit_signup")
+                  : tr("auth_submit_login")}
             </button>
           </form>
 

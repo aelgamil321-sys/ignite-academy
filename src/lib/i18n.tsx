@@ -460,6 +460,7 @@ export const t = {
   auth_islamic_group: { en: "Islamic Group", ar: "المجموعة الإسلامية" },
   auth_profile_photo: { en: "Profile photo", ar: "صورة الملف الشخصي" },
   auth_submit_signup: { en: "Create account", ar: "إنشاء الحساب" },
+  auth_submitting: { en: "Please wait…", ar: "يرجى الانتظار…" },
   auth_submit_login: { en: "Sign in", ar: "دخول" },
   auth_to_login: { en: "Have an account? Sign in", ar: "لديك حساب؟ سجّل الدخول" },
   auth_to_signup: { en: "New here? Create an account", ar: "جديد هنا؟ أنشئ حسابًا" },
@@ -498,12 +499,12 @@ export const t = {
     ar: "يرجى إدخال رمز ربط ولي الأمر.",
   },
   auth_success_student: {
-    en: "Account created successfully. Please check your email to confirm your account before logging in.",
-    ar: "تم إنشاء الحساب بنجاح. يرجى فحص بريدك الإلكتروني لتأكيد الحساب قبل تسجيل الدخول.",
+    en: "Activation link sent to your email.",
+    ar: "تم إرسال رابط التفعيل إلى بريدك الإلكتروني",
   },
   auth_success_parent: {
-    en: "Account created successfully. Please check your email to confirm your account before logging in.",
-    ar: "تم إنشاء الحساب بنجاح. يرجى فحص بريدك الإلكتروني لتأكيد الحساب قبل تسجيل الدخول.",
+    en: "Activation link sent to your email.",
+    ar: "تم إرسال رابط التفعيل إلى بريدك الإلكتروني",
   },
   auth_email_confirmed: {
     en: "Email confirmed successfully. You can now log in.",
@@ -541,6 +542,10 @@ export const t = {
   auth_err_password_length: {
     en: "Password must be at least 8 characters.",
     ar: "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
+  },
+  auth_err_rate_limit: {
+    en: "Too many emails sent. Please wait a few minutes before trying again.",
+    ar: "تم إرسال عدد كبير من الرسائل. يرجى الانتظار بضع دقائق قبل المحاولة مرة أخرى.",
   },
   auth_invalid_link_code: {
     en: "That student link code is not valid. Check the code in Parent Settings after signing in.",
