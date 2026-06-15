@@ -9,8 +9,9 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { useI18n, type TKey, prefetchTranslations } from "@/lib/i18n";
+import { useI18n, type TKey, prefetchEducationalTranslations, useLessonTranslationScope } from "@/lib/i18n";
 import { needsDynamicTranslation } from "@/lib/translate-content";
+import type { EducationalField } from "@/lib/translate-content";
 import type { Bi } from "@/lib/curriculum";
 import { getGrade } from "@/lib/curriculum";
 import { useResolveLesson, lessonVideoEmbeds, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
@@ -18,6 +19,7 @@ import { studentDownloadItems, fileNameFromUrl, type StudentDownloadItem } from 
 import { LessonQuizStudent } from "@/components/lesson-quiz-student";
 import { normalizeQuizList } from "@/lib/lesson-quiz";
 import { useLessonHashScroll } from "@/lib/lesson-hash-scroll";
+import { TranslatedContentShell } from "@/components/translation-loading-indicator";
 import videoPlaceholder from "@/assets/video-placeholder.jpg";
 
 export const Route = createFileRoute("/grades/$grade/$lesson")({
@@ -39,26 +41,36 @@ function LessonPage() {
   const resolved = useResolveLesson(gradeSlug, lessonSlug);
   const { tr, lang, dir, bi } = useI18n();
   const lessonReady = !cmsLoading && Boolean(resolved?.lesson);
+  useLessonTranslationScope(lessonSlug);
 
   useEffect(() => {
     if (!resolved?.lesson || !needsDynamicTranslation(lang)) return;
     const lesson = resolved.lesson;
     const source = (b: Bi) => b.en?.trim() || b.ar?.trim() || "";
-    const texts = [
-      source(lesson.title),
-      source(lesson.outcome),
-      source(lesson.explanation),
-      source(lesson.activity),
-      source(lesson.worksheet),
-      source(resolved.grade.name),
-      ...lesson.vocab.flatMap((v) => [source(v.term), source(v.def)]),
-      ...normalizeQuizList(resolved.custom?.quiz ?? lesson.quiz).flatMap((q) => [
-        source(q.q),
-        ...q.options.map((o) => source(o)),
+    const fields: EducationalField[] = [
+      { fieldName: "title", contentType: "title", text: source(lesson.title) },
+      { fieldName: "outcome", contentType: "outcome", text: source(lesson.outcome) },
+      { fieldName: "explanation", contentType: "content", text: source(lesson.explanation) },
+      { fieldName: "activity", contentType: "activity", text: source(lesson.activity) },
+      { fieldName: "worksheet", contentType: "worksheet", text: source(lesson.worksheet) },
+      { fieldName: "grade", contentType: "general", text: source(resolved.grade.name) },
+      { fieldName: "subject", contentType: "general", text: source(lesson.subject) },
+      { fieldName: "unit", contentType: "general", text: source(lesson.unit) },
+      ...lesson.vocab.flatMap((v, i) => [
+        { fieldName: `vocab_term_${i}`, contentType: "vocab_term" as const, text: source(v.term) },
+        { fieldName: `vocab_def_${i}`, contentType: "vocab_def" as const, text: source(v.def) },
       ]),
-    ].filter(Boolean);
-    prefetchTranslations(texts, lang);
-  }, [resolved, lang]);
+      ...normalizeQuizList(resolved.custom?.quiz ?? lesson.quiz).flatMap((q, qi) => [
+        { fieldName: `quiz_q_${qi}`, contentType: "quiz_question" as const, text: source(q.q) },
+        ...q.options.map((o, oi) => ({
+          fieldName: `quiz_q_${qi}_opt_${oi}`,
+          contentType: "quiz_option" as const,
+          text: source(o),
+        })),
+      ]),
+    ].filter((f) => f.text);
+    prefetchEducationalTranslations(lessonSlug, fields, lang);
+  }, [resolved, lang, lessonSlug]);
 
   useLessonHashScroll(lessonReady, lessonSlug);
 
@@ -92,15 +104,15 @@ function LessonPage() {
     );
   }
 
-  const worksheetBody = (bi(lesson.worksheet) ?? "").trim()
+  const worksheetBody = (bi(lesson.worksheet, { fieldName: "worksheet", contentType: "worksheet" }) ?? "").trim()
     || (custom?.worksheetName
       ? (lang === "ar" ? `ورقة عمل مرفقة: ${custom.worksheetName}` : `Worksheet attached: ${custom.worksheetName}`)
       : "");
 
   const sections: Array<{ icon: typeof Target; key: TKey; body: string }> = [
-    { icon: Target, key: "ls_outcome", body: bi(lesson.outcome) },
-    { icon: BookOpen, key: "ls_content", body: bi(lesson.explanation) },
-    { icon: Sparkles, key: "ls_activity", body: bi(lesson.activity) },
+    { icon: Target, key: "ls_outcome", body: bi(lesson.outcome, { fieldName: "outcome", contentType: "outcome" }) },
+    { icon: BookOpen, key: "ls_content", body: bi(lesson.explanation, { fieldName: "explanation", contentType: "content" }) },
+    { icon: Sparkles, key: "ls_activity", body: bi(lesson.activity, { fieldName: "activity", contentType: "activity" }) },
     { icon: ClipboardList, key: "ls_worksheet", body: worksheetBody },
   ];
 
@@ -127,8 +139,8 @@ function LessonPage() {
             <div className="hidden md:block mb-5">
               <Breadcrumbs items={[
                 { label: tr("nav_stages"), to: "/grades" },
-                { label: bi(grade.name), to: "/grades/$grade", params: { grade: grade.slug } },
-                { label: bi(lesson.title) },
+                { label: bi(grade.name, { fieldName: "grade", contentType: "general" }), to: "/grades/$grade", params: { grade: grade.slug } },
+                { label: bi(lesson.title, { fieldName: "title", contentType: "title" }) },
               ]} />
             </div>
             <Link
@@ -139,21 +151,23 @@ function LessonPage() {
               <ChevronLeft className={`h-4 w-4 shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
               <span>
                 {lang === "ar"
-                  ? `العودة إلى ${bi(grade.name)}`
-                  : `${tr("back_to_grade")} ${bi(grade.name)}`}
+                  ? `العودة إلى ${bi(grade.name, { fieldName: "grade", contentType: "general" })}`
+                  : `${tr("back_to_grade")} ${bi(grade.name, { fieldName: "grade", contentType: "general" })}`}
               </span>
             </Link>
             <div className="mt-2 hidden text-xs uppercase tracking-[0.22em] text-primary md:mb-2 md:block">
-              {bi(lesson.subject)} · {bi(lesson.unit)}
+              {bi(lesson.subject, { fieldName: "subject", contentType: "general" })} · {bi(lesson.unit, { fieldName: "unit", contentType: "general" })}
             </div>
+            <TranslatedContentShell>
             <h1 className="mt-2 font-display text-xl font-semibold leading-snug text-foreground [overflow-wrap:anywhere] md:mt-0 md:text-5xl md:leading-tight">
-              {bi(lesson.title)}
+              {bi(lesson.title, { fieldName: "title", contentType: "title" })}
             </h1>
+            </TranslatedContentShell>
             <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-primary md:hidden">
-              {bi(lesson.subject)} · {bi(lesson.unit)}
+              {bi(lesson.subject, { fieldName: "subject", contentType: "general" })} · {bi(lesson.unit, { fieldName: "unit", contentType: "general" })}
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground md:mt-4 md:gap-4 md:text-sm">
-              <span className="order-1 inline-flex items-center gap-1.5 md:order-3"><BookOpen className="h-3.5 w-3.5 md:h-4 md:w-4" /> {bi(grade.name)}</span>
+              <span className="order-1 inline-flex items-center gap-1.5 md:order-3"><BookOpen className="h-3.5 w-3.5 md:h-4 md:w-4" /> {bi(grade.name, { fieldName: "grade", contentType: "general" })}</span>
               <span className="order-2 inline-flex items-center gap-1.5 md:order-1"><Clock className="h-3.5 w-3.5 md:h-4 md:w-4" /> {lesson.duration} {tr("minutes")}</span>
               <span className="order-3 inline-flex items-center gap-1.5 md:order-2"><HelpCircle className="h-3.5 w-3.5 md:h-4 md:w-4" /> {quizCount} Q</span>
             </div>
@@ -198,7 +212,9 @@ function LessonPage() {
                     <h2 className={lessonCardTitle}>{tr(s.key)}</h2>
                   </div>
                   {body ? (
-                    <p className={lessonBody}>{body}</p>
+                    <TranslatedContentShell>
+                      <p className={lessonBody}>{body}</p>
+                    </TranslatedContentShell>
                   ) : (
                     <p className="text-sm italic text-muted-foreground md:text-base">{fallback}</p>
                   )}
@@ -217,8 +233,12 @@ function LessonPage() {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4">
                   {lesson.vocab.map((vw, i) => (
                     <div key={i} className="rounded-xl border border-border bg-background p-3 md:p-4">
-                      <div className="font-display text-base text-foreground md:text-lg [overflow-wrap:anywhere]">{bi(vw.term)}</div>
-                      {bi(vw.def) && <div className="mt-1 text-sm leading-[1.8] text-muted-foreground [overflow-wrap:anywhere]">{bi(vw.def)}</div>}
+                      <div className="font-display text-base text-foreground md:text-lg [overflow-wrap:anywhere]">{bi(vw.term, { fieldName: `vocab_term_${i}`, contentType: "vocab_term" })}</div>
+                      {bi(vw.def, { fieldName: `vocab_def_${i}`, contentType: "vocab_def" }) && (
+                        <div className="mt-1 text-sm leading-[1.8] text-muted-foreground [overflow-wrap:anywhere]">
+                          {bi(vw.def, { fieldName: `vocab_def_${i}`, contentType: "vocab_def" })}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -247,7 +267,7 @@ function LessonPage() {
                         <iframe
                           className="h-full w-full"
                           src={`https://www.youtube.com/embed/${video.ytId}`}
-                          title={`${bi(lesson.title)} — ${video.label}`}
+                          title={`${bi(lesson.title, { fieldName: "title", contentType: "title" })} — ${video.label}`}
                           allowFullScreen
                         />
                       </div>
@@ -290,7 +310,7 @@ function LessonPage() {
                     <a key={f.id} href={f.fileUrl} download={f.fileName}
                       className={`${resourceBtn} justify-start text-xs md:text-sm`}>
                       <Download className="h-4 w-4 shrink-0" />
-                      <span className="min-w-0 [overflow-wrap:anywhere]">{bi(f.title)} <span className="opacity-60">· {f.type.toUpperCase()}</span></span>
+                      <span className="min-w-0 [overflow-wrap:anywhere]">{bi(f.title, { fieldName: `file_${f.id}`, contentType: "resource_label" })} <span className="opacity-60">· {f.type.toUpperCase()}</span></span>
                     </a>
                   ))}
                 </div>

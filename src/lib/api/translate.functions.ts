@@ -6,32 +6,43 @@ import {
   splitIslamicProtectedText,
   translatableSegments,
 } from "@/lib/islamic-text-protection";
-import { machineTranslateBatch } from "@/lib/translate.server";
+import {
+  isTranslationApiConfigured,
+  machineTranslateBatch,
+} from "@/lib/translate.server";
 
 const translatableLang = z.enum(["fr", "de", "ur", "zh"]);
 
-export const translateContentBatch = createServerFn({ method: "POST" })
-  .inputValidator(
-    z.object({
-      texts: z.array(z.string().max(8000)),
-      targetLang: translatableLang,
-      sourceLang: z.enum(["en", "ar"]).optional(),
-    }),
-  )
-  .handler(async ({ data }) => {
-    const sourceLang = data.sourceLang ?? "en";
-    const results: string[] = [];
+const translateInputSchema = z.object({
+  texts: z.array(z.string().max(8000)),
+  targetLang: translatableLang,
+  sourceLang: z.enum(["en", "ar"]).optional(),
+  contentType: z.string().optional(),
+  lessonId: z.string().optional(),
+});
 
-    for (const text of data.texts) {
-      const segments = splitIslamicProtectedText(text);
-      const parts = translatableSegments(segments);
-      if (parts.length === 0) {
-        results.push(text);
-        continue;
-      }
-      const translatedParts = await machineTranslateBatch(parts, data.targetLang, sourceLang);
-      results.push(mergeProtectedSegments(segments, translatedParts));
+/** Shared handler for server fn and POST /api/translate. */
+export async function handleTranslateRequest(data: z.infer<typeof translateInputSchema>) {
+  const sourceLang = data.sourceLang ?? "en";
+  const results: string[] = [];
+  let anyTranslated = false;
+
+  for (const text of data.texts) {
+    const segments = splitIslamicProtectedText(text);
+    const parts = translatableSegments(segments);
+    if (parts.length === 0) {
+      results.push(text);
+      continue;
     }
+    const batch = await machineTranslateBatch(parts, data.targetLang, sourceLang);
+    anyTranslated = anyTranslated || batch.anyTranslated;
+    results.push(mergeProtectedSegments(segments, batch.translations));
+  }
 
-    return { translations: results };
-  });
+  const serviceAvailable = isTranslationApiConfigured() || anyTranslated;
+  return { translations: results, serviceAvailable };
+}
+
+export const translateContentBatch = createServerFn({ method: "POST" })
+  .inputValidator(translateInputSchema)
+  .handler(async ({ data }) => handleTranslateRequest(data));

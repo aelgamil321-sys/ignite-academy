@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { HelpCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, useLessonTranslationScope } from "@/lib/i18n";
 import type { QuizQuestion } from "@/lib/curriculum";
 import {
   fetchLatestQuizSubmission,
@@ -14,6 +14,7 @@ import {
   type SavedQuizSubmission,
 } from "@/lib/lesson-quiz";
 import { LessonQuizResults } from "@/components/lesson-quiz-results";
+import { TranslatedContentShell } from "@/components/translation-loading-indicator";
 
 export function LessonQuizStudent({
   lessonId,
@@ -27,6 +28,7 @@ export function LessonQuizStudent({
   lessonTitle: { en: string; ar: string };
 }) {
   const { tr, lang, bi } = useI18n();
+  useLessonTranslationScope(lessonId);
   const questions = normalizeQuizList(rawQuestions);
   const [choiceAnswers, setChoiceAnswers] = useState<Record<number, number>>({});
   const [essayAnswers, setEssayAnswers] = useState<Record<number, string>>({});
@@ -215,9 +217,11 @@ export function LessonQuizStudent({
                       {q.points} {lang === "ar" ? "نقطة" : q.points === 1 ? "pt" : "pts"}
                     </span>
                   </div>
+                  <TranslatedContentShell>
                   <div className="font-medium text-foreground mb-3">
-                    {bi(q.q) || q.q.en || q.q.ar}
+                    {bi(q.q, { fieldName: `quiz_q_${i}`, contentType: "quiz_question" }) || q.q.en || q.q.ar}
                   </div>
+                  </TranslatedContentShell>
 
                   {isEssay ? (
                     <textarea
@@ -247,7 +251,7 @@ export function LessonQuizStudent({
                                 : "border-border hover:border-primary hover:text-primary",
                             ].join(" ")}
                           >
-                            {bi(opt) || opt.en || opt.ar}
+                            {bi(opt, { fieldName: `quiz_q_${i}_opt_${oi}`, contentType: "quiz_option" }) || opt.en || opt.ar}
                           </button>
                         );
                       })}

@@ -310,6 +310,7 @@ export const fr: Record<string, string> = {
   auth_invalid_link_code: "Ce code de liaison étudiant n'est pas valide. Vérifiez le code dans les paramètres parent après connexion.",
   parent_dashboard_load_failed: "Impossible de charger le tableau de bord parent :",
   content_translating: "Traduction…",
+  content_translation_unavailable: "La traduction n'est pas encore disponible.",
 };
 
 /** FR translations for L() English strings. */

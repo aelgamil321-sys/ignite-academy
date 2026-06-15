@@ -310,6 +310,7 @@ export const zh: Record<string, string> = {
   auth_invalid_link_code: "该学生关联码无效。登录后请在家长设置中核对关联码。",
   parent_dashboard_load_failed: "无法加载家长仪表板：",
   content_translating: "翻译中…",
+  content_translation_unavailable: "翻译暂不可用。",
 };
 
 /** ZH translations for L() English strings. */

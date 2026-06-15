@@ -9,6 +9,7 @@ import {
 import { canIssueCertificate } from "@/lib/certificate";
 import { CertificateButton } from "@/components/certificate-modal";
 import type { Bi } from "@/lib/curriculum";
+import { TranslatedContentShell } from "@/components/translation-loading-indicator";
 
 
 export function LessonQuizResults({
@@ -123,7 +124,9 @@ export function LessonQuizResults({
                 </span>
               </div>
 
-              <div className="font-medium text-foreground">{bi(q.q) || q.q.en || q.q.ar}</div>
+              <TranslatedContentShell>
+              <div className="font-medium text-foreground">{bi(q.q, { fieldName: `quiz_q_${i}`, contentType: "quiz_question" }) || q.q.en || q.q.ar}</div>
+              </TranslatedContentShell>
 
               {isEssay && saved?.type === "essay" ? (
                 <div className="space-y-3 text-sm">
@@ -157,7 +160,7 @@ export function LessonQuizResults({
                               {L("Teacher feedback", "ملاحظات المعلّم")[lang]}
                             </div>
                             <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-2 whitespace-pre-wrap">
-                              {bi(saved.teacherFeedback) ||
+                              {bi(saved.teacherFeedback, { fieldName: `quiz_feedback_${i}`, contentType: "quiz_feedback" }) ||
                                 saved.teacherFeedback.en ||
                                 saved.teacherFeedback.ar}
                             </div>
@@ -178,7 +181,7 @@ export function LessonQuizResults({
                       {L("Your answer", "إجابتك")[lang]}:{" "}
                     </span>
                     <span className="font-medium">
-                      {bi(q.options[saved.selectedIndex] ?? { en: "", ar: "" })}
+                      {bi(q.options[saved.selectedIndex] ?? { en: "", ar: "" }, { fieldName: `quiz_q_${i}_selected`, contentType: "quiz_option" })}
                     </span>
                   </div>
                   <div>
@@ -186,7 +189,7 @@ export function LessonQuizResults({
                       {L("Correct answer", "الإجابة الصحيحة")[lang]}:{" "}
                     </span>
                     <span className="font-medium">
-                      {bi(q.options[saved.correctIndex] ?? { en: "", ar: "" })}
+                      {bi(q.options[saved.correctIndex] ?? { en: "", ar: "" }, { fieldName: `quiz_q_${i}_correct`, contentType: "quiz_option" })}
                     </span>
                   </div>
                   <div

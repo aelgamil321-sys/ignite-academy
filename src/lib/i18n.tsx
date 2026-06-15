@@ -14,16 +14,36 @@ import { de } from "@/lib/i18n/locales/de";
 import { fr } from "@/lib/i18n/locales/fr";
 import { ur } from "@/lib/i18n/locales/ur";
 import { zh } from "@/lib/i18n/locales/zh";
-import { getCachedTranslation, setCachedTranslation } from "@/lib/translation-cache";
 import {
-  biDisplayFallback,
+  getCachedEducationalTranslation,
+  setCachedEducationalTranslation,
+} from "@/lib/translation-cache";
+import {
+  educationalDisplayFallback,
+  isTranslationServiceAvailable,
   needsDynamicTranslation,
-  translateBi,
+  onTranslationAvailabilityChange,
+  translateEducationalBi,
+  type EducationalContentType,
 } from "@/lib/translate-content";
 
 export type { Lang, ContentLocale } from "@/lib/i18n-config";
 export { L, LANG_OPTIONS, pickBi, pickBiLocale } from "@/lib/i18n-config";
-export { translateContent, translateBi, prefetchTranslations } from "@/lib/translate-content";
+export {
+  translateEducationalContent,
+  translateEducationalBi,
+  prefetchEducationalTranslations,
+  needsDynamicTranslation,
+  isTranslationServiceAvailable,
+  type EducationalContentType,
+  type EducationalField,
+} from "@/lib/translate-content";
+// Backward-compatible aliases
+export {
+  translateEducationalContent as translateContent,
+  translateEducationalBi as translateBi,
+  prefetchEducationalTranslations as prefetchTranslations,
+} from "@/lib/translate-content";
 
 type Dict = Record<string, { en: string; ar: string }>;
 
@@ -501,6 +521,10 @@ export const t = {
     ar: "تعذر تحميل لوحة ولي الأمر:",
   },
   content_translating: { en: "Translating…", ar: "جارٍ الترجمة…" },
+  content_translation_unavailable: {
+    en: "Translation is not available yet.",
+    ar: "الترجمة غير متاحة حالياً.",
+  },
 } satisfies Dict;
 
 export type TKey = keyof typeof t;
@@ -522,6 +546,12 @@ function translate(key: TKey, lang: Lang): string {
   return t[key].en || t[key].ar;
 }
 
+export type BiFieldMeta = {
+  lessonId?: string;
+  fieldName?: string;
+  contentType?: EducationalContentType;
+};
+
 interface I18nCtx {
   lang: Lang;
   locale: ContentLocale;
@@ -530,11 +560,15 @@ interface I18nCtx {
   toggle: () => void;
   tr: (key: TKey) => string;
   /** Pick lesson/CMS text; dynamically translates for fr/de/ur/zh. */
-  bi: (text?: Bi | null) => string;
+  bi: (text?: Bi | null, meta?: BiFieldMeta) => string;
   /** Safe variant when bilingual text may be undefined. */
-  biMaybe: (text?: Bi | null) => string;
+  biMaybe: (text?: Bi | null, meta?: BiFieldMeta) => string;
   /** Number of in-flight content translations (for loading UI). */
   contentTranslating: number;
+  /** True when translation API could not produce target-language text. */
+  translationUnavailable: boolean;
+  /** Scope lesson/quiz cache keys to a lesson id. */
+  setLessonScope: (lessonId: string | null) => void;
 }
 
 const Ctx = createContext<I18nCtx | null>(null);
@@ -543,12 +577,20 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("ar");
   const [contentRev, setContentRev] = useState(0);
   const [contentTranslating, setContentTranslating] = useState(0);
+  const [translationUnavailable, setTranslationUnavailable] = useState(false);
   const inflightRef = useRef(new Set<string>());
+  const lessonScopeRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = window.localStorage.getItem(LANG_STORAGE_KEY);
     if (isLang(saved)) setLangState(saved);
+  }, []);
+
+  useEffect(() => {
+    return onTranslationAvailabilityChange((available) => {
+      setTranslationUnavailable(!available);
+    });
   }, []);
 
   useEffect(() => {
@@ -564,23 +606,42 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") window.localStorage.setItem(LANG_STORAGE_KEY, l);
   };
 
+  const setLessonScope = useCallback((lessonId: string | null) => {
+    lessonScopeRef.current = lessonId;
+  }, []);
+
   const locale = contentLocale(lang);
 
   const requestBiTranslation = useCallback(
-    (text: Bi) => {
+    (text: Bi, meta?: BiFieldMeta) => {
       const source = text.en?.trim() || text.ar?.trim() || "";
       if (!source || !needsDynamicTranslation(lang)) return;
-      const inflightKey = `${lang}:${source}`;
+
+      const lessonId = meta?.lessonId ?? lessonScopeRef.current ?? undefined;
+      const fieldName = meta?.fieldName ?? "content";
+      const contentType = meta?.contentType ?? "general";
+      const inflightKey = `${lang}:${lessonId ?? "_"}:${fieldName}:${source}`;
       if (inflightRef.current.has(inflightKey)) return;
+
       inflightRef.current.add(inflightKey);
       setContentTranslating((n) => n + 1);
-      void translateBi(text, lang)
-        .then((translated) => {
-          setCachedTranslation(lang, source, translated);
+      void translateEducationalBi(text, lang, { contentType, lessonId, fieldName })
+        .then((result) => {
+          setCachedEducationalTranslation(
+            { lang, contentType, lessonId, fieldName, source },
+            result.text,
+          );
+          if (result.serviceUnavailable) {
+            setTranslationUnavailable(true);
+          }
           setContentRev((v) => v + 1);
         })
         .catch(() => {
-          setCachedTranslation(lang, source, biDisplayFallback(text, lang));
+          setCachedEducationalTranslation(
+            { lang, contentType, lessonId, fieldName, source },
+            educationalDisplayFallback(source, lang, text),
+          );
+          setTranslationUnavailable(true);
           setContentRev((v) => v + 1);
         })
         .finally(() => {
@@ -592,23 +653,35 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   );
 
   const bi = useCallback(
-    (text?: Bi | null) => {
+    (text?: Bi | null, meta?: BiFieldMeta) => {
       if (!text) return "";
       if (!needsDynamicTranslation(lang)) {
         return pickBiLocale(text, locale);
       }
       const source = text.en?.trim() || text.ar?.trim() || "";
       if (!source) return "";
-      const cached = getCachedTranslation(lang, source);
+
+      const lessonId = meta?.lessonId ?? lessonScopeRef.current ?? undefined;
+      const fieldName = meta?.fieldName ?? "content";
+      const contentType = meta?.contentType ?? "general";
+
+      const cached = getCachedEducationalTranslation({
+        lang,
+        contentType,
+        lessonId,
+        fieldName,
+        source,
+      });
       if (cached) return cached;
-      requestBiTranslation(text);
-      return biDisplayFallback(text, lang);
+
+      requestBiTranslation(text, meta);
+      return educationalDisplayFallback(source, lang, text);
     },
     [lang, locale, contentRev, requestBiTranslation],
   );
 
   const biMaybe = useCallback(
-    (text?: Bi | null) => (text ? bi(text) : ""),
+    (text?: Bi | null, meta?: BiFieldMeta) => (text ? bi(text, meta) : ""),
     [bi],
   );
 
@@ -622,9 +695,20 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     bi,
     biMaybe,
     contentTranslating,
+    translationUnavailable,
+    setLessonScope,
   };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+/** Pin lesson/quiz translation cache to a lesson id for the current page. */
+export function useLessonTranslationScope(lessonId: string | undefined) {
+  const { setLessonScope } = useI18n();
+  useEffect(() => {
+    setLessonScope(lessonId ?? null);
+    return () => setLessonScope(null);
+  }, [lessonId, setLessonScope]);
 }
 
 export function useI18n() {

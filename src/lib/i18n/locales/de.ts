@@ -310,6 +310,7 @@ export const de: Record<string, string> = {
   auth_invalid_link_code: "Dieser Schüler-Verknüpfungscode ist ungültig. Überprüfen Sie den Code in den Elterneinstellungen nach der Anmeldung.",
   parent_dashboard_load_failed: "Eltern-Dashboard konnte nicht geladen werden:",
   content_translating: "Übersetzung…",
+  content_translation_unavailable: "Übersetzung ist noch nicht verfügbar.",
 };
 
 /** DE translations for L() English strings. */
