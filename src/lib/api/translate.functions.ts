@@ -26,6 +26,7 @@ export async function handleTranslateRequest(data: z.infer<typeof translateInput
   const sourceLang = data.sourceLang ?? "en";
   const results: string[] = [];
   let anyTranslated = false;
+  const providers = new Set<string>();
 
   for (const text of data.texts) {
     const segments = splitIslamicProtectedText(text);
@@ -36,11 +37,16 @@ export async function handleTranslateRequest(data: z.infer<typeof translateInput
     }
     const batch = await machineTranslateBatch(parts, data.targetLang, sourceLang);
     anyTranslated = anyTranslated || batch.anyTranslated;
+    for (const p of batch.providers) providers.add(p);
     results.push(mergeProtectedSegments(segments, batch.translations));
   }
 
   const serviceAvailable = isTranslationApiConfigured() || anyTranslated;
-  return { translations: results, serviceAvailable };
+  return {
+    translations: results,
+    serviceAvailable,
+    providers: [...providers],
+  };
 }
 
 export const translateContentBatch = createServerFn({ method: "POST" })

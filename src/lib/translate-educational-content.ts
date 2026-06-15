@@ -1,6 +1,6 @@
 import type { Bi } from "@/lib/curriculum";
 import type { Lang } from "@/lib/i18n-config";
-import { pickBiLocale, contentLocale } from "@/lib/i18n-config";
+import { pickBiLocale } from "@/lib/i18n-config";
 import {
   buildEducationalCacheKey,
   getCachedEducationalTranslation,
@@ -54,14 +54,21 @@ function sourceLangForText(text: string, preferred?: "en" | "ar"): "en" | "ar" {
   return /[\u0600-\u06FF]/.test(text) ? "ar" : "en";
 }
 
-function englishFallback(text: string, bi?: Bi): string {
-  if (bi) return bi.en?.trim() || bi.ar?.trim() || "";
-  return text;
-}
-
-function arabicFallback(text: string, bi?: Bi): string {
-  if (bi) return bi.ar?.trim() || bi.en?.trim() || "";
-  return text;
+function debugTranslate(
+  event: string,
+  input: TranslateEducationalInput,
+  extra?: Record<string, unknown>,
+) {
+  if (!import.meta.env.DEV) return;
+  console.debug(`[i18n-translate] ${event}`, {
+    lang: input.targetLanguage,
+    contentType: input.contentType,
+    fieldName: input.fieldName,
+    lessonId: input.lessonId,
+    sourceLen: input.text?.length ?? 0,
+    sourcePreview: input.text?.slice(0, 80),
+    ...extra,
+  });
 }
 
 /** Sync display before async translation completes. Selected → English → Arabic. */
@@ -120,7 +127,7 @@ function scheduleFlush() {
 async function flushTranslationQueue() {
   if (pendingQueue.length === 0) return;
 
-  const batch = pendingQueue.splice(0, 20);
+  const batch = pendingQueue.splice(0, 16);
   const byGroup = new Map<string, QueueItem[]>();
 
   for (const item of batch) {
@@ -140,31 +147,56 @@ async function flushTranslationQueue() {
       const texts = items.map((i) => i.text);
 
       try {
-        const { translations, serviceAvailable } = await translateContentBatch({
-          data: { texts, targetLang, sourceLang },
+        const { translations, serviceAvailable, providers } = await translateContentBatch({
+          data: {
+            texts,
+            targetLang,
+            sourceLang,
+            contentType: items[0]?.contentType,
+            lessonId: items[0]?.lessonId,
+          },
         });
+
         setTranslationServiceAvailable(serviceAvailable);
 
         items.forEach((item, index) => {
-          const translated = translations[index] ?? educationalDisplayFallback(item.text, item.targetLanguage);
+          const source = item.text;
+          const translated =
+            translations[index]?.trim() ||
+            educationalDisplayFallback(source, item.targetLanguage);
+          const changed = translated !== source;
           const cacheInput = {
             lang: item.targetLanguage,
             contentType: item.contentType,
             lessonId: item.lessonId,
             fieldName: item.fieldName,
-            source: item.text,
+            source,
           };
-          setCachedEducationalTranslation(cacheInput, translated);
+          if (serviceAvailable && changed) {
+            setCachedEducationalTranslation(cacheInput, translated);
+          }
+          debugTranslate("resolved", item, {
+            changed,
+            serviceAvailable,
+            providers,
+            resultPreview: translated.slice(0, 80),
+            fallback: !changed,
+            cached: serviceAvailable && changed,
+          });
           item.resolve({
             text: translated,
             fromCache: false,
-            serviceUnavailable: !serviceAvailable,
+            serviceUnavailable: !serviceAvailable || !changed,
           });
         });
-      } catch {
+      } catch (error) {
         setTranslationServiceAvailable(false);
         items.forEach((item) => {
           const fallback = educationalDisplayFallback(item.text, item.targetLanguage);
+          debugTranslate("error", item, {
+            error: error instanceof Error ? error.message : String(error),
+            fallbackPreview: fallback.slice(0, 80),
+          });
           item.resolve({
             text: fallback,
             fromCache: false,
@@ -181,7 +213,6 @@ async function flushTranslationQueue() {
 /**
  * Translate lesson/quiz educational content for fr/de/ur/zh.
  * Qur'an ayah markers and Hadith lines are protected server-side.
- * Database content is never modified.
  */
 export async function translateEducationalContent(
   input: TranslateEducationalInput,
@@ -205,8 +236,11 @@ export async function translateEducationalContent(
 
   const cached = getCachedEducationalTranslation(cacheInput);
   if (cached) {
+    debugTranslate("cache-hit", input, { resultPreview: cached.slice(0, 80) });
     return { text: cached, fromCache: true, serviceUnavailable: !isTranslationServiceAvailable() };
   }
+
+  debugTranslate("queue", input, {});
 
   return new Promise((resolve) => {
     pendingQueue.push({ ...input, text: trimmed, resolve });
@@ -225,18 +259,10 @@ export async function translateEducationalBi(
   },
 ): Promise<TranslateEducationalResult> {
   if (targetLanguage === "ar") {
-    return {
-      text: pickBiLocale(bi, "ar"),
-      fromCache: true,
-      serviceUnavailable: false,
-    };
+    return { text: pickBiLocale(bi, "ar"), fromCache: true, serviceUnavailable: false };
   }
   if (targetLanguage === "en") {
-    return {
-      text: pickBiLocale(bi, "en"),
-      fromCache: true,
-      serviceUnavailable: false,
-    };
+    return { text: pickBiLocale(bi, "en"), fromCache: true, serviceUnavailable: false };
   }
 
   const source = bi.en?.trim() || bi.ar?.trim() || "";
@@ -280,4 +306,4 @@ export function prefetchEducationalTranslations(
   }
 }
 
-export { englishFallback, arabicFallback, contentLocale };
+export { contentLocale } from "@/lib/i18n-config";

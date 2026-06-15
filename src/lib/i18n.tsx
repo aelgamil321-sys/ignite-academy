@@ -601,6 +601,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.body.dir = dir;
   }, [lang]);
 
+  useEffect(() => {
+    if (!needsDynamicTranslation(lang)) {
+      setTranslationUnavailable(false);
+    }
+    setContentRev((v) => v + 1);
+  }, [lang]);
+
   const setLang = (l: Lang) => {
     setLangState(l);
     if (typeof window !== "undefined") window.localStorage.setItem(LANG_STORAGE_KEY, l);
@@ -627,20 +634,29 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       setContentTranslating((n) => n + 1);
       void translateEducationalBi(text, lang, { contentType, lessonId, fieldName })
         .then((result) => {
-          setCachedEducationalTranslation(
-            { lang, contentType, lessonId, fieldName, source },
-            result.text,
-          );
+          if (!result.serviceUnavailable && result.text) {
+            setCachedEducationalTranslation(
+              { lang, contentType, lessonId, fieldName, source },
+              result.text,
+            );
+          }
           if (result.serviceUnavailable) {
             setTranslationUnavailable(true);
+          } else {
+            setTranslationUnavailable(false);
+          }
+          if (import.meta.env.DEV) {
+            console.debug("[i18n-bi] translated", {
+              lang,
+              contentType,
+              fieldName,
+              changed: result.text !== educationalDisplayFallback(source, lang, text),
+              preview: result.text.slice(0, 80),
+            });
           }
           setContentRev((v) => v + 1);
         })
         .catch(() => {
-          setCachedEducationalTranslation(
-            { lang, contentType, lessonId, fieldName, source },
-            educationalDisplayFallback(source, lang, text),
-          );
           setTranslationUnavailable(true);
           setContentRev((v) => v + 1);
         })

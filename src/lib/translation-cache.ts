@@ -1,7 +1,7 @@
 import type { Lang } from "@/lib/i18n-config";
 import type { EducationalContentType } from "@/lib/translate-educational-content";
 
-const CACHE_STORAGE_KEY = "iia.translation.cache.v2";
+const CACHE_STORAGE_KEY = "iia.translation.cache.v3";
 const LEGACY_CACHE_STORAGE_KEY = "iia.translation.cache.v1";
 const MAX_CACHE_ENTRIES = 5000;
 
