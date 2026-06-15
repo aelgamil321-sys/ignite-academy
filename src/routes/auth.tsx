@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
@@ -15,15 +15,18 @@ import { uploadProfilePhoto } from "@/lib/profile-photo";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 import {
   SIGNUP_EMAIL_REDIRECT_URL,
-  clearEmailConfirmationParams,
-  isEmailConfirmationReturn,
+  clearAuthCallbackUrl,
+  hasSupabaseAuthHash,
+  isEmailNotConfirmedError,
+  parseEmailConfirmedParam,
+  waitForSupabaseHashSession,
 } from "@/lib/auth-redirect";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     mode: s.mode === "signup" ? "signup" : "login",
     accountType: parseAuthAccountType(s),
-    email_confirmed: s.email_confirmed === "1" || s.email_confirmed === "true",
+    email_confirmed: parseEmailConfirmedParam(s.email_confirmed),
   }),
   head: () => ({
     meta: [
@@ -55,28 +58,65 @@ function AuthPage() {
   const [signupAlert, setSignupAlert] = useState<string | null>(null);
   const [signupSuccessAlert, setSignupSuccessAlert] = useState<string | null>(null);
   const [emailConfirmedAlert, setEmailConfirmedAlert] = useState<string | null>(null);
-  const [handlingEmailConfirm, setHandlingEmailConfirm] = useState(
-    () => emailConfirmedSearch || isEmailConfirmationReturn(),
-  );
+  const [emailNotConfirmedAlert, setEmailNotConfirmedAlert] = useState<string | null>(null);
+  const authInitDone = useRef(false);
 
   useEffect(() => { setMode(initialMode); }, [initialMode]);
   useEffect(() => { setAccountType(initialAccountType); }, [initialAccountType]);
 
+  // Run once on mount: handle email-confirmation callback OR redirect already-signed-in users.
   useEffect(() => {
-    if (!handlingEmailConfirm) return;
-    let active = true;
+    if (authInitDone.current) return;
+    authInitDone.current = true;
+
+    let cancelled = false;
+
     void (async () => {
-      await supabase.auth.signOut();
-      if (!active) return;
-      setEmailConfirmedAlert(tr("auth_email_confirmed"));
-      setMode("login");
-      setHandlingEmailConfirm(false);
-      clearEmailConfirmationParams();
+      const confirmedParam = emailConfirmedSearch;
+      const hashPresent = hasSupabaseAuthHash();
+
+      if (confirmedParam === false) {
+        await waitForSupabaseHashSession();
+        await supabase.auth.signOut();
+        if (cancelled) return;
+        setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
+        setMode("login");
+        clearAuthCallbackUrl();
+        return;
+      }
+
+      if (confirmedParam === true || hashPresent) {
+        await waitForSupabaseHashSession();
+        await supabase.auth.signOut();
+        if (cancelled) return;
+        setEmailConfirmedAlert(tr("auth_email_confirmed"));
+        setMode("login");
+        clearAuthCallbackUrl();
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+
+      const user = data.session?.user;
+      if (user && !user.email_confirmed_at) {
+        await supabase.auth.signOut();
+        return;
+      }
+
+      if (!user?.email_confirmed_at) return;
+
+      const role = await getAccountRole(user.id);
+      if (cancelled) return;
+      if (initialAccountType === "parent" && role === "student") return;
+      if (initialAccountType === "student" && role === "parent") return;
+      window.location.replace(postAuthPathForRole(role));
     })();
+
     return () => {
-      active = false;
+      cancelled = true;
     };
-  }, [handlingEmailConfirm, tr]);
+  }, [emailConfirmedSearch, initialAccountType, tr]);
 
   function isDuplicateEmailError(err: unknown): boolean {
     if (err && typeof err === "object" && "code" in err) {
@@ -88,46 +128,13 @@ function AuthPage() {
     return false;
   }
 
-  // If already signed in with a confirmed email, send to the correct dashboard.
-  useEffect(() => {
-    if (handlingEmailConfirm) return;
-
-    let active = true;
-    const redirectSignedInUser = async (userId: string, emailConfirmed: boolean) => {
-      if (!emailConfirmed) {
-        await supabase.auth.signOut();
-        return;
-      }
-      const role = await getAccountRole(userId);
-      if (!active) return;
-      if (initialAccountType === "parent" && role === "student") return;
-      if (initialAccountType === "student" && role === "parent") return;
-      const path = postAuthPathForRole(role);
-      window.location.replace(path);
-    };
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!active || !session?.user) return;
-      void redirectSignedInUser(session.user.id, !!session.user.email_confirmed_at);
-    });
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!active || !data.session?.user) return;
-      void redirectSignedInUser(
-        data.session.user.id,
-        !!data.session.user.email_confirmed_at,
-      );
-    });
-    return () => {
-      active = false;
-      subscription.unsubscribe();
-    };
-  }, [initialAccountType, handlingEmailConfirm]);
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
     setSignupAlert(null);
     setSignupSuccessAlert(null);
     setEmailConfirmedAlert(null);
+    setEmailNotConfirmedAlert(null);
     try {
       const fd = new FormData(e.currentTarget);
       const submitEmail = String(fd.get("email") ?? email).trim();
@@ -263,15 +270,32 @@ function AuthPage() {
         email: submitEmail,
         password: submitPassword,
       });
-      if (error) throw error;
+      if (error) {
+        if (isEmailNotConfirmedError(error)) {
+          setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
+          await supabase.auth.signOut();
+          return;
+        }
+        throw error;
+      }
+
+      if (!loginData.user?.email_confirmed_at) {
+        setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
+        await supabase.auth.signOut();
+        return;
+      }
+
       toast.success(tr("auth_success_login"));
-      const redirectPath = loginData.user
-        ? await getPostAuthPath(loginData.user.id)
-        : "/student";
+      const redirectPath = await getPostAuthPath(loginData.user.id);
       window.location.assign(redirectPath);
     } catch (err) {
       if (mode === "signup" && isDuplicateEmailError(err)) {
         setSignupAlert(tr("auth_duplicate_email"));
+        return;
+      }
+      if (mode === "login" && isEmailNotConfirmedError(err)) {
+        setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
+        await supabase.auth.signOut();
         return;
       }
       toast.error(err instanceof Error ? err.message : String(err));
@@ -307,6 +331,18 @@ function AuthPage() {
               <LogIn className="h-4 w-4" /> {tr("auth_login")}
             </button>
           </div>
+
+          {emailNotConfirmedAlert && mode === "login" && (
+            <div
+              role="alert"
+              className="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-5 py-4 text-sm text-foreground"
+            >
+              <div className="flex gap-3">
+                <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" aria-hidden />
+                <p className="font-medium leading-relaxed">{emailNotConfirmedAlert}</p>
+              </div>
+            </div>
+          )}
 
           {emailConfirmedAlert && mode === "login" && (
             <div

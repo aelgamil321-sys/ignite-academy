@@ -505,8 +505,12 @@ export const t = {
     ar: "تم إنشاء الحساب بنجاح. يرجى فحص بريدك الإلكتروني لتأكيد الحساب قبل تسجيل الدخول.",
   },
   auth_email_confirmed: {
-    en: "Your email has been confirmed successfully. You can now sign in.",
-    ar: "تم تأكيد البريد الإلكتروني بنجاح، يمكنك الآن تسجيل الدخول.",
+    en: "Email confirmed successfully. You can now log in.",
+    ar: "تم تأكيد البريد الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
+  },
+  auth_email_not_confirmed: {
+    en: "Please confirm your email first.",
+    ar: "يرجى تأكيد بريدك الإلكتروني أولاً.",
   },
   auth_success_login: { en: "Welcome to the Academy", ar: "مرحبًا بك في الأكاديمية" },
   auth_already_linked: {
