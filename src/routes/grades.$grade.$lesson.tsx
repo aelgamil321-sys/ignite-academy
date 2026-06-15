@@ -44,7 +44,7 @@ function LessonPage() {
   useLessonTranslationScope(lessonSlug);
 
   useEffect(() => {
-    if (!resolved?.lesson || !needsDynamicTranslation(lang)) return;
+    if (!lessonReady || !resolved?.lesson || !needsDynamicTranslation(lang)) return;
     const lesson = resolved.lesson;
     const source = (b: Bi) => b.en?.trim() || b.ar?.trim() || "";
     const fields: EducationalField[] = [
@@ -70,7 +70,7 @@ function LessonPage() {
       ]),
     ].filter((f) => f.text);
     prefetchEducationalTranslations(lessonSlug, fields, lang);
-  }, [resolved, lang, lessonSlug]);
+  }, [lessonSlug, lang, lessonReady]);
 
   useLessonHashScroll(lessonReady, lessonSlug);
 

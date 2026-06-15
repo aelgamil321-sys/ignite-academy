@@ -24,6 +24,15 @@ const translateInputSchema = z.object({
 /** Shared handler for server fn and POST /api/translate. */
 export async function handleTranslateRequest(data: z.infer<typeof translateInputSchema>) {
   const sourceLang = data.sourceLang ?? "en";
+
+  if (!isTranslationApiConfigured()) {
+    return {
+      translations: data.texts,
+      serviceAvailable: false,
+      providers: ["none"] as string[],
+    };
+  }
+
   const results: string[] = [];
   let anyTranslated = false;
   const providers = new Set<string>();

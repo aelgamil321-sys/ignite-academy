@@ -10,6 +10,7 @@ export {
   educationalDisplayFallback,
   isTranslationServiceAvailable,
   onTranslationAvailabilityChange,
+  initEducationalTranslationScheduler,
   type EducationalContentType,
   type EducationalField,
   type TranslateEducationalInput,

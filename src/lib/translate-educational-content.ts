@@ -6,7 +6,11 @@ import {
   getCachedEducationalTranslation,
   setCachedEducationalTranslation,
 } from "@/lib/translation-cache";
-import { translateContentBatch } from "@/lib/api/translate.functions";
+import {
+  mergeProtectedSegments,
+  splitIslamicProtectedText,
+  translatableSegments,
+} from "@/lib/islamic-text-protection";
 
 export type EducationalContentType =
   | "title"
@@ -44,6 +48,17 @@ export type EducationalField = {
   contentType: EducationalContentType;
   text: string;
 };
+
+const BROWSER_TARGET: Record<Exclude<Lang, "en" | "ar">, string> = {
+  fr: "fr",
+  de: "de",
+  ur: "ur",
+  zh: "zh-CN",
+};
+
+const MAX_CONCURRENT = 2;
+const TRANSLATION_TIMEOUT_MS = 8_000;
+const CONTENT_UPDATE_DEBOUNCE_MS = 100;
 
 export function needsDynamicTranslation(lang: Lang): boolean {
   return lang !== "en" && lang !== "ar";
@@ -109,116 +124,210 @@ function setTranslationServiceAvailable(available: boolean) {
   }
 }
 
-type QueueItem = TranslateEducationalInput & {
-  resolve: (value: TranslateEducationalResult) => void;
-};
-
-const pendingQueue: QueueItem[] = [];
-let flushTimer: ReturnType<typeof setTimeout> | null = null;
-
-function scheduleFlush() {
-  if (flushTimer !== null) return;
-  flushTimer = setTimeout(() => {
-    flushTimer = null;
-    void flushTranslationQueue();
-  }, 40);
+function parseGtxJson(json: unknown): string | null {
+  if (!Array.isArray(json) || !Array.isArray(json[0])) return null;
+  const parts = (json[0] as Array<[string, ...unknown[]]>).map((row) => row[0]).filter(Boolean);
+  return parts.join("").trim() || null;
 }
 
-async function flushTranslationQueue() {
-  if (pendingQueue.length === 0) return;
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
 
-  const batch = pendingQueue.splice(0, 12);
-  const byGroup = new Map<string, QueueItem[]>();
+/** Browser-side gtx — uses visitor IP; never touches the Cloudflare Worker. */
+async function browserTranslateText(
+  source: string,
+  lang: Lang,
+  sourceLang: "en" | "ar",
+): Promise<string | null> {
+  if (typeof window === "undefined" || !needsDynamicTranslation(lang)) return null;
+  const target = BROWSER_TARGET[lang as Exclude<Lang, "en" | "ar">];
+  const segments = splitIslamicProtectedText(source);
+  const parts = translatableSegments(segments);
+  if (parts.length === 0) return source;
 
-  for (const item of batch) {
-    const sourceLang = sourceLangForText(item.text, item.sourceLanguage);
-    const key = `${item.targetLanguage}:${sourceLang}`;
-    const group = byGroup.get(key) ?? [];
-    group.push(item);
-    byGroup.set(key, group);
+  const translatedParts: string[] = [];
+  for (const part of parts) {
+    const q = encodeURIComponent(part.slice(0, 4500));
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${target}&dt=t&q=${q}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        translatedParts.push(part);
+        continue;
+      }
+      const out = parseGtxJson((await res.json()) as unknown);
+      translatedParts.push(out && out !== part ? out : part);
+    } catch {
+      translatedParts.push(part);
+    }
   }
 
-  await Promise.all(
-    Array.from(byGroup.entries()).map(async ([groupKey, items]) => {
-      const [targetLang, sourceLang] = groupKey.split(":") as [
-        Exclude<Lang, "en" | "ar">,
-        "en" | "ar",
-      ];
-      const texts = items.map((i) => i.text);
+  const merged = mergeProtectedSegments(segments, translatedParts);
+  return merged !== source ? merged : null;
+}
 
-      let translations: string[] = [];
-      let serviceAvailable = false;
-      let providers: string[] = [];
+function scheduleKey(input: TranslateEducationalInput): string {
+  return buildEducationalCacheKey({
+    lang: input.targetLanguage,
+    contentType: input.contentType,
+    lessonId: input.lessonId,
+    fieldName: input.fieldName,
+    source: input.text,
+  });
+}
+
+type PendingJob = TranslateEducationalInput & {
+  resolvers: Array<(value: TranslateEducationalResult) => void>;
+};
+
+const browserQueue: PendingJob[] = [];
+const inflightKeys = new Set<string>();
+const failedKeys = new Set<string>();
+const queuedKeys = new Set<string>();
+let activeJobs = 0;
+let onContentUpdate: (() => void) | null = null;
+let onTranslatingChange: ((activeCount: number) => void) | null = null;
+let updateTimer: ReturnType<typeof setTimeout> | null = null;
+const prefetchedLessonLang = new Set<string>();
+
+/** Register UI refresh + in-flight count callbacks (from I18nProvider via useEffect). */
+export function initEducationalTranslationScheduler(
+  onUpdate: () => void,
+  onTranslating?: (activeCount: number) => void,
+): () => void {
+  onContentUpdate = onUpdate;
+  onTranslatingChange = onTranslating ?? null;
+  return () => {
+    if (onContentUpdate === onUpdate) onContentUpdate = null;
+    if (onTranslatingChange === onTranslating) onTranslatingChange = null;
+  };
+}
+
+function notifyTranslatingCount() {
+  if (!onTranslatingChange) return;
+  onTranslatingChange(activeJobs + browserQueue.length);
+}
+
+function scheduleContentUpdate() {
+  if (!onContentUpdate || updateTimer !== null) return;
+  updateTimer = setTimeout(() => {
+    updateTimer = null;
+    onContentUpdate?.();
+  }, CONTENT_UPDATE_DEBOUNCE_MS);
+}
+
+function resolveJob(job: PendingJob, result: TranslateEducationalResult) {
+  for (const resolve of job.resolvers) resolve(result);
+}
+
+function pumpBrowserQueue() {
+  if (typeof window === "undefined") return;
+
+  while (activeJobs < MAX_CONCURRENT && browserQueue.length > 0) {
+    const job = browserQueue.shift()!;
+    const key = scheduleKey(job);
+    if (inflightKeys.has(key)) continue;
+
+    inflightKeys.add(key);
+    activeJobs++;
+    notifyTranslatingCount();
+
+    void (async () => {
+      const sourceLang = sourceLangForText(job.text, job.sourceLanguage);
+      const cacheInput = {
+        lang: job.targetLanguage,
+        contentType: job.contentType,
+        lessonId: job.lessonId,
+        fieldName: job.fieldName,
+        source: job.text,
+      };
 
       try {
-        const result = await translateContentBatch({
-          data: {
-            texts,
-            targetLang,
-            sourceLang,
-            contentType: items[0]?.contentType,
-            lessonId: items[0]?.lessonId,
-          },
-        });
-        translations = result.translations;
-        serviceAvailable = result.serviceAvailable;
-        providers = result.providers ?? [];
-        setTranslationServiceAvailable(serviceAvailable);
-      } catch (error) {
-        debugTranslate("server-error", items[0]!, {
-          error: error instanceof Error ? error.message : String(error),
-        });
-        translations = texts;
-        serviceAvailable = false;
-      }
+        const translated = await withTimeout(
+          browserTranslateText(job.text, job.targetLanguage, sourceLang),
+          TRANSLATION_TIMEOUT_MS,
+        );
 
-      for (let index = 0; index < items.length; index++) {
-        const item = items[index]!;
-        const source = item.text;
-        let translated = translations[index]?.trim() || "";
-        let ok = serviceAvailable && translated !== source && Boolean(translated);
-
-        if (!ok) {
-          translated = educationalDisplayFallback(source, item.targetLanguage);
-        }
-
-        const changed = translated !== source;
-        const cacheInput = {
-          lang: item.targetLanguage,
-          contentType: item.contentType,
-          lessonId: item.lessonId,
-          fieldName: item.fieldName,
-          source,
-        };
-
-        if (ok && changed) {
+        if (translated) {
           setCachedEducationalTranslation(cacheInput, translated);
+          setTranslationServiceAvailable(true);
+          debugTranslate("browser-ok", job, { resultPreview: translated.slice(0, 80) });
+          resolveJob(job, {
+            text: translated,
+            fromCache: false,
+            serviceUnavailable: false,
+          });
+        } else {
+          failedKeys.add(key);
+          setTranslationServiceAvailable(false);
+          const fallback = educationalDisplayFallback(job.text, job.targetLanguage);
+          debugTranslate("browser-fail", job, { fallback: true });
+          resolveJob(job, {
+            text: fallback,
+            fromCache: false,
+            serviceUnavailable: true,
+          });
         }
-
-        debugTranslate("resolved", item, {
-          changed,
-          serviceAvailable: ok,
-          providers,
-          resultPreview: translated.slice(0, 80),
-          fallback: !changed,
-          cached: ok && changed,
-        });
-
-        item.resolve({
-          text: translated,
+      } catch {
+        failedKeys.add(key);
+        setTranslationServiceAvailable(false);
+        resolveJob(job, {
+          text: educationalDisplayFallback(job.text, job.targetLanguage),
           fromCache: false,
-          serviceUnavailable: !ok || !changed,
+          serviceUnavailable: true,
         });
+      } finally {
+        inflightKeys.delete(key);
+        queuedKeys.delete(key);
+        activeJobs--;
+        notifyTranslatingCount();
+        scheduleContentUpdate();
+        pumpBrowserQueue();
       }
-    }),
-  );
+    })();
+  }
+}
 
-  if (pendingQueue.length > 0) scheduleFlush();
+function enqueueBrowserTranslation(
+  input: TranslateEducationalInput,
+): Promise<TranslateEducationalResult> {
+  const key = scheduleKey(input);
+
+  if (failedKeys.has(key)) {
+    return Promise.resolve({
+      text: educationalDisplayFallback(input.text, input.targetLanguage),
+      fromCache: false,
+      serviceUnavailable: true,
+    });
+  }
+
+  return new Promise((resolve) => {
+    const existing = browserQueue.find((j) => scheduleKey(j) === key);
+    if (existing) {
+      existing.resolvers.push(resolve);
+      return;
+    }
+
+    if (inflightKeys.has(key) || queuedKeys.has(key)) {
+      browserQueue.push({ ...input, resolvers: [resolve] });
+      return;
+    }
+
+    queuedKeys.add(key);
+    browserQueue.push({ ...input, resolvers: [resolve] });
+    debugTranslate("queue", input, {});
+    notifyTranslatingCount();
+    pumpBrowserQueue();
+  });
 }
 
 /**
  * Translate lesson/quiz educational content for fr/de/ur/zh.
- * Qur'an ayah markers and Hadith lines are protected server-side.
+ * Client: browser gtx only (never hits Worker). Server/SSR: returns English fallback.
  */
 export async function translateEducationalContent(
   input: TranslateEducationalInput,
@@ -243,15 +352,18 @@ export async function translateEducationalContent(
   const cached = getCachedEducationalTranslation(cacheInput);
   if (cached) {
     debugTranslate("cache-hit", input, { resultPreview: cached.slice(0, 80) });
-    return { text: cached, fromCache: true, serviceUnavailable: !isTranslationServiceAvailable() };
+    return { text: cached, fromCache: true, serviceUnavailable: false };
   }
 
-  debugTranslate("queue", input, {});
+  if (typeof window === "undefined") {
+    return {
+      text: educationalDisplayFallback(trimmed, input.targetLanguage),
+      fromCache: false,
+      serviceUnavailable: false,
+    };
+  }
 
-  return new Promise((resolve) => {
-    pendingQueue.push({ ...input, text: trimmed, resolve });
-    scheduleFlush();
-  });
+  return enqueueBrowserTranslation({ ...input, text: trimmed });
 }
 
 /** Translate a bilingual CMS field without duplicating database records. */
@@ -285,15 +397,22 @@ export async function translateEducationalBi(
   });
 }
 
+/** Prefetch all lesson fields once per lesson+language (useEffect only — never during render). */
 export function prefetchEducationalTranslations(
   lessonId: string,
   fields: EducationalField[],
   targetLanguage: Lang,
 ): void {
-  if (!needsDynamicTranslation(targetLanguage)) return;
+  if (!needsDynamicTranslation(targetLanguage) || typeof window === "undefined") return;
+
+  const sessionKey = `${targetLanguage}::${lessonId}`;
+  if (prefetchedLessonLang.has(sessionKey)) return;
+  prefetchedLessonLang.add(sessionKey);
+
   for (const field of fields) {
     const trimmed = field.text?.trim();
     if (!trimmed) continue;
+
     const cacheInput = {
       lang: targetLanguage,
       contentType: field.contentType,
@@ -302,6 +421,10 @@ export function prefetchEducationalTranslations(
       source: trimmed,
     };
     if (getCachedEducationalTranslation(cacheInput)) continue;
+
+    const key = buildEducationalCacheKey(cacheInput);
+    if (failedKeys.has(key) || inflightKeys.has(key) || queuedKeys.has(key)) continue;
+
     void translateEducationalContent({
       text: trimmed,
       targetLanguage,
