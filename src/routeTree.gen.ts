@@ -9,9 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VideoLessonsRouteImport } from './routes/video-lessons'
 import { Route as StudentDashboardRouteImport } from './routes/student-dashboard'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as ResourceLibraryRouteImport } from './routes/resource-library'
 import { Route as HallOfFameRouteImport } from './routes/hall-of-fame'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -43,6 +45,11 @@ import { Route as GradesGradeLessonRouteImport } from './routes/grades.$grade.$l
 import { Route as GradesGradeUnitsUnitRouteImport } from './routes/grades.$grade.units.$unit'
 import { Route as AdminLessonsEditLessonIdRouteImport } from './routes/admin.lessons.edit.$lessonId'
 
+const VideoLessonsRoute = VideoLessonsRouteImport.update({
+  id: '/video-lessons',
+  path: '/video-lessons',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudentDashboardRoute = StudentDashboardRouteImport.update({
   id: '/student-dashboard',
   path: '/student-dashboard',
@@ -56,6 +63,11 @@ const StudentRoute = StudentRouteImport.update({
 const ResourcesRoute = ResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourceLibraryRoute = ResourceLibraryRouteImport.update({
+  id: '/resource-library',
+  path: '/resource-library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HallOfFameRoute = HallOfFameRouteImport.update({
@@ -219,9 +231,11 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/hall-of-fame': typeof HallOfFameRoute
+  '/resource-library': typeof ResourceLibraryRoute
   '/resources': typeof ResourcesRoute
   '/student': typeof StudentRouteWithChildren
   '/student-dashboard': typeof StudentDashboardRoute
+  '/video-lessons': typeof VideoLessonsRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
@@ -253,8 +267,10 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/hall-of-fame': typeof HallOfFameRoute
+  '/resource-library': typeof ResourceLibraryRoute
   '/resources': typeof ResourcesRoute
   '/student-dashboard': typeof StudentDashboardRoute
+  '/video-lessons': typeof VideoLessonsRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
@@ -288,9 +304,11 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/hall-of-fame': typeof HallOfFameRoute
+  '/resource-library': typeof ResourceLibraryRoute
   '/resources': typeof ResourcesRoute
   '/student': typeof StudentRouteWithChildren
   '/student-dashboard': typeof StudentDashboardRoute
+  '/video-lessons': typeof VideoLessonsRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/categories/$category': typeof CategoriesCategoryRoute
@@ -325,9 +343,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/hall-of-fame'
+    | '/resource-library'
     | '/resources'
     | '/student'
     | '/student-dashboard'
+    | '/video-lessons'
     | '/admin/upload-test'
     | '/announcements/$slug'
     | '/categories/$category'
@@ -359,8 +379,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/hall-of-fame'
+    | '/resource-library'
     | '/resources'
     | '/student-dashboard'
+    | '/video-lessons'
     | '/admin/upload-test'
     | '/announcements/$slug'
     | '/categories/$category'
@@ -393,9 +415,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/hall-of-fame'
+    | '/resource-library'
     | '/resources'
     | '/student'
     | '/student-dashboard'
+    | '/video-lessons'
     | '/admin/upload-test'
     | '/announcements/$slug'
     | '/categories/$category'
@@ -429,9 +453,11 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
   HallOfFameRoute: typeof HallOfFameRoute
+  ResourceLibraryRoute: typeof ResourceLibraryRoute
   ResourcesRoute: typeof ResourcesRoute
   StudentRoute: typeof StudentRouteWithChildren
   StudentDashboardRoute: typeof StudentDashboardRoute
+  VideoLessonsRoute: typeof VideoLessonsRoute
   AnnouncementsSlugRoute: typeof AnnouncementsSlugRoute
   CategoriesCategoryRoute: typeof CategoriesCategoryRoute
   ParentSlugRoute: typeof ParentSlugRoute
@@ -451,6 +477,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/video-lessons': {
+      id: '/video-lessons'
+      path: '/video-lessons'
+      fullPath: '/video-lessons'
+      preLoaderRoute: typeof VideoLessonsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/student-dashboard': {
       id: '/student-dashboard'
       path: '/student-dashboard'
@@ -470,6 +503,13 @@ declare module '@tanstack/react-router' {
       path: '/resources'
       fullPath: '/resources'
       preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resource-library': {
+      id: '/resource-library'
+      path: '/resource-library'
+      fullPath: '/resource-library'
+      preLoaderRoute: typeof ResourceLibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hall-of-fame': {
@@ -728,9 +768,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
   HallOfFameRoute: HallOfFameRoute,
+  ResourceLibraryRoute: ResourceLibraryRoute,
   ResourcesRoute: ResourcesRoute,
   StudentRoute: StudentRouteWithChildren,
   StudentDashboardRoute: StudentDashboardRoute,
+  VideoLessonsRoute: VideoLessonsRoute,
   AnnouncementsSlugRoute: AnnouncementsSlugRoute,
   CategoriesCategoryRoute: CategoriesCategoryRoute,
   ParentSlugRoute: ParentSlugRoute,

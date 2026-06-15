@@ -372,8 +372,22 @@ export const t = {
   // Search & filters
   search_placeholder: { en: "Search…", ar: "ابحث…" },
   filter_by_grade: { en: "Filter by grade", ar: "تصفية حسب الصف" },
+  filter_by_lesson: { en: "Filter by lesson", ar: "تصفية حسب الدرس" },
   filter_by_unit: { en: "Filter by unit", ar: "تصفية حسب الوحدة" },
   filter_by_type: { en: "Filter by type", ar: "تصفية حسب النوع" },
+  rl_all_lessons: { en: "All lessons", ar: "جميع الدروس" },
+  empty_lesson_resources: {
+    en: "No lesson files available yet.",
+    ar: "لا توجد ملفات دروس متاحة بعد.",
+  },
+  empty_lesson_videos: {
+    en: "No lesson videos available yet.",
+    ar: "لا توجد دروس مرئية متاحة بعد.",
+  },
+  video_watch_ar: { en: "Watch Arabic video", ar: "مشاهدة الفيديو العربي" },
+  video_watch_en: { en: "Watch English video", ar: "مشاهدة الفيديو الإنجليزي" },
+  video_watch_lesson: { en: "Watch lesson video", ar: "مشاهدة فيديو الدرس" },
+  open_lesson: { en: "Open lesson page", ar: "فتح صفحة الدرس" },
   filter_all: { en: "All", ar: "الكل" },
   clear_filters: { en: "Clear", ar: "مسح" },
 

@@ -296,19 +296,34 @@ function Home() {
             <SectionHeader eyebrow={tr("feat_eyebrow")} title={tr("feat_title")} desc={tr("feat_desc")} tone="light" />
             <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               {[
-                { icon: Library, t: tr("feat_lib_t"), d: tr("feat_lib_d") },
-                { icon: Video, t: tr("feat_vid_t"), d: tr("feat_vid_d") },
-                { icon: ClipboardCheck, t: tr("feat_quiz_t"), d: tr("feat_quiz_d") },
-                { icon: Users, t: tr("feat_par_t"), d: tr("feat_par_d") },
-              ].map((f) => (
-                <div key={f.t} className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:bg-white/10 transition-colors">
-                  <div className="h-12 w-12 rounded-xl bg-primary text-foreground flex items-center justify-center">
-                    <f.icon className="h-6 w-6" />
+                { icon: Library, t: tr("feat_lib_t"), d: tr("feat_lib_d"), to: "/resource-library" as const },
+                { icon: Video, t: tr("feat_vid_t"), d: tr("feat_vid_d"), to: "/video-lessons" as const },
+                { icon: ClipboardCheck, t: tr("feat_quiz_t"), d: tr("feat_quiz_d"), to: "/quizzes" as const },
+                { icon: Users, t: tr("feat_par_t"), d: tr("feat_par_d"), to: "/parent" as const },
+              ].map((f) => {
+                const card = (
+                  <>
+                    <div className="h-12 w-12 rounded-xl bg-primary text-foreground flex items-center justify-center">
+                      <f.icon className="h-6 w-6" />
+                    </div>
+                    <div className="mt-4 font-display text-xl">{f.t}</div>
+                    <div className="mt-2 text-sm opacity-80 leading-relaxed">{f.d}</div>
+                  </>
+                );
+                return f.to ? (
+                  <Link
+                    key={f.t}
+                    to={f.to}
+                    className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:bg-white/10 transition-colors block"
+                  >
+                    {card}
+                  </Link>
+                ) : (
+                  <div key={f.t} className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:bg-white/10 transition-colors">
+                    {card}
                   </div>
-                  <div className="mt-4 font-display text-xl">{f.t}</div>
-                  <div className="mt-2 text-sm opacity-80 leading-relaxed">{f.d}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
