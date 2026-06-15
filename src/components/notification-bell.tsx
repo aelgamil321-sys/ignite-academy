@@ -77,7 +77,7 @@ function NotificationItem({
 }
 
 export function NotificationBell({ className }: { className?: string }) {
-  const { tr, lang } = useI18n();
+  const { tr } = useI18n();
   const [open, setOpen] = useState(false);
   const { items, unreadCount, loading, reload } = useNotifications(true);
 
@@ -158,9 +158,7 @@ export function NotificationBell({ className }: { className?: string }) {
 
         {unreadCount > 0 && (
           <div className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground text-center">
-            {lang === "ar"
-              ? `${unreadCount} غير مقروء`
-              : `${unreadCount} unread`}
+            {unreadCount} {tr("notifications_unread")}
           </div>
         )}
       </PopoverContent>

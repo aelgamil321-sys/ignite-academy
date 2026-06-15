@@ -686,4 +686,5 @@ export const zhByEn: Record<string, string> = {
   notifications_title: "通知",
   notifications_empty: "暂无通知。",
   notifications_mark_all_read: "全部标为已读",
+  notifications_unread: "条未读",
 };

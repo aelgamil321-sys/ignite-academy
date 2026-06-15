@@ -686,4 +686,5 @@ export const urByEn: Record<string, string> = {
   notifications_title: "اطلاعات",
   notifications_empty: "ابھی کوئی اطلاع نہیں۔",
   notifications_mark_all_read: "سب کو پڑھا ہوا نشان زد کریں",
+  notifications_unread: "نہ پڑھے",
 };

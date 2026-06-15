@@ -82,6 +82,11 @@ export async function markAllNotificationsRead(): Promise<{ error: string | null
   return { error: error?.message ?? null };
 }
 
+export async function syncParentMissingAssignmentNotifications(): Promise<void> {
+  const { error } = await supabase.rpc("sync_parent_missing_assignment_notifications");
+  if (error) console.warn("[notifications parent missing]", error.message);
+}
+
 export async function syncAssignmentDueSoonNotifications(): Promise<void> {
   const { error } = await supabase.rpc("sync_assignment_due_soon_notifications");
   if (error) console.warn("[notifications due soon]", error.message);
@@ -131,11 +136,20 @@ export async function syncBadgeNotifications(
 export async function refreshNotificationSources(
   userId: string,
   unlockedBadgeIds: StudentBadgeId[],
+  role: "student" | "parent" | "admin" | null,
 ): Promise<void> {
-  await Promise.all([
-    syncAssignmentDueSoonNotifications(),
-    syncBadgeNotifications(userId, unlockedBadgeIds),
-  ]);
+  if (role === "student") {
+    await Promise.all([
+      syncAssignmentDueSoonNotifications(),
+      syncBadgeNotifications(userId, unlockedBadgeIds),
+    ]);
+    return;
+  }
+
+  if (role === "parent") {
+    await syncParentMissingAssignmentNotifications();
+    return;
+  }
 }
 
 export function formatNotificationTime(iso: string, lang: "en" | "ar"): string {
@@ -159,12 +173,13 @@ export function notificationIcon(type: string): string {
     case "assignment_graded":
     case "child_assignment_submitted":
     case "child_assignment_graded":
-    case "admin_assignment_published":
+    case "child_assignment_missing":
     case "admin_assignment_submitted":
+    case "admin_student_registered":
+    case "admin_parent_registered":
       return "📋";
     case "certificate_earned":
     case "child_certificate_earned":
-    case "admin_certificate_earned":
       return "🏆";
     case "badge_unlocked":
     case "child_badge_unlocked":

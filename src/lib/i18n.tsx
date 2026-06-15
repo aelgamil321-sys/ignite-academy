@@ -593,6 +593,7 @@ export const t = {
   notifications_title: { en: "Notifications", ar: "الإشعارات" },
   notifications_empty: { en: "No notifications yet.", ar: "لا توجد إشعارات بعد." },
   notifications_mark_all_read: { en: "Mark all read", ar: "تعيين الكل كمقروء" },
+  notifications_unread: { en: "unread", ar: "غير مقروء" },
 } satisfies Dict;
 
 export type TKey = keyof typeof t;

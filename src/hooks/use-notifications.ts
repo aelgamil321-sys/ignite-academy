@@ -59,12 +59,12 @@ export function useNotifications(enabled: boolean) {
     if (role === "student") {
       const { data: progress } = await fetchStudentProgress(userId);
       if (progress) {
-        await refreshNotificationSources(userId, evaluateStudentBadges(progress));
+        await refreshNotificationSources(userId, evaluateStudentBadges(progress), role);
       } else {
-        await refreshNotificationSources(userId, []);
+        await refreshNotificationSources(userId, [], role);
       }
     } else {
-      await refreshNotificationSources(userId, []);
+      await refreshNotificationSources(userId, [], role);
     }
   }, [userId]);
 

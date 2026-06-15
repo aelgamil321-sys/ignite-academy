@@ -686,4 +686,5 @@ export const frByEn: Record<string, string> = {
   notifications_title: "Notifications",
   notifications_empty: "Aucune notification pour le moment.",
   notifications_mark_all_read: "Tout marquer comme lu",
+  notifications_unread: "non lu(s)",
 };

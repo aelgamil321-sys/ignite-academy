@@ -686,4 +686,5 @@ export const deByEn: Record<string, string> = {
   notifications_title: "Benachrichtigungen",
   notifications_empty: "Noch keine Benachrichtigungen.",
   notifications_mark_all_read: "Alle als gelesen markieren",
+  notifications_unread: "ungelesen",
 };
