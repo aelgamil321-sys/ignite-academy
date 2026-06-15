@@ -19,6 +19,7 @@ import {
 } from "@/lib/translation-cache";
 import {
   educationalDisplayFallback,
+  hasSuccessfulEducationalTranslations,
   initEducationalTranslationScheduler,
   needsDynamicTranslation,
   onTranslationAvailabilityChange,
@@ -594,7 +595,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     return initEducationalTranslationScheduler(
-      () => setContentRev((v) => v + 1),
+      () => {
+        setContentRev((v) => v + 1);
+        if (hasSuccessfulEducationalTranslations()) {
+          setTranslationUnavailable(false);
+        }
+      },
       (active) => setContentTranslating(active),
     );
   }, []);

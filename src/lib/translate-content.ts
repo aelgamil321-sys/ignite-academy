@@ -8,6 +8,7 @@ export {
   translateEducationalBi,
   prefetchEducationalTranslations,
   educationalDisplayFallback,
+  hasSuccessfulEducationalTranslations,
   isTranslationServiceAvailable,
   onTranslationAvailabilityChange,
   initEducationalTranslationScheduler,

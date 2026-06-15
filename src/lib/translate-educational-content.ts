@@ -110,6 +110,10 @@ export function isTranslationServiceAvailable(): boolean {
   return translationServiceAvailable !== false;
 }
 
+export function hasSuccessfulEducationalTranslations(): boolean {
+  return sessionSuccessCount > 0;
+}
+
 export function onTranslationAvailabilityChange(
   listener: (available: boolean) => void,
 ): () => void {

@@ -1,13 +1,16 @@
 import { Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { needsDynamicTranslation } from "@/lib/translate-content";
+import { needsDynamicTranslation, hasSuccessfulEducationalTranslations } from "@/lib/translate-content";
 import { cn } from "@/lib/utils";
 
 /** Small indicator shown while lesson/content translation is in progress. */
 export function TranslationLoadingIndicator({ className }: { className?: string }) {
   const { contentTranslating, translationUnavailable, tr, lang } = useI18n();
   const showSpinner = contentTranslating > 0 && needsDynamicTranslation(lang);
-  const showUnavailable = translationUnavailable && needsDynamicTranslation(lang);
+  const showUnavailable =
+    translationUnavailable &&
+    needsDynamicTranslation(lang) &&
+    !hasSuccessfulEducationalTranslations();
 
   if (!showSpinner && !showUnavailable) return null;
 
