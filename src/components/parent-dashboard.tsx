@@ -10,6 +10,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { computeStudentBadges } from "@/lib/student-badges";
 import { ParentPerformanceReportCard } from "@/components/parent-performance-report";
+import { ParentAssignmentsSection } from "@/components/parent-assignments-section";
 import {useI18n, L } from "@/lib/i18n";
 import type { ParentDashboardData } from "@/lib/parent-dashboard";
 import type { ActivityTimelineItem } from "@/lib/student-progress";
@@ -105,6 +106,8 @@ export function ParentDashboardView({
   return (
     <div className="space-y-10">
       <ParentPerformanceReportCard report={performanceReport} />
+
+      <ParentAssignmentsSection studentUserId={data.studentUserId} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {statCards.map((card) => {

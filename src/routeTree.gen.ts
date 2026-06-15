@@ -26,6 +26,7 @@ import { Route as StudentIndexRouteImport } from './routes/student.index'
 import { Route as QuizzesIndexRouteImport } from './routes/quizzes.index'
 import { Route as ParentIndexRouteImport } from './routes/parent.index'
 import { Route as GradesIndexRouteImport } from './routes/grades.index'
+import { Route as AssignmentsIndexRouteImport } from './routes/assignments.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
@@ -35,11 +36,13 @@ import { Route as ParentSettingsRouteImport } from './routes/parent.settings'
 import { Route as ParentDashboardRouteImport } from './routes/parent.dashboard'
 import { Route as ParentSlugRouteImport } from './routes/parent.$slug'
 import { Route as CategoriesCategoryRouteImport } from './routes/categories.$category'
+import { Route as AssignmentsAssignmentIdRouteImport } from './routes/assignments.$assignmentId'
 import { Route as AnnouncementsSlugRouteImport } from './routes/announcements.$slug'
 import { Route as AdminUploadTestRouteImport } from './routes/admin/upload-test'
 import { Route as GradesGradeIndexRouteImport } from './routes/grades.$grade.index'
 import { Route as AdminQuizSubmissionsIndexRouteImport } from './routes/admin/quiz-submissions.index'
 import { Route as AdminLessonsIndexRouteImport } from './routes/admin/lessons.index'
+import { Route as AdminAssignmentsIndexRouteImport } from './routes/admin/assignments.index'
 import { Route as AdminAnalyticsIndexRouteImport } from './routes/admin/analytics.index'
 import { Route as GradesGradeLessonRouteImport } from './routes/grades.$grade.$lesson'
 import { Route as GradesGradeUnitsUnitRouteImport } from './routes/grades.$grade.units.$unit'
@@ -130,6 +133,11 @@ const GradesIndexRoute = GradesIndexRouteImport.update({
   path: '/grades/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssignmentsIndexRoute = AssignmentsIndexRouteImport.update({
+  id: '/assignments/',
+  path: '/assignments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
   id: '/announcements/',
   path: '/announcements/',
@@ -175,6 +183,11 @@ const CategoriesCategoryRoute = CategoriesCategoryRouteImport.update({
   path: '/categories/$category',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssignmentsAssignmentIdRoute = AssignmentsAssignmentIdRouteImport.update({
+  id: '/assignments/$assignmentId',
+  path: '/assignments/$assignmentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnnouncementsSlugRoute = AnnouncementsSlugRouteImport.update({
   id: '/announcements/$slug',
   path: '/announcements/$slug',
@@ -199,6 +212,11 @@ const AdminQuizSubmissionsIndexRoute =
 const AdminLessonsIndexRoute = AdminLessonsIndexRouteImport.update({
   id: '/lessons/',
   path: '/lessons/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAssignmentsIndexRoute = AdminAssignmentsIndexRouteImport.update({
+  id: '/assignments/',
+  path: '/assignments/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminAnalyticsIndexRoute = AdminAnalyticsIndexRouteImport.update({
@@ -238,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/video-lessons': typeof VideoLessonsRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
+  '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/parent/dashboard': typeof ParentDashboardRoute
@@ -247,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/videos/$slug': typeof VideosSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/assignments/': typeof AssignmentsIndexRoute
   '/grades/': typeof GradesIndexRoute
   '/parent/': typeof ParentIndexRoute
   '/quizzes/': typeof QuizzesIndexRoute
@@ -254,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/videos/': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
   '/admin/analytics/': typeof AdminAnalyticsIndexRoute
+  '/admin/assignments/': typeof AdminAssignmentsIndexRoute
   '/admin/lessons/': typeof AdminLessonsIndexRoute
   '/admin/quiz-submissions/': typeof AdminQuizSubmissionsIndexRoute
   '/grades/$grade/': typeof GradesGradeIndexRoute
@@ -273,6 +294,7 @@ export interface FileRoutesByTo {
   '/video-lessons': typeof VideoLessonsRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
+  '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/parent/dashboard': typeof ParentDashboardRoute
@@ -282,6 +304,7 @@ export interface FileRoutesByTo {
   '/videos/$slug': typeof VideosSlugRoute
   '/admin': typeof AdminIndexRoute
   '/announcements': typeof AnnouncementsIndexRoute
+  '/assignments': typeof AssignmentsIndexRoute
   '/grades': typeof GradesIndexRoute
   '/parent': typeof ParentIndexRoute
   '/quizzes': typeof QuizzesIndexRoute
@@ -289,6 +312,7 @@ export interface FileRoutesByTo {
   '/videos': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
   '/admin/analytics': typeof AdminAnalyticsIndexRoute
+  '/admin/assignments': typeof AdminAssignmentsIndexRoute
   '/admin/lessons': typeof AdminLessonsIndexRoute
   '/admin/quiz-submissions': typeof AdminQuizSubmissionsIndexRoute
   '/grades/$grade': typeof GradesGradeIndexRoute
@@ -311,6 +335,7 @@ export interface FileRoutesById {
   '/video-lessons': typeof VideoLessonsRoute
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
+  '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
   '/categories/$category': typeof CategoriesCategoryRoute
   '/parent/$slug': typeof ParentSlugRoute
   '/parent/dashboard': typeof ParentDashboardRoute
@@ -320,6 +345,7 @@ export interface FileRoutesById {
   '/videos/$slug': typeof VideosSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/assignments/': typeof AssignmentsIndexRoute
   '/grades/': typeof GradesIndexRoute
   '/parent/': typeof ParentIndexRoute
   '/quizzes/': typeof QuizzesIndexRoute
@@ -327,6 +353,7 @@ export interface FileRoutesById {
   '/videos/': typeof VideosIndexRoute
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
   '/admin/analytics/': typeof AdminAnalyticsIndexRoute
+  '/admin/assignments/': typeof AdminAssignmentsIndexRoute
   '/admin/lessons/': typeof AdminLessonsIndexRoute
   '/admin/quiz-submissions/': typeof AdminQuizSubmissionsIndexRoute
   '/grades/$grade/': typeof GradesGradeIndexRoute
@@ -350,6 +377,7 @@ export interface FileRouteTypes {
     | '/video-lessons'
     | '/admin/upload-test'
     | '/announcements/$slug'
+    | '/assignments/$assignmentId'
     | '/categories/$category'
     | '/parent/$slug'
     | '/parent/dashboard'
@@ -359,6 +387,7 @@ export interface FileRouteTypes {
     | '/videos/$slug'
     | '/admin/'
     | '/announcements/'
+    | '/assignments/'
     | '/grades/'
     | '/parent/'
     | '/quizzes/'
@@ -366,6 +395,7 @@ export interface FileRouteTypes {
     | '/videos/'
     | '/grades/$grade/$lesson'
     | '/admin/analytics/'
+    | '/admin/assignments/'
     | '/admin/lessons/'
     | '/admin/quiz-submissions/'
     | '/grades/$grade/'
@@ -385,6 +415,7 @@ export interface FileRouteTypes {
     | '/video-lessons'
     | '/admin/upload-test'
     | '/announcements/$slug'
+    | '/assignments/$assignmentId'
     | '/categories/$category'
     | '/parent/$slug'
     | '/parent/dashboard'
@@ -394,6 +425,7 @@ export interface FileRouteTypes {
     | '/videos/$slug'
     | '/admin'
     | '/announcements'
+    | '/assignments'
     | '/grades'
     | '/parent'
     | '/quizzes'
@@ -401,6 +433,7 @@ export interface FileRouteTypes {
     | '/videos'
     | '/grades/$grade/$lesson'
     | '/admin/analytics'
+    | '/admin/assignments'
     | '/admin/lessons'
     | '/admin/quiz-submissions'
     | '/grades/$grade'
@@ -422,6 +455,7 @@ export interface FileRouteTypes {
     | '/video-lessons'
     | '/admin/upload-test'
     | '/announcements/$slug'
+    | '/assignments/$assignmentId'
     | '/categories/$category'
     | '/parent/$slug'
     | '/parent/dashboard'
@@ -431,6 +465,7 @@ export interface FileRouteTypes {
     | '/videos/$slug'
     | '/admin/'
     | '/announcements/'
+    | '/assignments/'
     | '/grades/'
     | '/parent/'
     | '/quizzes/'
@@ -438,6 +473,7 @@ export interface FileRouteTypes {
     | '/videos/'
     | '/grades/$grade/$lesson'
     | '/admin/analytics/'
+    | '/admin/assignments/'
     | '/admin/lessons/'
     | '/admin/quiz-submissions/'
     | '/grades/$grade/'
@@ -459,6 +495,7 @@ export interface RootRouteChildren {
   StudentDashboardRoute: typeof StudentDashboardRoute
   VideoLessonsRoute: typeof VideoLessonsRoute
   AnnouncementsSlugRoute: typeof AnnouncementsSlugRoute
+  AssignmentsAssignmentIdRoute: typeof AssignmentsAssignmentIdRoute
   CategoriesCategoryRoute: typeof CategoriesCategoryRoute
   ParentSlugRoute: typeof ParentSlugRoute
   ParentDashboardRoute: typeof ParentDashboardRoute
@@ -466,6 +503,7 @@ export interface RootRouteChildren {
   QuizzesSlugRoute: typeof QuizzesSlugRoute
   VideosSlugRoute: typeof VideosSlugRoute
   AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
+  AssignmentsIndexRoute: typeof AssignmentsIndexRoute
   GradesIndexRoute: typeof GradesIndexRoute
   ParentIndexRoute: typeof ParentIndexRoute
   QuizzesIndexRoute: typeof QuizzesIndexRoute
@@ -596,6 +634,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GradesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assignments/': {
+      id: '/assignments/'
+      path: '/assignments'
+      fullPath: '/assignments/'
+      preLoaderRoute: typeof AssignmentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/announcements/': {
       id: '/announcements/'
       path: '/announcements'
@@ -659,6 +704,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assignments/$assignmentId': {
+      id: '/assignments/$assignmentId'
+      path: '/assignments/$assignmentId'
+      fullPath: '/assignments/$assignmentId'
+      preLoaderRoute: typeof AssignmentsAssignmentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/announcements/$slug': {
       id: '/announcements/$slug'
       path: '/announcements/$slug'
@@ -692,6 +744,13 @@ declare module '@tanstack/react-router' {
       path: '/lessons'
       fullPath: '/admin/lessons/'
       preLoaderRoute: typeof AdminLessonsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/assignments/': {
+      id: '/admin/assignments/'
+      path: '/assignments'
+      fullPath: '/admin/assignments/'
+      preLoaderRoute: typeof AdminAssignmentsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/analytics/': {
@@ -729,6 +788,7 @@ interface AdminRouteRouteChildren {
   AdminUploadTestRoute: typeof AdminUploadTestRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAnalyticsIndexRoute: typeof AdminAnalyticsIndexRoute
+  AdminAssignmentsIndexRoute: typeof AdminAssignmentsIndexRoute
   AdminLessonsIndexRoute: typeof AdminLessonsIndexRoute
   AdminQuizSubmissionsIndexRoute: typeof AdminQuizSubmissionsIndexRoute
   AdminLessonsEditLessonIdRoute: typeof AdminLessonsEditLessonIdRoute
@@ -738,6 +798,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminUploadTestRoute: AdminUploadTestRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminAnalyticsIndexRoute: AdminAnalyticsIndexRoute,
+  AdminAssignmentsIndexRoute: AdminAssignmentsIndexRoute,
   AdminLessonsIndexRoute: AdminLessonsIndexRoute,
   AdminQuizSubmissionsIndexRoute: AdminQuizSubmissionsIndexRoute,
   AdminLessonsEditLessonIdRoute: AdminLessonsEditLessonIdRoute,
@@ -774,6 +835,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudentDashboardRoute: StudentDashboardRoute,
   VideoLessonsRoute: VideoLessonsRoute,
   AnnouncementsSlugRoute: AnnouncementsSlugRoute,
+  AssignmentsAssignmentIdRoute: AssignmentsAssignmentIdRoute,
   CategoriesCategoryRoute: CategoriesCategoryRoute,
   ParentSlugRoute: ParentSlugRoute,
   ParentDashboardRoute: ParentDashboardRoute,
@@ -781,6 +843,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuizzesSlugRoute: QuizzesSlugRoute,
   VideosSlugRoute: VideosSlugRoute,
   AnnouncementsIndexRoute: AnnouncementsIndexRoute,
+  AssignmentsIndexRoute: AssignmentsIndexRoute,
   GradesIndexRoute: GradesIndexRoute,
   ParentIndexRoute: ParentIndexRoute,
   QuizzesIndexRoute: QuizzesIndexRoute,

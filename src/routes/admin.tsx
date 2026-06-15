@@ -110,15 +110,20 @@ export function AdminLayoutShell({ email }: { email: string }) {
   const onLessonsEdit = pathname.startsWith("/admin/lessons/edit/");
   const onQuizSubmissions =
     pathname === "/admin/quiz-submissions" || pathname === "/admin/quiz-submissions/";
+  const onAssignments =
+    pathname === "/admin/assignments" || pathname === "/admin/assignments/";
   const onAnalytics =
     pathname === "/admin/analytics" || pathname === "/admin/analytics/";
 
   const adminLabel = L("Admin", "الإدارة")[lang];
   const manageLessonsLabel = L("Manage Lessons", "إدارة الدروس")[lang];
   const quizSubmissionsLabel = L("Quiz Submissions", "إرسالات الاختبارات")[lang];
+  const assignmentsLabel = L("Assignments Management", "إدارة الواجبات")[lang];
   const analyticsLabel = L("Analytics", "التحليلات")[lang];
   const title = onAnalytics
     ? analyticsLabel
+    : onAssignments
+    ? assignmentsLabel
     : onQuizSubmissions
     ? quizSubmissionsLabel
     : onLessonsList
@@ -133,6 +138,11 @@ export function AdminLayoutShell({ email }: { email: string }) {
       )[lang]
     : onQuizSubmissions
     ? L("Review student quiz submissions and grade essay answers.", "راجع إرسالات الطلاب وقيّم الإجابات المقالية.")[lang]
+    : onAssignments
+    ? L(
+        "Create assignments, review submissions, and grade student work.",
+        "أنشئ الواجبات وراجع الإرسالات وقيّم أعمال الطلاب.",
+      )[lang]
     : onLessonsList
       ? L("View and edit all lessons.", "عرض وتعديل جميع الدروس.")[lang]
       : onLessonsEdit
@@ -143,6 +153,8 @@ export function AdminLayoutShell({ email }: { email: string }) {
     ? [{ label: adminLabel, to: "/admin" }, { label: analyticsLabel }]
     : onQuizSubmissions
     ? [{ label: adminLabel, to: "/admin" }, { label: quizSubmissionsLabel }]
+    : onAssignments
+    ? [{ label: adminLabel, to: "/admin" }, { label: assignmentsLabel }]
     : onLessonsList
       ? [{ label: adminLabel, to: "/admin" }, { label: manageLessonsLabel }]
       : onLessonsEdit

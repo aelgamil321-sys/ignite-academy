@@ -10,7 +10,7 @@ import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
 import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 
-const STUDENT_ONLY_PATHS = new Set(["/grades", "/quizzes", "/student"]);
+const STUDENT_ONLY_PATHS = new Set(["/grades", "/quizzes", "/assignments", "/student"]);
 
 /** Shared pill styles for header controls and nav links */
 const headerPillBase =
@@ -63,6 +63,7 @@ export function SiteHeader() {
     { label: tr("nav_resources"), to: "/resources" },
     { label: tr("nav_videos"), to: "/videos" },
     { label: tr("nav_quizzes"), to: "/quizzes" },
+    { label: tr("nav_assignments"), to: "/assignments" },
     { label: tr("nav_announcements"), to: "/announcements" },
     { label: tr("nav_hall_of_fame"), to: "/hall-of-fame" },
     { label: tr("nav_parent"), to: "/parent" },

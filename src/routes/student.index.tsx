@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/page-shell";
 import { ParentLinkCodeCard } from "@/components/parent-link-code-card";
 import { StudentProgressDashboard } from "@/components/student-progress-dashboard";
+import { StudentAssignmentsLinkCard } from "@/components/parent-assignments-section";
 import { useI18n } from "@/lib/i18n";
 import { grades } from "@/lib/curriculum";
 import { gradeDisplayName, normalizeGradeSlug } from "@/lib/grade-utils";
@@ -178,6 +179,10 @@ function StudentDashboardPage({
       )}
 
       {parentLinkCode ? <ParentLinkCodeCard code={parentLinkCode} /> : null}
+
+      <div className="mb-6">
+        <StudentAssignmentsLinkCard />
+      </div>
 
       {loading ? (
         <div className="text-sm text-muted-foreground py-12 text-center">
