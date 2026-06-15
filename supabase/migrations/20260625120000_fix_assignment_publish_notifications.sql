@@ -7,24 +7,53 @@ LANGUAGE sql
 IMMUTABLE
 SET search_path = public
 AS $$
-  SELECT CASE lower(trim(COALESCE(p_grade, '')))
+  SELECT CASE g
     WHEN '' THEN ''
-    WHEN 'grade 1', 'grade-1', 'grade1' THEN '1'
-    WHEN 'grade 2', 'grade-2', 'grade2' THEN '2'
-    WHEN 'grade 3', 'grade-3', 'grade3' THEN '3'
-    WHEN 'grade 4', 'grade-4', 'grade4' THEN '4'
-    WHEN 'grade 5', 'grade-5', 'grade5' THEN '5'
-    WHEN 'grade 6', 'grade-6', 'grade6' THEN '6'
-    WHEN 'grade 7', 'grade-7', 'grade7' THEN '7'
-    WHEN 'grade 8', 'grade-8', 'grade8' THEN '8'
-    WHEN 'grade 9', 'grade-9', 'grade9' THEN '9'
-    WHEN 'grade 10', 'grade-10', 'grade10' THEN '10'
-    WHEN 'grade 11', 'grade-11', 'grade11' THEN '11'
-    WHEN 'grade 12', 'grade-12', 'grade12' THEN '12'
-    WHEN 'kg 1', 'kg-1', 'kg1' THEN 'kg1'
-    WHEN 'kg 2', 'kg-2', 'kg2' THEN 'kg2'
-    ELSE lower(trim(p_grade))
-  END;
+    WHEN 'grade 1' THEN '1'
+    WHEN 'grade-1' THEN '1'
+    WHEN 'grade1' THEN '1'
+    WHEN 'grade 2' THEN '2'
+    WHEN 'grade-2' THEN '2'
+    WHEN 'grade2' THEN '2'
+    WHEN 'grade 3' THEN '3'
+    WHEN 'grade-3' THEN '3'
+    WHEN 'grade3' THEN '3'
+    WHEN 'grade 4' THEN '4'
+    WHEN 'grade-4' THEN '4'
+    WHEN 'grade4' THEN '4'
+    WHEN 'grade 5' THEN '5'
+    WHEN 'grade-5' THEN '5'
+    WHEN 'grade5' THEN '5'
+    WHEN 'grade 6' THEN '6'
+    WHEN 'grade-6' THEN '6'
+    WHEN 'grade6' THEN '6'
+    WHEN 'grade 7' THEN '7'
+    WHEN 'grade-7' THEN '7'
+    WHEN 'grade7' THEN '7'
+    WHEN 'grade 8' THEN '8'
+    WHEN 'grade-8' THEN '8'
+    WHEN 'grade8' THEN '8'
+    WHEN 'grade 9' THEN '9'
+    WHEN 'grade-9' THEN '9'
+    WHEN 'grade9' THEN '9'
+    WHEN 'grade 10' THEN '10'
+    WHEN 'grade-10' THEN '10'
+    WHEN 'grade10' THEN '10'
+    WHEN 'grade 11' THEN '11'
+    WHEN 'grade-11' THEN '11'
+    WHEN 'grade11' THEN '11'
+    WHEN 'grade 12' THEN '12'
+    WHEN 'grade-12' THEN '12'
+    WHEN 'grade12' THEN '12'
+    WHEN 'kg 1' THEN 'kg1'
+    WHEN 'kg-1' THEN 'kg1'
+    WHEN 'kg1' THEN 'kg1'
+    WHEN 'kg 2' THEN 'kg2'
+    WHEN 'kg-2' THEN 'kg2'
+    WHEN 'kg2' THEN 'kg2'
+    ELSE g
+  END
+  FROM (SELECT lower(trim(COALESCE(p_grade, ''))) AS g) normalized;
 $$;
 
 CREATE OR REPLACE FUNCTION public.profile_matches_assignment(

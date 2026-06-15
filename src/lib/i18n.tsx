@@ -497,12 +497,16 @@ export const t = {
     ar: "يرجى إدخال رمز ربط ولي الأمر.",
   },
   auth_success_student: {
-    en: "Your account was created. Please check your email to confirm, then sign in.",
-    ar: "تم إنشاء حسابك. يرجى التحقق من بريدك الإلكتروني ثم تسجيل الدخول.",
+    en: "Account created successfully. Please check your email to confirm your account before logging in.",
+    ar: "تم إنشاء الحساب بنجاح. يرجى فحص بريدك الإلكتروني لتأكيد الحساب قبل تسجيل الدخول.",
   },
   auth_success_parent: {
-    en: "Your account was created. Please check your email to confirm, then sign in.",
-    ar: "تم إنشاء حسابك. يرجى التحقق من بريدك الإلكتروني ثم تسجيل الدخول.",
+    en: "Account created successfully. Please check your email to confirm your account before logging in.",
+    ar: "تم إنشاء الحساب بنجاح. يرجى فحص بريدك الإلكتروني لتأكيد الحساب قبل تسجيل الدخول.",
+  },
+  auth_email_confirmed: {
+    en: "Your email has been confirmed successfully. You can now sign in.",
+    ar: "تم تأكيد البريد الإلكتروني بنجاح، يمكنك الآن تسجيل الدخول.",
   },
   auth_success_login: { en: "Welcome to the Academy", ar: "مرحبًا بك في الأكاديمية" },
   auth_already_linked: {

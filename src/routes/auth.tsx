@@ -7,17 +7,23 @@ import { getAccountRole, getPostAuthPath, postAuthPathForRole } from "@/lib/acco
 import { parseAuthAccountType } from "@/lib/parent-corner-access";
 import { redeemParentLinkCode } from "@/lib/parent-link-code";
 import { toast } from "sonner";
-import { GraduationCap, LogIn, UserPlus, AlertCircle, Users } from "lucide-react";
+import { GraduationCap, LogIn, UserPlus, AlertCircle, Users, CheckCircle } from "lucide-react";
 import { grades } from "@/lib/curriculum";
 import { StudentAcademicFields } from "@/components/student-academic-fields";
 import { ProfilePhotoField } from "@/components/profile-photo-field";
 import { uploadProfilePhoto } from "@/lib/profile-photo";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
+import {
+  SIGNUP_EMAIL_REDIRECT_URL,
+  clearEmailConfirmationParams,
+  isEmailConfirmationReturn,
+} from "@/lib/auth-redirect";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     mode: s.mode === "signup" ? "signup" : "login",
     accountType: parseAuthAccountType(s),
+    email_confirmed: s.email_confirmed === "1" || s.email_confirmed === "true",
   }),
   head: () => ({
     meta: [
@@ -30,7 +36,8 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { mode: initialMode, accountType: initialAccountType } = Route.useSearch();
+  const { mode: initialMode, accountType: initialAccountType, email_confirmed: emailConfirmedSearch } =
+    Route.useSearch();
   const { lang, bi, tr } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [accountType, setAccountType] = useState<"student" | "parent">(initialAccountType);
@@ -46,9 +53,30 @@ function AuthPage() {
   const [islamicGroup, setIslamicGroup] = useState<IslamicGroup | "">("");
   const [busy, setBusy] = useState(false);
   const [signupAlert, setSignupAlert] = useState<string | null>(null);
+  const [signupSuccessAlert, setSignupSuccessAlert] = useState<string | null>(null);
+  const [emailConfirmedAlert, setEmailConfirmedAlert] = useState<string | null>(null);
+  const [handlingEmailConfirm, setHandlingEmailConfirm] = useState(
+    () => emailConfirmedSearch || isEmailConfirmationReturn(),
+  );
 
   useEffect(() => { setMode(initialMode); }, [initialMode]);
   useEffect(() => { setAccountType(initialAccountType); }, [initialAccountType]);
+
+  useEffect(() => {
+    if (!handlingEmailConfirm) return;
+    let active = true;
+    void (async () => {
+      await supabase.auth.signOut();
+      if (!active) return;
+      setEmailConfirmedAlert(tr("auth_email_confirmed"));
+      setMode("login");
+      setHandlingEmailConfirm(false);
+      clearEmailConfirmationParams();
+    })();
+    return () => {
+      active = false;
+    };
+  }, [handlingEmailConfirm, tr]);
 
   function isDuplicateEmailError(err: unknown): boolean {
     if (err && typeof err === "object" && "code" in err) {
@@ -60,10 +88,16 @@ function AuthPage() {
     return false;
   }
 
-  // If already signed in, send to the correct dashboard (unless switching account type)
+  // If already signed in with a confirmed email, send to the correct dashboard.
   useEffect(() => {
+    if (handlingEmailConfirm) return;
+
     let active = true;
-    const redirectSignedInUser = async (userId: string) => {
+    const redirectSignedInUser = async (userId: string, emailConfirmed: boolean) => {
+      if (!emailConfirmed) {
+        await supabase.auth.signOut();
+        return;
+      }
       const role = await getAccountRole(userId);
       if (!active) return;
       if (initialAccountType === "parent" && role === "student") return;
@@ -72,21 +106,28 @@ function AuthPage() {
       window.location.replace(path);
     };
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active && session?.user) void redirectSignedInUser(session.user.id);
+      if (!active || !session?.user) return;
+      void redirectSignedInUser(session.user.id, !!session.user.email_confirmed_at);
     });
     void supabase.auth.getSession().then(({ data }) => {
-      if (active && data.session?.user) void redirectSignedInUser(data.session.user.id);
+      if (!active || !data.session?.user) return;
+      void redirectSignedInUser(
+        data.session.user.id,
+        !!data.session.user.email_confirmed_at,
+      );
     });
     return () => {
       active = false;
       subscription.unsubscribe();
     };
-  }, [initialAccountType]);
+  }, [initialAccountType, handlingEmailConfirm]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
     setSignupAlert(null);
+    setSignupSuccessAlert(null);
+    setEmailConfirmedAlert(null);
     try {
       const fd = new FormData(e.currentTarget);
       const submitEmail = String(fd.get("email") ?? email).trim();
@@ -125,17 +166,11 @@ function AuthPage() {
             return;
           }
 
-          const completeStudentSignup = async (userId: string) => {
-            await uploadProfilePhoto(userId, profilePhotoFile);
-            toast.success(tr("auth_welcome"));
-            window.location.assign("/student");
-          };
-
           const { data, error } = await supabase.auth.signUp({
             email: submitEmail,
             password: submitPassword,
             options: {
-              emailRedirectTo: `${window.location.origin}/student-dashboard`,
+              emailRedirectTo: SIGNUP_EMAIL_REDIRECT_URL,
               data: {
                 full_name: submitEnglishName,
                 arabic_name: submitArabicName,
@@ -149,21 +184,14 @@ function AuthPage() {
           });
           if (error) throw error;
 
-          if (data.session && data.user) {
-            await completeStudentSignup(data.user.id);
+          if (data.session && data.user?.email_confirmed_at) {
+            await uploadProfilePhoto(data.user.id, profilePhotoFile);
+            toast.success(tr("auth_welcome"));
+            window.location.assign("/student");
             return;
           }
 
-          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-            email: submitEmail,
-            password: submitPassword,
-          });
-          if (!loginError && loginData.session?.user) {
-            await completeStudentSignup(loginData.user.id);
-            return;
-          }
-
-          toast.success(tr("auth_success_student"));
+          setSignupSuccessAlert(tr("auth_success_student"));
           setMode("login");
           return;
         }
@@ -184,7 +212,7 @@ function AuthPage() {
           email: submitEmail,
           password: submitPassword,
           options: {
-            emailRedirectTo: `${window.location.origin}/parent/dashboard`,
+            emailRedirectTo: SIGNUP_EMAIL_REDIRECT_URL,
             data: {
               full_name: submitParentFullName,
               role_intent: "parent",
@@ -220,23 +248,13 @@ function AuthPage() {
           window.location.assign("/parent/dashboard");
         };
 
-        if (data.session) {
+        if (data.session && data.user?.email_confirmed_at) {
           toast.success(tr("auth_welcome"));
           await completeParentSignup();
           return;
         }
 
-        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-          email: submitEmail,
-          password: submitPassword,
-        });
-        if (!loginError && loginData.session) {
-          toast.success(tr("auth_welcome"));
-          await completeParentSignup();
-          return;
-        }
-
-        toast.success(tr("auth_success_parent"));
+        setSignupSuccessAlert(tr("auth_success_parent"));
         setMode("login");
         return;
       }
@@ -276,19 +294,43 @@ function AuthPage() {
           <div className="inline-flex rounded-full border border-border p-1 mb-6">
             <button
               type="button"
-              onClick={() => { setMode("signup"); setSignupAlert(null); }}
+              onClick={() => { setMode("signup"); setSignupAlert(null); setSignupSuccessAlert(null); }}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${mode === "signup" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
             >
               <UserPlus className="h-4 w-4" /> {accountType === "parent" ? tr("auth_create_parent") : tr("auth_create_student")}
             </button>
             <button
               type="button"
-              onClick={() => { setMode("login"); setSignupAlert(null); }}
+              onClick={() => { setMode("login"); setSignupAlert(null); setSignupSuccessAlert(null); }}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${mode === "login" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
             >
               <LogIn className="h-4 w-4" /> {tr("auth_login")}
             </button>
           </div>
+
+          {emailConfirmedAlert && mode === "login" && (
+            <div
+              role="status"
+              className="mb-4 rounded-2xl border border-primary/40 bg-primary/10 px-5 py-4 text-sm text-foreground"
+            >
+              <div className="flex gap-3">
+                <CheckCircle className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                <p className="font-medium leading-relaxed">{emailConfirmedAlert}</p>
+              </div>
+            </div>
+          )}
+
+          {signupSuccessAlert && mode === "login" && (
+            <div
+              role="status"
+              className="mb-4 rounded-2xl border border-primary/40 bg-primary/10 px-5 py-4 text-sm text-foreground"
+            >
+              <div className="flex gap-3">
+                <CheckCircle className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                <p className="font-medium leading-relaxed">{signupSuccessAlert}</p>
+              </div>
+            </div>
+          )}
 
           {signupAlert && mode === "signup" && (
             <div
@@ -462,7 +504,11 @@ function AuthPage() {
           <div className="mt-5 text-center text-xs text-muted-foreground">
             <button
               type="button"
-              onClick={() => { setMode(mode === "login" ? "signup" : "login"); setSignupAlert(null); }}
+              onClick={() => {
+                setMode(mode === "login" ? "signup" : "login");
+                setSignupAlert(null);
+                setSignupSuccessAlert(null);
+              }}
               className="underline hover:text-primary"
             >
               {mode === "login" ? tr("auth_to_signup") : tr("auth_to_login")}
