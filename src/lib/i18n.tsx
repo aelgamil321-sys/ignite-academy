@@ -578,6 +578,16 @@ export const t = {
   assignment_no_missing: { en: "No missing assignments.", ar: "لا توجد واجبات ناقصة." },
   assignment_no_late: { en: "No late assignments.", ar: "لا توجد واجبات متأخرة." },
   loading: { en: "Loading…", ar: "جارٍ التحميل…" },
+  assignment_submitted_file: { en: "Submitted file", ar: "الملف المُرسل" },
+  assignment_file_open: { en: "Open file", ar: "عرض الملف" },
+  assignment_file_download: { en: "Download", ar: "تحميل الملف" },
+  assignment_file_preview: { en: "Preview", ar: "معاينة" },
+  assignment_file_preview_title: { en: "File preview", ar: "معاينة الملف" },
+  assignment_file_type: { en: "File type", ar: "نوع الملف" },
+  assignment_file_size: { en: "File size", ar: "حجم الملف" },
+  assignment_file_not_found: { en: "File not found in storage.", ar: "الملف غير موجود في التخزين." },
+  assignment_file_signed_url_failed: { en: "Could not open file. Signed URL failed.", ar: "تعذر فتح الملف. فشل إنشاء الرابط المؤقت." },
+  assignment_file_permission_denied: { en: "Permission denied to access this file.", ar: "لا تملك صلاحية الوصول إلى هذا الملف." },
 } satisfies Dict;
 
 export type TKey = keyof typeof t;

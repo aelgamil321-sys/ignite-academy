@@ -30,8 +30,8 @@ import {
   type AssignmentSubmissionRow,
   type AssignmentSubmissionStatus,
 } from "@/lib/assignment";
+import { AdminAssignmentSubmissionFile } from "@/components/admin-assignment-submission-file";
 import {
-  ASSIGNMENT_ATTACHMENT_ACCEPT,
   deleteAssignmentStorageFile,
   uploadAssignmentAttachment,
 } from "@/lib/assignment-upload";
@@ -560,11 +560,13 @@ function AdminAssignmentsPage() {
                         <p className="text-sm whitespace-pre-wrap">{sub.text_response}</p>
                       </div>
                     )}
-                    {sub.file_name && (
-                      <p className="text-sm text-muted-foreground">
-                        {L("File", "ملف")[lang]}: {sub.file_name}
-                      </p>
-                    )}
+                    {sub.file_path || sub.file_name ? (
+                      <AdminAssignmentSubmissionFile
+                        filePath={sub.file_path}
+                        fileName={sub.file_name}
+                        fileMime={sub.file_mime}
+                      />
+                    ) : null}
                     <div className="grid gap-3 sm:grid-cols-3">
                       <div>
                         <label className="text-xs font-medium">{L("Score", "الدرجة")[lang]}</label>
