@@ -483,6 +483,7 @@ export const t = {
     ar: "يرجى إدخال اسم الطالب بالإنجليزية.",
   },
   auth_err_section: { en: "Please select your section.", ar: "يرجى اختيار الشعبة." },
+  auth_err_grade: { en: "Please select your grade.", ar: "يرجى اختيار الصف." },
   auth_err_islamic_group: {
     en: "Please select your Islamic group.",
     ar: "يرجى اختيار المجموعة الإسلامية.",
@@ -536,6 +537,10 @@ export const t = {
   auth_err_email_password: {
     en: "Please enter your email and password.",
     ar: "يرجى إدخال البريد الإلكتروني وكلمة المرور.",
+  },
+  auth_err_password_length: {
+    en: "Password must be at least 8 characters.",
+    ar: "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
   },
   auth_invalid_link_code: {
     en: "That student link code is not valid. Check the code in Parent Settings after signing in.",

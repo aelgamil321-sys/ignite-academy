@@ -128,6 +128,32 @@ function AuthPage() {
     return false;
   }
 
+  function showSignupError(message: string, debug?: unknown) {
+    setSignupAlert(message);
+    console.error("[auth signup]", message, debug ?? "");
+  }
+
+  function validateStudentSignupFields(fields: {
+    arabicName: string;
+    englishName: string;
+    grade: string;
+    section: string;
+    islamicGroup: string;
+    email: string;
+    password: string;
+    photo: File | null;
+  }): string | null {
+    if (!fields.arabicName) return tr("auth_err_arabic_name");
+    if (!fields.englishName) return tr("auth_err_english_name");
+    if (!fields.grade) return tr("auth_err_grade");
+    if (!fields.section) return tr("auth_err_section");
+    if (!fields.islamicGroup) return tr("auth_err_islamic_group");
+    if (!fields.photo) return tr("auth_err_photo");
+    if (!fields.email || !fields.password) return tr("auth_err_email_password");
+    if (fields.password.length < 8) return tr("auth_err_password_length");
+    return null;
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
@@ -136,7 +162,8 @@ function AuthPage() {
     setEmailConfirmedAlert(null);
     setEmailNotConfirmedAlert(null);
     try {
-      const fd = new FormData(e.currentTarget);
+      const form = e.currentTarget;
+      const fd = new FormData(form);
       const submitEmail = String(fd.get("email") ?? email).trim();
       const submitPassword = String(fd.get("password") ?? password);
       const submitArabicName = String(fd.get("arabic_name") ?? arabicName).trim();
@@ -145,33 +172,29 @@ function AuthPage() {
       const submitSection = String(fd.get("section") ?? section).trim();
       const submitIslamicGroup = String(fd.get("islamic_group") ?? islamicGroup).trim();
 
-      if (!submitEmail || !submitPassword) {
-        toast.error(tr("auth_err_email_password"));
-        return;
-      }
-
       if (mode === "signup") {
+        console.debug("[auth signup] submit started", { accountType });
+
         if (accountType === "student") {
-          if (!submitArabicName) {
-            toast.error(tr("auth_err_arabic_name"));
+          const validationError = validateStudentSignupFields({
+            arabicName: submitArabicName,
+            englishName: submitEnglishName,
+            grade: submitGrade,
+            section: submitSection,
+            islamicGroup: submitIslamicGroup,
+            email: submitEmail,
+            password: submitPassword,
+            photo: profilePhotoFile,
+          });
+          if (validationError) {
+            showSignupError(validationError, { step: "validation" });
             return;
           }
-          if (!submitEnglishName) {
-            toast.error(tr("auth_err_english_name"));
-            return;
-          }
-          if (!submitSection) {
-            toast.error(tr("auth_err_section"));
-            return;
-          }
-          if (!submitIslamicGroup) {
-            toast.error(tr("auth_err_islamic_group"));
-            return;
-          }
-          if (!profilePhotoFile) {
-            toast.error(tr("auth_err_photo"));
-            return;
-          }
+
+          console.debug("[auth signup] calling supabase.auth.signUp", {
+            email: submitEmail,
+            emailRedirectTo: SIGNUP_EMAIL_REDIRECT_URL,
+          });
 
           const { data, error } = await supabase.auth.signUp({
             email: submitEmail,
@@ -189,17 +212,29 @@ function AuthPage() {
               },
             },
           });
-          if (error) throw error;
+          if (error) {
+            console.error("[auth signup] supabase signUp error", error);
+            throw error;
+          }
+
+          console.debug("[auth signup] signUp response", {
+            userId: data.user?.id,
+            hasSession: Boolean(data.session),
+            emailConfirmed: Boolean(data.user?.email_confirmed_at),
+          });
 
           if (data.session && data.user?.email_confirmed_at) {
-            await uploadProfilePhoto(data.user.id, profilePhotoFile);
+            await uploadProfilePhoto(data.user.id, profilePhotoFile!);
             toast.success(tr("auth_welcome"));
             window.location.assign("/student");
             return;
           }
 
+          if (data.session && !data.user?.email_confirmed_at) {
+            await supabase.auth.signOut();
+          }
+
           setSignupSuccessAlert(tr("auth_success_student"));
-          setMode("login");
           return;
         }
 
@@ -207,13 +242,26 @@ function AuthPage() {
         const submitParentLinkCode = String(fd.get("parent_link_code") ?? parentLinkCode).trim();
 
         if (!submitParentFullName) {
-          toast.error(tr("auth_err_parent_name"));
+          showSignupError(tr("auth_err_parent_name"), { step: "validation" });
           return;
         }
         if (!submitParentLinkCode) {
-          toast.error(tr("auth_err_link_code"));
+          showSignupError(tr("auth_err_link_code"), { step: "validation" });
           return;
         }
+        if (!submitEmail || !submitPassword) {
+          showSignupError(tr("auth_err_email_password"), { step: "validation" });
+          return;
+        }
+        if (submitPassword.length < 8) {
+          showSignupError(tr("auth_err_password_length"), { step: "validation" });
+          return;
+        }
+
+        console.debug("[auth signup] calling supabase.auth.signUp (parent)", {
+          email: submitEmail,
+          emailRedirectTo: SIGNUP_EMAIL_REDIRECT_URL,
+        });
 
         const { data, error } = await supabase.auth.signUp({
           email: submitEmail,
@@ -227,10 +275,13 @@ function AuthPage() {
             },
           },
         });
-        if (error) throw error;
+        if (error) {
+          console.error("[auth signup] supabase signUp error (parent)", error);
+          throw error;
+        }
 
         if (data.user) {
-          await supabase.from("parent_profiles").upsert(
+          const { error: profileError } = await supabase.from("parent_profiles").upsert(
             {
               user_id: data.user.id,
               full_name: submitParentFullName,
@@ -240,6 +291,9 @@ function AuthPage() {
             },
             { onConflict: "user_id" },
           );
+          if (profileError) {
+            console.error("[auth signup] parent_profiles upsert error", profileError);
+          }
         }
 
         const completeParentSignup = async () => {
@@ -261,8 +315,16 @@ function AuthPage() {
           return;
         }
 
+        if (data.session && !data.user?.email_confirmed_at) {
+          await supabase.auth.signOut();
+        }
+
         setSignupSuccessAlert(tr("auth_success_parent"));
-        setMode("login");
+        return;
+      }
+
+      if (!submitEmail || !submitPassword) {
+        toast.error(tr("auth_err_email_password"));
         return;
       }
 
@@ -290,12 +352,17 @@ function AuthPage() {
       window.location.assign(redirectPath);
     } catch (err) {
       if (mode === "signup" && isDuplicateEmailError(err)) {
-        setSignupAlert(tr("auth_duplicate_email"));
+        showSignupError(tr("auth_duplicate_email"), err);
         return;
       }
       if (mode === "login" && isEmailNotConfirmedError(err)) {
         setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
         await supabase.auth.signOut();
+        return;
+      }
+      if (mode === "signup") {
+        const message = err instanceof Error ? err.message : String(err);
+        showSignupError(message, err);
         return;
       }
       toast.error(err instanceof Error ? err.message : String(err));
@@ -356,7 +423,7 @@ function AuthPage() {
             </div>
           )}
 
-          {signupSuccessAlert && mode === "login" && (
+          {signupSuccessAlert && (
             <div
               role="status"
               className="mb-4 rounded-2xl border border-primary/40 bg-primary/10 px-5 py-4 text-sm text-foreground"
@@ -389,7 +456,7 @@ function AuthPage() {
             </div>
           )}
 
-          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+          <form noValidate onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             {mode === "signup" && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground">{tr("auth_account_type")}</label>
@@ -419,7 +486,6 @@ function AuthPage() {
                     type="text"
                     name="arabic_name"
                     autoComplete="additional-name"
-                    required
                     value={arabicName}
                     onChange={(e) => setArabicName(e.target.value)}
                     maxLength={100}
@@ -433,7 +499,6 @@ function AuthPage() {
                     type="text"
                     name="english_name"
                     autoComplete="name"
-                    required
                     value={englishName}
                     onChange={(e) => setEnglishName(e.target.value)}
                     maxLength={100}
@@ -444,7 +509,6 @@ function AuthPage() {
                   <label className="text-xs font-medium text-muted-foreground">{tr("auth_grade")}</label>
                   <select
                     name="grade"
-                    required
                     value={grade}
                     onChange={(e) => setGrade(e.target.value)}
                     className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
@@ -460,13 +524,11 @@ function AuthPage() {
                   islamicGroup={islamicGroup}
                   onSectionChange={setSection}
                   onIslamicGroupChange={setIslamicGroup}
-                  required
                 />
                 <ProfilePhotoField
                   lang={lang}
                   file={profilePhotoFile}
                   onChange={setProfilePhotoFile}
-                  required
                 />
               </>
             )}
@@ -478,7 +540,6 @@ function AuthPage() {
                     type="text"
                     name="parent_full_name"
                     autoComplete="name"
-                    required
                     value={parentFullName}
                     onChange={(e) => setParentFullName(e.target.value)}
                     maxLength={100}
@@ -490,7 +551,6 @@ function AuthPage() {
                   <input
                     type="text"
                     name="parent_link_code"
-                    required
                     value={parentLinkCode}
                     onChange={(e) => setParentLinkCode(e.target.value.toUpperCase())}
                     maxLength={20}
@@ -508,7 +568,6 @@ function AuthPage() {
                 type="email"
                 name="email"
                 autoComplete="email"
-                required
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setSignupAlert(null); }}
                 maxLength={255}
@@ -521,8 +580,6 @@ function AuthPage() {
                 type="password"
                 name="password"
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                required
-                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
