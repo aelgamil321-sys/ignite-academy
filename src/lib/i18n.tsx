@@ -59,6 +59,7 @@ export const t = {
   nav_videos: { en: "Videos", ar: "الدروس المرئية" },
   nav_quizzes: { en: "Quizzes", ar: "الاختبارات" },
   nav_assignments: { en: "Assignments", ar: "الواجبات" },
+  nav_notifications: { en: "Notifications", ar: "الإشعارات" },
   nav_announcements: { en: "Announcements", ar: "الإعلانات" },
   nav_hall_of_fame: { en: "Hall of Fame", ar: "لوحة الشرف" },
   nav_contact: { en: "Contact", ar: "اتصل بنا" },
@@ -588,6 +589,10 @@ export const t = {
   assignment_file_not_found: { en: "File not found in storage.", ar: "الملف غير موجود في التخزين." },
   assignment_file_signed_url_failed: { en: "Could not open file. Signed URL failed.", ar: "تعذر فتح الملف. فشل إنشاء الرابط المؤقت." },
   assignment_file_permission_denied: { en: "Permission denied to access this file.", ar: "لا تملك صلاحية الوصول إلى هذا الملف." },
+
+  notifications_title: { en: "Notifications", ar: "الإشعارات" },
+  notifications_empty: { en: "No notifications yet.", ar: "لا توجد إشعارات بعد." },
+  notifications_mark_all_read: { en: "Mark all read", ar: "تعيين الكل كمقروء" },
 } satisfies Dict;
 
 export type TKey = keyof typeof t;

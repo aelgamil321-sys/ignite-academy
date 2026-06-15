@@ -682,4 +682,8 @@ export const urByEn: Record<string, string> = {
   assignment_file_not_found: "اسٹوریج میں فائل نہیں ملی۔",
   assignment_file_signed_url_failed: "فائل کھولنے میں ناکامی۔ دستخط شدہ URL ناکام۔",
   assignment_file_permission_denied: "اس فائل تک رسائی کی اجازت نہیں۔",
+  nav_notifications: "اطلاعات",
+  notifications_title: "اطلاعات",
+  notifications_empty: "ابھی کوئی اطلاع نہیں۔",
+  notifications_mark_all_read: "سب کو پڑھا ہوا نشان زد کریں",
 };

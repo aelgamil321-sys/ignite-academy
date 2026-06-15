@@ -682,4 +682,8 @@ export const deByEn: Record<string, string> = {
   assignment_file_not_found: "Datei im Speicher nicht gefunden.",
   assignment_file_signed_url_failed: "Datei konnte nicht geöffnet werden. Signierte URL fehlgeschlagen.",
   assignment_file_permission_denied: "Keine Berechtigung für diese Datei.",
+  nav_notifications: "Benachrichtigungen",
+  notifications_title: "Benachrichtigungen",
+  notifications_empty: "Noch keine Benachrichtigungen.",
+  notifications_mark_all_read: "Alle als gelesen markieren",
 };

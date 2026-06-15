@@ -682,4 +682,8 @@ export const frByEn: Record<string, string> = {
   assignment_file_not_found: "Fichier introuvable dans le stockage.",
   assignment_file_signed_url_failed: "Impossible d'ouvrir le fichier. Échec du lien signé.",
   assignment_file_permission_denied: "Accès refusé à ce fichier.",
+  nav_notifications: "Notifications",
+  notifications_title: "Notifications",
+  notifications_empty: "Aucune notification pour le moment.",
+  notifications_mark_all_read: "Tout marquer comme lu",
 };

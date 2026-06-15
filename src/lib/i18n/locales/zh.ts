@@ -682,4 +682,8 @@ export const zhByEn: Record<string, string> = {
   assignment_file_not_found: "存储中未找到文件。",
   assignment_file_signed_url_failed: "无法打开文件，签名 URL 失败。",
   assignment_file_permission_denied: "无权访问此文件。",
+  nav_notifications: "通知",
+  notifications_title: "通知",
+  notifications_empty: "暂无通知。",
+  notifications_mark_all_read: "全部标为已读",
 };
