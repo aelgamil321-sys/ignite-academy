@@ -2,7 +2,6 @@ import type { Lang } from "@/lib/i18n-config";
 
 export type TranslatableLang = Exclude<Lang, "en" | "ar">;
 
-/** Google / MyMemory language codes. */
 const TARGET_CODES: Record<TranslatableLang, string> = {
   fr: "fr",
   de: "de",
@@ -10,7 +9,6 @@ const TARGET_CODES: Record<TranslatableLang, string> = {
   zh: "zh-CN",
 };
 
-/** MyMemory uses slightly different codes for some targets. */
 const MYMEMORY_TARGET: Record<TranslatableLang, string> = {
   fr: "fr",
   de: "de",
@@ -18,13 +16,24 @@ const MYMEMORY_TARGET: Record<TranslatableLang, string> = {
   zh: "zh-CN",
 };
 
-const FETCH_HEADERS = {
-  Accept: "application/json",
-  "User-Agent": "IgniteIslamicAcademy/1.0 (educational; translate)",
+const BROWSER_HEADERS = {
+  Accept: "*/*",
+  "Accept-Language": "en-US,en;q=0.9",
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+  Referer: "https://translate.google.com/",
 };
 
 export function isTranslationApiConfigured(): boolean {
   return Boolean(process.env.GOOGLE_TRANSLATE_API_KEY);
+}
+
+function parseGtxResponse(json: unknown): string | null {
+  if (!Array.isArray(json) || !Array.isArray(json[0])) return null;
+  const parts = (json[0] as Array<[string, ...unknown[]]>)
+    .map((row) => row[0])
+    .filter(Boolean);
+  return parts.join("").trim() || null;
 }
 
 async function googleTranslateApi(
@@ -37,7 +46,7 @@ async function googleTranslateApi(
     `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(apiKey)}`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...FETCH_HEADERS },
+      headers: { "Content-Type": "application/json", ...BROWSER_HEADERS },
       body: JSON.stringify({ q: text, target, source, format: "text" }),
     },
   );
@@ -49,27 +58,30 @@ async function googleTranslateApi(
   return out && out !== text ? out : null;
 }
 
-/** Unofficial Google Translate endpoint — server-only fallback when no API key. */
 async function googleTranslateGtx(
   text: string,
   target: string,
   source: "en" | "ar",
 ): Promise<string | null> {
   const chunk = text.length > 4500 ? text.slice(0, 4500) : text;
-  const url =
-    `https://translate.googleapis.com/translate_a/single?client=gtx` +
-    `&sl=${encodeURIComponent(source)}` +
-    `&tl=${encodeURIComponent(target)}` +
-    `&dt=t&q=${encodeURIComponent(chunk)}`;
-  const res = await fetch(url, { headers: FETCH_HEADERS });
-  if (!res.ok) return null;
-  const json = (await res.json()) as unknown;
-  if (!Array.isArray(json) || !Array.isArray(json[0])) return null;
-  const parts = (json[0] as Array<[string, ...unknown[]]>)
-    .map((row) => row[0])
-    .filter(Boolean);
-  const out = parts.join("").trim();
-  return out && out !== chunk ? out : null;
+  const q = encodeURIComponent(chunk);
+  const urls = [
+    `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${source}&tl=${target}&dt=t&q=${q}`,
+    `https://translate.google.com/translate_a/single?client=gtx&sl=${source}&tl=${target}&dt=t&q=${q}`,
+  ];
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers: BROWSER_HEADERS });
+      if (!res.ok) continue;
+      const json = (await res.json()) as unknown;
+      const out = parseGtxResponse(json);
+      if (out && out !== chunk) return out;
+    } catch {
+      // try next endpoint
+    }
+  }
+  return null;
 }
 
 async function myMemoryTranslate(
@@ -80,7 +92,7 @@ async function myMemoryTranslate(
   const langpair = `${source}|${target}`;
   const chunk = text.length > 480 ? text.slice(0, 480) : text;
   const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=${encodeURIComponent(langpair)}`;
-  const res = await fetch(url, { headers: FETCH_HEADERS });
+  const res = await fetch(url, { headers: BROWSER_HEADERS });
   if (!res.ok) return null;
   const json = (await res.json()) as {
     responseStatus?: number;

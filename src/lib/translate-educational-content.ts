@@ -127,7 +127,7 @@ function scheduleFlush() {
 async function flushTranslationQueue() {
   if (pendingQueue.length === 0) return;
 
-  const batch = pendingQueue.splice(0, 16);
+  const batch = pendingQueue.splice(0, 12);
   const byGroup = new Map<string, QueueItem[]>();
 
   for (const item of batch) {
@@ -146,8 +146,12 @@ async function flushTranslationQueue() {
       ];
       const texts = items.map((i) => i.text);
 
+      let translations: string[] = [];
+      let serviceAvailable = false;
+      let providers: string[] = [];
+
       try {
-        const { translations, serviceAvailable, providers } = await translateContentBatch({
+        const result = await translateContentBatch({
           data: {
             texts,
             targetLang,
@@ -156,52 +160,54 @@ async function flushTranslationQueue() {
             lessonId: items[0]?.lessonId,
           },
         });
-
+        translations = result.translations;
+        serviceAvailable = result.serviceAvailable;
+        providers = result.providers ?? [];
         setTranslationServiceAvailable(serviceAvailable);
-
-        items.forEach((item, index) => {
-          const source = item.text;
-          const translated =
-            translations[index]?.trim() ||
-            educationalDisplayFallback(source, item.targetLanguage);
-          const changed = translated !== source;
-          const cacheInput = {
-            lang: item.targetLanguage,
-            contentType: item.contentType,
-            lessonId: item.lessonId,
-            fieldName: item.fieldName,
-            source,
-          };
-          if (serviceAvailable && changed) {
-            setCachedEducationalTranslation(cacheInput, translated);
-          }
-          debugTranslate("resolved", item, {
-            changed,
-            serviceAvailable,
-            providers,
-            resultPreview: translated.slice(0, 80),
-            fallback: !changed,
-            cached: serviceAvailable && changed,
-          });
-          item.resolve({
-            text: translated,
-            fromCache: false,
-            serviceUnavailable: !serviceAvailable || !changed,
-          });
-        });
       } catch (error) {
-        setTranslationServiceAvailable(false);
-        items.forEach((item) => {
-          const fallback = educationalDisplayFallback(item.text, item.targetLanguage);
-          debugTranslate("error", item, {
-            error: error instanceof Error ? error.message : String(error),
-            fallbackPreview: fallback.slice(0, 80),
-          });
-          item.resolve({
-            text: fallback,
-            fromCache: false,
-            serviceUnavailable: true,
-          });
+        debugTranslate("server-error", items[0]!, {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        translations = texts;
+        serviceAvailable = false;
+      }
+
+      for (let index = 0; index < items.length; index++) {
+        const item = items[index]!;
+        const source = item.text;
+        let translated = translations[index]?.trim() || "";
+        let ok = serviceAvailable && translated !== source && Boolean(translated);
+
+        if (!ok) {
+          translated = educationalDisplayFallback(source, item.targetLanguage);
+        }
+
+        const changed = translated !== source;
+        const cacheInput = {
+          lang: item.targetLanguage,
+          contentType: item.contentType,
+          lessonId: item.lessonId,
+          fieldName: item.fieldName,
+          source,
+        };
+
+        if (ok && changed) {
+          setCachedEducationalTranslation(cacheInput, translated);
+        }
+
+        debugTranslate("resolved", item, {
+          changed,
+          serviceAvailable: ok,
+          providers,
+          resultPreview: translated.slice(0, 80),
+          fallback: !changed,
+          cached: ok && changed,
+        });
+
+        item.resolve({
+          text: translated,
+          fromCache: false,
+          serviceUnavailable: !ok || !changed,
         });
       }
     }),

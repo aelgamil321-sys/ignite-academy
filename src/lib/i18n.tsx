@@ -26,6 +26,57 @@ import {
   translateEducationalBi,
   type EducationalContentType,
 } from "@/lib/translate-content";
+import {
+  mergeProtectedSegments,
+  splitIslamicProtectedText,
+  translatableSegments,
+} from "@/lib/islamic-text-protection";
+
+const BROWSER_TARGET: Record<Exclude<Lang, "en" | "ar">, string> = {
+  fr: "fr",
+  de: "de",
+  ur: "ur",
+  zh: "zh-CN",
+};
+
+function parseGtxJson(json: unknown): string | null {
+  if (!Array.isArray(json) || !Array.isArray(json[0])) return null;
+  const parts = (json[0] as Array<[string, ...unknown[]]>).map((row) => row[0]).filter(Boolean);
+  return parts.join("").trim() || null;
+}
+
+/** Browser-side gtx (visitor IP) when Cloudflare Worker translation is blocked. */
+async function browserTranslateEducationalText(
+  source: string,
+  lang: Lang,
+  sourceLang: "en" | "ar",
+): Promise<string | null> {
+  if (typeof window === "undefined" || !needsDynamicTranslation(lang)) return null;
+  const target = BROWSER_TARGET[lang as Exclude<Lang, "en" | "ar">];
+  const segments = splitIslamicProtectedText(source);
+  const parts = translatableSegments(segments);
+  if (parts.length === 0) return source;
+
+  const translatedParts: string[] = [];
+  for (const part of parts) {
+    const q = encodeURIComponent(part.slice(0, 4500));
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${target}&dt=t&q=${q}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        translatedParts.push(part);
+        continue;
+      }
+      const out = parseGtxJson((await res.json()) as unknown);
+      translatedParts.push(out && out !== part ? out : part);
+    } catch {
+      translatedParts.push(part);
+    }
+  }
+
+  const merged = mergeProtectedSegments(segments, translatedParts);
+  return merged !== source ? merged : null;
+}
 
 export type { Lang, ContentLocale } from "@/lib/i18n-config";
 export { L, LANG_OPTIONS, pickBi, pickBiLocale } from "@/lib/i18n-config";
@@ -633,25 +684,45 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       inflightRef.current.add(inflightKey);
       setContentTranslating((n) => n + 1);
       void translateEducationalBi(text, lang, { contentType, lessonId, fieldName })
-        .then((result) => {
-          if (!result.serviceUnavailable && result.text) {
+        .then(async (result) => {
+          let finalText = result.text;
+          let unavailable = result.serviceUnavailable;
+
+          if (unavailable && typeof window !== "undefined") {
+            const sourceLang: "en" | "ar" = text.en?.trim() ? "en" : "ar";
+            const browserText = await browserTranslateEducationalText(source, lang, sourceLang);
+            if (browserText) {
+              finalText = browserText;
+              unavailable = false;
+              if (import.meta.env.DEV) {
+                console.debug("[i18n-bi] browser-gtx fallback", {
+                  lang,
+                  contentType,
+                  fieldName,
+                  preview: browserText.slice(0, 80),
+                });
+              }
+            }
+          }
+
+          if (!unavailable && finalText) {
             setCachedEducationalTranslation(
               { lang, contentType, lessonId, fieldName, source },
-              result.text,
+              finalText,
             );
-          }
-          if (result.serviceUnavailable) {
-            setTranslationUnavailable(true);
-          } else {
             setTranslationUnavailable(false);
+          } else {
+            setTranslationUnavailable(true);
           }
+
           if (import.meta.env.DEV) {
             console.debug("[i18n-bi] translated", {
               lang,
               contentType,
               fieldName,
-              changed: result.text !== educationalDisplayFallback(source, lang, text),
-              preview: result.text.slice(0, 80),
+              changed: finalText !== educationalDisplayFallback(source, lang, text),
+              preview: finalText.slice(0, 80),
+              unavailable,
             });
           }
           setContentRev((v) => v + 1);
