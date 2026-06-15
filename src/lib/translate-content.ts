@@ -11,6 +11,7 @@ export {
   isTranslationServiceAvailable,
   onTranslationAvailabilityChange,
   initEducationalTranslationScheduler,
+  resetTranslationSession,
   type EducationalContentType,
   type EducationalField,
   type TranslateEducationalInput,

@@ -56,8 +56,10 @@ const BROWSER_TARGET: Record<Exclude<Lang, "en" | "ar">, string> = {
   zh: "zh-CN",
 };
 
-const MAX_CONCURRENT = 2;
-const TRANSLATION_TIMEOUT_MS = 8_000;
+const MAX_CONCURRENT = 3;
+const BASE_TRANSLATION_TIMEOUT_MS = 8_000;
+const MAX_TRANSLATION_TIMEOUT_MS = 25_000;
+const MAX_FIELD_ATTEMPTS = 2;
 const CONTENT_UPDATE_DEBOUNCE_MS = 100;
 
 export function needsDynamicTranslation(lang: Lang): boolean {
@@ -137,6 +139,29 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
   ]);
 }
 
+function timeoutForText(text: string): number {
+  return Math.min(MAX_TRANSLATION_TIMEOUT_MS, BASE_TRANSLATION_TIMEOUT_MS + Math.floor(text.length / 40));
+}
+
+function looksMostlyEnglish(text: string): boolean {
+  const latin = (text.match(/[A-Za-z]/g) ?? []).length;
+  const arabic = (text.match(/[\u0600-\u06FF]/g) ?? []).length;
+  return latin > arabic;
+}
+
+async function fetchGtxPart(
+  part: string,
+  target: string,
+  sourceLang: "en" | "ar",
+): Promise<string | null> {
+  const q = encodeURIComponent(part.slice(0, 4500));
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${target}&dt=t&q=${q}`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const out = parseGtxJson((await res.json()) as unknown);
+  return out && out !== part ? out : null;
+}
+
 /** Browser-side gtx — uses visitor IP; never touches the Cloudflare Worker. */
 async function browserTranslateText(
   source: string,
@@ -151,19 +176,14 @@ async function browserTranslateText(
 
   const translatedParts: string[] = [];
   for (const part of parts) {
-    const q = encodeURIComponent(part.slice(0, 4500));
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${target}&dt=t&q=${q}`;
-    try {
-      const res = await fetch(url);
-      if (!res.ok) {
-        translatedParts.push(part);
-        continue;
-      }
-      const out = parseGtxJson((await res.json()) as unknown);
-      translatedParts.push(out && out !== part ? out : part);
-    } catch {
-      translatedParts.push(part);
+    let out = await fetchGtxPart(part, target, sourceLang);
+    if (!out && sourceLang !== "en" && looksMostlyEnglish(part)) {
+      out = await fetchGtxPart(part, target, "en");
     }
+    if (!out && sourceLang === "en") {
+      out = await fetchGtxPart(part, target, "en");
+    }
+    translatedParts.push(out ?? part);
   }
 
   const merged = mergeProtectedSegments(segments, translatedParts);
@@ -186,13 +206,18 @@ type PendingJob = TranslateEducationalInput & {
 
 const browserQueue: PendingJob[] = [];
 const inflightKeys = new Set<string>();
-const failedKeys = new Set<string>();
+const attemptCounts = new Map<string, number>();
 const queuedKeys = new Set<string>();
 let activeJobs = 0;
 let onContentUpdate: (() => void) | null = null;
 let onTranslatingChange: ((activeCount: number) => void) | null = null;
 let updateTimer: ReturnType<typeof setTimeout> | null = null;
-const prefetchedLessonLang = new Set<string>();
+
+/** Clear in-flight tracking when the user switches language. */
+export function resetTranslationSession(): void {
+  attemptCounts.clear();
+  queuedKeys.clear();
+}
 
 /** Register UI refresh + in-flight count callbacks (from I18nProvider via useEffect). */
 export function initEducationalTranslationScheduler(
@@ -247,10 +272,20 @@ function pumpBrowserQueue() {
       };
 
       try {
-        const translated = await withTimeout(
+        const attempts = (attemptCounts.get(key) ?? 0) + 1;
+        attemptCounts.set(key, attempts);
+
+        let translated = await withTimeout(
           browserTranslateText(job.text, job.targetLanguage, sourceLang),
-          TRANSLATION_TIMEOUT_MS,
+          timeoutForText(job.text),
         );
+
+        if (!translated && attempts < MAX_FIELD_ATTEMPTS && sourceLang !== "en") {
+          translated = await withTimeout(
+            browserTranslateText(job.text, job.targetLanguage, "en"),
+            timeoutForText(job.text),
+          );
+        }
 
         if (translated) {
           setCachedEducationalTranslation(cacheInput, translated);
@@ -262,18 +297,16 @@ function pumpBrowserQueue() {
             serviceUnavailable: false,
           });
         } else {
-          failedKeys.add(key);
           setTranslationServiceAvailable(false);
           const fallback = educationalDisplayFallback(job.text, job.targetLanguage);
-          debugTranslate("browser-fail", job, { fallback: true });
+          debugTranslate("browser-fail", job, { fallback: true, attempts });
           resolveJob(job, {
             text: fallback,
             fromCache: false,
-            serviceUnavailable: true,
+            serviceUnavailable: attempts >= MAX_FIELD_ATTEMPTS,
           });
         }
       } catch {
-        failedKeys.add(key);
         setTranslationServiceAvailable(false);
         resolveJob(job, {
           text: educationalDisplayFallback(job.text, job.targetLanguage),
@@ -296,8 +329,9 @@ function enqueueBrowserTranslation(
   input: TranslateEducationalInput,
 ): Promise<TranslateEducationalResult> {
   const key = scheduleKey(input);
+  const attempts = attemptCounts.get(key) ?? 0;
 
-  if (failedKeys.has(key)) {
+  if (attempts >= MAX_FIELD_ATTEMPTS) {
     return Promise.resolve({
       text: educationalDisplayFallback(input.text, input.targetLanguage),
       fromCache: false,
@@ -397,17 +431,13 @@ export async function translateEducationalBi(
   });
 }
 
-/** Prefetch all lesson fields once per lesson+language (useEffect only — never during render). */
+/** Schedule translation for lesson/quiz fields (useEffect only). Safe to call multiple times. */
 export function prefetchEducationalTranslations(
   lessonId: string,
   fields: EducationalField[],
   targetLanguage: Lang,
 ): void {
   if (!needsDynamicTranslation(targetLanguage) || typeof window === "undefined") return;
-
-  const sessionKey = `${targetLanguage}::${lessonId}`;
-  if (prefetchedLessonLang.has(sessionKey)) return;
-  prefetchedLessonLang.add(sessionKey);
 
   for (const field of fields) {
     const trimmed = field.text?.trim();
@@ -423,7 +453,8 @@ export function prefetchEducationalTranslations(
     if (getCachedEducationalTranslation(cacheInput)) continue;
 
     const key = buildEducationalCacheKey(cacheInput);
-    if (failedKeys.has(key) || inflightKeys.has(key) || queuedKeys.has(key)) continue;
+    if ((attemptCounts.get(key) ?? 0) >= MAX_FIELD_ATTEMPTS) continue;
+    if (inflightKeys.has(key) || queuedKeys.has(key)) continue;
 
     void translateEducationalContent({
       text: trimmed,
@@ -431,6 +462,7 @@ export function prefetchEducationalTranslations(
       contentType: field.contentType,
       lessonId,
       fieldName: field.fieldName,
+      sourceLanguage: /[\u0600-\u06FF]/.test(trimmed) && !/[A-Za-z]{4,}/.test(trimmed) ? "ar" : "en",
     });
   }
 }

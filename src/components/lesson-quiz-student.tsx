@@ -3,8 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { HelpCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useI18n, useLessonTranslationScope } from "@/lib/i18n";
-import type { QuizQuestion } from "@/lib/curriculum";
+import { useI18n, useLessonTranslationScope, prefetchEducationalTranslations } from "@/lib/i18n";
+import { needsDynamicTranslation } from "@/lib/translate-content";
+import type { EducationalField } from "@/lib/translate-content";
+import type { Bi, QuizQuestion } from "@/lib/curriculum";
 import {
   fetchLatestQuizSubmission,
   fetchStudentQuizSubmissions,
@@ -30,6 +32,21 @@ export function LessonQuizStudent({
   const { tr, lang, bi } = useI18n();
   useLessonTranslationScope(lessonId);
   const questions = normalizeQuizList(rawQuestions);
+  const quizMeta = { lessonId };
+
+  useEffect(() => {
+    if (!needsDynamicTranslation(lang) || questions.length === 0) return;
+    const source = (b: Bi) => b.en?.trim() || b.ar?.trim() || "";
+    const fields: EducationalField[] = questions.flatMap((q, qi) => [
+      { fieldName: `quiz_q_${qi}`, contentType: "quiz_question" as const, text: source(q.q) },
+      ...q.options.map((o, oi) => ({
+        fieldName: `quiz_q_${qi}_opt_${oi}`,
+        contentType: "quiz_option" as const,
+        text: source(o),
+      })),
+    ]).filter((f) => f.text);
+    prefetchEducationalTranslations(lessonId, fields, lang);
+  }, [lessonId, lang, questions]);
   const [choiceAnswers, setChoiceAnswers] = useState<Record<number, number>>({});
   const [essayAnswers, setEssayAnswers] = useState<Record<number, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -192,6 +209,7 @@ export function LessonQuizStudent({
         </div>
       ) : showResults ? (
         <LessonQuizResults
+          lessonId={lessonId}
           submission={savedSubmission!}
           questions={questions}
           gradeName={gradeName}
@@ -219,7 +237,7 @@ export function LessonQuizStudent({
                   </div>
                   <TranslatedContentShell>
                   <div className="font-medium text-foreground mb-3">
-                    {bi(q.q, { fieldName: `quiz_q_${i}`, contentType: "quiz_question" }) || q.q.en || q.q.ar}
+                    {bi(q.q, { ...quizMeta, fieldName: `quiz_q_${i}`, contentType: "quiz_question" }) || q.q.en || q.q.ar}
                   </div>
                   </TranslatedContentShell>
 
@@ -251,7 +269,7 @@ export function LessonQuizStudent({
                                 : "border-border hover:border-primary hover:text-primary",
                             ].join(" ")}
                           >
-                            {bi(opt, { fieldName: `quiz_q_${i}_opt_${oi}`, contentType: "quiz_option" }) || opt.en || opt.ar}
+                            {bi(opt, { ...quizMeta, fieldName: `quiz_q_${i}_opt_${oi}`, contentType: "quiz_option" }) || opt.en || opt.ar}
                           </button>
                         );
                       })}

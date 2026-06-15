@@ -22,6 +22,7 @@ import {
   initEducationalTranslationScheduler,
   needsDynamicTranslation,
   onTranslationAvailabilityChange,
+  resetTranslationSession,
   type EducationalContentType,
 } from "@/lib/translate-content";
 
@@ -33,6 +34,7 @@ export {
   prefetchEducationalTranslations,
   needsDynamicTranslation,
   isTranslationServiceAvailable,
+  resetTranslationSession,
   type EducationalContentType,
   type EducationalField,
 } from "@/lib/translate-content";
@@ -606,6 +608,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [lang]);
 
   useEffect(() => {
+    resetTranslationSession();
     if (!needsDynamicTranslation(lang)) {
       setTranslationUnavailable(false);
     }

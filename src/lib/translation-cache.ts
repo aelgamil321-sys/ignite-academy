@@ -1,8 +1,9 @@
 import type { Lang } from "@/lib/i18n-config";
 import type { EducationalContentType } from "@/lib/translate-educational-content";
 
-const CACHE_STORAGE_KEY = "iia.translation.cache.v4";
+const CACHE_STORAGE_KEY = "iia.translation.cache.v5";
 const LEGACY_CACHE_STORAGE_KEYS = [
+  "iia.translation.cache.v4",
   "iia.translation.cache.v3",
   "iia.translation.cache.v1",
 ] as const;
@@ -24,10 +25,28 @@ function loadStore(): CacheStore {
     for (const legacyKey of LEGACY_CACHE_STORAGE_KEYS) {
       window.localStorage.removeItem(legacyKey);
     }
+    purgeInvalidDynamicLanguageEntries(memoryCache);
   } catch {
     memoryCache = {};
   }
   return memoryCache;
+}
+
+/** Drop legacy fr::source keys where translation equals source. */
+function purgeInvalidDynamicLanguageEntries(store: CacheStore): void {
+  let changed = false;
+  for (const [key, value] of Object.entries(store)) {
+    const lang = key.split("::")[0] as Lang;
+    if (lang !== "fr" && lang !== "de" && lang !== "ur" && lang !== "zh") continue;
+    const parts = key.split("::");
+    if (parts.length !== 2) continue;
+    const source = parts[1] ?? "";
+    if (source && value.trim() === source.trim()) {
+      delete store[key];
+      changed = true;
+    }
+  }
+  if (changed) persistStore(store);
 }
 
 /** Reject stale entries that stored untranslated source text as the target language. */
@@ -88,12 +107,47 @@ export function translationCacheKey(lang: Lang, source: string): string {
   return `${lang}::${source}`;
 }
 
+/** Reuse a translation for the same source text within a lesson (any fieldName). */
+export function findLessonTranslationBySource(
+  lang: Lang,
+  lessonId: string | undefined,
+  source: string,
+): string | null {
+  if (!source || lang === "en" || lang === "ar") return null;
+  const store = loadStore();
+  const hash = contentHash(source);
+  const lessonPart = lessonId ?? "_";
+
+  for (const [key, value] of Object.entries(store)) {
+    if (!key.startsWith(`${lang}::`)) continue;
+    if (!key.includes(`::${lessonPart}::`) || !key.endsWith(`::${hash}`)) continue;
+    const input: EducationalCacheKeyInput = {
+      lang,
+      contentType: "general",
+      lessonId,
+      fieldName: "_",
+      source,
+    };
+    if (isValidEducationalCacheHit(value, input)) return value;
+  }
+
+  const legacy = store[translationCacheKey(lang, source)];
+  if (legacy) {
+    const input: EducationalCacheKeyInput = { lang, contentType: "general", source };
+    if (isValidEducationalCacheHit(legacy, input)) return legacy;
+  }
+  return null;
+}
+
 export function getCachedEducationalTranslation(input: EducationalCacheKeyInput): string | null {
   if (!input.source) return null;
   const store = loadStore();
   const key = buildEducationalCacheKey(input);
   const hit = store[key];
   if (hit && isValidEducationalCacheHit(hit, input)) return hit;
+
+  const bySource = findLessonTranslationBySource(input.lang, input.lessonId, input.source);
+  if (bySource) return bySource;
 
   const legacy = store[translationCacheKey(input.lang, input.source)];
   if (legacy && isValidEducationalCacheHit(legacy, input)) return legacy;

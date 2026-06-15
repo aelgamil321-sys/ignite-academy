@@ -1,5 +1,8 @@
+import { useEffect } from "react";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
-import {useI18n, L } from "@/lib/i18n";
+import { useI18n, L, prefetchEducationalTranslations, useLessonTranslationScope } from "@/lib/i18n";
+import { needsDynamicTranslation } from "@/lib/translate-content";
+import type { EducationalField } from "@/lib/translate-content";
 import type { QuizQuestion } from "@/lib/curriculum";
 import {
   gradeLabelForPercentage,
@@ -13,17 +16,65 @@ import { TranslatedContentShell } from "@/components/translation-loading-indicat
 
 
 export function LessonQuizResults({
+  lessonId,
   submission,
   questions,
   gradeName,
   lessonTitle,
 }: {
+  lessonId: string;
   submission: SavedQuizSubmission;
   questions: QuizQuestion[];
   gradeName: Bi;
   lessonTitle: Bi;
 }) {
   const { tr, lang, bi } = useI18n();
+  useLessonTranslationScope(lessonId);
+  const quizMeta = { lessonId };
+
+  useEffect(() => {
+    if (!needsDynamicTranslation(lang)) return;
+    const source = (b: Bi) => b.en?.trim() || b.ar?.trim() || "";
+    const fields: EducationalField[] = [];
+    const answerByIndex = new Map<number, QuizSubmissionAnswerItem>();
+    for (const a of submission.answers) answerByIndex.set(a.questionIndex, a);
+
+    questions.forEach((q, i) => {
+      const saved = answerByIndex.get(i);
+      if (saved?.teacherFeedback) {
+        const fb = source(saved.teacherFeedback);
+        if (fb) {
+          fields.push({
+            fieldName: `quiz_feedback_${i}`,
+            contentType: "quiz_feedback",
+            text: fb,
+          });
+        }
+      }
+      if (saved && saved.type !== "essay") {
+        const selected = q.options[saved.selectedIndex];
+        const correct = q.options[saved.correctIndex];
+        const selText = selected ? source(selected) : "";
+        const corText = correct ? source(correct) : "";
+        if (selText) {
+          fields.push({
+            fieldName: `quiz_q_${i}_opt_${saved.selectedIndex}`,
+            contentType: "quiz_option",
+            text: selText,
+          });
+        }
+        if (corText) {
+          fields.push({
+            fieldName: `quiz_q_${i}_opt_${saved.correctIndex}`,
+            contentType: "quiz_option",
+            text: corText,
+          });
+        }
+      }
+    });
+
+    if (fields.length > 0) prefetchEducationalTranslations(lessonId, fields, lang);
+  }, [lessonId, lang, submission, questions]);
   const pending = submission.status === "pending_review";
   const finalScore = submission.final_score ?? submission.auto_score + submission.essay_score;
   const percentage = submission.percentage ?? 0;
@@ -125,7 +176,7 @@ export function LessonQuizResults({
               </div>
 
               <TranslatedContentShell>
-              <div className="font-medium text-foreground">{bi(q.q, { fieldName: `quiz_q_${i}`, contentType: "quiz_question" }) || q.q.en || q.q.ar}</div>
+              <div className="font-medium text-foreground">{bi(q.q, { ...quizMeta, fieldName: `quiz_q_${i}`, contentType: "quiz_question" }) || q.q.en || q.q.ar}</div>
               </TranslatedContentShell>
 
               {isEssay && saved?.type === "essay" ? (
@@ -160,7 +211,7 @@ export function LessonQuizResults({
                               {L("Teacher feedback", "ملاحظات المعلّم")[lang]}
                             </div>
                             <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-2 whitespace-pre-wrap">
-                              {bi(saved.teacherFeedback, { fieldName: `quiz_feedback_${i}`, contentType: "quiz_feedback" }) ||
+                              {bi(saved.teacherFeedback, { ...quizMeta, fieldName: `quiz_feedback_${i}`, contentType: "quiz_feedback" }) ||
                                 saved.teacherFeedback.en ||
                                 saved.teacherFeedback.ar}
                             </div>
@@ -181,7 +232,7 @@ export function LessonQuizResults({
                       {L("Your answer", "إجابتك")[lang]}:{" "}
                     </span>
                     <span className="font-medium">
-                      {bi(q.options[saved.selectedIndex] ?? { en: "", ar: "" }, { fieldName: `quiz_q_${i}_selected`, contentType: "quiz_option" })}
+                      {bi(q.options[saved.selectedIndex] ?? { en: "", ar: "" }, { ...quizMeta, fieldName: `quiz_q_${i}_opt_${saved.selectedIndex}`, contentType: "quiz_option" })}
                     </span>
                   </div>
                   <div>
@@ -189,7 +240,7 @@ export function LessonQuizResults({
                       {L("Correct answer", "الإجابة الصحيحة")[lang]}:{" "}
                     </span>
                     <span className="font-medium">
-                      {bi(q.options[saved.correctIndex] ?? { en: "", ar: "" }, { fieldName: `quiz_q_${i}_correct`, contentType: "quiz_option" })}
+                      {bi(q.options[saved.correctIndex] ?? { en: "", ar: "" }, { ...quizMeta, fieldName: `quiz_q_${i}_opt_${saved.correctIndex}`, contentType: "quiz_option" })}
                     </span>
                   </div>
                   <div
