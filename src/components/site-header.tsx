@@ -13,6 +13,19 @@ import { cn } from "@/lib/utils";
 
 const STUDENT_ONLY_PATHS = new Set(["/grades", "/quizzes", "/assignments", "/student"]);
 
+/** Desktop (xl+) nav — must include /hall-of-fame (do not use a blind slice on allNav). */
+const DESKTOP_NAV_PATHS = [
+  "/",
+  "/about",
+  "/grades",
+  "/resources",
+  "/videos",
+  "/quizzes",
+  "/assignments",
+  "/announcements",
+  "/hall-of-fame",
+] as const;
+
 /** Shared pill styles for header controls and nav links */
 const headerPillBase =
   "inline-flex items-center justify-center rounded-lg border border-border/80 bg-card text-foreground shadow-[var(--shadow-soft)] transition-all hover:border-primary/45 hover:text-primary hover:shadow-[var(--shadow-elegant)]";
@@ -85,7 +98,14 @@ export function SiteHeader() {
   ];
 
   const nav = signedIn && isParent ? parentNav : allNav.filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
-  const desktopNav = signedIn && isParent ? parentNav : allNav.slice(0, 8).filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
+  const desktopNav =
+    signedIn && isParent
+      ? parentNav
+      : allNav.filter(
+          (item) =>
+            (DESKTOP_NAV_PATHS as readonly string[]).includes(item.to) &&
+            (!signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to)),
+        );
   const profilePath = signedIn && isParent ? "/parent/settings" : "/student/profile";
   const profileLabel = signedIn && isParent ? tr("profile_parent") : tr("profile_student");
 
