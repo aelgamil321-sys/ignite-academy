@@ -8,6 +8,7 @@ import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
 import { LessonQuizBuilder } from "@/components/lesson-quiz-builder";
 import { LessonVocabBuilder } from "@/components/lesson-vocab-builder";
+import { LessonAiTranslationButton } from "@/components/lesson-ai-translation-button";
 import type { VocabularyItem } from "@/lib/lesson-vocab";
 import {
   bilingualFilesFromLesson,
@@ -194,7 +195,21 @@ export function LessonEditForm({
           <textarea className="lesson-input" dir="rtl" rows={5} value={expAr} onChange={(e) => setExpAr(e.target.value)} />
         </Field>
       </Row>
-      <LessonVocabBuilder items={vocab} onChange={setVocab} inputClassName="lesson-input" />
+      <LessonVocabBuilder
+        items={vocab}
+        onChange={setVocab}
+        inputClassName="lesson-input"
+        lessonId={lesson.id}
+      />
+      <LessonAiTranslationButton
+        lessonId={lesson.id}
+        unit={{ en: unitEn, ar: unitAr }}
+        title={{ en: titleEn, ar: titleAr }}
+        outcome={{ en: outEn, ar: outAr }}
+        explanation={{ en: expEn, ar: expAr }}
+        vocab={vocab}
+        quiz={quiz}
+      />
       <Row>
         <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[lang]}>
           <input className="lesson-input" dir="rtl" placeholder="https://www.youtube.com/watch?v=..." value={ytAr} onChange={(e) => setYtAr(e.target.value)} />

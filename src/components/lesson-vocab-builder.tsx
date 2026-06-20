@@ -1,5 +1,13 @@
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, ChevronUp, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { useI18n, L } from "@/lib/i18n";
+import {
+  aiDisabledMessage,
+  callIgniteVocabSuggest,
+  type VocabAiSuggestion,
+} from "@/lib/ai/ignite-ai";
+import { buildEducationalCacheKey } from "@/lib/translation-cache";
 import type { VocabularyItem } from "@/lib/lesson-vocab";
 import { emptyVocabItem } from "@/lib/lesson-vocab";
 
@@ -9,6 +17,13 @@ const EXAMPLE = {
   wordEn: "The Event",
   meaningEn: "One of the names of the Day of Judgment",
 };
+
+const EXTRA_LANGS = [
+  { key: "fr" as const, labelEn: "French", labelAr: "فرنسي" },
+  { key: "de" as const, labelEn: "German", labelAr: "ألماني" },
+  { key: "ur" as const, labelEn: "Urdu", labelAr: "أردو" },
+  { key: "zh" as const, labelEn: "Chinese", labelAr: "صيني" },
+];
 
 function Row({ children }: { children: React.ReactNode }) {
   return <div className="grid gap-3 md:grid-cols-2">{children}</div>;
@@ -23,16 +38,69 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function VocabAiReview({
+  suggestion,
+  onApply,
+  onDiscard,
+}: {
+  suggestion: VocabAiSuggestion;
+  onApply: () => void;
+  onDiscard: () => void;
+}) {
+  const { lang } = useI18n();
+  const m = suggestion.meaning;
+
+  return (
+    <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+        {L("AI suggestion — review before saving", "اقتراح الذكاء الاصطناعي — راجع قبل الحفظ")[lang]}
+      </p>
+      {suggestion.note && (
+        <p className="text-sm text-muted-foreground">{suggestion.note}</p>
+      )}
+      <div className="grid gap-2 text-sm">
+        <div><span className="font-semibold">AR:</span> {m.ar || "—"}</div>
+        <div><span className="font-semibold">EN:</span> {m.en || "—"}</div>
+        <div><span className="font-semibold">FR:</span> {m.fr || "—"}</div>
+        <div><span className="font-semibold">DE:</span> {m.de || "—"}</div>
+        <div><span className="font-semibold">UR:</span> {m.ur || "—"}</div>
+        <div><span className="font-semibold">ZH:</span> {m.zh || "—"}</div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={onApply}
+          className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover"
+        >
+          {L("Apply meanings", "تطبيق المعاني")[lang]}
+        </button>
+        <button
+          type="button"
+          onClick={onDiscard}
+          className="rounded-full border border-border px-4 py-2 text-xs font-semibold hover:bg-muted"
+        >
+          {L("Discard", "تجاهل")[lang]}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function LessonVocabBuilder({
   items,
   onChange,
   inputClassName = "input",
+  lessonId,
 }: {
   items: VocabularyItem[];
   onChange: (items: VocabularyItem[]) => void;
   inputClassName?: string;
+  lessonId?: string;
 }) {
   const { lang } = useI18n();
+  const [aiIndex, setAiIndex] = useState<number | null>(null);
+  const [aiLoading, setAiLoading] = useState<number | null>(null);
+  const [aiSuggestion, setAiSuggestion] = useState<VocabAiSuggestion | null>(null);
 
   const updateWord = (index: number, patch: Partial<VocabularyItem["word"]>) => {
     onChange(
@@ -64,6 +132,116 @@ export function LessonVocabBuilder({
 
   const addItem = () => {
     onChange([...items, emptyVocabItem()]);
+  };
+
+  const suggestMeanings = async (index: number) => {
+    const item = items[index];
+    const wordAr = item.word.ar.trim();
+    const wordEn = item.word.en.trim();
+    if (!wordAr && !wordEn) {
+      toast.error(L("Enter a word first.", "أدخل الكلمة أولاً.")[lang]);
+      return;
+    }
+
+    setAiLoading(index);
+    setAiIndex(index);
+    setAiSuggestion(null);
+
+    try {
+      const result = await callIgniteVocabSuggest({ wordAr, wordEn });
+      if (!result.serviceAvailable) {
+        toast.error(aiDisabledMessage(lang === "ar" ? "ar" : "en"));
+        setAiIndex(null);
+        return;
+      }
+      if (!result.suggestion) {
+        toast.error(L("Could not generate a suggestion.", "تعذر إنشاء اقتراح.")[lang]);
+        setAiIndex(null);
+        return;
+      }
+      setAiSuggestion(result.suggestion);
+    } catch {
+      toast.error(aiDisabledMessage(lang === "ar" ? "ar" : "en"));
+      setAiIndex(null);
+    } finally {
+      setAiLoading(null);
+    }
+  };
+
+  const applySuggestion = (index: number) => {
+    if (!aiSuggestion) return;
+    onChange(
+      items.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              meaning: {
+                ar: aiSuggestion.meaning.ar,
+                en: aiSuggestion.meaning.en,
+              },
+            }
+          : item,
+      ),
+    );
+
+    if (lessonId) {
+      const sourceText = aiSuggestion.meaning.en || aiSuggestion.meaning.ar;
+      const sourceLang = aiSuggestion.meaning.en ? "en" : "ar";
+      if (sourceText) {
+        void (async () => {
+          try {
+            const { igniteCacheWarm } = await import("@/lib/api/ai.functions");
+            const entries = EXTRA_LANGS.map(({ key }) => {
+              const translated =
+                key === "fr"
+                  ? aiSuggestion.meaning.fr
+                  : key === "de"
+                    ? aiSuggestion.meaning.de
+                    : key === "ur"
+                      ? aiSuggestion.meaning.ur
+                      : aiSuggestion.meaning.zh;
+              if (!translated?.trim()) return null;
+              return {
+                cacheKey: buildEducationalCacheKey({
+                  lang: key,
+                  contentType: "vocab_def",
+                  lessonId,
+                  fieldName: `vocab_def_${index}`,
+                  source: sourceText,
+                }),
+                sourceText,
+                sourceLang: sourceLang as "en" | "ar",
+                targetLang: key,
+                contentType: "vocab_def",
+                lessonId,
+                fieldName: `vocab_def_${index}`,
+                translatedText: translated,
+                provider: "openai",
+              };
+            }).filter(Boolean) as Array<{
+              cacheKey: string;
+              sourceText: string;
+              sourceLang: "en" | "ar";
+              targetLang: "fr" | "de" | "ur" | "zh";
+              contentType: string;
+              lessonId: string;
+              fieldName: string;
+              translatedText: string;
+              provider: string;
+            }>;
+            if (entries.length > 0) {
+              await igniteCacheWarm({ data: { entries } });
+            }
+          } catch {
+            // best-effort cache warm
+          }
+        })();
+      }
+    }
+
+    setAiSuggestion(null);
+    setAiIndex(null);
+    toast.success(L("Meanings applied. Save the lesson to keep them.", "تم تطبيق المعاني. احفظ الدرس للاحتفاظ بها.")[lang]);
   };
 
   return (
@@ -99,6 +277,19 @@ export function LessonVocabBuilder({
               <div className="flex items-center gap-1">
                 <button
                   type="button"
+                  onClick={() => { void suggestMeanings(index); }}
+                  disabled={aiLoading === index}
+                  className="inline-flex items-center gap-1 rounded-lg border border-primary/40 bg-primary/5 px-2 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10 disabled:opacity-60"
+                >
+                  {aiLoading === index ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  {L("AI meaning", "اقتراح المعنى بالذكاء الاصطناعي")[lang]}
+                </button>
+                <button
+                  type="button"
                   onClick={() => moveItem(index, -1)}
                   disabled={index === 0}
                   className="rounded-lg border border-border p-1.5 text-muted-foreground hover:border-primary hover:text-primary disabled:opacity-40"
@@ -125,6 +316,17 @@ export function LessonVocabBuilder({
                 </button>
               </div>
             </div>
+
+            {aiIndex === index && aiSuggestion && (
+              <VocabAiReview
+                suggestion={aiSuggestion}
+                onApply={() => applySuggestion(index)}
+                onDiscard={() => {
+                  setAiSuggestion(null);
+                  setAiIndex(null);
+                }}
+              />
+            )}
 
             <Row>
               <Field label={L("Word (Arabic)", "الكلمة (عربي)")[lang]}>

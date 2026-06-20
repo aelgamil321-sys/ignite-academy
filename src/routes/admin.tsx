@@ -26,6 +26,7 @@ import { DeleteLessonButton } from "@/components/admin-manage-lessons";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
 import { LessonQuizBuilder } from "@/components/lesson-quiz-builder";
 import { LessonVocabBuilder } from "@/components/lesson-vocab-builder";
+import { LessonAiTranslationButton } from "@/components/lesson-ai-translation-button";
 import type { VocabularyItem } from "@/lib/lesson-vocab";
 import { serializeVocabForStorage } from "@/lib/lesson-vocab";
 import {
@@ -615,7 +616,23 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
         <Field label={L("Explanation (EN)", "الشرح (إنجليزي)")[lang]}><textarea className="input" rows={5} value={expEn} onChange={(e) => setExpEn(e.target.value)} /></Field>
         <Field label={L("Explanation (AR)", "الشرح (عربي)")[lang]}><textarea className="input" dir="rtl" rows={5} value={expAr} onChange={(e) => setExpAr(e.target.value)} /></Field>
       </Row>
-      <LessonVocabBuilder items={vocab} onChange={setVocab} inputClassName="input" />
+      <LessonVocabBuilder
+        items={vocab}
+        onChange={setVocab}
+        inputClassName="input"
+        lessonId={editId ?? draftLessonId ?? undefined}
+      />
+      {(editId ?? draftLessonId) && (
+        <LessonAiTranslationButton
+          lessonId={(editId ?? draftLessonId)!}
+          unit={{ en: unitEn, ar: unitAr }}
+          title={{ en: titleEn, ar: titleAr }}
+          outcome={{ en: outEn, ar: outAr }}
+          explanation={{ en: expEn, ar: expAr }}
+          vocab={vocab}
+          quiz={quiz}
+        />
+      )}
       <Row>
         <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[lang]}>
           <input className="input" dir="rtl" placeholder="https://www.youtube.com/watch?v=..." value={ytAr} onChange={(e) => setYtAr(e.target.value)} />

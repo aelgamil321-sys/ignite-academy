@@ -8,6 +8,7 @@ const bodySchema = z.object({
   sourceLang: z.enum(["en", "ar"]).optional(),
   contentType: z.string().optional(),
   lessonId: z.string().optional(),
+  fieldNames: z.array(z.string()).optional(),
 });
 
 /** POST /api/translate — server-side only; no API keys in the browser. */

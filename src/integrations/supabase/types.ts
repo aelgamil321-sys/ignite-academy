@@ -188,6 +188,48 @@ export type Database = {
         }
         Relationships: []
       }
+      translation_cache: {
+        Row: {
+          cache_key: string
+          source_text: string
+          source_lang: string
+          target_lang: string
+          content_type: string | null
+          lesson_id: string | null
+          field_name: string | null
+          translated_text: string
+          provider: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          cache_key: string
+          source_text: string
+          source_lang: string
+          target_lang: string
+          content_type?: string | null
+          lesson_id?: string | null
+          field_name?: string | null
+          translated_text: string
+          provider?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          cache_key?: string
+          source_text?: string
+          source_lang?: string
+          target_lang?: string
+          content_type?: string | null
+          lesson_id?: string | null
+          field_name?: string | null
+          translated_text?: string
+          provider?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lesson_quiz_submissions: {
         Row: {
           id: string

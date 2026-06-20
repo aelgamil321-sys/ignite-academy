@@ -6,6 +6,7 @@ import {
   getCachedEducationalTranslation,
   setCachedEducationalTranslation,
 } from "@/lib/translation-cache";
+import { callIgniteTranslate } from "@/lib/ai/ignite-ai";
 import {
   mergeProtectedSegments,
   splitIslamicProtectedText,
@@ -166,7 +167,36 @@ async function fetchGtxPart(
   return out && out !== part ? out : null;
 }
 
-/** Browser-side gtx — uses visitor IP; never touches the Cloudflare Worker. */
+/** Server-side Ignite AI translation with DB cache (keys never in browser). */
+async function igniteServerTranslate(
+  source: string,
+  lang: Lang,
+  sourceLang: "en" | "ar",
+  meta: Pick<TranslateEducationalInput, "contentType" | "lessonId" | "fieldName">,
+): Promise<string | null> {
+  if (!needsDynamicTranslation(lang)) return null;
+  try {
+    const result = await withTimeout(
+      callIgniteTranslate({
+        texts: [source],
+        targetLang: lang as Exclude<Lang, "en" | "ar">,
+        sourceLang,
+        contentType: meta.contentType,
+        lessonId: meta.lessonId,
+        fieldNames: [meta.fieldName ?? "_"],
+      }),
+      timeoutForText(source),
+    );
+    if (!result) return null;
+    const translated = result.translations[0];
+    if (translated && translated.trim() && translated !== source) return translated;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** Browser-side gtx fallback when server AI is unavailable. */
 async function browserTranslateText(
   source: string,
   lang: Lang,
@@ -290,9 +320,23 @@ function pumpBrowserQueue() {
         attemptCounts.set(key, attempts);
 
         let translated = await withTimeout(
-          browserTranslateText(job.text, job.targetLanguage, sourceLang),
+          igniteServerTranslate(job.text, job.targetLanguage, sourceLang, job),
           timeoutForText(job.text),
         );
+
+        if (!translated) {
+          translated = await withTimeout(
+            browserTranslateText(job.text, job.targetLanguage, sourceLang),
+            timeoutForText(job.text),
+          );
+        }
+
+        if (!translated && attempts < MAX_FIELD_ATTEMPTS && sourceLang !== "en") {
+          translated = await withTimeout(
+            igniteServerTranslate(job.text, job.targetLanguage, "en", job),
+            timeoutForText(job.text),
+          );
+        }
 
         if (!translated && attempts < MAX_FIELD_ATTEMPTS && sourceLang !== "en") {
           translated = await withTimeout(

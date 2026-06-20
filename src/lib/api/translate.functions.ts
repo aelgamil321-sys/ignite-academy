@@ -1,15 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import {
-  mergeProtectedSegments,
-  splitIslamicProtectedText,
-  translatableSegments,
-} from "@/lib/islamic-text-protection";
-import {
-  isTranslationApiConfigured,
-  machineTranslateBatch,
-} from "@/lib/translate.server";
+import { handleIgniteTranslateBatch } from "@/lib/api/ai.functions";
 
 const translatableLang = z.enum(["fr", "de", "ur", "zh"]);
 
@@ -19,42 +11,17 @@ const translateInputSchema = z.object({
   sourceLang: z.enum(["en", "ar"]).optional(),
   contentType: z.string().optional(),
   lessonId: z.string().optional(),
+  fieldNames: z.array(z.string()).optional(),
 });
 
-/** Shared handler for server fn and POST /api/translate. */
+/** Shared handler for server fn and POST /api/translate (Ignite AI + DB cache). */
 export async function handleTranslateRequest(data: z.infer<typeof translateInputSchema>) {
-  const sourceLang = data.sourceLang ?? "en";
-
-  if (!isTranslationApiConfigured()) {
-    return {
-      translations: data.texts,
-      serviceAvailable: false,
-      providers: ["none"] as string[],
-    };
-  }
-
-  const results: string[] = [];
-  let anyTranslated = false;
-  const providers = new Set<string>();
-
-  for (const text of data.texts) {
-    const segments = splitIslamicProtectedText(text);
-    const parts = translatableSegments(segments);
-    if (parts.length === 0) {
-      results.push(text);
-      continue;
-    }
-    const batch = await machineTranslateBatch(parts, data.targetLang, sourceLang);
-    anyTranslated = anyTranslated || batch.anyTranslated;
-    for (const p of batch.providers) providers.add(p);
-    results.push(mergeProtectedSegments(segments, batch.translations));
-  }
-
-  const serviceAvailable = isTranslationApiConfigured() || anyTranslated;
+  const result = await handleIgniteTranslateBatch(data);
   return {
-    translations: results,
-    serviceAvailable,
-    providers: [...providers],
+    translations: result.translations,
+    serviceAvailable: result.serviceAvailable,
+    providers: result.providers,
+    fromCache: result.fromCache,
   };
 }
 

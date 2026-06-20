@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { handleTranslateApi } from "./lib/api/translate-route.server";
+import { handleIgniteApi } from "./lib/api/ai-route.server";
 import { renderErrorPage } from "./lib/error-page";
 
 type ServerEntry = {
@@ -44,6 +45,9 @@ export default {
       const url = new URL(request.url);
       if (url.pathname === "/api/translate") {
         return handleTranslateApi(request);
+      }
+      if (url.pathname.startsWith("/api/ignite")) {
+        return handleIgniteApi(request);
       }
 
       const handler = await getServerEntry();
