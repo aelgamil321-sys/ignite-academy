@@ -3,7 +3,7 @@ import { Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import {useI18n, L } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
-import { deleteLessonFile, formatError } from "@/lib/upload";
+import { deleteLessonFile, formatError, uploadLessonFile, validateLessonUploadFile } from "@/lib/upload";
 import {
   BILINGUAL_LESSON_FILE_SLOTS,
   BILINGUAL_FILE_DB_COLUMN,
@@ -137,7 +137,13 @@ export function LessonBilingualFileFields({
       return;
     }
 
-    const filePath = `lessons/${currentLessonId}/${Date.now()}-${file.name}`;
+    const validation = validateLessonUploadFile(file);
+    if (validation) {
+      const msg = validation[lang];
+      setErrors((p) => ({ ...p, [key]: msg }));
+      toast.error(msg);
+      return;
+    }
 
     setUploading((p) => ({ ...p, [key]: true }));
     setErrors((p) => {
@@ -151,28 +157,23 @@ export function LessonBilingualFileFields({
       return next;
     });
 
-    console.log("[upload] A. File selected", { name: file.name, size: file.size, column, filePath });
+    console.log("[upload] A. File selected", {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      column,
+      lessonId: currentLessonId,
+    });
 
     try {
       await withTimeout(
         (async () => {
           console.log("[upload] B. Upload started");
-          const { data, error } = await supabase.storage
-            .from("lesson-files")
-            .upload(filePath, file, { upsert: true });
+          const { publicUrl, filePath } = await uploadLessonFile(file, currentLessonId);
 
-          console.log("[upload] C. Upload completed", { data, error });
+          console.log("[upload] C. Upload completed", { publicUrl, filePath });
 
-          if (error) {
-            throw new Error(`Storage upload failed: ${error.message}`);
-          }
-
-          console.log("[upload] D. Public URL generating");
-          const { data: publicUrlData } = supabase.storage.from("lesson-files").getPublicUrl(filePath);
-          const publicUrl = publicUrlData.publicUrl;
-          console.log("[upload] D. Public URL generated", publicUrl);
-
-          console.log("[upload] E. Saving URL to lesson row", { column, lessonId: currentLessonId });
+          console.log("[upload] D. Saving URL to lesson row", { column, lessonId: currentLessonId });
           const { error: dbError } = await supabase
             .from("lessons")
             .update({ [column]: publicUrl })

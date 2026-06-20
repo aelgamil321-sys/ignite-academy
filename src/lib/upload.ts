@@ -1,7 +1,20 @@
 import { supabase } from "@/integrations/supabase/client";
+import {
+  buildLessonStorageKey,
+  resolveLessonFileContentType,
+  validateLessonUploadFile,
+  type LessonFileValidationMessage,
+} from "@/lib/lesson-file-upload";
 
 const BUCKET = "cms-uploads";
 export const LESSON_FILES_BUCKET = "lesson-files";
+
+export type { LessonFileValidationMessage };
+export {
+  buildLessonStorageKey,
+  resolveLessonFileContentType,
+  validateLessonUploadFile,
+} from "@/lib/lesson-file-upload";
 
 /** Max signed URL lifetime when public URLs are unavailable (1 year). */
 const SIGNED_URL_EXPIRY_SECONDS = 60 * 60 * 24 * 365;
@@ -49,26 +62,36 @@ export type LessonFileUploadResult = {
 
 /** Upload a lesson file to the lesson-files bucket and return its public URL. */
 export async function uploadLessonFile(file: File, lessonId: string): Promise<LessonFileUploadResult> {
-  const filePath = `lessons/${lessonId}/${Date.now()}-${file.name}`;
+  const validation = validateLessonUploadFile(file);
+  if (validation) {
+    throw new Error(validation.en);
+  }
 
-  console.log("[lesson upload] selected file", {
-    name: file.name,
+  const filePath = buildLessonStorageKey(lessonId, file.name);
+  const contentType = resolveLessonFileContentType(file) ?? undefined;
+
+  console.log("[lesson upload] storage target", {
+    bucket: LESSON_FILES_BUCKET,
+    key: filePath,
+    contentType,
+    originalName: file.name,
     size: file.size,
-    type: file.type,
+    reportedType: file.type || null,
   });
-  console.log("[lesson upload] upload path", filePath);
 
-  const { data, error } = await supabase.storage
-    .from("lesson-files")
-    .upload(filePath, file, { upsert: true });
+  const { data, error } = await supabase.storage.from(LESSON_FILES_BUCKET).upload(filePath, file, {
+    upsert: true,
+    contentType,
+    cacheControl: "3600",
+  });
 
-  console.log("[lesson upload] upload result", { data, error });
+  console.log("[lesson upload] upload result", { bucket: LESSON_FILES_BUCKET, key: filePath, data, error });
 
   if (error) {
     throw new Error(`Upload failed: ${error.message}`);
   }
 
-  const { data: publicUrlData } = supabase.storage.from("lesson-files").getPublicUrl(filePath);
+  const { data: publicUrlData } = supabase.storage.from(LESSON_FILES_BUCKET).getPublicUrl(filePath);
 
   return {
     publicUrl: publicUrlData.publicUrl,

@@ -36,12 +36,36 @@ export type BilingualFileSlot = {
 };
 
 export const BILINGUAL_LESSON_FILE_SLOTS: BilingualFileSlot[] = [
-  { key: "pptArUrl", labelEn: "PPT Arabic", labelAr: "باوربوينت عربي", accept: ".ppt,.pptx", folder: "ppt-ar" },
-  { key: "pptEnUrl", labelEn: "PPT English", labelAr: "باوربوينت إنجليزي", accept: ".ppt,.pptx", folder: "ppt-en" },
-  { key: "worksheetArUrl", labelEn: "Worksheet Arabic", labelAr: "ورقة عمل عربية", accept: ".pdf,.doc,.docx", folder: "worksheet-ar" },
-  { key: "worksheetEnUrl", labelEn: "Worksheet English", labelAr: "ورقة عمل إنجليزية", accept: ".pdf,.doc,.docx", folder: "worksheet-en" },
-  { key: "pdfArUrl", labelEn: "PDF Arabic", labelAr: "PDF عربي", accept: ".pdf", folder: "pdf-ar" },
-  { key: "pdfEnUrl", labelEn: "PDF English", labelAr: "PDF إنجليزي", accept: ".pdf", folder: "pdf-en" },
+  {
+    key: "pptArUrl",
+    labelEn: "PPT Arabic",
+    labelAr: "باوربوينت عربي",
+    accept: ".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    folder: "ppt-ar",
+  },
+  {
+    key: "pptEnUrl",
+    labelEn: "PPT English",
+    labelAr: "باوربوينت إنجليزي",
+    accept: ".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    folder: "ppt-en",
+  },
+  {
+    key: "worksheetArUrl",
+    labelEn: "Worksheet Arabic",
+    labelAr: "ورقة عمل عربية",
+    accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    folder: "worksheet-ar",
+  },
+  {
+    key: "worksheetEnUrl",
+    labelEn: "Worksheet English",
+    labelAr: "ورقة عمل إنجليزية",
+    accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    folder: "worksheet-en",
+  },
+  { key: "pdfArUrl", labelEn: "PDF Arabic", labelAr: "PDF عربي", accept: ".pdf,application/pdf", folder: "pdf-ar" },
+  { key: "pdfEnUrl", labelEn: "PDF English", labelAr: "PDF إنجليزي", accept: ".pdf,application/pdf", folder: "pdf-en" },
 ];
 
 export const EMPTY_BILINGUAL_LESSON_FILES: BilingualLessonFiles = {
