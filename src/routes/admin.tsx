@@ -294,8 +294,10 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const [quiz, setQuiz] = useState<QuizQuestion[]>(() => quizQuestionsForForm([]));
   const [pub, setPub] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [draftLessonId, setDraftLessonId] = useState<string | null>(null);
   const [dbg, setDbg] = useState({ clicked: false, valid: false, status: "" as "" | "success" | "error", error: "", id: "" });
   const bilingualLoadedFor = useRef<string | null>(null);
+  const ensureDraftInFlight = useRef<Promise<string | null> | null>(null);
 
   useEffect(() => {
     if (!editId) return;
@@ -338,30 +340,15 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
     setVocEn(""); setVocAr(""); setActEn(""); setActAr(""); setWsEn(""); setWsAr(""); setYtAr(""); setYtEn("");
     setBilingualFiles(EMPTY_BILINGUAL_LESSON_FILES); setQuiz(quizQuestionsForForm([]));
     setUnitEn(""); setUnitAr("");
+    setDraftLessonId(null);
   };
 
-  const submit = async (publish: boolean) => {
-    setDbg({ clicked: true, valid: false, status: "", error: "", id: "" });
-    if (!titleEn.trim() || !titleAr.trim()) {
-      const msg = L("Title (English) and Title (Arabic) are required", "العنوان (إنجليزي) والعنوان (عربي) مطلوبان")[lang];
-      toast.error(msg);
-      setDbg((d) => ({ ...d, valid: false, status: "error", error: msg }));
-      return;
-    }
-    if (!grade) {
-      const msg = L("Grade is required", "الصف مطلوب")[lang];
-      toast.error(msg);
-      setDbg((d) => ({ ...d, valid: false, status: "error", error: msg }));
-      return;
-    }
-    setDbg((d) => ({ ...d, valid: true }));
-    setSaving(true);
-
+  const buildLessonPayload = (publish: boolean) => {
     const ytArTrim = ytAr.trim();
     const ytEnTrim = ytEn.trim();
     const legacyYoutube = ytEnTrim || ytArTrim;
 
-    const payload = {
+    return {
       grade: normalizeGradeSlug(grade),
       unit: { en: unitEn, ar: unitAr },
       title: { en: titleEn, ar: titleAr },
@@ -383,17 +370,93 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       quiz: serializeQuizForSave(quiz),
       published: publish,
     };
+  };
 
-    // Safety: never let base64 data URLs reach the DB (causes statement timeout).
+  const rejectEmbeddedDataUrls = (payload: Record<string, unknown>): string | null => {
     for (const [k, v] of Object.entries(payload)) {
       if (typeof v === "string" && v.startsWith("data:")) {
-        const msg = `Field ${k} contains an embedded file. Re-upload the file before saving.`;
-        toast.error(msg);
-        setDbg({ clicked: true, valid: true, status: "error", error: msg, id: "" });
-        setSaving(false);
-        return;
+        return `Field ${k} contains an embedded file. Re-upload the file before saving.`;
       }
     }
+    return null;
+  };
+
+  const ensureLessonIdForUpload = async (): Promise<string | null> => {
+    if (editId) return editId;
+    if (draftLessonId) return draftLessonId;
+    if (ensureDraftInFlight.current) return ensureDraftInFlight.current;
+
+    const promise = (async (): Promise<string | null> => {
+      if (!titleEn.trim() || !titleAr.trim()) {
+        toast.error(L("Title (English) and Title (Arabic) are required", "العنوان (إنجليزي) والعنوان (عربي) مطلوبان")[lang]);
+        return null;
+      }
+      if (!grade) {
+        toast.error(L("Grade is required", "الصف مطلوب")[lang]);
+        return null;
+      }
+
+      const payload = buildLessonPayload(false);
+      const embeddedError = rejectEmbeddedDataUrls(payload);
+      if (embeddedError) {
+        toast.error(embeddedError);
+        return null;
+      }
+
+      console.log("[LessonForm] auto-saving draft before file upload", payload);
+      const { data, error } = await supabase
+        .from("lessons")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .insert(payload as any)
+        .select()
+        .single();
+      if (error) throw error;
+
+      const id = (data as { id: string }).id;
+      setDraftLessonId(id);
+      setDbg((d) => ({ ...d, id }));
+      await refresh();
+      toast.message(L("Lesson saved as draft — uploading file…", "تم حفظ الدرس كمسودة — جارٍ رفع الملف…")[lang]);
+      return id;
+    })();
+
+    ensureDraftInFlight.current = promise;
+    try {
+      return await promise;
+    } finally {
+      ensureDraftInFlight.current = null;
+    }
+  };
+
+  const submit = async (publish: boolean) => {
+    setDbg({ clicked: true, valid: false, status: "", error: "", id: "" });
+    if (!titleEn.trim() || !titleAr.trim()) {
+      const msg = L("Title (English) and Title (Arabic) are required", "العنوان (إنجليزي) والعنوان (عربي) مطلوبان")[lang];
+      toast.error(msg);
+      setDbg((d) => ({ ...d, valid: false, status: "error", error: msg }));
+      return;
+    }
+    if (!grade) {
+      const msg = L("Grade is required", "الصف مطلوب")[lang];
+      toast.error(msg);
+      setDbg((d) => ({ ...d, valid: false, status: "error", error: msg }));
+      return;
+    }
+    setDbg((d) => ({ ...d, valid: true }));
+    setSaving(true);
+
+    const payload = buildLessonPayload(publish);
+    const embeddedError = rejectEmbeddedDataUrls(payload);
+    if (embeddedError) {
+      toast.error(embeddedError);
+      setDbg({ clicked: true, valid: true, status: "error", error: embeddedError, id: editId ?? draftLessonId ?? "" });
+      setSaving(false);
+      return;
+    }
+
+    const ytArTrim = ytAr.trim();
+    const ytEnTrim = ytEn.trim();
+    const legacyYoutube = ytEnTrim || ytArTrim;
 
     try {
       if (isEditing && editId) {
@@ -422,6 +485,41 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
         toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
         await refresh();
         onSaved?.();
+        return;
+      }
+
+      const newLessonId = draftLessonId;
+      if (newLessonId) {
+        const existing = lessons.find((l) => l.id === newLessonId);
+        const baselineFiles = existing ? bilingualFilesFromLesson(existing) : EMPTY_BILINGUAL_LESSON_FILES;
+        const mergedFiles = mergeBilingualFiles(bilingualFiles, baselineFiles);
+        console.log("[LessonForm] table=lessons action=update draft id=", newLessonId, "payload=", payload);
+        await updateLesson(newLessonId, {
+          grade: payload.grade,
+          unit: payload.unit,
+          title: payload.title,
+          outcome: payload.outcome,
+          explanation: payload.explanation,
+          vocab: payload.vocab,
+          activity: payload.activity,
+          worksheetText: payload.worksheet_text,
+          subjectCategory: payload.subject_category,
+          youtubeUrl: legacyYoutube,
+          youtubeArUrl: ytArTrim,
+          youtubeEnUrl: ytEnTrim,
+          quiz: payload.quiz,
+          published: payload.published,
+          ...bilingualFilesSavePayload(mergedFiles, baselineFiles),
+        });
+        setDbg({ clicked: true, valid: true, status: "success", error: "", id: newLessonId });
+        toast.success(publish
+          ? L("Lesson published!", "تم نشر الدرس!")[lang]
+          : L("Saved as draft", "حُفظ كمسودة")[lang]);
+        await refresh();
+        resetForm();
+        if (publish) {
+          navigate({ to: "/grades/$grade", params: { grade } });
+        }
         return;
       }
 
@@ -473,6 +571,9 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   }
 
   const editLesson = editId ? lessons.find((l) => l.id === editId) : undefined;
+  const activeLessonId = editId ?? draftLessonId ?? undefined;
+  const activeLesson =
+    editLesson ?? (draftLessonId ? lessons.find((l) => l.id === draftLessonId) : undefined);
 
   return (
     <FormCard title={isEditing ? L("Edit Lesson", "تعديل الدرس")[lang] : L("Add New Lesson", "إضافة درس جديد")[lang]}>
@@ -528,8 +629,9 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       <LessonBilingualFileFields
         files={bilingualFiles}
         onChange={setBilingualFiles}
-        lessonId={editId ?? undefined}
-        savedFiles={editLesson ? bilingualFilesFromLesson(editLesson) : undefined}
+        lessonId={activeLessonId}
+        savedFiles={activeLesson ? bilingualFilesFromLesson(activeLesson) : undefined}
+        onEnsureLessonId={!editId ? ensureLessonIdForUpload : undefined}
       />
 
       <LessonQuizBuilder questions={quiz} onChange={setQuiz} />

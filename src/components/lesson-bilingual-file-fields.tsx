@@ -3,7 +3,7 @@ import { Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import {useI18n, L } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
-import { deleteLessonFile, formatError, LESSON_FILES_BUCKET } from "@/lib/upload";
+import { deleteLessonFile, formatError } from "@/lib/upload";
 import {
   BILINGUAL_LESSON_FILE_SLOTS,
   BILINGUAL_FILE_DB_COLUMN,
@@ -18,11 +18,6 @@ const UPLOAD_TIMEOUT_MS = 60_000;
 
 
 type FieldMeta = { name: string; path: string };
-
-type FieldDebug = {
-  lastUploadResult: string;
-  lastSaveResult: string;
-};
 
 function withTimeout<T>(promise: Promise<T>, ms: number, stepLabel: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -55,12 +50,15 @@ export function LessonBilingualFileFields({
   onChange,
   lessonId,
   savedFiles,
+  onEnsureLessonId,
 }: {
   files: BilingualLessonFiles;
   onChange: Dispatch<SetStateAction<BilingualLessonFiles>>;
   lessonId?: string;
   /** URLs from the loaded lesson row (baseline / DB snapshot). */
   savedFiles?: BilingualLessonFiles;
+  /** Save a new lesson draft and return its ID before the first file upload. */
+  onEnsureLessonId?: () => Promise<string | null>;
 }) {
   const { lang } = useI18n();
   const lessonIdRef = useRef(lessonId);
@@ -69,10 +67,10 @@ export function LessonBilingualFileFields({
   const [localFiles, setLocalFiles] = useState<BilingualLessonFiles>(files);
   const [meta, setMeta] = useState<Partial<Record<BilingualFileKey, FieldMeta>>>(() => metaFromFiles(files));
   const [uploading, setUploading] = useState<Partial<Record<BilingualFileKey, boolean>>>({});
+  const [ensuringLesson, setEnsuringLesson] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<BilingualFileKey, string>>>({});
   const [successMsg, setSuccessMsg] = useState<Partial<Record<BilingualFileKey, string>>>({});
   const [dbUrls, setDbUrls] = useState<Partial<Record<BilingualFileKey, string | null>>>({});
-  const [debug, setDebug] = useState<Partial<Record<BilingualFileKey, FieldDebug>>>({});
 
   const prevLessonId = useRef(lessonId);
 
@@ -85,7 +83,6 @@ export function LessonBilingualFileFields({
       setErrors({});
       setSuccessMsg({});
       setDbUrls({});
-      setDebug({});
     }
   }, [lessonId, files]);
 
@@ -113,9 +110,28 @@ export function LessonBilingualFileFields({
     const key = bilingualKeyFromDbColumn(column);
     if (!key) return;
 
-    const currentLessonId = lessonIdRef.current;
+    let currentLessonId = lessonIdRef.current;
+    if (!currentLessonId && onEnsureLessonId) {
+      setEnsuringLesson(true);
+      try {
+        console.log("[upload] ensuring lesson exists before file upload");
+        currentLessonId = (await onEnsureLessonId()) ?? undefined;
+        lessonIdRef.current = currentLessonId;
+      } catch (err) {
+        const message = formatError(err);
+        setErrors((p) => ({ ...p, [key]: message }));
+        toast.error(message);
+        return;
+      } finally {
+        setEnsuringLesson(false);
+      }
+    }
+
     if (!currentLessonId) {
-      const msg = "Upload failed: Lesson ID is required. Edit an existing lesson first.";
+      const msg = L(
+        "Save the lesson first, then open it to edit and upload files.",
+        "احفظ الدرس أولًا، ثم افتحه للتعديل وارفع الملفات.",
+      )[lang];
       setErrors((p) => ({ ...p, [key]: msg }));
       toast.error(msg);
       return;
@@ -148,17 +164,8 @@ export function LessonBilingualFileFields({
           console.log("[upload] C. Upload completed", { data, error });
 
           if (error) {
-            setDebug((d) => ({
-              ...d,
-              [key]: { lastUploadResult: `FAILED: ${error.message}`, lastSaveResult: d[key]?.lastSaveResult ?? "—" },
-            }));
             throw new Error(`Storage upload failed: ${error.message}`);
           }
-
-          setDebug((d) => ({
-            ...d,
-            [key]: { lastUploadResult: "OK", lastSaveResult: d[key]?.lastSaveResult ?? "—" },
-          }));
 
           console.log("[upload] D. Public URL generating");
           const { data: publicUrlData } = supabase.storage.from("lesson-files").getPublicUrl(filePath);
@@ -172,13 +179,6 @@ export function LessonBilingualFileFields({
             .eq("id", currentLessonId);
 
           if (dbError) {
-            setDebug((d) => ({
-              ...d,
-              [key]: {
-                lastUploadResult: d[key]?.lastUploadResult ?? "OK",
-                lastSaveResult: `FAILED: ${dbError.message}`,
-              },
-            }));
             toast.error(`File uploaded but lesson URL save failed: ${dbError.message}`);
             throw new Error(`lesson URL save failed: ${dbError.message}`);
           }
@@ -193,17 +193,6 @@ export function LessonBilingualFileFields({
           console.log("[upload] E. Verified DB row", { savedUrl, verifyError });
 
           setDbUrls((p) => ({ ...p, [key]: savedUrl || publicUrl }));
-          setDebug((d) => ({
-            ...d,
-            [key]: {
-              lastUploadResult: "OK",
-              lastSaveResult: verifyError
-                ? `VERIFY FAILED: ${verifyError.message}`
-                : savedUrl
-                  ? "OK — saved to lesson row"
-                  : "WARNING: save returned no error but URL empty in DB",
-            },
-          }));
 
           console.log("[upload] F. Updating local UI state");
           setLocalFiles((prev) => ({ ...prev, [key]: publicUrl }));
@@ -280,27 +269,24 @@ export function LessonBilingualFileFields({
       <h4 className="font-display text-lg text-foreground">
         {L("Bilingual Lesson Files", "ملفات الدرس ثنائية اللغة")[lang]}
       </h4>
-      <p className="text-xs text-muted-foreground font-mono">
-        bucket: {LESSON_FILES_BUCKET}
-        {lessonId ? ` · lesson: ${lessonId}` : " · no lesson ID"}
-      </p>
+      {ensuringLesson && (
+        <p className="text-xs font-medium text-primary">
+          {L("Saving lesson draft before upload…", "جارٍ حفظ مسودة الدرس قبل الرفع…")[lang]}
+        </p>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         {BILINGUAL_LESSON_FILE_SLOTS.map((slot) => {
           const column = BILINGUAL_FILE_DB_COLUMN[slot.key] as BilingualFileDbColumn;
           const localUrl = localFiles[slot.key];
-          const parentUrl = files[slot.key];
-          const savedUrl = dbUrls[slot.key] ?? savedFiles?.[slot.key] ?? null;
           const fileName = meta[slot.key]?.name ?? (localUrl ? fileNameFromUrl(localUrl) : null);
-          const busy = uploading[slot.key];
-          const fieldDebug = debug[slot.key];
+          const busy = uploading[slot.key] || ensuringLesson;
 
           return (
             <div key={slot.key} className="rounded-lg border border-border p-3 space-y-2">
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {lang === "ar" ? slot.labelAr : slot.labelEn}
               </div>
-              <div className="text-[10px] text-muted-foreground font-mono">{column}</div>
 
               <input
                 type="file"
@@ -352,25 +338,6 @@ export function LessonBilingualFileFields({
                   </button>
                 </div>
               )}
-
-              <div className="rounded border border-border bg-card/50 p-2 text-[10px] font-mono space-y-0.5 break-all">
-                <div>
-                  <span className="text-muted-foreground">Current saved URL: </span>
-                  {savedUrl || "—"}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Local state URL: </span>
-                  {localUrl || parentUrl || "—"}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Last upload result: </span>
-                  {fieldDebug?.lastUploadResult ?? "—"}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Last save result: </span>
-                  {fieldDebug?.lastSaveResult ?? "—"}
-                </div>
-              </div>
             </div>
           );
         })}
