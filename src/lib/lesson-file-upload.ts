@@ -1,6 +1,6 @@
 /** Lesson bilingual file upload helpers (lesson-files bucket). */
 
-export const LESSON_FILE_MAX_BYTES = 52_428_800; // 50 MB — matches storage.buckets.file_size_limit
+export const LESSON_FILE_MAX_BYTES = 104_857_600; // 100 MB — matches storage.buckets.file_size_limit
 
 export const LESSON_FILE_ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
@@ -69,8 +69,8 @@ export function validateLessonUploadFile(file: File): LessonFileValidationMessag
   }
   if (file.size > LESSON_FILE_MAX_BYTES) {
     return {
-      en: "File must be 50 MB or smaller.",
-      ar: "يجب أن يكون حجم الملف 50 ميجابايت أو أقل.",
+      en: "File size must be 100 MB or less.",
+      ar: "يجب أن يكون حجم الملف 100 ميجابايت أو أقل.",
     };
   }
   return null;
