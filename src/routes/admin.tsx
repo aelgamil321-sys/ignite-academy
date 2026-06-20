@@ -30,6 +30,7 @@ import {
   bilingualFilesSavePayload,
   bilingualFilesToLessonUpdate,
   mergeBilingualFiles,
+  BILINGUAL_LESSON_FILE_SLOTS,
   EMPTY_BILINGUAL_LESSON_FILES,
   EMPTY_BILINGUAL_PENDING_FILES,
   hasPendingBilingualFiles,
@@ -301,6 +302,16 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const [draftLessonId, setDraftLessonId] = useState<string | null>(null);
   const [dbg, setDbg] = useState({ clicked: false, valid: false, status: "" as "" | "success" | "error", error: "", id: "" });
   const bilingualLoadedFor = useRef<string | null>(null);
+  const pendingFilesRef = useRef(pendingFiles);
+  pendingFilesRef.current = pendingFiles;
+
+  const setPendingFilesTracked: typeof setPendingFiles = (action) => {
+    setPendingFiles((prev) => {
+      const next = typeof action === "function" ? action(prev) : action;
+      pendingFilesRef.current = next;
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!editId) return;
@@ -323,12 +334,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   }, [editId, lessons]);
 
   useEffect(() => {
-    if (!editId) {
-      setBilingualFiles(EMPTY_BILINGUAL_LESSON_FILES);
-      setPendingFiles(EMPTY_BILINGUAL_PENDING_FILES);
-      bilingualLoadedFor.current = null;
-      return;
-    }
+    if (!editId) return;
     if (bilingualLoadedFor.current !== editId) {
       bilingualLoadedFor.current = null;
     }
@@ -469,7 +475,12 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
         return;
       }
 
-      const hasPending = hasPendingBilingualFiles(pendingFiles);
+      const pending = pendingFilesRef.current;
+      const hasPending = hasPendingBilingualFiles(pending);
+      console.log("[LessonForm] new lesson save", {
+        hasPending,
+        pendingKeys: BILINGUAL_LESSON_FILE_SLOTS.filter((s) => pending[s.key]).map((s) => s.key),
+      });
       let lessonId = draftLessonId;
 
       if (!lessonId) {
@@ -499,7 +510,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
 
       if (hasPending && lessonId) {
         console.log("[LessonForm] uploading pending bilingual files for lesson", lessonId);
-        const { urls, failures } = await uploadPendingBilingualLessonFiles(lessonId, pendingFiles);
+        const { urls, failures } = await uploadPendingBilingualLessonFiles(lessonId, pending);
         const mergedFiles: BilingualLessonFiles = { ...bilingualFiles };
         for (const [key, url] of Object.entries(urls)) {
           if (url) mergedFiles[key as keyof BilingualLessonFiles] = url;
@@ -641,7 +652,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
         savedFiles={activeLesson ? bilingualFilesFromLesson(activeLesson) : undefined}
         deferUpload={!editId}
         pendingFiles={pendingFiles}
-        onPendingFilesChange={setPendingFiles}
+        onPendingFilesChange={setPendingFilesTracked}
       />
 
       <LessonQuizBuilder questions={quiz} onChange={setQuiz} />

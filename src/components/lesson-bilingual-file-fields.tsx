@@ -127,7 +127,11 @@ export function LessonBilingualFileFields({
       delete next[key];
       return next;
     });
-    onPendingFilesChange?.((prev) => ({ ...prev, [key]: file }));
+    onPendingFilesChange?.((prev) => {
+      const next = { ...prev, [key]: file };
+      console.log("[lesson upload] queued pending file", { key, name: file.name, size: file.size });
+      return next;
+    });
     const queued = L("File selected — will upload when you save the lesson", "تم اختيار الملف — سيتم رفعه عند حفظ الدرس")[lang];
     setSuccessMsg((p) => ({ ...p, [key]: queued }));
   };
