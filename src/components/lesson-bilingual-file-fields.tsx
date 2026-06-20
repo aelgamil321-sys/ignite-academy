@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 import { Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import {useI18n, L } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteLessonFile, formatError, uploadLessonFile, validateLessonUploadFile } from "@/lib/upload";
 import {
@@ -11,11 +11,11 @@ import {
   type BilingualFileDbColumn,
   type BilingualFileKey,
   type BilingualLessonFiles,
+  type BilingualLessonPendingFiles,
   fileNameFromUrl,
 } from "@/lib/lesson-bilingual-files";
 
 const UPLOAD_TIMEOUT_MS = 60_000;
-
 
 type FieldMeta = { name: string; path: string };
 
@@ -50,15 +50,18 @@ export function LessonBilingualFileFields({
   onChange,
   lessonId,
   savedFiles,
-  onEnsureLessonId,
+  deferUpload = false,
+  pendingFiles,
+  onPendingFilesChange,
 }: {
   files: BilingualLessonFiles;
   onChange: Dispatch<SetStateAction<BilingualLessonFiles>>;
   lessonId?: string;
-  /** URLs from the loaded lesson row (baseline / DB snapshot). */
   savedFiles?: BilingualLessonFiles;
-  /** Save a new lesson draft and return its ID before the first file upload. */
-  onEnsureLessonId?: () => Promise<string | null>;
+  /** Queue files locally until the lesson row is created on Save/Publish. */
+  deferUpload?: boolean;
+  pendingFiles?: BilingualLessonPendingFiles;
+  onPendingFilesChange?: Dispatch<SetStateAction<BilingualLessonPendingFiles>>;
 }) {
   const { lang } = useI18n();
   const lessonIdRef = useRef(lessonId);
@@ -67,7 +70,6 @@ export function LessonBilingualFileFields({
   const [localFiles, setLocalFiles] = useState<BilingualLessonFiles>(files);
   const [meta, setMeta] = useState<Partial<Record<BilingualFileKey, FieldMeta>>>(() => metaFromFiles(files));
   const [uploading, setUploading] = useState<Partial<Record<BilingualFileKey, boolean>>>({});
-  const [ensuringLesson, setEnsuringLesson] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<BilingualFileKey, string>>>({});
   const [successMsg, setSuccessMsg] = useState<Partial<Record<BilingualFileKey, string>>>({});
   const [dbUrls, setDbUrls] = useState<Partial<Record<BilingualFileKey, string | null>>>({});
@@ -87,6 +89,12 @@ export function LessonBilingualFileFields({
   }, [lessonId, files]);
 
   useEffect(() => {
+    if (!deferUpload) {
+      setLocalFiles(files);
+    }
+  }, [deferUpload, files]);
+
+  useEffect(() => {
     if (savedFiles) {
       setDbUrls((prev) => {
         const next = { ...prev };
@@ -100,43 +108,7 @@ export function LessonBilingualFileFields({
     }
   }, [savedFiles]);
 
-  const handleFileUpload = async (
-    e: ChangeEvent<HTMLInputElement>,
-    column: BilingualFileDbColumn,
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const key = bilingualKeyFromDbColumn(column);
-    if (!key) return;
-
-    let currentLessonId = lessonIdRef.current;
-    if (!currentLessonId && onEnsureLessonId) {
-      setEnsuringLesson(true);
-      try {
-        console.log("[upload] ensuring lesson exists before file upload");
-        currentLessonId = (await onEnsureLessonId()) ?? undefined;
-        lessonIdRef.current = currentLessonId;
-      } catch (err) {
-        const message = formatError(err);
-        setErrors((p) => ({ ...p, [key]: message }));
-        toast.error(message);
-        return;
-      } finally {
-        setEnsuringLesson(false);
-      }
-    }
-
-    if (!currentLessonId) {
-      const msg = L(
-        "Save the lesson first, then open it to edit and upload files.",
-        "احفظ الدرس أولًا، ثم افتحه للتعديل وارفع الملفات.",
-      )[lang];
-      setErrors((p) => ({ ...p, [key]: msg }));
-      toast.error(msg);
-      return;
-    }
-
+  const queuePendingFile = (key: BilingualFileKey, file: File) => {
     const validation = validateLessonUploadFile(file);
     if (validation) {
       const msg = validation[lang];
@@ -144,6 +116,25 @@ export function LessonBilingualFileFields({
       toast.error(msg);
       return;
     }
+
+    setErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+    setSuccessMsg((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+    onPendingFilesChange?.((prev) => ({ ...prev, [key]: file }));
+    const queued = L("File selected — will upload when you save the lesson", "تم اختيار الملف — سيتم رفعه عند حفظ الدرس")[lang];
+    setSuccessMsg((p) => ({ ...p, [key]: queued }));
+  };
+
+  const uploadToLesson = async (key: BilingualFileKey, column: BilingualFileDbColumn, file: File) => {
+    const currentLessonId = lessonIdRef.current;
+    if (!currentLessonId) return;
 
     setUploading((p) => ({ ...p, [key]: true }));
     setErrors((p) => {
@@ -157,23 +148,11 @@ export function LessonBilingualFileFields({
       return next;
     });
 
-    console.log("[upload] A. File selected", {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      column,
-      lessonId: currentLessonId,
-    });
-
     try {
       await withTimeout(
         (async () => {
-          console.log("[upload] B. Upload started");
           const { publicUrl, filePath } = await uploadLessonFile(file, currentLessonId);
 
-          console.log("[upload] C. Upload completed", { publicUrl, filePath });
-
-          console.log("[upload] D. Saving URL to lesson row", { column, lessonId: currentLessonId });
           const { error: dbError } = await supabase
             .from("lessons")
             .update({ [column]: publicUrl })
@@ -184,18 +163,7 @@ export function LessonBilingualFileFields({
             throw new Error(`lesson URL save failed: ${dbError.message}`);
           }
 
-          const { data: verifyRow, error: verifyError } = await supabase
-            .from("lessons")
-            .select(column)
-            .eq("id", currentLessonId)
-            .single();
-
-          const savedUrl = verifyRow ? String((verifyRow as Record<string, unknown>)[column] ?? "") : "";
-          console.log("[upload] E. Verified DB row", { savedUrl, verifyError });
-
-          setDbUrls((p) => ({ ...p, [key]: savedUrl || publicUrl }));
-
-          console.log("[upload] F. Updating local UI state");
+          setDbUrls((p) => ({ ...p, [key]: publicUrl }));
           setLocalFiles((prev) => ({ ...prev, [key]: publicUrl }));
           setMeta((prev) => ({ ...prev, [key]: { name: file.name, path: filePath } }));
           onChange((prev) => ({ ...prev, [key]: publicUrl }));
@@ -212,9 +180,9 @@ export function LessonBilingualFileFields({
       const raw = formatError(err);
       const message = raw.includes("lesson URL save failed")
         ? `File uploaded but lesson URL save failed: ${raw.replace(/^lesson URL save failed: /, "")}`
-        : raw.startsWith("Storage upload failed:")
+        : raw.includes("Timeout")
           ? raw
-          : raw.includes("Timeout")
+          : raw.startsWith("Upload failed:")
             ? raw
             : `Upload failed: ${raw}`;
       setErrors((p) => ({ ...p, [key]: message }));
@@ -223,11 +191,62 @@ export function LessonBilingualFileFields({
       }
     } finally {
       setUploading((p) => ({ ...p, [key]: false }));
-      e.target.value = "";
     }
   };
 
+  const handleFileUpload = async (
+    e: ChangeEvent<HTMLInputElement>,
+    column: BilingualFileDbColumn,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const key = bilingualKeyFromDbColumn(column);
+    if (!key) return;
+
+    if (deferUpload) {
+      queuePendingFile(key, file);
+      e.target.value = "";
+      return;
+    }
+
+    const validation = validateLessonUploadFile(file);
+    if (validation) {
+      const msg = validation[lang];
+      setErrors((p) => ({ ...p, [key]: msg }));
+      toast.error(msg);
+      e.target.value = "";
+      return;
+    }
+
+    if (!lessonIdRef.current) {
+      const msg = L("Lesson ID is missing. Save the lesson and try again.", "معرّف الدرس مفقود. احفظ الدرس وحاول مرة أخرى.")[lang];
+      setErrors((p) => ({ ...p, [key]: msg }));
+      toast.error(msg);
+      e.target.value = "";
+      return;
+    }
+
+    await uploadToLesson(key, column, file);
+    e.target.value = "";
+  };
+
   const onRemove = async (key: BilingualFileKey) => {
+    if (deferUpload && pendingFiles?.[key]) {
+      onPendingFilesChange?.((prev) => ({ ...prev, [key]: null }));
+      setSuccessMsg((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+      return;
+    }
+
     const storagePath = meta[key]?.path;
     if (storagePath) {
       try {
@@ -270,18 +289,26 @@ export function LessonBilingualFileFields({
       <h4 className="font-display text-lg text-foreground">
         {L("Bilingual Lesson Files", "ملفات الدرس ثنائية اللغة")[lang]}
       </h4>
-      {ensuringLesson && (
-        <p className="text-xs font-medium text-primary">
-          {L("Saving lesson draft before upload…", "جارٍ حفظ مسودة الدرس قبل الرفع…")[lang]}
+      {deferUpload && (
+        <p className="text-xs text-muted-foreground">
+          {L(
+            "Select files now. They will upload automatically when you click Save or Publish.",
+            "اختر الملفات الآن. سيتم رفعها تلقائيًا عند الضغط على حفظ أو نشر.",
+          )[lang]}
         </p>
       )}
 
       <div className="grid gap-4 md:grid-cols-2">
         {BILINGUAL_LESSON_FILE_SLOTS.map((slot) => {
           const column = BILINGUAL_FILE_DB_COLUMN[slot.key] as BilingualFileDbColumn;
-          const localUrl = localFiles[slot.key];
-          const fileName = meta[slot.key]?.name ?? (localUrl ? fileNameFromUrl(localUrl) : null);
-          const busy = uploading[slot.key] || ensuringLesson;
+          const pendingFile = deferUpload ? pendingFiles?.[slot.key] ?? null : null;
+          const localUrl = deferUpload ? files[slot.key] : localFiles[slot.key];
+          const fileName =
+            pendingFile?.name ??
+            meta[slot.key]?.name ??
+            (localUrl ? fileNameFromUrl(localUrl) : null);
+          const busy = uploading[slot.key];
+          const hasFile = Boolean(pendingFile || localUrl);
 
           return (
             <div key={slot.key} className="rounded-lg border border-border p-3 space-y-2">
@@ -300,7 +327,9 @@ export function LessonBilingualFileFields({
               />
 
               {busy && (
-                <div className="text-xs font-medium text-primary">Uploading to Supabase…</div>
+                <div className="text-xs font-medium text-primary">
+                  {L("Uploading…", "جارٍ الرفع…")[lang]}
+                </div>
               )}
               {successMsg[slot.key] && !busy && (
                 <div className="text-xs font-medium text-primary">{successMsg[slot.key]}</div>
@@ -308,26 +337,33 @@ export function LessonBilingualFileFields({
               {errors[slot.key] && !busy && (
                 <div className="text-xs font-medium text-destructive break-all">{errors[slot.key]}</div>
               )}
-              {!busy && !localUrl && !errors[slot.key] && !successMsg[slot.key] && (
+              {!busy && !hasFile && !errors[slot.key] && !successMsg[slot.key] && (
                 <div className="text-xs text-muted-foreground italic">
                   {L("No file uploaded", "لم يتم رفع ملف")[lang]}
                 </div>
               )}
 
-              {localUrl && (
+              {hasFile && (
                 <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
                   <span className="text-primary truncate max-w-[180px]" title={fileName ?? undefined}>
                     ✓ {fileName}
                   </span>
-                  <a
-                    href={localUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-primary hover:text-primary"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    {L("View", "عرض")[lang]}
-                  </a>
+                  {pendingFile && (
+                    <span className="text-muted-foreground">
+                      ({L("pending", "بانتظار الحفظ")[lang]})
+                    </span>
+                  )}
+                  {localUrl && !pendingFile && (
+                    <a
+                      href={localUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:text-primary"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      {L("View", "عرض")[lang]}
+                    </a>
+                  )}
                   <button
                     type="button"
                     onClick={() => void onRemove(slot.key)}

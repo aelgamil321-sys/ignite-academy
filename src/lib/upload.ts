@@ -1,5 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import {
+  BILINGUAL_LESSON_FILE_SLOTS,
+  type BilingualFileKey,
+  type BilingualLessonPendingFiles,
+} from "@/lib/lesson-bilingual-files";
+import {
   buildLessonStorageKey,
   resolveLessonFileContentType,
   validateLessonUploadFile,
@@ -98,6 +103,34 @@ export async function uploadLessonFile(file: File, lessonId: string): Promise<Le
     filePath,
     fileName: file.name,
   };
+}
+
+export type PendingLessonUploadResult = {
+  urls: Partial<Record<BilingualFileKey, string>>;
+  failures: Array<{ key: BilingualFileKey; message: string }>;
+};
+
+/** Upload all queued bilingual lesson files after the lesson row exists. */
+export async function uploadPendingBilingualLessonFiles(
+  lessonId: string,
+  pending: BilingualLessonPendingFiles,
+): Promise<PendingLessonUploadResult> {
+  const urls: Partial<Record<BilingualFileKey, string>> = {};
+  const failures: PendingLessonUploadResult["failures"] = [];
+
+  for (const slot of BILINGUAL_LESSON_FILE_SLOTS) {
+    const file = pending[slot.key];
+    if (!file) continue;
+
+    try {
+      const { publicUrl } = await uploadLessonFile(file, lessonId);
+      urls[slot.key] = publicUrl;
+    } catch (err) {
+      failures.push({ key: slot.key, message: formatError(err) });
+    }
+  }
+
+  return { urls, failures };
 }
 
 /** Best-effort removal of a stored lesson file (admin only). */

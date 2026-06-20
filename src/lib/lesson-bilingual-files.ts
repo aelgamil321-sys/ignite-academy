@@ -27,6 +27,8 @@ export function bilingualKeyFromDbColumn(column: BilingualFileDbColumn): Bilingu
 
 export type BilingualLessonFiles = Record<BilingualFileKey, string | null>;
 
+export type BilingualLessonPendingFiles = Record<BilingualFileKey, File | null>;
+
 export type BilingualFileSlot = {
   key: BilingualFileKey;
   labelEn: string;
@@ -76,6 +78,19 @@ export const EMPTY_BILINGUAL_LESSON_FILES: BilingualLessonFiles = {
   pdfArUrl: null,
   pdfEnUrl: null,
 };
+
+export const EMPTY_BILINGUAL_PENDING_FILES: BilingualLessonPendingFiles = {
+  pptArUrl: null,
+  pptEnUrl: null,
+  worksheetArUrl: null,
+  worksheetEnUrl: null,
+  pdfArUrl: null,
+  pdfEnUrl: null,
+};
+
+export function hasPendingBilingualFiles(pending: BilingualLessonPendingFiles): boolean {
+  return BILINGUAL_LESSON_FILE_SLOTS.some((slot) => pending[slot.key] != null);
+}
 
 export function bilingualFilesFromLesson(lesson: CustomLesson): BilingualLessonFiles {
   return {
