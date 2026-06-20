@@ -18,8 +18,6 @@ export type EducationalContentType =
   | "content"
   | "vocab_term"
   | "vocab_def"
-  | "activity"
-  | "worksheet"
   | "instruction"
   | "quiz_question"
   | "quiz_option"

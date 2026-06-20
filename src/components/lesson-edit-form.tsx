@@ -55,10 +55,6 @@ export function LessonEditForm({
   const [expAr, setExpAr] = useState(lesson.explanation.ar);
   const [vocEn, setVocEn] = useState(lesson.vocab.en);
   const [vocAr, setVocAr] = useState(lesson.vocab.ar);
-  const [actEn, setActEn] = useState(lesson.activity.en);
-  const [actAr, setActAr] = useState(lesson.activity.ar);
-  const [wsEn, setWsEn] = useState(lesson.worksheetText.en);
-  const [wsAr, setWsAr] = useState(lesson.worksheetText.ar);
   const [ytAr, setYtAr] = useState((lesson.youtubeArUrl ?? "").trim());
   const [ytEn, setYtEn] = useState(
     (lesson.youtubeEnUrl ?? "").trim() || (!(lesson.youtubeArUrl ?? "").trim() ? (lesson.youtubeUrl ?? "").trim() : ""),
@@ -84,10 +80,6 @@ export function LessonEditForm({
     setExpAr(lesson.explanation.ar);
     setVocEn(lesson.vocab.en);
     setVocAr(lesson.vocab.ar);
-    setActEn(lesson.activity.en);
-    setActAr(lesson.activity.ar);
-    setWsEn(lesson.worksheetText.en);
-    setWsAr(lesson.worksheetText.ar);
     setYtAr((lesson.youtubeArUrl ?? "").trim());
     setYtEn(
       (lesson.youtubeEnUrl ?? "").trim() || (!(lesson.youtubeArUrl ?? "").trim() ? (lesson.youtubeUrl ?? "").trim() : ""),
@@ -134,8 +126,6 @@ export function LessonEditForm({
         outcome: { en: outEn, ar: outAr },
         explanation: { en: expEn, ar: expAr },
         vocab: { en: vocEn, ar: vocAr },
-        activity: { en: actEn, ar: actAr },
-        worksheetText: { en: wsEn, ar: wsAr },
         youtubeUrl: legacyYoutube,
         youtubeArUrl: ytArTrim,
         youtubeEnUrl: ytEnTrim,
@@ -210,22 +200,6 @@ export function LessonEditForm({
         </Field>
         <Field label={L("Key Vocabulary (AR)", "المفردات (عربي)")[lang]}>
           <input className="lesson-input" dir="rtl" value={vocAr} onChange={(e) => setVocAr(e.target.value)} />
-        </Field>
-      </Row>
-      <Row>
-        <Field label={L("Student Activity (EN)", "نشاط الطالب (إنجليزي)")[lang]}>
-          <textarea className="lesson-input" rows={3} value={actEn} onChange={(e) => setActEn(e.target.value)} />
-        </Field>
-        <Field label={L("Student Activity (AR)", "نشاط الطالب (عربي)")[lang]}>
-          <textarea className="lesson-input" dir="rtl" rows={3} value={actAr} onChange={(e) => setActAr(e.target.value)} />
-        </Field>
-      </Row>
-      <Row>
-        <Field label={L("Worksheet Text (EN)", "نص ورقة العمل (إنجليزي)")[lang]}>
-          <textarea className="lesson-input" rows={3} value={wsEn} onChange={(e) => setWsEn(e.target.value)} />
-        </Field>
-        <Field label={L("Worksheet Text (AR)", "نص ورقة العمل (عربي)")[lang]}>
-          <textarea className="lesson-input" dir="rtl" rows={3} value={wsAr} onChange={(e) => setWsAr(e.target.value)} />
         </Field>
       </Row>
       <Row>

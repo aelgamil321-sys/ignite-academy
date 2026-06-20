@@ -100,7 +100,6 @@ export type Database = {
       }
       lessons: {
         Row: {
-          activity: Json
           created_at: string
           explanation: Json
           grade: string
@@ -124,14 +123,12 @@ export type Database = {
           worksheet_ar_url: string | null
           worksheet_en_url: string | null
           worksheet_name: string | null
-          worksheet_text: Json
           worksheet_url: string | null
           youtube_url: string
           youtube_url_ar: string
           youtube_url_en: string
         }
         Insert: {
-          activity?: Json
           created_at?: string
           explanation?: Json
           grade: string
@@ -155,14 +152,12 @@ export type Database = {
           worksheet_ar_url?: string | null
           worksheet_en_url?: string | null
           worksheet_name?: string | null
-          worksheet_text?: Json
           worksheet_url?: string | null
           youtube_url?: string
           youtube_url_ar?: string
           youtube_url_en?: string
         }
         Update: {
-          activity?: Json
           created_at?: string
           explanation?: Json
           grade?: string
@@ -186,7 +181,6 @@ export type Database = {
           worksheet_ar_url?: string | null
           worksheet_en_url?: string | null
           worksheet_name?: string | null
-          worksheet_text?: Json
           worksheet_url?: string | null
           youtube_url?: string
           youtube_url_ar?: string

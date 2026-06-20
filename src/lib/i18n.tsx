@@ -186,7 +186,6 @@ export const t = {
   // Lesson structure (for future pages)
   ls_outcome: { en: "Learning Outcome", ar: "نواتج التعلّم" },
   ls_content: { en: "Lesson Content", ar: "محتوى الدرس" },
-  ls_activity: { en: "Student Activity", ar: "نشاط الطالب" },
   ls_worksheet: { en: "Worksheet", ar: "ورقة العمل" },
   ls_video: { en: "Video Lesson", ar: "الدرس المرئي" },
   ls_quiz: { en: "Quiz", ar: "الاختبار" },

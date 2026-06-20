@@ -19,8 +19,6 @@ export interface CustomLesson {
   outcome: Bi;
   explanation: Bi;
   vocab: Bi;
-  activity: Bi;
-  worksheetText: Bi;
   youtubeUrl: string;
   youtubeArUrl?: string;
   youtubeEnUrl?: string;
@@ -131,7 +129,7 @@ function parseBi(raw: unknown): Bi {
 // ---------- Row <-> domain mapping ----------
 type LessonRow = {
   id: string; grade: string; unit: Bi; title: Bi; outcome: Bi; explanation: Bi;
-  vocab: Bi; activity: Bi; youtube_url: string;
+  vocab: Bi; youtube_url: string;
   youtube_url_ar?: string | null;
   youtube_url_en?: string | null;
   pdf_url: string | null; pdf_name: string | null;
@@ -140,7 +138,6 @@ type LessonRow = {
   ppt_ar_url?: string | null; ppt_en_url?: string | null;
   worksheet_ar_url?: string | null; worksheet_en_url?: string | null;
   pdf_ar_url?: string | null; pdf_en_url?: string | null;
-  worksheet_text?: Bi | null;
   quiz: QuizQuestion[]; published: boolean; created_at: string;
   subject_category?: string | null;
   is_deleted?: boolean;
@@ -164,8 +161,6 @@ const lessonFromRow = (r: LessonRow): CustomLesson => ({
   outcome: parseBi(r.outcome),
   explanation: parseBi(r.explanation),
   vocab: parseBi(r.vocab),
-  activity: parseBi(r.activity),
-  worksheetText: parseBi(r.worksheet_text),
   youtubeUrl: r.youtube_url ?? "",
   youtubeArUrl: r.youtube_url_ar ?? undefined,
   youtubeEnUrl: r.youtube_url_en ?? undefined,
@@ -188,8 +183,6 @@ const lessonToRow = (l: Partial<CustomLesson>) => {
   if (l.outcome !== undefined) o.outcome = l.outcome;
   if (l.explanation !== undefined) o.explanation = l.explanation;
   if (l.vocab !== undefined) o.vocab = l.vocab;
-  if (l.activity !== undefined) o.activity = l.activity;
-  if (l.worksheetText !== undefined) o.worksheet_text = l.worksheetText;
   if (l.youtubeUrl !== undefined) o.youtube_url = l.youtubeUrl;
   if (l.youtubeArUrl !== undefined) o.youtube_url_ar = l.youtubeArUrl ?? "";
   if (l.youtubeEnUrl !== undefined) o.youtube_url_en = l.youtubeEnUrl ?? "";
@@ -507,8 +500,6 @@ export function customToLesson(c: CustomLesson, lang: "en" | "ar" = "en"): Lesso
     outcome: c.outcome,
     explanation: c.explanation,
     vocab: vocabFromBi(c.vocab),
-    activity: c.activity,
-    worksheet: c.worksheetText,
     videoTitle: c.title,
     quiz: normalizeQuizList(c.quiz ?? []),
   };

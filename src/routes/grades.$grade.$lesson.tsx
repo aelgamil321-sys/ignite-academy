@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import {
-  ChevronLeft, Clock, Target, BookOpen, Sparkles, ClipboardList,
-  FileText, Video, HelpCircle, Download,
+  ChevronLeft, Clock, Target, BookOpen,
+  FileText, Video, HelpCircle, Download, ClipboardList,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -51,8 +51,6 @@ function LessonPage() {
       { fieldName: "title", contentType: "title", text: source(lesson.title) },
       { fieldName: "outcome", contentType: "outcome", text: source(lesson.outcome) },
       { fieldName: "explanation", contentType: "content", text: source(lesson.explanation) },
-      { fieldName: "activity", contentType: "activity", text: source(lesson.activity) },
-      { fieldName: "worksheet", contentType: "worksheet", text: source(lesson.worksheet) },
       { fieldName: "grade", contentType: "general", text: source(resolved.grade.name) },
       { fieldName: "subject", contentType: "general", text: source(lesson.subject) },
       { fieldName: "unit", contentType: "general", text: source(lesson.unit) },
@@ -110,16 +108,10 @@ function LessonPage() {
   }
 
   const lessonMeta = { lessonId: lessonSlug };
-  const worksheetBody = (bi(lesson.worksheet, { ...lessonMeta, fieldName: "worksheet", contentType: "worksheet" }) ?? "").trim()
-    || (custom?.worksheetName
-      ? (lang === "ar" ? `ورقة عمل مرفقة: ${custom.worksheetName}` : `Worksheet attached: ${custom.worksheetName}`)
-      : "");
 
   const sections: Array<{ icon: typeof Target; key: TKey; body: string }> = [
     { icon: Target, key: "ls_outcome", body: bi(lesson.outcome, { ...lessonMeta, fieldName: "outcome", contentType: "outcome" }) },
     { icon: BookOpen, key: "ls_content", body: bi(lesson.explanation, { ...lessonMeta, fieldName: "explanation", contentType: "content" }) },
-    { icon: Sparkles, key: "ls_activity", body: bi(lesson.activity, { ...lessonMeta, fieldName: "activity", contentType: "activity" }) },
-    { icon: ClipboardList, key: "ls_worksheet", body: worksheetBody },
   ];
 
   const lessonVideos = lessonVideoEmbeds(custom, lang);

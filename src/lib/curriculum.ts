@@ -21,8 +21,6 @@ export interface Lesson {
   outcome: Bi;
   explanation: Bi;
   vocab: Array<{ term: Bi; def: Bi }>;
-  activity: Bi;
-  worksheet: Bi;
   videoTitle: Bi;
   quiz: QuizQuestion[];
 }

@@ -267,8 +267,6 @@ function lessonToFormState(l: CustomLesson) {
     outEn: l.outcome.en, outAr: l.outcome.ar,
     expEn: l.explanation.en, expAr: l.explanation.ar,
     vocEn: l.vocab.en, vocAr: l.vocab.ar,
-    actEn: l.activity.en, actAr: l.activity.ar,
-    wsEn: l.worksheetText.en, wsAr: l.worksheetText.ar,
     subjectCategory: l.subjectCategory,
     ytAr: (l.youtubeArUrl ?? "").trim(),
     ytEn: (l.youtubeEnUrl ?? "").trim() || (!(l.youtubeArUrl ?? "").trim() ? (l.youtubeUrl ?? "").trim() : ""),
@@ -289,8 +287,6 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const [outEn, setOutEn] = useState(""); const [outAr, setOutAr] = useState("");
   const [expEn, setExpEn] = useState(""); const [expAr, setExpAr] = useState("");
   const [vocEn, setVocEn] = useState(""); const [vocAr, setVocAr] = useState("");
-  const [actEn, setActEn] = useState(""); const [actAr, setActAr] = useState("");
-  const [wsEn, setWsEn] = useState(""); const [wsAr, setWsAr] = useState("");
   const [subjectCategory, setSubjectCategory] = useState<SubjectCategory>("quran");
   const [ytAr, setYtAr] = useState("");
   const [ytEn, setYtEn] = useState("");
@@ -324,8 +320,6 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
     setOutEn(s.outEn); setOutAr(s.outAr);
     setExpEn(s.expEn); setExpAr(s.expAr);
     setVocEn(s.vocEn); setVocAr(s.vocAr);
-    setActEn(s.actEn); setActAr(s.actAr);
-    setWsEn(s.wsEn); setWsAr(s.wsAr);
     setSubjectCategory(s.subjectCategory);
     setYtAr(s.ytAr);
     setYtEn(s.ytEn);
@@ -347,7 +341,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
 
   const resetForm = () => {
     setTitleEn(""); setTitleAr(""); setOutEn(""); setOutAr(""); setExpEn(""); setExpAr("");
-    setVocEn(""); setVocAr(""); setActEn(""); setActAr(""); setWsEn(""); setWsAr(""); setYtAr(""); setYtEn("");
+    setVocEn(""); setVocAr(""); setYtAr(""); setYtEn("");
     setBilingualFiles(EMPTY_BILINGUAL_LESSON_FILES);
     setPendingFiles(EMPTY_BILINGUAL_PENDING_FILES);
     setQuiz(quizQuestionsForForm([]));
@@ -367,8 +361,6 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       outcome: { en: outEn, ar: outAr },
       explanation: { en: expEn, ar: expAr },
       vocab: { en: vocEn, ar: vocAr },
-      activity: { en: actEn, ar: actAr },
-      worksheet_text: { en: wsEn, ar: wsAr },
       subject_category: subjectCategory,
       youtube_url: legacyYoutube,
       youtube_url_ar: ytArTrim,
@@ -395,8 +387,6 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       outcome: { en: outEn, ar: outAr },
       explanation: { en: expEn, ar: expAr },
       vocab: { en: vocEn, ar: vocAr },
-      activity: { en: actEn, ar: actAr },
-      worksheetText: { en: wsEn, ar: wsAr },
       subjectCategory,
       youtubeUrl: legacyYoutube,
       youtubeArUrl: ytArTrim,
@@ -458,8 +448,6 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
           outcome: payload.outcome,
           explanation: payload.explanation,
           vocab: payload.vocab,
-          activity: payload.activity,
-          worksheetText: payload.worksheet_text,
           subjectCategory: payload.subject_category,
           youtubeUrl: legacyYoutube,
           youtubeArUrl: ytArTrim,
@@ -627,14 +615,6 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       <Row>
         <Field label={L("Key Vocabulary (EN, comma separated)", "المفردات (إنجليزي، مفصولة بفواصل)")[lang]}><input className="input" value={vocEn} onChange={(e) => setVocEn(e.target.value)} /></Field>
         <Field label={L("Key Vocabulary (AR)", "المفردات (عربي)")[lang]}><input className="input" dir="rtl" value={vocAr} onChange={(e) => setVocAr(e.target.value)} /></Field>
-      </Row>
-      <Row>
-        <Field label={L("Student Activity (EN)", "نشاط الطالب (إنجليزي)")[lang]}><textarea className="input" rows={3} value={actEn} onChange={(e) => setActEn(e.target.value)} /></Field>
-        <Field label={L("Student Activity (AR)", "نشاط الطالب (عربي)")[lang]}><textarea className="input" dir="rtl" rows={3} value={actAr} onChange={(e) => setActAr(e.target.value)} /></Field>
-      </Row>
-      <Row>
-        <Field label={L("Worksheet Text (EN)", "نص ورقة العمل (إنجليزي)")[lang]}><textarea className="input" rows={3} value={wsEn} onChange={(e) => setWsEn(e.target.value)} /></Field>
-        <Field label={L("Worksheet Text (AR)", "نص ورقة العمل (عربي)")[lang]}><textarea className="input" dir="rtl" rows={3} value={wsAr} onChange={(e) => setWsAr(e.target.value)} /></Field>
       </Row>
       <Row>
         <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[lang]}>
