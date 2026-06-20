@@ -1,4 +1,7 @@
+import type { VocabularyItem } from "./lesson-vocab";
+
 export type Bi = { en: string; ar: string };
+export type { VocabularyItem } from "./lesson-vocab";
 
 export type QuizQuestionType = "multiple_choice" | "true_false" | "essay";
 
@@ -20,7 +23,7 @@ export interface Lesson {
   duration: number;
   outcome: Bi;
   explanation: Bi;
-  vocab: Array<{ term: Bi; def: Bi }>;
+  vocab: VocabularyItem[];
   videoTitle: Bi;
   quiz: QuizQuestion[];
 }

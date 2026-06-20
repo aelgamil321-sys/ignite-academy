@@ -13,6 +13,8 @@ import { useI18n, type TKey, prefetchEducationalTranslations, useLessonTranslati
 import { needsDynamicTranslation } from "@/lib/translate-content";
 import type { EducationalField } from "@/lib/translate-content";
 import type { Bi } from "@/lib/curriculum";
+import { LessonVocabularyCards } from "@/components/lesson-vocabulary-cards";
+import { pickVocabMeaningBi, pickVocabWordBi } from "@/lib/lesson-vocab";
 import { getGrade } from "@/lib/curriculum";
 import { useResolveLesson, lessonVideoEmbeds, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
 import { studentDownloadItems, fileNameFromUrl, type StudentDownloadItem } from "@/lib/lesson-bilingual-files";
@@ -60,8 +62,8 @@ function LessonPage() {
         text: source(f.title),
       })),
       ...lesson.vocab.flatMap((v, i) => [
-        { fieldName: `vocab_term_${i}`, contentType: "vocab_term" as const, text: source(v.term) },
-        { fieldName: `vocab_def_${i}`, contentType: "vocab_def" as const, text: source(v.def) },
+        { fieldName: `vocab_term_${i}`, contentType: "vocab_term" as const, text: source(pickVocabWordBi(v, lang === "ar" ? "ar" : "en")) },
+        { fieldName: `vocab_def_${i}`, contentType: "vocab_def" as const, text: source(pickVocabMeaningBi(v, lang === "ar" ? "ar" : "en")) },
       ]),
       ...normalizeQuizList(resolved.custom?.quiz ?? lesson.quiz).flatMap((q, qi) => [
         { fieldName: `quiz_q_${qi}`, contentType: "quiz_question" as const, text: source(q.q) },
@@ -220,28 +222,7 @@ function LessonPage() {
               );
             })}
 
-            {lesson.vocab.length > 0 && (
-              <div className={lessonCard}>
-                <div className={`${lessonCardHeader} md:mb-4`}>
-                  <div className={lessonCardIcon}>
-                    <FileText className="h-4 w-4 md:h-5 md:w-5" />
-                  </div>
-                  <h2 className={lessonCardTitle}>{tr("vocab")}</h2>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4">
-                  {lesson.vocab.map((vw, i) => (
-                    <div key={i} className="rounded-xl border border-border bg-background p-3 md:p-4">
-                      <div className="font-display text-base text-foreground md:text-lg [overflow-wrap:anywhere]">{bi(vw.term, { ...lessonMeta, fieldName: `vocab_term_${i}`, contentType: "vocab_term" })}</div>
-                      {bi(vw.def, { ...lessonMeta, fieldName: `vocab_def_${i}`, contentType: "vocab_def" }) && (
-                        <div className="mt-1 text-sm leading-[1.8] text-muted-foreground [overflow-wrap:anywhere]">
-                          {bi(vw.def, { ...lessonMeta, fieldName: `vocab_def_${i}`, contentType: "vocab_def" })}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <LessonVocabularyCards items={lesson.vocab} lessonMeta={lessonMeta} />
 
             <div
               id="lesson-video"

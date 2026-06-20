@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LessonEditForm } from "@/components/lesson-edit-form";
-import { normalizeQuizList } from "@/lib/lesson-quiz";
+import { parseVocabFromStorage } from "@/lib/lesson-vocab";
 import { useCMS, type CustomLesson } from "@/lib/cms";
 import { useI18n } from "@/lib/i18n";
 
@@ -69,7 +69,7 @@ function AdminLessonEditPage() {
         title: parseBi(row.title),
         outcome: parseBi(row.outcome),
         explanation: parseBi(row.explanation),
-        vocab: parseBi(row.vocab),
+        vocab: parseVocabFromStorage(row.vocab),
         youtubeUrl: String(row.youtube_url ?? ""),
         youtubeArUrl: row.youtube_url_ar ? String(row.youtube_url_ar) : undefined,
         youtubeEnUrl: row.youtube_url_en ? String(row.youtube_url_en) : undefined,

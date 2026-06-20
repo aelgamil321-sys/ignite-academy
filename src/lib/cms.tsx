@@ -7,6 +7,7 @@ import {
 import { type SubjectCategory, subjectCategoryName } from "./categories";
 import { gradeDisplayName, gradeMatches, normalizeGradeSlug } from "./grade-utils";
 import { normalizeQuizList } from "./lesson-quiz";
+import { parseVocabFromStorage, serializeVocabForStorage, type VocabularyItem } from "./lesson-vocab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -18,7 +19,7 @@ export interface CustomLesson {
   title: Bi;
   outcome: Bi;
   explanation: Bi;
-  vocab: Bi;
+  vocab: VocabularyItem[];
   youtubeUrl: string;
   youtubeArUrl?: string;
   youtubeEnUrl?: string;
@@ -160,7 +161,7 @@ const lessonFromRow = (r: LessonRow): CustomLesson => ({
   title: parseBi(r.title),
   outcome: parseBi(r.outcome),
   explanation: parseBi(r.explanation),
-  vocab: parseBi(r.vocab),
+  vocab: parseVocabFromStorage(r.vocab),
   youtubeUrl: r.youtube_url ?? "",
   youtubeArUrl: r.youtube_url_ar ?? undefined,
   youtubeEnUrl: r.youtube_url_en ?? undefined,
@@ -182,7 +183,7 @@ const lessonToRow = (l: Partial<CustomLesson>) => {
   if (l.title !== undefined) o.title = l.title;
   if (l.outcome !== undefined) o.outcome = l.outcome;
   if (l.explanation !== undefined) o.explanation = l.explanation;
-  if (l.vocab !== undefined) o.vocab = l.vocab;
+  if (l.vocab !== undefined) o.vocab = serializeVocabForStorage(l.vocab);
   if (l.youtubeUrl !== undefined) o.youtube_url = l.youtubeUrl;
   if (l.youtubeArUrl !== undefined) o.youtube_url_ar = l.youtubeArUrl ?? "";
   if (l.youtubeEnUrl !== undefined) o.youtube_url_en = l.youtubeEnUrl ?? "";
@@ -477,17 +478,6 @@ export function lessonVideoEmbeds(
   return items;
 }
 
-function vocabFromBi(b: Bi): Array<{ term: Bi; def: Bi }> {
-  const en = (b.en ?? "").split(/[,;]/).map((s) => s.trim()).filter(Boolean);
-  const ar = (b.ar ?? "").split(/[,،;؛]/).map((s) => s.trim()).filter(Boolean);
-  const n = Math.max(en.length, ar.length);
-  if (n === 0) return [];
-  return Array.from({ length: n }, (_, i) => ({
-    term: { en: en[i] ?? "", ar: ar[i] ?? "" },
-    def: { en: "", ar: "" },
-  }));
-}
-
 export function customToLesson(c: CustomLesson, lang: "en" | "ar" = "en"): Lesson {
   const subjectName = subjectCategoryName(c.subjectCategory, lang);
   const subjectAr = subjectCategoryName(c.subjectCategory, "ar");
@@ -499,7 +489,7 @@ export function customToLesson(c: CustomLesson, lang: "en" | "ar" = "en"): Lesso
     duration: 0,
     outcome: c.outcome,
     explanation: c.explanation,
-    vocab: vocabFromBi(c.vocab),
+    vocab: c.vocab,
     videoTitle: c.title,
     quiz: normalizeQuizList(c.quiz ?? []),
   };

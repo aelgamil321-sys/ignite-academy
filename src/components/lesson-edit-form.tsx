@@ -7,6 +7,8 @@ import { useCMS, type CustomLesson } from "@/lib/cms";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
 import { LessonQuizBuilder } from "@/components/lesson-quiz-builder";
+import { LessonVocabBuilder } from "@/components/lesson-vocab-builder";
+import type { VocabularyItem } from "@/lib/lesson-vocab";
 import {
   bilingualFilesFromLesson,
   bilingualFilesSavePayload,
@@ -53,8 +55,7 @@ export function LessonEditForm({
   const [outAr, setOutAr] = useState(lesson.outcome.ar);
   const [expEn, setExpEn] = useState(lesson.explanation.en);
   const [expAr, setExpAr] = useState(lesson.explanation.ar);
-  const [vocEn, setVocEn] = useState(lesson.vocab.en);
-  const [vocAr, setVocAr] = useState(lesson.vocab.ar);
+  const [vocab, setVocab] = useState<VocabularyItem[]>(lesson.vocab);
   const [ytAr, setYtAr] = useState((lesson.youtubeArUrl ?? "").trim());
   const [ytEn, setYtEn] = useState(
     (lesson.youtubeEnUrl ?? "").trim() || (!(lesson.youtubeArUrl ?? "").trim() ? (lesson.youtubeUrl ?? "").trim() : ""),
@@ -78,8 +79,7 @@ export function LessonEditForm({
     setOutAr(lesson.outcome.ar);
     setExpEn(lesson.explanation.en);
     setExpAr(lesson.explanation.ar);
-    setVocEn(lesson.vocab.en);
-    setVocAr(lesson.vocab.ar);
+    setVocab(lesson.vocab);
     setYtAr((lesson.youtubeArUrl ?? "").trim());
     setYtEn(
       (lesson.youtubeEnUrl ?? "").trim() || (!(lesson.youtubeArUrl ?? "").trim() ? (lesson.youtubeUrl ?? "").trim() : ""),
@@ -125,7 +125,7 @@ export function LessonEditForm({
         title: { en: titleEn, ar: titleAr },
         outcome: { en: outEn, ar: outAr },
         explanation: { en: expEn, ar: expAr },
-        vocab: { en: vocEn, ar: vocAr },
+        vocab,
         youtubeUrl: legacyYoutube,
         youtubeArUrl: ytArTrim,
         youtubeEnUrl: ytEnTrim,
@@ -194,14 +194,7 @@ export function LessonEditForm({
           <textarea className="lesson-input" dir="rtl" rows={5} value={expAr} onChange={(e) => setExpAr(e.target.value)} />
         </Field>
       </Row>
-      <Row>
-        <Field label={L("Key Vocabulary (EN)", "المفردات (إنجليزي)")[lang]}>
-          <input className="lesson-input" value={vocEn} onChange={(e) => setVocEn(e.target.value)} />
-        </Field>
-        <Field label={L("Key Vocabulary (AR)", "المفردات (عربي)")[lang]}>
-          <input className="lesson-input" dir="rtl" value={vocAr} onChange={(e) => setVocAr(e.target.value)} />
-        </Field>
-      </Row>
+      <LessonVocabBuilder items={vocab} onChange={setVocab} inputClassName="lesson-input" />
       <Row>
         <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[lang]}>
           <input className="lesson-input" dir="rtl" placeholder="https://www.youtube.com/watch?v=..." value={ytAr} onChange={(e) => setYtAr(e.target.value)} />

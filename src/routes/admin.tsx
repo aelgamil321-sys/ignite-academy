@@ -25,6 +25,9 @@ import { AdminSidebar, type AdminTab } from "@/components/admin-sidebar";
 import { DeleteLessonButton } from "@/components/admin-manage-lessons";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
 import { LessonQuizBuilder } from "@/components/lesson-quiz-builder";
+import { LessonVocabBuilder } from "@/components/lesson-vocab-builder";
+import type { VocabularyItem } from "@/lib/lesson-vocab";
+import { serializeVocabForStorage } from "@/lib/lesson-vocab";
 import {
   bilingualFilesFromLesson,
   bilingualFilesSavePayload,
@@ -266,7 +269,7 @@ function lessonToFormState(l: CustomLesson) {
     titleEn: l.title.en, titleAr: l.title.ar,
     outEn: l.outcome.en, outAr: l.outcome.ar,
     expEn: l.explanation.en, expAr: l.explanation.ar,
-    vocEn: l.vocab.en, vocAr: l.vocab.ar,
+    vocab: l.vocab,
     subjectCategory: l.subjectCategory,
     ytAr: (l.youtubeArUrl ?? "").trim(),
     ytEn: (l.youtubeEnUrl ?? "").trim() || (!(l.youtubeArUrl ?? "").trim() ? (l.youtubeUrl ?? "").trim() : ""),
@@ -286,7 +289,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
   const [titleEn, setTitleEn] = useState(""); const [titleAr, setTitleAr] = useState("");
   const [outEn, setOutEn] = useState(""); const [outAr, setOutAr] = useState("");
   const [expEn, setExpEn] = useState(""); const [expAr, setExpAr] = useState("");
-  const [vocEn, setVocEn] = useState(""); const [vocAr, setVocAr] = useState("");
+  const [vocab, setVocab] = useState<VocabularyItem[]>([]);
   const [subjectCategory, setSubjectCategory] = useState<SubjectCategory>("quran");
   const [ytAr, setYtAr] = useState("");
   const [ytEn, setYtEn] = useState("");
@@ -319,7 +322,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
     setTitleEn(s.titleEn); setTitleAr(s.titleAr);
     setOutEn(s.outEn); setOutAr(s.outAr);
     setExpEn(s.expEn); setExpAr(s.expAr);
-    setVocEn(s.vocEn); setVocAr(s.vocAr);
+    setVocab(s.vocab);
     setSubjectCategory(s.subjectCategory);
     setYtAr(s.ytAr);
     setYtEn(s.ytEn);
@@ -341,7 +344,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
 
   const resetForm = () => {
     setTitleEn(""); setTitleAr(""); setOutEn(""); setOutAr(""); setExpEn(""); setExpAr("");
-    setVocEn(""); setVocAr(""); setYtAr(""); setYtEn("");
+    setVocab([]); setYtAr(""); setYtEn("");
     setBilingualFiles(EMPTY_BILINGUAL_LESSON_FILES);
     setPendingFiles(EMPTY_BILINGUAL_PENDING_FILES);
     setQuiz(quizQuestionsForForm([]));
@@ -360,7 +363,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       title: { en: titleEn, ar: titleAr },
       outcome: { en: outEn, ar: outAr },
       explanation: { en: expEn, ar: expAr },
-      vocab: { en: vocEn, ar: vocAr },
+      vocab: serializeVocabForStorage(vocab),
       subject_category: subjectCategory,
       youtube_url: legacyYoutube,
       youtube_url_ar: ytArTrim,
@@ -386,7 +389,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
       title: { en: titleEn, ar: titleAr },
       outcome: { en: outEn, ar: outAr },
       explanation: { en: expEn, ar: expAr },
-      vocab: { en: vocEn, ar: vocAr },
+      vocab,
       subjectCategory,
       youtubeUrl: legacyYoutube,
       youtubeArUrl: ytArTrim,
@@ -447,7 +450,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
           title: payload.title,
           outcome: payload.outcome,
           explanation: payload.explanation,
-          vocab: payload.vocab,
+          vocab,
           subjectCategory: payload.subject_category,
           youtubeUrl: legacyYoutube,
           youtubeArUrl: ytArTrim,
@@ -612,10 +615,7 @@ function LessonForm({ editId, onSaved, onCancel }: { editId?: string | null; onS
         <Field label={L("Explanation (EN)", "الشرح (إنجليزي)")[lang]}><textarea className="input" rows={5} value={expEn} onChange={(e) => setExpEn(e.target.value)} /></Field>
         <Field label={L("Explanation (AR)", "الشرح (عربي)")[lang]}><textarea className="input" dir="rtl" rows={5} value={expAr} onChange={(e) => setExpAr(e.target.value)} /></Field>
       </Row>
-      <Row>
-        <Field label={L("Key Vocabulary (EN, comma separated)", "المفردات (إنجليزي، مفصولة بفواصل)")[lang]}><input className="input" value={vocEn} onChange={(e) => setVocEn(e.target.value)} /></Field>
-        <Field label={L("Key Vocabulary (AR)", "المفردات (عربي)")[lang]}><input className="input" dir="rtl" value={vocAr} onChange={(e) => setVocAr(e.target.value)} /></Field>
-      </Row>
+      <LessonVocabBuilder items={vocab} onChange={setVocab} inputClassName="input" />
       <Row>
         <Field label={L("YouTube Video Link (Arabic)", "رابط فيديو يوتيوب (عربي)")[lang]}>
           <input className="input" dir="rtl" placeholder="https://www.youtube.com/watch?v=..." value={ytAr} onChange={(e) => setYtAr(e.target.value)} />
