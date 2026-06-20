@@ -43,8 +43,8 @@ BEGIN
       replace(
         md5(gen_random_uuid()::text || clock_timestamp()::text || random()::text),
         '-',
-        '',
-      ),
+        ''
+      )
     );
   END;
 
