@@ -8,8 +8,10 @@ import {
 import { machineTranslateText } from "@/lib/translate.server";
 import type { EducationalContentType } from "@/lib/translate-educational-content";
 
-export const AI_DISABLED_MESSAGE_AR = "خدمة الذكاء الاصطناعي غير مفعلة بعد.";
-export const AI_DISABLED_MESSAGE_EN = "AI service is not enabled yet.";
+export const AI_DISABLED_MESSAGE_AR =
+  "خدمة الذكاء الاصطناعي غير مفعلة بعد. يرجى إضافة OPENAI_API_KEY في Cloudflare.";
+export const AI_DISABLED_MESSAGE_EN =
+  "AI service is not enabled yet. Please add OPENAI_API_KEY in Cloudflare.";
 
 export type TranslatableLang = Exclude<Lang, "en" | "ar">;
 
@@ -36,6 +38,10 @@ export type LessonAiField = {
 /** True when OpenAI or Google Translate API is configured on the worker. */
 export function isIgniteAiConfigured(): boolean {
   return Boolean(process.env.OPENAI_API_KEY || process.env.GOOGLE_TRANSLATE_API_KEY);
+}
+
+export function isOpenAiConfigured(): boolean {
+  return Boolean(process.env.OPENAI_API_KEY);
 }
 
 function openAiModel(): string {
@@ -158,13 +164,18 @@ export async function igniteTranslateText(
 export async function igniteSuggestVocabMeanings(input: {
   wordAr: string;
   wordEn: string;
-}): Promise<{ suggestion: VocabAiSuggestion | null; serviceAvailable: boolean }> {
+}): Promise<{ suggestion: VocabAiSuggestion | null; serviceAvailable: boolean; openAiConfigured: boolean }> {
+  const openAiConfigured = isOpenAiConfigured();
   const wordAr = input.wordAr.trim();
   const wordEn = input.wordEn.trim();
   const word = wordAr || wordEn;
 
   if (!word) {
-    return { suggestion: null, serviceAvailable: isIgniteAiConfigured() };
+    return { suggestion: null, serviceAvailable: openAiConfigured, openAiConfigured };
+  }
+
+  if (!openAiConfigured) {
+    return { suggestion: null, serviceAvailable: false, openAiConfigured: false };
   }
 
   if (hasProtectedIslamicContent(word)) {
@@ -175,11 +186,8 @@ export async function igniteSuggestVocabMeanings(input: {
         protectedContent: true,
       },
       serviceAvailable: true,
+      openAiConfigured: true,
     };
-  }
-
-  if (!isIgniteAiConfigured()) {
-    return { suggestion: null, serviceAvailable: false };
   }
 
   const userPrompt = `Word (Arabic): ${wordAr || "(not provided)"}
@@ -221,6 +229,7 @@ Each value is a concise student-friendly definition. If a language cannot be det
         protectedContent: false,
       },
       serviceAvailable: true,
+      openAiConfigured: true,
     };
   }
 
@@ -239,9 +248,10 @@ Each value is a concise student-friendly definition. If a language cannot be det
         protectedContent: false,
       },
       serviceAvailable: true,
+      openAiConfigured: true,
     };
   } catch {
-    return { suggestion: null, serviceAvailable: isIgniteAiConfigured() };
+    return { suggestion: null, serviceAvailable: false, openAiConfigured: true };
   }
 }
 

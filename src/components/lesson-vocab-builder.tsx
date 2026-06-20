@@ -2,9 +2,11 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n, L } from "@/lib/i18n";
+import { AiActionBanner, type AiActionStatus } from "@/components/ai-action-banner";
 import {
   aiDisabledMessage,
   callIgniteVocabSuggest,
+  IgniteAiError,
   type VocabAiSuggestion,
 } from "@/lib/ai/ignite-ai";
 import { buildEducationalCacheKey } from "@/lib/translation-cache";
@@ -101,6 +103,7 @@ export function LessonVocabBuilder({
   const [aiIndex, setAiIndex] = useState<number | null>(null);
   const [aiLoading, setAiLoading] = useState<number | null>(null);
   const [aiSuggestion, setAiSuggestion] = useState<VocabAiSuggestion | null>(null);
+  const [aiStatus, setAiStatus] = useState<AiActionStatus>({ kind: "idle" });
 
   const updateWord = (index: number, patch: Partial<VocabularyItem["word"]>) => {
     onChange(
@@ -138,30 +141,54 @@ export function LessonVocabBuilder({
     const item = items[index];
     const wordAr = item.word.ar.trim();
     const wordEn = item.word.en.trim();
+    console.info("[IgniteAI] Vocab suggest clicked", { index, wordAr, wordEn });
+
     if (!wordAr && !wordEn) {
-      toast.error(L("Enter a word first.", "أدخل الكلمة أولاً.")[lang]);
+      const msg = L("Enter a word first.", "أدخل الكلمة أولاً.")[lang];
+      setAiStatus({ kind: "error", message: msg });
+      toast.error(msg);
       return;
     }
 
     setAiLoading(index);
     setAiIndex(index);
     setAiSuggestion(null);
+    setAiStatus({
+      kind: "loading",
+      message: L("Generating meaning suggestion…", "جارٍ اقتراح المعنى…")[lang],
+    });
 
     try {
       const result = await callIgniteVocabSuggest({ wordAr, wordEn });
-      if (!result.serviceAvailable) {
-        toast.error(aiDisabledMessage(lang === "ar" ? "ar" : "en"));
+      console.info("[IgniteAI] Vocab suggest result", result);
+
+      if (!result.serviceAvailable || result.openAiConfigured === false) {
+        const msg = aiDisabledMessage(lang === "ar" ? "ar" : "en");
+        setAiStatus({ kind: "error", message: msg });
+        toast.error(msg);
         setAiIndex(null);
         return;
       }
       if (!result.suggestion) {
-        toast.error(L("Could not generate a suggestion.", "تعذر إنشاء اقتراح.")[lang]);
+        const msg = L("Could not generate a suggestion.", "تعذر إنشاء اقتراح.")[lang];
+        setAiStatus({ kind: "error", message: msg });
+        toast.error(msg);
         setAiIndex(null);
         return;
       }
       setAiSuggestion(result.suggestion);
-    } catch {
-      toast.error(aiDisabledMessage(lang === "ar" ? "ar" : "en"));
+      setAiStatus({
+        kind: "success",
+        message: L("Suggestion ready — review and apply below.", "الاقتراح جاهز — راجعه وطبّقه أدناه.")[lang],
+      });
+    } catch (error) {
+      const msg =
+        error instanceof IgniteAiError
+          ? error.message
+          : aiDisabledMessage(lang === "ar" ? "ar" : "en");
+      console.error("[IgniteAI] Vocab suggest failed", error);
+      setAiStatus({ kind: "error", message: msg });
+      toast.error(msg);
       setAiIndex(null);
     } finally {
       setAiLoading(null);
@@ -257,6 +284,8 @@ export function LessonVocabBuilder({
           )[lang]}
         </p>
       </div>
+
+      <AiActionBanner status={aiStatus} />
 
       {items.length === 0 && (
         <p className="text-sm text-muted-foreground italic">

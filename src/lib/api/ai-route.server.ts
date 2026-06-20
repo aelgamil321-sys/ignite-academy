@@ -6,6 +6,8 @@ import {
 import {
   ignitePregenerateLessonTranslations,
   igniteSuggestVocabMeanings,
+  isIgniteAiConfigured,
+  isOpenAiConfigured,
 } from "@/lib/ai/ignite-ai.server";
 
 const translateSchema = z.object({
@@ -44,7 +46,15 @@ export async function handleIgniteApi(request: Request): Promise<Response> {
   const subpath = url.pathname.replace(/^\/api\/ignite/, "") || "/";
 
   try {
-    const body = await request.json();
+    const body = request.method === "POST" ? await request.json().catch(() => ({})) : {};
+
+    if (subpath === "/status") {
+      return json({
+        serviceAvailable: isIgniteAiConfigured(),
+        openAiConfigured: isOpenAiConfigured(),
+        translateApiConfigured: Boolean(process.env.GOOGLE_TRANSLATE_API_KEY),
+      });
+    }
 
     if (subpath === "/translate") {
       const data = translateSchema.parse(body);

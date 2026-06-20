@@ -46,6 +46,17 @@ export default {
       if (url.pathname === "/api/translate") {
         return handleTranslateApi(request);
       }
+      if (url.pathname === "/api/ignite/status" && request.method === "GET") {
+        const { isIgniteAiConfigured, isOpenAiConfigured } = await import("@/lib/ai/ignite-ai.server");
+        return new Response(
+          JSON.stringify({
+            serviceAvailable: isIgniteAiConfigured(),
+            openAiConfigured: isOpenAiConfigured(),
+            translateApiConfigured: Boolean(process.env.GOOGLE_TRANSLATE_API_KEY),
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
       if (url.pathname.startsWith("/api/ignite")) {
         return handleIgniteApi(request);
       }

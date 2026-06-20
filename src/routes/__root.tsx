@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider } from "../lib/i18n";
 import { CMSProvider } from "../lib/cms";
 import { SITE_NAME } from "../lib/site-branding";
+import { Toaster } from "../components/ui/sonner";
 
 
 function NotFoundComponent() {
@@ -126,6 +127,7 @@ function RootComponent() {
       <I18nProvider>
         <CMSProvider>
           <Outlet />
+          <Toaster richColors closeButton position="top-center" />
         </CMSProvider>
       </I18nProvider>
     </QueryClientProvider>
