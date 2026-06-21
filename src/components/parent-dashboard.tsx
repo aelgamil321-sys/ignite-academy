@@ -1,6 +1,7 @@
 import { Clock3, ClipboardCheck, Award } from "lucide-react";
 import { ParentDashboardHero } from "@/components/parent-dashboard-hero";
-import { ParentDashboardSummary } from "@/components/parent-dashboard-summary";
+import { ParentDashboardRecommendation } from "@/components/parent-dashboard-recommendation";
+import { ParentDashboardSummary, PARENT_SECTION_IDS } from "@/components/parent-dashboard-summary";
 import { ParentAcademicChart } from "@/components/parent-academic-chart";
 import { ParentAssignmentsSection } from "@/components/parent-assignments-section";
 import { ParentDashboardInsights } from "@/components/parent-dashboard-insights";
@@ -37,13 +38,21 @@ export function ParentDashboardView({ data }: { data: ParentDashboardData }) {
     <div className="space-y-5 sm:space-y-6">
       <ParentDashboardHero data={data} />
 
+      <ParentDashboardRecommendation data={data} />
+
       <ParentDashboardSummary data={data} />
 
       <div className="grid gap-5 lg:grid-cols-5 lg:gap-6">
-        <div className="lg:col-span-3">
+        <div
+          id={PARENT_SECTION_IDS.academicPerformance}
+          className="scroll-mt-24 lg:col-span-3"
+        >
           <ParentAcademicChart report={performanceReport} />
         </div>
-        <div className="lg:col-span-2">
+        <div
+          id={PARENT_SECTION_IDS.progressReport}
+          className="scroll-mt-24 lg:col-span-2"
+        >
           <ParentDashboardInsights data={data} />
         </div>
       </div>
@@ -51,7 +60,9 @@ export function ParentDashboardView({ data }: { data: ParentDashboardData }) {
       <ParentAssignmentsSection studentUserId={data.studentUserId} />
 
       <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
-        <ParentDashboardCertificates certificates={progress.certificates} />
+        <div id={PARENT_SECTION_IDS.certificates} className="scroll-mt-24">
+          <ParentDashboardCertificates certificates={progress.certificates} />
+        </div>
         <ParentDashboardBadges progress={progress} />
       </div>
 

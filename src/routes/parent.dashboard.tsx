@@ -6,6 +6,7 @@ import { PageShell } from "@/components/page-shell";
 import { ParentAccountRequired } from "@/components/parent-account-required";
 import { ParentChildSelector } from "@/components/parent-child-selector";
 import { ParentDashboardView } from "@/components/parent-dashboard";
+import { PARENT_DASHBOARD_UI_PREVIEW } from "@/lib/parent-dashboard-preview-mock";
 import {useI18n, L } from "@/lib/i18n";
 import {
   fetchParentDashboardBundle,
@@ -21,6 +22,11 @@ import { isParentAccount } from "@/lib/account-role";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/parent/dashboard")({
+  validateSearch: (search: Record<string, unknown>) => {
+    const raw = search.uiPreview;
+    const normalized = raw === true || raw === 1 || raw === "1" || raw === '"1"' ? "1" : undefined;
+    return { uiPreview: normalized };
+  },
   head: () => ({
     meta: [
       { title: "Parent Dashboard — Ignite Islamic Academy" },
@@ -37,10 +43,12 @@ export const Route = createFileRoute("/parent/dashboard")({
 function ParentDashboardGate() {
   const navigate = useNavigate();
   const { tr } = useI18n();
+  const { uiPreview } = Route.useSearch();
   const [state, setState] = useState<"checking" | "ok" | "denied">("checking");
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (import.meta.env.DEV && uiPreview === "1") return;
     let active = true;
     void (async () => {
       const { data } = await supabase.auth.getUser();
@@ -64,7 +72,20 @@ function ParentDashboardGate() {
       active = false;
       sub.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, uiPreview]);
+
+  if (import.meta.env.DEV && uiPreview === "1") {
+    return (
+      <PageShell
+        eyebrow={tr("nav_parent")}
+        title={tr("parent_dashboard_title")}
+        lead="UI preview (dev only) — mock student data"
+        crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: tr("parent_dashboard_title") }]}
+      >
+        <ParentDashboardView data={PARENT_DASHBOARD_UI_PREVIEW} />
+      </PageShell>
+    );
+  }
 
   if (state === "denied") {
     return (

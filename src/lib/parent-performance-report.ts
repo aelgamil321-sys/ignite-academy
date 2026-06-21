@@ -206,3 +206,9 @@ export function formatPeerRank(rank: PeerRankSlice, lang: "en" | "ar"): string {
   }
   return lang === "ar" ? `${rank.rank} من ${rank.total}` : `${rank.rank} of ${rank.total}`;
 }
+
+/** Parent dashboard display: rank position only (e.g. #3). Logic unchanged. */
+export function formatPeerRankPosition(rank: PeerRankSlice): string {
+  if (rank.total <= 0 || rank.rank === null) return "—";
+  return `#${rank.rank}`;
+}

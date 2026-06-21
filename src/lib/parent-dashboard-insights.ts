@@ -1,5 +1,6 @@
 import type { ParentPerformanceReport } from "@/lib/parent-performance-report";
 import type { StudentProgressData } from "@/lib/student-progress";
+import { L } from "@/lib/i18n";
 
 /** Build parent-facing insight bullets from existing dashboard metrics (display only). */
 export function buildParentInsights(
@@ -56,6 +57,48 @@ export function buildParentInsights(
   }
 
   return insights.slice(0, 5);
+}
+
+export type ParentRecommendationTier = "excellent" | "good" | "needs_support" | "no_data";
+
+export function resolveParentRecommendation(
+  averageQuizScorePct: number | null,
+  lang: "en" | "ar",
+): { tier: ParentRecommendationTier; message: string } {
+  if (averageQuizScorePct === null) {
+    return {
+      tier: "no_data",
+      message: L(
+        "Recommendations will appear after your child completes their first quiz.",
+        "ستظهر التوصيات بعد إكمال ابنكم لأول اختبار.",
+      )[lang],
+    };
+  }
+  if (averageQuizScorePct >= 90) {
+    return {
+      tier: "excellent",
+      message: L(
+        "Your child is performing excellently and is encouraged to maintain this level.",
+        "الطالب يحقق أداءً ممتازًا ويُنصح بالاستمرار على نفس المستوى.",
+      )[lang],
+    };
+  }
+  if (averageQuizScorePct >= 75) {
+    return {
+      tier: "good",
+      message: L(
+        "Good performance. We recommend extra review before upcoming assessments.",
+        "أداء جيد، ويوصى بزيادة المراجعة قبل الاختبارات القادمة.",
+      )[lang],
+    };
+  }
+  return {
+    tier: "needs_support",
+    message: L(
+      "Your child needs additional follow-up and academic support.",
+      "يحتاج الطالب إلى متابعة إضافية ودعم أكاديمي.",
+    )[lang],
+  };
 }
 
 export function heroStatusLabel(
