@@ -128,7 +128,12 @@ function debugTranslate(
   });
 }
 
-/** Sync display before async translation completes — never cross-fallback to English. */
+/** Arabic, then English — shown while machine translation is pending or unavailable. */
+export function biPendingDisplayText(bi: Bi): string {
+  return bi.ar?.trim() || bi.en?.trim() || "";
+}
+
+/** Sync display before async translation completes. */
 export function educationalDisplayFallback(
   text: string,
   lang: Lang,
@@ -137,7 +142,11 @@ export function educationalDisplayFallback(
   const stored = bi ? resolveStoredBiText(bi, lang) : null;
   if (stored) return stored;
   if (lang === "en") return text;
-  return "";
+  if (bi) {
+    const pending = biPendingDisplayText(bi);
+    if (pending) return pending;
+  }
+  return text?.trim() ?? "";
 }
 
 let translationServiceAvailable: boolean | null = null;

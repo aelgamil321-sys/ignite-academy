@@ -4,6 +4,7 @@ import { Download, FileSpreadsheet, FileText, Presentation, Search } from "lucid
 import { PageShell } from "@/components/page-shell";
 import { EmptyState } from "@/components/empty-state";
 import { useI18n } from "@/lib/i18n";
+import type { Lang } from "@/lib/i18n-config";
 import { grades } from "@/lib/curriculum";
 import { gradeDisplayName, gradeMatches } from "@/lib/grade-utils";
 import {
@@ -133,7 +134,7 @@ function ResourceCard({
   tr,
 }: {
   item: LessonResourceItem;
-  lang: string;
+  lang: Lang;
   bi: (text?: { en: string; ar: string } | null) => string;
   tr: (key: "download_pdf" | "download_ppt" | "download_worksheet") => string;
 }) {
@@ -150,7 +151,7 @@ function ResourceCard({
         <div className="font-medium text-foreground">{item.label}</div>
         <div className="text-sm text-foreground/80 mt-1 truncate">{bi(item.lessonTitle)}</div>
         <div className="text-xs text-muted-foreground mt-1">
-          {gradeDisplayName(item.gradeSlug, locale)}
+          {gradeDisplayName(item.gradeSlug, lang)}
           {item.unit.en || item.unit.ar ? ` · ${bi(item.unit)}` : ""}
         </div>
       </div>

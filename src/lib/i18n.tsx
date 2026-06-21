@@ -32,6 +32,7 @@ import {
   onTranslationAvailabilityChange,
   resetTranslationSession,
   resolveStoredBiText,
+  biPendingDisplayText,
   biSourceForTranslation,
   translateEducationalContent,
   type EducationalContentType,
@@ -987,7 +988,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const locale = contentLocale(lang);
 
-  /** Read-only: returns stored locale, cache, or queues machine translation (no English fallback). */
+  /** Read-only: stored locale, cache, Arabic/English fallback while translating, or machine translation. */
   const bi = useCallback(
     (text?: Bi | null, meta?: BiFieldMeta) => {
       if (!text) return "";
@@ -996,7 +997,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       if (stored) return stored;
 
       const source = biSourceForTranslation(text, lang);
-      if (!source) return "";
+      if (!source) return biPendingDisplayText(text);
 
       const lessonId = meta?.lessonId ?? lessonScopeRef.current ?? undefined;
       const fieldName = meta?.fieldName ?? "content";
@@ -1009,7 +1010,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         fieldName,
         source: source.text,
       });
-      if (cached) return cached;
+      if (cached?.trim()) return cached;
 
       void translateEducationalContent({
         text: source.text,
@@ -1020,7 +1021,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         fieldName,
       });
 
-      return "";
+      return biPendingDisplayText(text);
     },
     [lang, contentRev],
   );

@@ -6,6 +6,7 @@ export {
   needsDynamicTranslation,
   needsMachineTranslation,
   resolveStoredBiText,
+  biPendingDisplayText,
   biSourceForTranslation,
   translateEducationalContent,
   translateEducationalBi,

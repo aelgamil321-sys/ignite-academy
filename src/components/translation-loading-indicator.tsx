@@ -46,17 +46,26 @@ export function TranslatedContentShell({
   children: React.ReactNode;
   className?: string;
 }) {
-  const { contentTranslating, lang } = useI18n();
+  const { contentTranslating, lang, tr } = useI18n();
   const pending = contentTranslating > 0 && needsDynamicTranslation(lang);
+  const isEmpty =
+    children === "" ||
+    children === null ||
+    children === undefined ||
+    (typeof children === "string" && !children.trim());
 
   return (
     <div
       className={cn(
-        pending && "animate-pulse [animation-duration:1.4s] opacity-90",
+        pending && !isEmpty && "animate-pulse [animation-duration:1.4s] opacity-90",
         className,
       )}
     >
-      {children}
+      {isEmpty && pending ? (
+        <span className="text-sm text-muted-foreground italic">{tr("content_translating")}</span>
+      ) : (
+        children
+      )}
     </div>
   );
 }
