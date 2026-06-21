@@ -29,7 +29,7 @@ function AnnouncementDetail() {
     body: custom.content,
     imageUrl: custom.imageUrl,
   } : null);
-  if (!ann) return <div className="container-page py-20">Announcement not found.</div>;
+  if (!ann) return <div className="container-page py-20">{tr("announcement_not_found")}</div>;
   const image = ann.imageUrl;
 
   return (

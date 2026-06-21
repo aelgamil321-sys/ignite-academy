@@ -14,7 +14,8 @@ import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { SUBJECT_CATEGORIES } from "@/lib/categories";
 import { useCMS, useCMSStats, useAllAnnouncements } from "@/lib/cms";
-import { gradeDisplayName } from "@/lib/grade-utils";
+import { gradeNameBi } from "@/lib/grade-utils";
+import { useHomepageContentPrefetch } from "@/hooks/use-cms-content-prefetch";
 import { SITE_NAME } from "@/lib/site-branding";
 import { certificateIslamicLogoUrl } from "@/lib/certificate-branding";
 import { DepartmentLogoCard } from "@/components/brand-logo";
@@ -40,6 +41,7 @@ function Home() {
   const stats = useCMSStats();
   const announcements = useAllAnnouncements();
   const featuredLessons = lessons.filter((l) => l.published).slice(0, 3);
+  useHomepageContentPrefetch(lessons.filter((l) => l.published), announcements);
   const [signedIn, setSignedIn] = useState(false);
   const [authReady, setAuthReady] = useState(false);
 
@@ -246,7 +248,10 @@ function Home() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs uppercase tracking-wider text-primary font-semibold">
-                    {gradeDisplayName(l.grade, lang)} · {bi(l.unit)}
+                    {((): string => {
+                      const g = gradeNameBi(l.grade);
+                      return g ? bi(g) : l.grade;
+                    })()} · {bi(l.unit)}
                   </div>
                   <div className="mt-1 font-display text-xl text-foreground truncate">{bi(l.title)}</div>
                   <div className="text-xs text-foreground/60 mt-1">{l.quiz.length} {tr("questions")} · {tr("lesson_meta")}</div>

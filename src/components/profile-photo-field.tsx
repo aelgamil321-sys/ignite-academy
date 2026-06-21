@@ -1,29 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera, X } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 import { PROFILE_PHOTO_ACCEPT, validateProfilePhotoFile } from "@/lib/profile-photo";
 
 type Props = {
-  lang: "en" | "ar";
   file: File | null;
   onChange: (file: File | null) => void;
   required?: boolean;
 };
 
-export function ProfilePhotoField({ lang, file, onChange, required = false }: Props) {
+export function ProfilePhotoField({ file, onChange, required = false }: Props) {
+  const { tr } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const T = {
-    label: lang === "ar" ? "صورة الملف الشخصي" : "Profile Photo",
-    hint:
-      lang === "ar"
-        ? "صورة واضحة للوجه — JPEG أو PNG أو WebP (حتى 5 ميجابايت)"
-        : "Clear face photo — JPEG, PNG, or WebP (max 5 MB)",
-    choose: lang === "ar" ? "اختر صورة" : "Choose photo",
-    change: lang === "ar" ? "تغيير الصورة" : "Change photo",
-    remove: lang === "ar" ? "إزالة" : "Remove",
-  };
 
   useEffect(() => {
     if (!file) {
@@ -43,7 +33,7 @@ export function ProfilePhotoField({ lang, file, onChange, required = false }: Pr
     }
     const validationError = validateProfilePhotoFile(next);
     if (validationError) {
-      setError(lang === "ar" ? "صورة غير صالحة. استخدم JPEG أو PNG أو WebP (حتى 5 ميجابايت)." : validationError);
+      setError(tr("profile_photo_invalid"));
       onChange(null);
       return;
     }
@@ -54,7 +44,7 @@ export function ProfilePhotoField({ lang, file, onChange, required = false }: Pr
   return (
     <div>
       <label className="text-xs font-medium text-muted-foreground">
-        {T.label}
+        {tr("auth_profile_photo")}
         {required ? " *" : ""}
       </label>
       <div className="mt-2 flex flex-wrap items-center gap-4">
@@ -85,7 +75,7 @@ export function ProfilePhotoField({ lang, file, onChange, required = false }: Pr
             className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
           >
             <Camera className="h-3.5 w-3.5" />
-            {file ? T.change : T.choose}
+            {file ? tr("profile_change_photo") : tr("profile_photo_choose")}
           </button>
           {file ? (
             <button
@@ -97,10 +87,10 @@ export function ProfilePhotoField({ lang, file, onChange, required = false }: Pr
               className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-destructive"
             >
               <X className="h-3.5 w-3.5" />
-              {T.remove}
+              {tr("profile_photo_remove")}
             </button>
           ) : null}
-          <p className="text-xs text-muted-foreground">{T.hint}</p>
+          <p className="text-xs text-muted-foreground">{tr("profile_photo_hint")}</p>
           {error ? <p className="text-xs text-destructive">{error}</p> : null}
         </div>
       </div>

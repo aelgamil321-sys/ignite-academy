@@ -1,7 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode, useState } from "react";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, uiBi } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   formatNotificationTime,
@@ -24,11 +24,11 @@ function NotificationItem({
   item: NotificationRow;
   onRead: (id: string) => void;
 }) {
-  const { bi, lang } = useI18n();
+  const { lang } = useI18n();
   const unread = !item.read_at;
-  const title = bi(notificationTitle(item));
-  const body = bi(notificationBody(item));
-  const time = formatNotificationTime(item.created_at, lang === "ar" ? "ar" : "en");
+  const title = uiBi(notificationTitle(item), lang);
+  const body = uiBi(notificationBody(item), lang);
+  const time = formatNotificationTime(item.created_at, lang);
 
   const inner = (
     <div

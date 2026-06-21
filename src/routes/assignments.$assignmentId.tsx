@@ -4,6 +4,7 @@ import { Download, Loader2, Paperclip, Send } from "lucide-react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
+import { localeForFormatting } from "@/lib/i18n-config";
 import { supabase } from "@/integrations/supabase/client";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import {
@@ -165,7 +166,7 @@ function AssignmentDetailPage() {
     );
   }
 
-  const formatDue = new Date(item.due_date).toLocaleString(lang === "ar" ? "ar-EG" : "en-GB", {
+  const formatDue = new Date(item.due_date).toLocaleString(localeForFormatting(lang), {
     dateStyle: "full",
     timeStyle: "short",
   });

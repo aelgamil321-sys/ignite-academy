@@ -332,7 +332,9 @@ export function CertificateModal({
                   ) : (
                     <Download className="h-4 w-4" />
                   )}
-                  {downloading ? "Generating PDF..." : "Download PDF / تحميل PDF"}
+                  {downloading
+                    ? L("Generating PDF...", "جارٍ إنشاء PDF...")[lang]
+                    : L("Download PDF", "تحميل PDF")[lang]}
                 </button>
                 <button
                   type="button"
@@ -341,7 +343,7 @@ export function CertificateModal({
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors w-full disabled:opacity-50"
                 >
                   <X className="h-4 w-4" />
-                  Close / إغلاق
+                  {L("Close", "إغلاق")[lang]}
                 </button>
               </div>
             </>
@@ -416,7 +418,9 @@ export function CertificateButton({
         className="inline-flex items-center gap-2 rounded-full border-2 border-primary bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary hover:bg-primary-hover hover:text-white transition-colors disabled:opacity-60"
       >
         {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Award className="h-4 w-4" />}
-        {checking ? "Checking profile… / جارٍ التحقق…" : "Download Certificate / تحميل الشهادة"}
+        {checking
+          ? L("Checking profile…", "جارٍ التحقق…")[lang]
+          : L("Download Certificate", "تحميل الشهادة")[lang]}
       </button>
       <CertificateModal
         open={open}

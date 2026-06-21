@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n";
+import { contentLocale } from "@/lib/i18n-config";
 import {
   fetchAssignmentStorageFileMeta,
   formatAssignmentFileSize,
@@ -45,7 +46,7 @@ function accessErrorMessage(
 
 export function AdminAssignmentSubmissionFile({ filePath, fileName, fileMime }: Props) {
   const { tr, lang } = useI18n();
-  const displayLang = lang === "ar" ? "ar" : "en";
+  const displayLang = contentLocale(lang);
   const mime = resolveAssignmentFileMime(fileMime, fileName);
   const typeLabel = formatAssignmentFileTypeLabel(mime, fileName, displayLang);
   const canPreview = isPreviewableAssignmentFile(mime);

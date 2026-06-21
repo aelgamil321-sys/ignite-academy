@@ -1,7 +1,7 @@
 import type { Bi, QuizQuestion, QuizQuestionType } from "@/lib/curriculum";
 import { supabase } from "@/integrations/supabase/client";
 import type { Lang } from "./i18n-config";
-import { contentLocale } from "./i18n-config";
+import { contentLocale, L } from "./i18n-config";
 
 export const TRUE_FALSE_OPTIONS: Bi[] = [
   { en: "True", ar: "صح" },
@@ -370,15 +370,12 @@ export type SavedQuizSubmission = {
   submitted_at: string;
 };
 
-export function gradeLabelForPercentage(
-  percentage: number,
-  lang: "en" | "ar",
-): string {
-  if (percentage >= 90) return lang === "ar" ? "ممتاز" : "Excellent";
-  if (percentage >= 80) return lang === "ar" ? "جيد جدًا" : "Very Good";
-  if (percentage >= 70) return lang === "ar" ? "جيد" : "Good";
-  if (percentage >= 60) return lang === "ar" ? "مقبول" : "Pass";
-  return lang === "ar" ? "يحتاج إلى تحسين" : "Needs Improvement";
+export function gradeLabelForPercentage(percentage: number, lang: Lang): string {
+  if (percentage >= 90) return L("Excellent", "ممتاز")[lang];
+  if (percentage >= 80) return L("Very Good", "جيد جدًا")[lang];
+  if (percentage >= 70) return L("Good", "جيد")[lang];
+  if (percentage >= 60) return L("Pass", "مقبول")[lang];
+  return L("Needs Improvement", "يحتاج إلى تحسين")[lang];
 }
 
 export function optionLabel(

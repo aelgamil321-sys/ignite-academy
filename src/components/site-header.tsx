@@ -110,7 +110,7 @@ export function SiteHeader() {
   const profileLabel = signedIn && isParent ? tr("profile_parent") : tr("profile_student");
 
   const schoolLogoUrl = certificateSchoolLogoUrl();
-  const schoolLogoAlt = locale === "ar" ? "مدرسة اجنايت" : "Ignite School";
+  const schoolLogoAlt = tr("school_logo_alt");
 
   const brandLink = (compact?: boolean) => (
     <Link to="/" className="group flex min-w-0 items-center gap-2 sm:gap-2.5">

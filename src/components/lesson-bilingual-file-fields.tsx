@@ -317,7 +317,7 @@ export function LessonBilingualFileFields({
           return (
             <div key={slot.key} className="rounded-lg border border-border p-3 space-y-2">
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {lang === "ar" ? slot.labelAr : slot.labelEn}
+                {L(slot.labelEn, slot.labelAr)[lang]}
               </div>
 
               <input

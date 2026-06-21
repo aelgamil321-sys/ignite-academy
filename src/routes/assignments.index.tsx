@@ -4,6 +4,7 @@ import { FileText, ArrowRight, Loader2 } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
 import { EmptyState } from "@/components/empty-state";
 import { useI18n } from "@/lib/i18n";
+import { localeForFormatting } from "@/lib/i18n-config";
 import { supabase } from "@/integrations/supabase/client";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import {
@@ -78,7 +79,7 @@ function AssignmentsIndexPage() {
   }, [items, filter]);
 
   const formatDue = (iso: string) =>
-    new Date(iso).toLocaleString(lang === "ar" ? "ar-EG" : "en-GB", {
+    new Date(iso).toLocaleString(localeForFormatting(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });

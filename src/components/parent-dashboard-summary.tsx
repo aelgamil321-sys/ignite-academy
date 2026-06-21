@@ -8,7 +8,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { useI18n, L } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { formatPeerRankPosition } from "@/lib/parent-performance-report";
 import type { ParentDashboardData } from "@/lib/parent-dashboard";
 
@@ -84,7 +84,7 @@ function SummaryCardContent({ card }: { card: SummaryCard }) {
 }
 
 export function ParentDashboardSummary({ data }: { data: ParentDashboardData }) {
-  const { lang } = useI18n();
+  const { tr } = useI18n();
   const { progress, performanceReport: report } = data;
 
   const cards: SummaryCard[] = [
@@ -92,7 +92,7 @@ export function ParentDashboardSummary({ data }: { data: ParentDashboardData }) 
       key: "progress",
       icon: TrendingUp,
       emoji: "📈",
-      label: L("Academic Progress", "التقدم الدراسي")[lang],
+      label: tr("parent_academic_progress"),
       value: `${progress.overallProgressPct}%`,
       action: { type: "scroll", targetId: PARENT_SECTION_IDS.progressReport },
     },
@@ -100,7 +100,7 @@ export function ParentDashboardSummary({ data }: { data: ParentDashboardData }) 
       key: "certificates",
       icon: Award,
       emoji: "🏆",
-      label: L("Certificates Earned", "الشهادات المكتسبة")[lang],
+      label: tr("parent_certificates_earned"),
       value: String(progress.certificatesEarned),
       action: { type: "scroll", targetId: PARENT_SECTION_IDS.certificates },
     },
@@ -108,7 +108,7 @@ export function ParentDashboardSummary({ data }: { data: ParentDashboardData }) 
       key: "lessons",
       icon: BookOpenCheck,
       emoji: "📚",
-      label: L("Lessons Completed", "الدروس المكتملة")[lang],
+      label: tr("parent_lessons_completed"),
       value: `${progress.completedLessons}/${progress.totalLessons}`,
       action: { type: "navigate", gradeSlug: data.gradeSlug },
     },
@@ -116,7 +116,7 @@ export function ParentDashboardSummary({ data }: { data: ParentDashboardData }) 
       key: "average",
       icon: ClipboardCheck,
       emoji: "📝",
-      label: L("Average Score", "متوسط الدرجات")[lang],
+      label: tr("parent_average_score"),
       value: progress.averageQuizScorePct === null ? "—" : `${progress.averageQuizScorePct}%`,
       action: { type: "scroll", targetId: PARENT_SECTION_IDS.academicPerformance },
     },
@@ -124,18 +124,18 @@ export function ParentDashboardSummary({ data }: { data: ParentDashboardData }) 
       key: "grade-rank",
       icon: Medal,
       emoji: "🥇",
-      label: L("Rank in Grade", "الترتيب في الصف")[lang],
+      label: tr("parent_rank_grade"),
       value: formatPeerRankPosition(report.rankings.grade),
-      rankSublabel: L("Current rank", "المركز الحالي")[lang],
+      rankSublabel: tr("parent_current_rank"),
       action: { type: "scroll", targetId: PARENT_SECTION_IDS.progressReport },
     },
     {
       key: "islamic-rank",
       icon: Trophy,
       emoji: "⭐",
-      label: L("Rank in Islamic Group", "الترتيب في الإسلامية")[lang],
+      label: tr("parent_rank_islamic"),
       value: formatPeerRankPosition(report.rankings.islamicGroup),
-      rankSublabel: L("Current rank", "المركز الحالي")[lang],
+      rankSublabel: tr("parent_current_rank"),
       action: { type: "scroll", targetId: PARENT_SECTION_IDS.progressReport },
     },
   ];
@@ -151,11 +151,7 @@ export function ParentDashboardSummary({ data }: { data: ParentDashboardData }) 
               params={{ grade: card.action.gradeSlug }}
               className={CARD_INTERACTION_CLASS}
               style={{ animationDelay: `${index * 60}ms` }}
-              aria-label={
-                lang === "ar"
-                  ? `${card.label} — عرض دروس الصف`
-                  : `${card.label} — view grade lessons`
-              }
+              aria-label={`${card.label} — ${tr("parent_view_grade_lessons")}`}
             >
               <SummaryCardContent card={card} />
             </Link>
@@ -171,9 +167,7 @@ export function ParentDashboardSummary({ data }: { data: ParentDashboardData }) 
             }}
             className={CARD_INTERACTION_CLASS}
             style={{ animationDelay: `${index * 60}ms` }}
-            aria-label={
-              lang === "ar" ? `${card.label} — الانتقال إلى القسم` : `${card.label} — go to section`
-            }
+            aria-label={`${card.label} — ${tr("parent_go_to_section")}`}
           >
             <SummaryCardContent card={card} />
           </button>

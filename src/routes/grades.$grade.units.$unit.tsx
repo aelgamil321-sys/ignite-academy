@@ -5,6 +5,7 @@ import { ChevronLeft, Plus, Trash2, Eye, EyeOff, Save, ExternalLink } from "luci
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
 import {useI18n, L } from "@/lib/i18n";
+import { langDir } from "@/lib/i18n-config";
 import { getGrade, type Bi, type Grade, type Lesson, type QuizQuestion } from "@/lib/curriculum";
 import { useCMS, ytId } from "@/lib/cms";
 import { gradeMatches, normalizeGradeSlug } from "@/lib/grade-utils";
@@ -507,7 +508,7 @@ function InfoTab({
   };
 
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this information?")) return;
+    if (!confirm(L("Delete this information?", "حذف هذه المعلومات؟")[lang])) return;
     try {
       const { error } = await supabase.from("unit_information" as never).delete().eq("id", id);
       if (error) throw error;
@@ -561,16 +562,16 @@ function InfoTab({
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-foreground">{bi(it.title)}</div>
                   {bi(it.description) && (
-                    <p className="text-sm text-muted-foreground mt-1" dir={lang === "ar" ? "rtl" : "ltr"}>{bi(it.description)}</p>
+                    <p className="text-sm text-muted-foreground mt-1" dir={langDir(lang)}>{bi(it.description)}</p>
                   )}
                   {bi(it.key_points) && (
-                    <div className="mt-2 text-sm" dir={lang === "ar" ? "rtl" : "ltr"}>
+                    <div className="mt-2 text-sm" dir={langDir(lang)}>
                       <span className="font-semibold">{L("Key points:", "النقاط الرئيسية:")[lang]} </span>
                       {bi(it.key_points)}
                     </div>
                   )}
                   {bi(it.notes) && (
-                    <div className="mt-2 text-sm text-muted-foreground" dir={lang === "ar" ? "rtl" : "ltr"}>
+                    <div className="mt-2 text-sm text-muted-foreground" dir={langDir(lang)}>
                       <span className="font-semibold">{L("Notes:", "ملاحظات:")[lang]} </span>
                       {bi(it.notes)}
                     </div>
@@ -636,7 +637,7 @@ function ArticlesTab({
     finally { setSaving(false); }
   };
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this article?")) return;
+    if (!confirm(L("Delete this article?", "حذف هذا المقال؟")[lang])) return;
     try {
       const { error } = await supabase.from("articles").delete().eq("id", id);
       if (error) throw error;
@@ -753,7 +754,7 @@ function FilesTab({
     finally { setSaving(false); }
   };
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this file?")) return;
+    if (!confirm(L("Delete this file?", "حذف هذا الملف؟")[lang])) return;
     try {
       const { error } = await supabase.from("files").delete().eq("id", id);
       if (error) throw error;
@@ -872,7 +873,7 @@ function VideosTab({
     finally { setSaving(false); }
   };
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this video?")) return;
+    if (!confirm(L("Delete this video?", "حذف هذا الفيديو؟")[lang])) return;
     try {
       const { error } = await supabase.from("videos").delete().eq("id", id);
       if (error) throw error;
@@ -974,7 +975,7 @@ function QuizzesTab({
     finally { setSaving(false); }
   };
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this quiz?")) return;
+    if (!confirm(L("Delete this quiz?", "حذف هذا الاختبار؟")[lang])) return;
     try {
       const { error } = await supabase.from("unit_quizzes" as never).delete().eq("id", id);
       if (error) throw error;

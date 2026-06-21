@@ -1,11 +1,11 @@
 import { Lock } from "lucide-react";
-import {useI18n, L } from "@/lib/i18n";
+import {useI18n, L, uiBi } from "@/lib/i18n";
 import { computeStudentBadges } from "@/lib/student-badges";
 import type { StudentProgressData } from "@/lib/student-progress";
 
 
 export function StudentBadgesSection({ progress }: { progress: StudentProgressData }) {
-  const { lang, bi } = useI18n();
+  const { lang } = useI18n();
   const { badges, unlockedCount, totalCount } = computeStudentBadges(progress);
 
   return (
@@ -62,10 +62,10 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
                 badge.unlocked ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              {bi(badge.title)}
+              {uiBi(badge.title, lang)}
             </h3>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-              {bi(badge.description)}
+              {uiBi(badge.description, lang)}
             </p>
             {badge.unlocked && (
               <div className="mt-3 text-xs font-semibold uppercase tracking-wider text-primary">

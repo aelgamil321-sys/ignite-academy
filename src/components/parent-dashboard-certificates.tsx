@@ -6,13 +6,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useI18n, L } from "@/lib/i18n";
+import { useI18n, uiBi } from "@/lib/i18n";
+import { localeForFormatting, type Lang } from "@/lib/i18n-config";
 import type { StudentCertificateRow } from "@/lib/student-progress";
 
-function formatDate(iso: string, lang: "en" | "ar"): string {
+function formatDate(iso: string, lang: Lang): string {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB", {
+    return new Date(iso).toLocaleDateString(localeForFormatting(lang), {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -26,46 +27,45 @@ function CertificateViewDialog({
   certificate,
   open,
   onOpenChange,
-  lang,
   title,
 }: {
   certificate: StudentCertificateRow;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  lang: "en" | "ar";
   title: string;
 }) {
+  const { lang, tr } = useI18n();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
-            {L("Certificate Details", "تفاصيل الشهادة")[lang]}
+            {tr("parent_certificate_details")}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {L("Lesson", "الدرس")[lang]}
+              {tr("parent_lesson_label")}
             </div>
             <div className="mt-1 font-display text-lg text-foreground">{title}</div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-muted/30 px-3 py-2.5">
-              <div className="text-xs text-muted-foreground">{L("Date", "التاريخ")[lang]}</div>
+              <div className="text-xs text-muted-foreground">{tr("parent_date_label")}</div>
               <div className="mt-0.5 text-sm font-semibold">
                 {formatDate(certificate.issuedAt, lang)}
               </div>
             </div>
             <div className="rounded-xl border border-primary/25 bg-primary/8 px-3 py-2.5">
-              <div className="text-xs text-muted-foreground">{L("Score", "الدرجة")[lang]}</div>
+              <div className="text-xs text-muted-foreground">{tr("parent_score_label")}</div>
               <div className="mt-0.5 font-display text-xl text-primary">
                 {certificate.percentage}%
               </div>
             </div>
           </div>
           <div className="rounded-xl border border-dashed border-border bg-background px-3 py-2.5">
-            <div className="text-xs text-muted-foreground">{L("Certificate ID", "رقم الشهادة")[lang]}</div>
+            <div className="text-xs text-muted-foreground">{tr("parent_certificate_id")}</div>
             <div className="mt-0.5 font-mono text-sm text-foreground">{certificate.certificateId}</div>
           </div>
         </div>
@@ -79,7 +79,7 @@ export function ParentDashboardCertificates({
 }: {
   certificates: StudentCertificateRow[];
 }) {
-  const { lang, bi } = useI18n();
+  const { lang, tr } = useI18n();
   const [viewing, setViewing] = useState<StudentCertificateRow | null>(null);
   const latest = certificates.slice(0, 5);
 
@@ -90,21 +90,18 @@ export function ParentDashboardCertificates({
           <Award className="h-5 w-5" />
         </div>
         <h2 className="font-display text-xl text-foreground">
-          {L("Latest Certificates", "أحدث الشهادات")[lang]}
+          {tr("parent_latest_certificates")}
         </h2>
       </div>
 
       {latest.length === 0 ? (
         <p className="text-sm italic text-muted-foreground">
-          {L(
-            "No certificates yet. Completed lesson quizzes will appear here.",
-            "لا توجد شهادات بعد. ستظهر هنا عند إتمام اختبارات الدروس.",
-          )[lang]}
+          {tr("parent_no_certificates")}
         </p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {latest.map((certificate) => {
-            const title = bi(certificate.lessonTitle) || certificate.lessonTitle.en;
+            const title = uiBi(certificate.lessonTitle, lang) || certificate.lessonTitle.en;
             return (
               <article
                 key={certificate.certificateId}
@@ -127,7 +124,7 @@ export function ParentDashboardCertificates({
                   className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/8 px-3 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                 >
                   <Eye className="h-3.5 w-3.5" />
-                  {L("View certificate", "عرض الشهادة")[lang]}
+                  {tr("parent_view_certificate")}
                 </button>
               </article>
             );
@@ -140,8 +137,7 @@ export function ParentDashboardCertificates({
           certificate={viewing}
           open={!!viewing}
           onOpenChange={(open) => !open && setViewing(null)}
-          lang={lang}
-          title={bi(viewing.lessonTitle) || viewing.lessonTitle.en}
+          title={uiBi(viewing.lessonTitle, lang) || viewing.lessonTitle.en}
         />
       )}
     </section>

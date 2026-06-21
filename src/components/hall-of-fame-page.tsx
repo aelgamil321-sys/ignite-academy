@@ -7,7 +7,7 @@ import { useI18n, type TKey } from "@/lib/i18n";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { islamicGroupLabel } from "@/lib/student-academics";
 import { fetchHallOfFame, type HallOfFameData, type HallOfFameStudent } from "@/lib/hall-of-fame";
-import type { Lang } from "@/lib/i18n-config";
+import { isRtlLang, type Lang } from "@/lib/i18n-config";
 import { cn } from "@/lib/utils";
 
 function MetricPill({ label, value }: { label: string; value: string }) {
@@ -104,7 +104,7 @@ export function HallOfFamePage() {
 
   function gradeChampionLabel(gradeSlug: string): string {
     const grade = gradeDisplayName(gradeSlug, lang);
-    if (lang === "ar") return `${tr("grade_champion_suffix")} ${grade}`;
+    if (isRtlLang(lang)) return `${tr("grade_champion_suffix")} ${grade}`;
     return `${grade} ${tr("grade_champion_suffix")}`;
   }
 

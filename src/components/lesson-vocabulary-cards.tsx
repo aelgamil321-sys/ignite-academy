@@ -2,7 +2,6 @@ import { useState } from "react";
 import { BookOpen } from "lucide-react";
 import { useI18n, type BiFieldMeta } from "@/lib/i18n";
 import type { VocabularyItem } from "@/lib/lesson-vocab";
-import { hasVocabMeaning, pickVocabMeaningBi, pickVocabWordBi } from "@/lib/lesson-vocab";
 import { TranslatedContentShell } from "@/components/translation-loading-indicator";
 
 function VocabFlipCard({
@@ -16,10 +15,8 @@ function VocabFlipCard({
 }) {
   const { lang, bi, tr, dir } = useI18n();
   const [flipped, setFlipped] = useState(false);
-  const contentLang = lang === "ar" ? "ar" : "en";
-  const wordBi = pickVocabWordBi(item, contentLang);
-  const meaningBi = pickVocabMeaningBi(item, contentLang);
-  const hasMeaning = hasVocabMeaning(item, contentLang);
+  const contentLang = lang === "ar" || lang === "ur" ? "ar" : "en";
+  const hasMeaning = Boolean(item.meaning.en?.trim() || item.meaning.ar?.trim());
   const wordMeta = { ...lessonMeta, fieldName: `vocab_term_${index}`, contentType: "vocab_term" as const };
   const meaningMeta = { ...lessonMeta, fieldName: `vocab_def_${index}`, contentType: "vocab_def" as const };
 
@@ -29,7 +26,7 @@ function VocabFlipCard({
       onClick={() => setFlipped((f) => !f)}
       className="group relative h-44 w-full text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
       aria-pressed={flipped}
-      aria-label={`${bi(wordBi, wordMeta)} — ${tr("vocab_flip_hint")}`}
+      aria-label={`${bi(item.word, wordMeta)} — ${tr("vocab_flip_hint")}`}
     >
       <div
         className={`relative h-full w-full transition-transform duration-500 [transform-style:preserve-3d] ${
@@ -50,7 +47,7 @@ function VocabFlipCard({
               }`}
               dir={contentLang === "ar" ? "rtl" : "ltr"}
             >
-              {bi(wordBi, wordMeta)}
+              {bi(item.word, wordMeta)}
             </p>
           </TranslatedContentShell>
           <div className="mt-3 h-1 w-10 rounded-full bg-primary/40" />
@@ -68,7 +65,7 @@ function VocabFlipCard({
                 }`}
                 dir={contentLang === "ar" ? "rtl" : "ltr"}
               >
-                {bi(meaningBi, meaningMeta)}
+                {bi(item.meaning, meaningMeta)}
               </p>
             </TranslatedContentShell>
           ) : (

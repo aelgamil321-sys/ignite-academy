@@ -1,4 +1,5 @@
 import type { CustomLesson } from "@/lib/cms";
+import { L, type Lang } from "@/lib/i18n-config";
 
 export type BilingualFileKey =
   | "pptArUrl"
@@ -177,20 +178,19 @@ export type StudentDownloadItem = {
   key: BilingualFileKey;
 };
 
-/** Fixed student-facing download buttons for the six bilingual lesson file columns. */
-export const STUDENT_LESSON_FILE_DOWNLOADS: Array<{ key: BilingualFileKey; label: string }> = [
-  { key: "pptArUrl", label: "تحميل بوربوينت عربي" },
-  { key: "pptEnUrl", label: "Download English PowerPoint" },
-  { key: "worksheetArUrl", label: "تحميل ورقة عمل عربية" },
-  { key: "worksheetEnUrl", label: "Download English Worksheet" },
-  { key: "pdfArUrl", label: "تحميل PDF عربي" },
-  { key: "pdfEnUrl", label: "Download English PDF" },
-];
+const STUDENT_DOWNLOAD_L: Record<BilingualFileKey, Record<Lang, string>> = {
+  pptArUrl: L("Download Arabic PowerPoint", "تحميل بوربوينت عربي"),
+  pptEnUrl: L("Download English PowerPoint", "تحميل بوربوينت إنجليزي"),
+  worksheetArUrl: L("Download Arabic Worksheet", "تحميل ورقة عمل عربية"),
+  worksheetEnUrl: L("Download English Worksheet", "تحميل ورقة عمل إنجليزية"),
+  pdfArUrl: L("Download Arabic PDF", "تحميل PDF عربي"),
+  pdfEnUrl: L("Download English PDF", "تحميل PDF إنجليزي"),
+};
 
-export function studentDownloadItems(custom: CustomLesson): StudentDownloadItem[] {
-  return STUDENT_LESSON_FILE_DOWNLOADS.flatMap((entry) => {
-    const url = custom[entry.key]?.trim();
+export function studentDownloadItems(custom: CustomLesson, lang: Lang): StudentDownloadItem[] {
+  return (Object.keys(STUDENT_DOWNLOAD_L) as BilingualFileKey[]).flatMap((key) => {
+    const url = custom[key]?.trim();
     if (!url) return [];
-    return [{ key: entry.key, url, label: entry.label }];
+    return [{ key, url, label: STUDENT_DOWNLOAD_L[key][lang] }];
   });
 }

@@ -3,6 +3,7 @@ import { ArrowRight, Calendar, Megaphone } from "lucide-react";
 import type { Announcement } from "@/lib/extras";
 import type { AnnouncementTopic } from "@/lib/announcement-topics";
 import { useI18n } from "@/lib/i18n";
+import { localeForFormatting } from "@/lib/i18n-config";
 
 const TOPIC_BADGE_CLASS: Record<AnnouncementTopic, string> = {
   school_news: "bg-primary/20 text-primary ring-primary/30",
@@ -45,7 +46,7 @@ export function AnnouncementCard({
 }) {
   const { bi, tr, dir, lang } = useI18n();
   const dateLabel = new Date(announcement.createdAt).toLocaleDateString(
-    lang === "ar" ? "ar-EG" : "en-US",
+    localeForFormatting(lang),
     { year: "numeric", month: "short", day: "numeric" },
   );
 

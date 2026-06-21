@@ -27,6 +27,7 @@ export const Route = createFileRoute("/student/")({
 
 function StudentGate() {
   const navigate = useNavigate();
+  const { tr } = useI18n();
   const [state, setState] = useState<"checking" | "ok">("checking");
   const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -70,8 +71,13 @@ function StudentGate() {
 
   if (state !== "ok" || !userId) {
     return (
-      <PageShell eyebrow="Student" title="Student Dashboard" lead="Checking access…" crumbs={[{ label: "Student" }]}>
-        <div className="text-sm text-muted-foreground">Verifying your access…</div>
+      <PageShell
+        eyebrow={tr("nav_student")}
+        title={tr("student_dashboard_title")}
+        lead={tr("checking_access")}
+        crumbs={[{ label: tr("nav_student") }]}
+      >
+        <div className="text-sm text-muted-foreground">{tr("verifying_access")}</div>
       </PageShell>
     );
   }
@@ -101,7 +107,7 @@ function StudentDashboardPage({
   parentLinkCode: string | null;
 }) {
   const navigate = useNavigate();
-  const { tr, lang, bi } = useI18n();
+  const { tr, trf, lang, bi } = useI18n();
   const [progress, setProgress] = useState<StudentProgressData | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -127,7 +133,7 @@ function StudentDashboardPage({
 
   async function signOut() {
     await supabase.auth.signOut();
-    toast.success(lang === "ar" ? "تم تسجيل الخروج" : "Signed out");
+    toast.success(tr("signed_out"));
     navigate({ to: "/auth", search: { mode: "login" } });
   }
 
@@ -140,7 +146,7 @@ function StudentDashboardPage({
     >
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6 rounded-2xl border border-border bg-card px-5 py-4">
         <div className="text-sm">
-          <span className="text-muted-foreground">{lang === "ar" ? "مرحبًا" : "Welcome"}, </span>
+          <span className="text-muted-foreground">{tr("welcome_greeting")}, </span>
           <span className="font-semibold text-primary">{email}</span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -149,31 +155,27 @@ function StudentDashboardPage({
             className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
           >
             <User className="h-3.5 w-3.5" />
-            {lang === "ar" ? "الملف الشخصي" : "Profile"}
+            {tr("profile_student")}
           </Link>
           <button
             type="button"
             onClick={() => { void signOut(); }}
             className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition-colors"
           >
-            <LogOut className="h-3.5 w-3.5" /> {lang === "ar" ? "تسجيل الخروج" : "Sign out"}
+            <LogOut className="h-3.5 w-3.5" /> {tr("sign_out")}
           </button>
         </div>
       </div>
 
       {!profileComplete && (
         <div className="mb-6 rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p>
-            {lang === "ar"
-              ? "يرجى إكمال ملفك الشخصي (الاسم بالإنجليزية والعربية) قبل إنشاء الشهادات."
-              : "Please complete your profile (English and Arabic names) before generating certificates."}
-          </p>
+          <p>{tr("student_complete_profile_notice")}</p>
           <Link
             to="/student/profile"
             className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
           >
             <User className="h-3.5 w-3.5" />
-            {lang === "ar" ? "الملف الشخصي" : "Profile"}
+            {tr("profile_student")}
           </Link>
         </div>
       )}
@@ -186,11 +188,11 @@ function StudentDashboardPage({
 
       {loading ? (
         <div className="text-sm text-muted-foreground py-12 text-center">
-          {lang === "ar" ? "جارٍ تحميل التقدّم…" : "Loading your progress…"}
+          {tr("student_loading_progress")}
         </div>
       ) : loadError ? (
         <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-sm text-destructive">
-          {lang === "ar" ? `تعذر تحميل التقدّم: ${loadError}` : `Could not load progress: ${loadError}`}
+          {trf("student_load_progress_error", { error: loadError })}
         </div>
       ) : progress ? (
         <StudentProgressDashboard

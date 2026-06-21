@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/empty-state";
 import { Megaphone } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAllAnnouncements } from "@/lib/cms";
+import { useAnnouncementsContentPrefetch } from "@/hooks/use-cms-content-prefetch";
 import { AnnouncementCard } from "@/components/announcement-card";
 
 export const Route = createFileRoute("/announcements/")({
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/announcements/")({
 function AnnouncementsIndex() {
   const { tr } = useI18n();
   const announcements = useAllAnnouncements();
+  useAnnouncementsContentPrefetch(announcements);
 
   return (
     <PageShell

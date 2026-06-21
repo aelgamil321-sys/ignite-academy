@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/page-shell";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
 import { useAllVideos, type UnifiedVideo } from "@/lib/cms";
 import { grades } from "@/lib/curriculum";
 import { gradeMatches } from "@/lib/grade-utils";
@@ -75,9 +75,10 @@ function VideosIndex() {
     return map;
   }, [filtered]);
 
-  const emptyMsg = lang === "ar"
-    ? "لا توجد فيديوهات متاحة بعد. يرجى التحقق لاحقًا."
-    : "No videos available yet. Please check back later.";
+  const emptyMsg = L(
+    "No videos available yet. Please check back later.",
+    "لا توجد فيديوهات متاحة بعد. يرجى التحقق لاحقًا.",
+  )[lang];
 
   return (
     <PageShell eyebrow={tr("nav_videos")} title={tr("vid_title")} lead={tr("vid_lead")} crumbs={[{ label: tr("nav_videos") }]}>
@@ -111,7 +112,7 @@ function VideosIndex() {
                   </Link>
                 </div>
                 <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                  {list.length} {lang === "ar" ? "فيديو" : "videos"}
+                  {list.length} {L("videos", "فيديو")[lang]}
                 </span>
               </header>
 

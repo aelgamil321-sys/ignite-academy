@@ -1,8 +1,9 @@
 import type { Lang } from "@/lib/i18n-config";
 
-export type TranslatableLang = Exclude<Lang, "en" | "ar">;
+export type TranslatableLang = Exclude<Lang, "en">;
 
 const TARGET_CODES: Record<TranslatableLang, string> = {
+  ar: "ar",
   fr: "fr",
   de: "de",
   ur: "ur",
@@ -10,6 +11,7 @@ const TARGET_CODES: Record<TranslatableLang, string> = {
 };
 
 const MYMEMORY_TARGET: Record<TranslatableLang, string> = {
+  ar: "ar",
   fr: "fr",
   de: "de",
   ur: "ur",

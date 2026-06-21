@@ -7,14 +7,15 @@ import { ParentAssignmentsSection } from "@/components/parent-assignments-sectio
 import { ParentDashboardInsights } from "@/components/parent-dashboard-insights";
 import { ParentDashboardCertificates } from "@/components/parent-dashboard-certificates";
 import { ParentDashboardBadges } from "@/components/parent-dashboard-badges";
-import { useI18n, L } from "@/lib/i18n";
+import { useI18n, L, uiBi } from "@/lib/i18n";
+import { localeForFormatting, type Lang } from "@/lib/i18n-config";
 import type { ParentDashboardData } from "@/lib/parent-dashboard";
 import type { ActivityTimelineItem } from "@/lib/student-progress";
 
-function formatDate(iso: string, lang: "en" | "ar"): string {
+function formatDate(iso: string, lang: Lang): string {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB", {
+    return new Date(iso).toLocaleDateString(localeForFormatting(lang), {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -31,7 +32,7 @@ function timelineKey(item: ActivityTimelineItem): string {
 }
 
 export function ParentDashboardView({ data }: { data: ParentDashboardData }) {
-  const { lang, bi } = useI18n();
+  const { lang, bi, tr } = useI18n();
   const { progress, performanceReport } = data;
 
   return (
@@ -73,22 +74,16 @@ export function ParentDashboardView({ data }: { data: ParentDashboardData }) {
           </div>
           <div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Recent Activity", "النشاط الأخير")[lang]}
+              {tr("parent_recent_activity")}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {L(
-                "Quiz completions, certificates, and badge milestones.",
-                "إتمام الاختبارات والشهادات وإنجازات الشارات.",
-              )[lang]}
+              {tr("parent_recent_activity_lead")}
             </p>
           </div>
         </div>
         {progress.activityTimeline.length === 0 ? (
           <p className="text-sm italic text-muted-foreground">
-            {L(
-              "Activity will appear here once quizzes are submitted.",
-              "سيظهر النشاط هنا بعد إرسال الاختبارات.",
-            )[lang]}
+            {tr("parent_activity_empty")}
           </p>
         ) : (
           <ul className="space-y-0">
@@ -120,14 +115,14 @@ export function ParentDashboardView({ data }: { data: ParentDashboardData }) {
                 <div className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-3 transition-shadow hover:shadow-sm">
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary">
                     {item.kind === "badge_unlocked"
-                      ? L("Badge unlocked", "شارة مفتوحة")[lang]
+                      ? tr("parent_badge_unlocked")
                       : item.kind === "certificate_earned"
-                        ? L("Certificate earned", "شهادة مكتسبة")[lang]
-                        : L("Quiz completed", "اختبار مكتمل")[lang]}
+                        ? tr("parent_certificate_earned")
+                        : tr("parent_quiz_completed")}
                   </div>
                   <div className="mt-1 font-display text-lg leading-snug text-foreground">
                     {item.kind === "badge_unlocked"
-                      ? bi(item.badgeTitle)
+                      ? uiBi(item.badgeTitle, lang)
                       : bi(item.lessonTitle) || item.lessonTitle.en}
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">

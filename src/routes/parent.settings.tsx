@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { GraduationCap, LogOut, UserRound } from "lucide-react";
+import { GraduationCap, Loader2, LogOut, Save, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/page-shell";
 import { ParentLinkChildForm } from "@/components/parent-link-child-form";
+import { PreferredLanguageField } from "@/components/preferred-language-field";
 import { useI18n } from "@/lib/i18n";
 import { getAccountRole, isParentAccount, postAuthPathForRole } from "@/lib/account-role";
 import { fetchParentLinkedChildren, type ParentLinkedChild } from "@/lib/parent-children";
+import { normalizePreferredLang, savePreferredLanguage as persistPreferredLanguage } from "@/lib/preferred-language";
+import type { Lang } from "@/lib/i18n-config";
 import { supabase } from "@/integrations/supabase/client";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { grades } from "@/lib/curriculum";
@@ -23,10 +26,12 @@ export const Route = createFileRoute("/parent/settings")({
 
 function ParentSettingsPage() {
   const navigate = useNavigate();
-  const { tr, lang, bi, biMaybe } = useI18n();
+  const { tr, lang, bi, biMaybe, setLang } = useI18n();
   const [loading, setLoading] = useState(true);
+  const [savingLang, setSavingLang] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [preferredLanguage, setPreferredLanguage] = useState<Lang>("ar");
   const [children, setChildren] = useState<ParentLinkedChild[]>([]);
   const [linkError, setLinkError] = useState<"none" | "multiple" | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -55,7 +60,7 @@ function ParentSettingsPage() {
       const [{ data: profile }, childrenResult] = await Promise.all([
         supabase
           .from("parent_profiles")
-          .select("full_name, email")
+          .select("full_name, email, preferred_language")
           .eq("user_id", auth.user.id)
           .maybeSingle(),
         fetchParentLinkedChildren(auth.user.id),
@@ -63,6 +68,7 @@ function ParentSettingsPage() {
       if (!active) return;
       setFullName(profile?.full_name ?? "");
       setEmail(profile?.email ?? auth.user.email ?? "");
+      setPreferredLanguage(normalizePreferredLang(profile?.preferred_language) ?? lang);
       setUserId(auth.user.id);
       setChildren(childrenResult.children);
       setLinkError(childrenResult.linkError);
@@ -71,7 +77,21 @@ function ParentSettingsPage() {
     return () => {
       active = false;
     };
-  }, [navigate]);
+  }, [navigate, lang]);
+
+  async function handleSavePreferredLanguage() {
+    if (!userId) return;
+    setSavingLang(true);
+    try {
+      await persistPreferredLanguage(userId, preferredLanguage, "parent");
+      setLang(preferredLanguage);
+      toast.success(tr("profile_preferred_language_saved"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    } finally {
+      setSavingLang(false);
+    }
+  }
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -110,6 +130,28 @@ function ParentSettingsPage() {
                   <div className="text-xs uppercase tracking-wider text-muted-foreground">{tr("your_email")}</div>
                   <div className="text-sm mt-1">{email || "—"}</div>
                 </div>
+                <PreferredLanguageField
+                  value={preferredLanguage}
+                  onChange={setPreferredLanguage}
+                />
+                <button
+                  type="button"
+                  disabled={savingLang}
+                  onClick={() => void handleSavePreferredLanguage()}
+                  className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-60"
+                >
+                  {savingLang ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {tr("student_saving")}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      {tr("save_changes")}
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>

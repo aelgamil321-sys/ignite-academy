@@ -105,7 +105,7 @@ function AnalyticsTable({
             {rows.map((row) => (
               <tr key={row.key} className="border-b border-border/70 last:border-0">
                 <td className="py-3 pe-4 font-medium text-foreground">
-                  {lang === "ar" ? row.labelAr : row.labelEn}
+                  {L(row.labelEn, row.labelAr)[lang]}
                 </td>
                 <td className="py-3 pe-4 text-end text-foreground">{row.studentCount}</td>
                 <td className="py-3 pe-4 text-end font-semibold text-primary">
@@ -167,7 +167,7 @@ function LeadingInsightsBanner({
           >
             <div className="text-xs uppercase tracking-wide text-muted-foreground">{item.label}</div>
             <div className="mt-1 font-display text-lg text-foreground leading-tight">
-              {item.value ? (lang === "ar" ? item.value.labelAr : item.value.labelEn) : "—"}
+              {item.value ? L(item.value.labelEn, item.value.labelAr)[lang] : "—"}
             </div>
             {item.value ? (
               <div className="mt-1 text-sm font-semibold text-primary">
@@ -203,7 +203,7 @@ function IslamicGroupComparison({
             className="rounded-xl border border-border bg-muted/20 p-5"
           >
             <div className="text-xs uppercase tracking-wide text-primary mb-1">
-              {lang === "ar" ? card.labelAr : card.labelEn}
+              {L(card.labelEn, card.labelAr)[lang]}
             </div>
             <div className="grid grid-cols-3 gap-3 mt-3 text-sm">
               <div>
@@ -301,7 +301,7 @@ function TopStudentsTable({
                     </div>
                   </td>
                   <td className="py-3 pe-4 text-foreground">
-                    {lang === "ar" ? row.gradeLabelAr : row.gradeLabelEn}
+                    {L(row.gradeLabelEn, row.gradeLabelAr)[lang]}
                   </td>
                   <td className="py-3 pe-4 text-foreground">
                     {sectionLabel(row.section, lang)}
@@ -371,7 +371,7 @@ function TopSectionsTable({
                     </span>
                   </td>
                   <td className="py-3 pe-4 font-medium text-foreground">
-                    {lang === "ar" ? row.labelAr : row.labelEn}
+                    {L(row.labelEn, row.labelAr)[lang]}
                   </td>
                   <td className="py-3 pe-4 text-end text-foreground">{row.studentCount}</td>
                   <td className="py-3 pe-4 text-end font-semibold text-primary">
@@ -437,14 +437,14 @@ function AtRiskStudentsTable({
                 <tr key={row.userId} className="border-b border-border/70 last:border-0">
                   <td className="py-3 pe-4">
                     <div className="font-medium text-foreground">
-                      {lang === "ar" ? row.nameAr : row.nameEn}
+                      {L(row.nameEn, row.nameAr)[lang]}
                     </div>
                     {lang === "ar" && row.nameEn !== row.nameAr ? (
                       <div className="text-xs text-muted-foreground">{row.nameEn}</div>
                     ) : null}
                   </td>
                   <td className="py-3 pe-4 text-foreground">
-                    {lang === "ar" ? row.gradeLabelAr : row.gradeLabelEn}
+                    {L(row.gradeLabelEn, row.gradeLabelAr)[lang]}
                   </td>
                   <td className="py-3 pe-4 text-foreground">
                     {sectionLabel(row.section, lang)}

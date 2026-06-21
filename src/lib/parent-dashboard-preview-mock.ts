@@ -1,4 +1,7 @@
 import type { ParentDashboardData } from "@/lib/parent-dashboard";
+import { L } from "@/lib/i18n-config";
+
+const PREVIEW_FIQH_LESSON = L("Introduction to Fiqh", "مقدمة في الفقه");
 
 /** Dev-only mock for /parent/dashboard?uiPreview=1 visual verification. */
 export const PARENT_DASHBOARD_UI_PREVIEW: ParentDashboardData = {
@@ -21,7 +24,7 @@ export const PARENT_DASHBOARD_UI_PREVIEW: ParentDashboardData = {
       {
         certificateId: "CERT-001",
         lessonId: "lesson-1",
-        lessonTitle: { en: "Introduction to Fiqh", ar: "مقدمة في الفقه" },
+        lessonTitle: { en: PREVIEW_FIQH_LESSON.en, ar: PREVIEW_FIQH_LESSON.ar },
         score: 92,
         percentage: 92,
         issuedAt: new Date().toISOString(),

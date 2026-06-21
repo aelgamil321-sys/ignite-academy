@@ -51,9 +51,9 @@ function statusBadgeClass(status: ParentDashboardData["performanceReport"]["stat
 }
 
 export function ParentDashboardHero({ data }: { data: ParentDashboardData }) {
-  const { lang } = useI18n();
+  const { tr, lang } = useI18n();
   const { performanceReport: report, progress } = data;
-  const status = heroStatusLabel(report.status, lang);
+  const status = heroStatusLabel(report.status, tr);
 
   return (
     <section className="parent-dash-enter relative overflow-hidden rounded-2xl border border-primary/20 bg-brand-dark text-white shadow-[var(--shadow-gold)]">
@@ -81,15 +81,12 @@ export function ParentDashboardHero({ data }: { data: ParentDashboardData }) {
                 👨‍👩‍👧
               </span>
               <span className="text-xs font-semibold uppercase tracking-[0.22em]">
-                {L("Parent Dashboard", "لوحة ولي الأمر")[lang]}
+                {tr("parent_dashboard_title")}
               </span>
             </div>
 
             <p className="mt-2 text-sm leading-relaxed text-white/75 sm:text-base">
-              {L(
-                "Instant view of your child's academic performance and learning progress.",
-                "متابعة فورية لأداء ابنكم الأكاديمي والتقدم الدراسي.",
-              )[lang]}
+              {tr("parent_hero_instant_lead")}
             </p>
 
             <div className="mt-3">
@@ -101,7 +98,7 @@ export function ParentDashboardHero({ data }: { data: ParentDashboardData }) {
 
             <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
               <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold">
-                {lang === "ar" ? report.gradeLabelAr : report.gradeLabelEn}
+                {L(report.gradeLabelEn, report.gradeLabelAr)[lang]}
               </span>
               <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold">
                 {sectionLabel(report.section, lang)}
@@ -119,10 +116,7 @@ export function ParentDashboardHero({ data }: { data: ParentDashboardData }) {
         </div>
 
         <div className="flex justify-center lg:justify-end">
-          <ProgressRing
-            value={progress.overallProgressPct}
-            label={L("Progress", "التقدّم")[lang]}
-          />
+          <ProgressRing value={progress.overallProgressPct} label={tr("parent_progress_label")} />
         </div>
       </div>
     </section>

@@ -10,6 +10,7 @@ import { GraduationCap, LogIn, UserPlus, AlertCircle, Users, CheckCircle } from 
 import { grades } from "@/lib/curriculum";
 import { StudentAcademicFields } from "@/components/student-academic-fields";
 import { ProfilePhotoField } from "@/components/profile-photo-field";
+import { PreferredLanguageField } from "@/components/preferred-language-field";
 import { uploadProfilePhoto } from "@/lib/profile-photo";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 import {
@@ -21,6 +22,8 @@ import {
   parseEmailConfirmedParam,
   waitForSupabaseHashSession,
 } from "@/lib/auth-redirect";
+import { applyLanguageForUser, resolveGuestLanguage } from "@/lib/preferred-language";
+import { isLang, type Lang } from "@/lib/i18n-config";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -54,6 +57,7 @@ function AuthPage() {
   const [grade, setGrade] = useState(grades.find((g) => g.slug === "8")?.slug ?? grades[0]?.slug ?? "");
   const [section, setSection] = useState<StudentSection | "">("");
   const [islamicGroup, setIslamicGroup] = useState<IslamicGroup | "">("");
+  const [preferredLanguage, setPreferredLanguage] = useState<Lang>(() => resolveGuestLanguage());
   const [busy, setBusy] = useState(false);
   const [signupAlert, setSignupAlert] = useState<string | null>(null);
   const [signupSuccessAlert, setSignupSuccessAlert] = useState<string | null>(null);
@@ -112,6 +116,8 @@ function AuthPage() {
       if (cancelled) return;
       if (initialAccountType === "parent" && role === "student") return;
       if (initialAccountType === "student" && role === "parent") return;
+      await applyLanguageForUser(user.id);
+      if (cancelled) return;
       window.location.replace(postAuthPathForRole(role));
     })();
 
@@ -213,8 +219,13 @@ function AuthPage() {
       const submitGrade = String(fd.get("grade") ?? grade).trim();
       const submitSection = String(fd.get("section") ?? section).trim();
       const submitIslamicGroup = String(fd.get("islamic_group") ?? islamicGroup).trim();
+      const submitPreferredLanguage = String(fd.get("preferred_language") ?? preferredLanguage).trim();
 
       if (mode === "signup") {
+        if (!isLang(submitPreferredLanguage)) {
+          showSignupError(tr("auth_preferred_language_hint"), { step: "validation" });
+          return;
+        }
         if (accountType === "student") {
           const validationError = validateStudentSignupFields({
             arabicName: submitArabicName,
@@ -244,6 +255,7 @@ function AuthPage() {
                 grade: submitGrade,
                 section: submitSection,
                 islamic_group: submitIslamicGroup,
+                preferred_language: submitPreferredLanguage,
               },
             },
           });
@@ -300,6 +312,7 @@ function AuthPage() {
               full_name: submitParentFullName,
               role_intent: "parent",
               parent_link_code: submitParentLinkCode,
+              preferred_language: submitPreferredLanguage,
             },
           },
         });
@@ -316,6 +329,7 @@ function AuthPage() {
               email: submitEmail,
               student_name: "",
               student_grade: "",
+              preferred_language: submitPreferredLanguage,
             },
             { onConflict: "user_id" },
           );
@@ -359,6 +373,7 @@ function AuthPage() {
       }
 
       toast.success(tr("auth_success_login"));
+      await applyLanguageForUser(loginData.user.id);
       const redirectPath = await getPostAuthPath(loginData.user.id);
       window.location.assign(redirectPath);
     } catch (err) {
@@ -546,7 +561,6 @@ function AuthPage() {
                   onIslamicGroupChange={setIslamicGroup}
                 />
                 <ProfilePhotoField
-                  lang={lang}
                   file={profilePhotoFile}
                   onChange={setProfilePhotoFile}
                 />
@@ -581,6 +595,13 @@ function AuthPage() {
                   <p className="mt-1 text-xs text-muted-foreground">{tr("auth_parent_link_code_hint")}</p>
                 </div>
               </>
+            )}
+            {mode === "signup" && (
+              <PreferredLanguageField
+                value={preferredLanguage}
+                onChange={setPreferredLanguage}
+                required
+              />
             )}
             <div>
               <label className="text-xs font-medium text-muted-foreground">{tr("auth_email")}</label>

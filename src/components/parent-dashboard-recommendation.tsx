@@ -1,6 +1,9 @@
 import { Lightbulb, Sparkles } from "lucide-react";
-import { useI18n, L } from "@/lib/i18n";
-import { resolveParentRecommendation } from "@/lib/parent-dashboard-insights";
+import { useI18n } from "@/lib/i18n";
+import {
+  recommendationTierLabel,
+  resolveParentRecommendation,
+} from "@/lib/parent-dashboard-insights";
 import type { ParentDashboardData } from "@/lib/parent-dashboard";
 
 const TIER_STYLES = {
@@ -9,39 +12,31 @@ const TIER_STYLES = {
     bg: "from-primary/12 via-card to-card",
     icon: "bg-primary/20 text-primary",
     badge: "bg-primary/15 text-primary border-primary/30",
-    badgeAr: "أداء ممتاز",
-    badgeEn: "Excellent",
   },
   good: {
     border: "border-primary/25",
     bg: "from-primary/8 via-card to-card",
     icon: "bg-primary/15 text-primary",
     badge: "bg-primary/10 text-primary border-primary/25",
-    badgeAr: "أداء جيد",
-    badgeEn: "Good",
   },
   needs_support: {
     border: "border-primary/20",
     bg: "from-primary/6 via-card to-card",
     icon: "bg-primary/12 text-primary",
     badge: "bg-amber-500/10 text-amber-800 border-amber-500/25",
-    badgeAr: "يحتاج دعمًا",
-    badgeEn: "Needs support",
   },
   no_data: {
     border: "border-border",
     bg: "from-muted/40 via-card to-card",
     icon: "bg-muted text-muted-foreground",
     badge: "bg-muted text-muted-foreground border-border",
-    badgeAr: "بانتظار البيانات",
-    badgeEn: "Awaiting data",
   },
 } as const;
 
 export function ParentDashboardRecommendation({ data }: { data: ParentDashboardData }) {
-  const { lang, dir } = useI18n();
+  const { tr, dir, lang } = useI18n();
   const average = data.performanceReport.averageQuizScorePct ?? data.progress.averageQuizScorePct;
-  const { tier, message } = resolveParentRecommendation(average, lang);
+  const { tier, message } = resolveParentRecommendation(average, tr);
   const styles = TIER_STYLES[tier];
 
   return (
@@ -58,19 +53,19 @@ export function ParentDashboardRecommendation({ data }: { data: ParentDashboardD
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <h2 className="font-display text-lg text-foreground sm:text-xl">
-              {L("Smart Parent Recommendation", "توصية ذكية لولي الأمر")[lang]}
+              {tr("parent_smart_recommendation")}
             </h2>
             <span
               className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${styles.badge}`}
             >
               <Sparkles className="h-3 w-3" aria-hidden />
-              {lang === "ar" ? styles.badgeAr : styles.badgeEn}
+              {recommendationTierLabel(tier, tr)}
             </span>
           </div>
 
           <p
             className="mt-3 text-base leading-relaxed text-foreground sm:text-lg"
-            dir={lang === "ar" ? "rtl" : dir}
+            dir={lang === "ar" || lang === "ur" ? "rtl" : dir}
           >
             {message}
           </p>
@@ -78,9 +73,9 @@ export function ParentDashboardRecommendation({ data }: { data: ParentDashboardD
           {average !== null && (
             <p
               className="mt-2 text-xs text-muted-foreground"
-              dir={lang === "ar" ? "rtl" : dir}
+              dir={lang === "ar" || lang === "ur" ? "rtl" : dir}
             >
-              {L("Based on average quiz score", "بناءً على متوسط درجات الاختبارات")[lang]}:{" "}
+              {tr("parent_based_on_avg")}:{" "}
               <span className="font-semibold text-primary">{average}%</span>
             </p>
           )}

@@ -79,7 +79,7 @@ function ParentDashboardGate() {
       <PageShell
         eyebrow={tr("nav_parent")}
         title={tr("parent_dashboard_title")}
-        lead="UI preview (dev only) — mock student data"
+        lead={tr("parent_ui_preview_lead")}
         crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: tr("parent_dashboard_title") }]}
       >
         <ParentDashboardView data={PARENT_DASHBOARD_UI_PREVIEW} />
@@ -103,12 +103,12 @@ function ParentDashboardGate() {
   if (state !== "ok" || !userId) {
     return (
       <PageShell
-        eyebrow="Parent"
-        title="Parent Dashboard"
-        lead="Checking access…"
-        crumbs={[{ label: "Parent", to: "/parent" }, { label: "Dashboard" }]}
+        eyebrow={tr("nav_parent")}
+        title={tr("parent_dashboard_title")}
+        lead={tr("checking_access")}
+        crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: tr("dashboard_label") }]}
       >
-        <div className="text-sm text-muted-foreground">Verifying your access…</div>
+        <div className="text-sm text-muted-foreground">{tr("verifying_access")}</div>
       </PageShell>
     );
   }
@@ -197,15 +197,7 @@ function ParentDashboardPage({ userId }: { userId: string }) {
     >
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6 rounded-2xl border border-border bg-card px-5 py-4">
         <div className="text-sm text-muted-foreground">
-          {children.length > 1
-            ? L(
-                "Signed in to view your children's learning progress.",
-                "أنت مسجّل الدخول لمتابعة تقدّم أبنائك التعليمي.",
-              )[lang]
-            : L(
-                "Signed in to view your child's learning progress.",
-                "أنت مسجّل الدخول لمتابعة تقدّم ابنك/ابنتك التعليمي.",
-              )[lang]}
+          {children.length > 1 ? tr("parent_signed_in_multi") : tr("parent_signed_in_single")}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Link

@@ -163,7 +163,7 @@ export function LessonVocabBuilder({
       console.info("[IgniteAI] Vocab suggest result", result);
 
       if (!result.serviceAvailable || result.openAiConfigured === false) {
-        const msg = aiDisabledMessage(lang === "ar" ? "ar" : "en");
+        const msg = aiDisabledMessage(lang);
         setAiStatus({ kind: "error", message: msg });
         toast.error(msg);
         setAiIndex(null);
@@ -185,7 +185,7 @@ export function LessonVocabBuilder({
       const msg =
         error instanceof IgniteAiError
           ? error.message
-          : aiDisabledMessage(lang === "ar" ? "ar" : "en");
+          : aiDisabledMessage(lang);
       console.error("[IgniteAI] Vocab suggest failed", error);
       setAiStatus({ kind: "error", message: msg });
       toast.error(msg);

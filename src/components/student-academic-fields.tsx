@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import {
   ISLAMIC_GROUPS,
   STUDENT_SECTIONS,
@@ -11,7 +12,6 @@ const selectClass =
   "mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm";
 
 type Props = {
-  lang: "en" | "ar";
   section: StudentSection | "";
   islamicGroup: IslamicGroup | "";
   onSectionChange: (value: StudentSection) => void;
@@ -22,7 +22,6 @@ type Props = {
 };
 
 export function StudentAcademicFields({
-  lang,
   section,
   islamicGroup,
   onSectionChange,
@@ -31,16 +30,12 @@ export function StudentAcademicFields({
   sectionName = "section",
   islamicGroupName = "islamic_group",
 }: Props) {
-  const T = {
-    section: lang === "ar" ? "الشعبة" : "Section",
-    islamicGroup: lang === "ar" ? "المجموعة الإسلامية" : "Islamic Group",
-    choose: lang === "ar" ? "اختر…" : "Select…",
-  };
+  const { tr, lang } = useI18n();
 
   return (
     <>
       <div>
-        <label className="text-xs font-medium text-muted-foreground">{T.section}</label>
+        <label className="text-xs font-medium text-muted-foreground">{tr("auth_section")}</label>
         <select
           name={sectionName}
           required={required}
@@ -48,7 +43,7 @@ export function StudentAcademicFields({
           onChange={(e) => onSectionChange(e.target.value as StudentSection)}
           className={selectClass}
         >
-          <option value="">{T.choose}</option>
+          <option value="">{tr("select_placeholder")}</option>
           {STUDENT_SECTIONS.map((value) => (
             <option key={value} value={value}>
               {sectionLabel(value, lang)}
@@ -57,7 +52,7 @@ export function StudentAcademicFields({
         </select>
       </div>
       <div>
-        <label className="text-xs font-medium text-muted-foreground">{T.islamicGroup}</label>
+        <label className="text-xs font-medium text-muted-foreground">{tr("auth_islamic_group")}</label>
         <select
           name={islamicGroupName}
           required={required}
@@ -65,7 +60,7 @@ export function StudentAcademicFields({
           onChange={(e) => onIslamicGroupChange(e.target.value as IslamicGroup)}
           className={selectClass}
         >
-          <option value="">{T.choose}</option>
+          <option value="">{tr("select_placeholder")}</option>
           {ISLAMIC_GROUPS.map((value) => (
             <option key={value} value={value}>
               {islamicGroupLabel(value, lang)}

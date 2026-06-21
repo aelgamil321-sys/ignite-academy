@@ -7,10 +7,11 @@ import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { EmptyState } from "@/components/empty-state";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
 import { getGrade } from "@/lib/curriculum";
 import { useLessonsForGrade, useAllVideos, useAllResources, useCMS } from "@/lib/cms";
 import { gradeMatches } from "@/lib/grade-utils";
+import { useGradeContentPrefetch } from "@/hooks/use-cms-content-prefetch";
 import { slugifyUnit } from "./grades.$grade.units.$unit";
 import { GradeLessonsSection } from "@/components/grade-lessons-section";
 
@@ -48,6 +49,7 @@ function GradePage() {
     () => cmsLessons.filter((l) => l.published && gradeMatches(l.grade, grade.slug)),
     [cmsLessons, grade.slug],
   );
+  useGradeContentPrefetch(gradeCustomLessons);
   const allVideos = useAllVideos();
   const allResources = useAllResources();
   const [q, setQ] = useState("");
@@ -98,19 +100,26 @@ function GradePage() {
 
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl">
               <Stat icon={BookOpen} value={lessons.length} label={tr("stat_lessons")} />
-              <Stat icon={Layers} value={units.length} label={lang === "ar" ? "الوحدات" : "Units"} />
-              <Stat icon={VideoIcon} value={gradeVideos.length} label={lang === "ar" ? "الفيديوهات" : "Videos"} />
-              <Stat icon={FileText} value={gradeResources.length} label={lang === "ar" ? "الموارد" : "Resources"} />
+              <Stat icon={Layers} value={units.length} label={L("Units", "الوحدات")[lang]} />
+              <Stat icon={VideoIcon} value={gradeVideos.length} label={L("Videos", "الفيديوهات")[lang]} />
+              <Stat icon={FileText} value={gradeResources.length} label={L("Resources", "الموارد")[lang]} />
             </div>
           </div>
         </section>
 
         <section className="container-page pt-14 pb-6">
           <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
-            <h2 className="font-display text-2xl text-foreground">{lang === "ar" ? "الوحدات" : "Units"}</h2>
+            <h2 className="font-display text-2xl text-foreground">{L("Units", "الوحدات")[lang]}</h2>
           </div>
           {units.length === 0 ? (
-            <EmptyState icon={Layers} title={tr("empty_units")} description={lang === "ar" ? "ستظهر الوحدات هنا فور إضافة دروس لهذا الصف." : "Units will appear here once lessons are added for this grade."} />
+            <EmptyState
+              icon={Layers}
+              title={tr("empty_units")}
+              description={L(
+                "Units will appear here once lessons are added for this grade.",
+                "ستظهر الوحدات هنا فور إضافة دروس لهذا الصف.",
+              )[lang]}
+            />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {units.map((u) => (
@@ -133,7 +142,7 @@ function GradePage() {
 
         <section className="container-page py-14">
           <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
-            <h2 className="font-display text-2xl text-foreground">{lang === "ar" ? "الدروس" : "Lessons"}</h2>
+            <h2 className="font-display text-2xl text-foreground">{L("Lessons", "الدروس")[lang]}</h2>
             <div className="relative w-full sm:w-72">
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
@@ -147,7 +156,14 @@ function GradePage() {
           </div>
 
           {lessons.length === 0 ? (
-            <EmptyState icon={BookOpen} title={tr("empty_lessons")} description={lang === "ar" ? "لم يضف الإداري بعد أي دروس لهذا الصف." : "An administrator has not added lessons for this grade yet."} />
+            <EmptyState
+              icon={BookOpen}
+              title={tr("empty_lessons")}
+              description={L(
+                "An administrator has not added lessons for this grade yet.",
+                "لم يضف الإداري بعد أي دروس لهذا الصف.",
+              )[lang]}
+            />
           ) : filteredLessons.length === 0 ? (
             <EmptyState icon={Search} title={tr("empty_results")} />
           ) : (

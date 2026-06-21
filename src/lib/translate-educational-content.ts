@@ -1,6 +1,5 @@
 import type { Bi } from "@/lib/curriculum";
 import type { Lang } from "@/lib/i18n-config";
-import { pickBiLocale } from "@/lib/i18n-config";
 import {
   buildEducationalCacheKey,
   getCachedEducationalTranslation,
@@ -46,9 +45,12 @@ export type EducationalField = {
   fieldName: string;
   contentType: EducationalContentType;
   text: string;
+  sourceLanguage?: "en" | "ar";
+  lessonId?: string;
 };
 
-const BROWSER_TARGET: Record<Exclude<Lang, "en" | "ar">, string> = {
+const BROWSER_TARGET: Record<Exclude<Lang, "en">, string> = {
+  ar: "ar",
   fr: "fr",
   de: "de",
   ur: "ur",
@@ -61,8 +63,47 @@ const MAX_TRANSLATION_TIMEOUT_MS = 25_000;
 const MAX_FIELD_ATTEMPTS = 2;
 const CONTENT_UPDATE_DEBOUNCE_MS = 100;
 
+/** True when UI may show machine-translated CMS content (all langs except English). */
 export function needsDynamicTranslation(lang: Lang): boolean {
-  return lang !== "en" && lang !== "ar";
+  return lang !== "en";
+}
+
+/** Stored bilingual text for a locale (no machine translation). */
+export function resolveStoredBiText(bi: Bi, lang: Lang): string | null {
+  if (lang === "en") return bi.en?.trim() || bi.ar?.trim() || null;
+  if (lang === "ar") return bi.ar?.trim() || null;
+  return null;
+}
+
+/** Source text to translate into `targetLang`, or null when native text already exists. */
+export function biSourceForTranslation(
+  bi: Bi,
+  targetLang: Lang,
+): { text: string; sourceLanguage: "en" | "ar" } | null {
+  if (targetLang === "en") {
+    const en = bi.en?.trim();
+    if (en) return { text: en, sourceLanguage: "en" };
+    const ar = bi.ar?.trim();
+    if (ar) return { text: ar, sourceLanguage: "ar" };
+    return null;
+  }
+  if (targetLang === "ar") {
+    if (bi.ar?.trim()) return null;
+    const en = bi.en?.trim();
+    if (en) return { text: en, sourceLanguage: "en" };
+    return null;
+  }
+  const en = bi.en?.trim();
+  if (en) return { text: en, sourceLanguage: "en" };
+  const ar = bi.ar?.trim();
+  if (ar) return { text: ar, sourceLanguage: "ar" };
+  return null;
+}
+
+export function needsMachineTranslation(lang: Lang, bi?: Bi): boolean {
+  if (lang === "en") return false;
+  if (!bi) return lang !== "en";
+  return biSourceForTranslation(bi, lang) !== null;
 }
 
 function sourceLangForText(text: string, preferred?: "en" | "ar"): "en" | "ar" {
@@ -87,17 +128,16 @@ function debugTranslate(
   });
 }
 
-/** Sync display before async translation completes. Selected → English → Arabic. */
+/** Sync display before async translation completes — never cross-fallback to English. */
 export function educationalDisplayFallback(
   text: string,
   lang: Lang,
   bi?: Bi,
 ): string {
-  if (lang === "ar") return bi ? pickBiLocale(bi, "ar") : text;
-  if (lang === "en") return bi ? pickBiLocale(bi, "en") : text;
-  const en = bi ? pickBiLocale(bi, "en") : text;
-  if (en?.trim()) return en.trim();
-  return bi ? pickBiLocale(bi, "ar") : text;
+  const stored = bi ? resolveStoredBiText(bi, lang) : null;
+  if (stored) return stored;
+  if (lang === "en") return text;
+  return "";
 }
 
 let translationServiceAvailable: boolean | null = null;
@@ -167,19 +207,18 @@ async function fetchGtxPart(
   return out && out !== part ? out : null;
 }
 
-/** Server-side Ignite AI translation with DB cache (keys never in browser). */
 async function igniteServerTranslate(
   source: string,
   lang: Lang,
   sourceLang: "en" | "ar",
   meta: Pick<TranslateEducationalInput, "contentType" | "lessonId" | "fieldName">,
 ): Promise<string | null> {
-  if (!needsDynamicTranslation(lang)) return null;
+  if (lang === "en" || lang === sourceLang) return null;
   try {
     const result = await withTimeout(
       callIgniteTranslate({
         texts: [source],
-        targetLang: lang as Exclude<Lang, "en" | "ar">,
+        targetLang: lang,
         sourceLang,
         contentType: meta.contentType,
         lessonId: meta.lessonId,
@@ -202,8 +241,8 @@ async function browserTranslateText(
   lang: Lang,
   sourceLang: "en" | "ar",
 ): Promise<string | null> {
-  if (typeof window === "undefined" || !needsDynamicTranslation(lang)) return null;
-  const target = BROWSER_TARGET[lang as Exclude<Lang, "en" | "ar">];
+  if (typeof window === "undefined" || lang === "en" || lang === sourceLang) return null;
+  const target = BROWSER_TARGET[lang as Exclude<Lang, "en">];
   const segments = splitIslamicProtectedText(source);
   const parts = translatableSegments(segments);
   if (parts.length === 0) return source;
@@ -431,7 +470,11 @@ export async function translateEducationalContent(
     return { text: input.text ?? "", fromCache: false, serviceUnavailable: false };
   }
 
-  if (!needsDynamicTranslation(input.targetLanguage)) {
+  if (input.targetLanguage === "en") {
+    return { text: trimmed, fromCache: true, serviceUnavailable: false };
+  }
+
+  if (input.targetLanguage === "ar" && input.sourceLanguage === "ar") {
     return { text: trimmed, fromCache: true, serviceUnavailable: false };
   }
 
@@ -462,7 +505,6 @@ export async function translateEducationalContent(
   return enqueueBrowserTranslation({ ...input, text: trimmed });
 }
 
-/** Translate a bilingual CMS field without duplicating database records. */
 export async function translateEducationalBi(
   bi: Bi,
   targetLanguage: Lang,
@@ -472,43 +514,47 @@ export async function translateEducationalBi(
     fieldName?: string;
   },
 ): Promise<TranslateEducationalResult> {
-  if (targetLanguage === "ar") {
-    return { text: pickBiLocale(bi, "ar"), fromCache: true, serviceUnavailable: false };
-  }
-  if (targetLanguage === "en") {
-    return { text: pickBiLocale(bi, "en"), fromCache: true, serviceUnavailable: false };
+  const stored = resolveStoredBiText(bi, targetLanguage);
+  if (stored) {
+    return { text: stored, fromCache: true, serviceUnavailable: false };
   }
 
-  const source = bi.en?.trim() || bi.ar?.trim() || "";
+  const source = biSourceForTranslation(bi, targetLanguage);
   if (!source) return { text: "", fromCache: true, serviceUnavailable: false };
 
-  const sourceLanguage: "en" | "ar" = bi.en?.trim() ? "en" : "ar";
   return translateEducationalContent({
-    text: source,
+    text: source.text,
     targetLanguage,
-    sourceLanguage,
+    sourceLanguage: source.sourceLanguage,
     contentType: meta.contentType,
     lessonId: meta.lessonId,
     fieldName: meta.fieldName,
   });
 }
 
-/** Schedule translation for lesson/quiz fields (useEffect only). Safe to call multiple times. */
 export function prefetchEducationalTranslations(
   lessonId: string,
   fields: EducationalField[],
   targetLanguage: Lang,
 ): void {
-  if (!needsDynamicTranslation(targetLanguage) || typeof window === "undefined") return;
+  if (targetLanguage === "en" || typeof window === "undefined") return;
 
   for (const field of fields) {
     const trimmed = field.text?.trim();
     if (!trimmed) continue;
 
+    const sourceLanguage =
+      field.sourceLanguage ??
+      (/[\u0600-\u06FF]/.test(trimmed) && !/[A-Za-z]{4,}/.test(trimmed) ? "ar" : "en");
+
+    if (targetLanguage === sourceLanguage) continue;
+    if (targetLanguage === "ar" && sourceLanguage === "ar") continue;
+
+    const scopeId = field.lessonId ?? lessonId;
     const cacheInput = {
       lang: targetLanguage,
       contentType: field.contentType,
-      lessonId,
+      lessonId: scopeId,
       fieldName: field.fieldName,
       source: trimmed,
     };
@@ -525,9 +571,9 @@ export function prefetchEducationalTranslations(
       text: trimmed,
       targetLanguage,
       contentType: field.contentType,
-      lessonId,
+      lessonId: scopeId,
       fieldName: field.fieldName,
-      sourceLanguage: /[\u0600-\u06FF]/.test(trimmed) && !/[A-Za-z]{4,}/.test(trimmed) ? "ar" : "en",
+      sourceLanguage,
     });
   }
 

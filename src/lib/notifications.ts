@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { localeForFormatting, type Lang } from "@/lib/i18n-config";
 import type { StudentBadgeId } from "@/lib/student-badges";
 
 export type NotificationRow = {
@@ -181,10 +182,10 @@ export async function refreshNotificationSources(
   }
 }
 
-export function formatNotificationTime(iso: string, lang: "en" | "ar"): string {
+export function formatNotificationTime(iso: string, lang: Lang): string {
   if (!iso) return "";
   try {
-    return new Date(iso).toLocaleString(lang === "ar" ? "ar-EG" : "en-GB", {
+    return new Date(iso).toLocaleString(localeForFormatting(lang), {
       month: "short",
       day: "numeric",
       hour: "2-digit",

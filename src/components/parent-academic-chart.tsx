@@ -1,7 +1,7 @@
 import { BarChart3 } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useI18n, L } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import type { ParentPerformanceReport } from "@/lib/parent-performance-report";
 
 const chartConfig = {
@@ -12,7 +12,7 @@ const chartConfig = {
 };
 
 export function ParentAcademicChart({ report }: { report: ParentPerformanceReport }) {
-  const { lang } = useI18n();
+  const { tr } = useI18n();
   const trend = report.quizTrend;
   const singlePoint = trend.length === 1;
   const currentScore = trend.length > 0 ? trend[trend.length - 1].scorePct : null;
@@ -26,17 +26,17 @@ export function ParentAcademicChart({ report }: { report: ParentPerformanceRepor
           </div>
           <div>
             <h2 className="font-display text-xl text-foreground">
-              {L("Academic Performance", "الأداء الأكاديمي")[lang]}
+              {tr("parent_academic_performance")}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {L("Quiz score trend over time.", "اتجاه درجات الاختبارات عبر الزمن.")[lang]}
+              {tr("parent_quiz_trend_lead")}
             </p>
           </div>
         </div>
         {currentScore !== null && (
           <div className="rounded-xl border border-primary/25 bg-primary/8 px-4 py-2 text-center">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {L("Current score", "الدرجة الحالية")[lang]}
+              {tr("parent_current_score")}
             </div>
             <div className="font-display text-2xl text-primary">{currentScore}%</div>
           </div>
@@ -45,19 +45,13 @@ export function ParentAcademicChart({ report }: { report: ParentPerformanceRepor
 
       {trend.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center text-sm italic text-muted-foreground">
-          {L(
-            "Quiz scores will appear here after the first submission.",
-            "ستظهر درجات الاختبارات هنا بعد أول إرسال.",
-          )[lang]}
+          {tr("parent_quiz_trend_empty")}
         </p>
       ) : (
         <div className="space-y-3">
           {singlePoint && (
             <p className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm text-foreground">
-              {L(
-                "Performance trends will appear after additional assessments are added.",
-                "سيظهر تطور الأداء بعد إضافة اختبارات إضافية",
-              )[lang]}
+              {tr("parent_performance_trend_single")}
             </p>
           )}
           <ChartContainer config={chartConfig} className="aspect-[2.4/1] min-h-[200px] w-full">
@@ -80,7 +74,7 @@ export function ParentAcademicChart({ report }: { report: ParentPerformanceRepor
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    formatter={(value) => [`${value}%`, lang === "ar" ? "الدرجة" : "Score"]}
+                    formatter={(value) => [`${value}%`, tr("chart_score_label")]}
                   />
                 }
               />

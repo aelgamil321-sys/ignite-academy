@@ -3,6 +3,7 @@ import {
   igniteTranslateBatch,
   igniteVocabSuggest,
 } from "@/lib/api/ai.functions";
+import { L, type Lang } from "@/lib/i18n-config";
 
 export {
   collectLessonAiFields,
@@ -31,8 +32,8 @@ export class IgniteAiError extends Error {
   }
 }
 
-export function aiDisabledMessage(lang: "en" | "ar"): string {
-  return lang === "ar" ? AI_DISABLED_MESSAGE_AR : AI_DISABLED_MESSAGE_EN;
+export function aiDisabledMessage(lang: Lang): string {
+  return L(AI_DISABLED_MESSAGE_EN, AI_DISABLED_MESSAGE_AR)[lang];
 }
 
 function isJsonResponse(res: Response): boolean {

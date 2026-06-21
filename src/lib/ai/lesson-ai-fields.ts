@@ -82,7 +82,7 @@ export function collectLessonAiFields(input: {
 
 export type IgniteTranslateRequest = {
   texts: string[];
-  targetLang: Exclude<Lang, "en" | "ar">;
+  targetLang: Lang;
   sourceLang?: "en" | "ar";
   contentType?: EducationalContentType;
   lessonId?: string;

@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import {useI18n, L } from "@/lib/i18n";
+import { contentLocale, pickBiLocale } from "@/lib/i18n-config";
 import type { QuizQuestion, QuizQuestionType } from "@/lib/curriculum";
 import {
   emptyEssayQuestion,
@@ -257,7 +258,7 @@ export function LessonQuizBuilder({
                           className="accent-primary shrink-0"
                         />
                         {qType === "true_false" ? (
-                          <span className="text-sm">{lang === "ar" ? opt.ar : opt.en}</span>
+                          <span className="text-sm">{pickBiLocale(opt, contentLocale(lang))}</span>
                         ) : (
                           <>
                             <input

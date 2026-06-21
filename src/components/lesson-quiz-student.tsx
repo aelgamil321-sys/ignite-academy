@@ -3,9 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { HelpCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useI18n, useLessonTranslationScope, prefetchEducationalTranslations } from "@/lib/i18n";
-import { needsDynamicTranslation } from "@/lib/translate-content";
-import type { EducationalField } from "@/lib/translate-content";
+import { useI18n, useLessonTranslationScope, prefetchEducationalTranslations, L } from "@/lib/i18n";
+import { biSourceForTranslation, type EducationalField } from "@/lib/translate-content";
 import type { Bi, QuizQuestion } from "@/lib/curriculum";
 import {
   fetchLatestQuizSubmission,
@@ -29,23 +28,31 @@ export function LessonQuizStudent({
   gradeName: { en: string; ar: string };
   lessonTitle: { en: string; ar: string };
 }) {
-  const { tr, lang, bi } = useI18n();
+  const { tr, lang, bi, dir } = useI18n();
   useLessonTranslationScope(lessonId);
   const questions = normalizeQuizList(rawQuestions);
   const quizMeta = { lessonId };
 
   useEffect(() => {
-    if (!needsDynamicTranslation(lang) || questions.length === 0) return;
-    const source = (b: Bi) => b.en?.trim() || b.ar?.trim() || "";
-    const fields: EducationalField[] = questions.flatMap((q, qi) => [
-      { fieldName: `quiz_q_${qi}`, contentType: "quiz_question" as const, text: source(q.q) },
-      ...q.options.map((o, oi) => ({
-        fieldName: `quiz_q_${qi}_opt_${oi}`,
-        contentType: "quiz_option" as const,
-        text: source(o),
-      })),
-    ]).filter((f) => f.text);
-    prefetchEducationalTranslations(lessonId, fields, lang);
+    if (questions.length === 0 || lang === "en") return;
+    const fields: EducationalField[] = [];
+    const pushBi = (b: Bi, fieldName: string, contentType: EducationalField["contentType"]) => {
+      const source = biSourceForTranslation(b, lang);
+      if (!source) return;
+      fields.push({
+        fieldName,
+        contentType,
+        text: source.text,
+        sourceLanguage: source.sourceLanguage,
+      });
+    };
+    for (const [qi, q] of questions.entries()) {
+      pushBi(q.q, `quiz_q_${qi}`, "quiz_question");
+      for (const [oi, opt] of q.options.entries()) {
+        pushBi(opt, `quiz_q_${qi}_opt_${oi}`, "quiz_option");
+      }
+    }
+    if (fields.length > 0) prefetchEducationalTranslations(lessonId, fields, lang);
   }, [lessonId, lang, questions]);
   const [choiceAnswers, setChoiceAnswers] = useState<Record<number, number>>({});
   const [essayAnswers, setEssayAnswers] = useState<Record<number, string>>({});
@@ -138,20 +145,14 @@ export function LessonQuizStudent({
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       const user = sessionData.session?.user;
       if (sessionError || !user) {
-        setSaveError(
-          lang === "ar"
-            ? "سجّل الدخول لحفظ نتيجة الاختبار."
-            : "Sign in to save your quiz result.",
-        );
+        setSaveError(L("Sign in to save your quiz result.", "سجّل الدخول لحفظ نتيجة الاختبار.")[lang]);
         return;
       }
 
       const existing = await fetchLatestQuizSubmission(lessonId, user.id);
       if (existing) {
         setSavedSubmission(existing);
-        toast.info(
-          lang === "ar" ? "تم إرسال هذا الاختبار مسبقاً" : "This quiz was already submitted",
-        );
+        toast.info(L("This quiz was already submitted", "تم إرسال هذا الاختبار مسبقاً")[lang]);
         return;
       }
 
@@ -165,9 +166,7 @@ export function LessonQuizStudent({
       if (error || !submission) {
         console.error("[quiz submit]", error);
         setSaveError(
-          lang === "ar"
-            ? `تعذر حفظ النتيجة: ${error ?? "unknown error"}`
-            : `Could not save result: ${error ?? "unknown error"}`,
+          `${L("Could not save result:", "تعذر حفظ النتيجة:")[lang]} ${error ?? "unknown error"}`,
         );
         return;
       }
@@ -175,12 +174,11 @@ export function LessonQuizStudent({
       setSavedSubmission(submission);
       toast.success(
         submission.status === "pending_review"
-          ? lang === "ar"
-            ? "تم إرسال الاختبار — الإجابة قيد مراجعة المعلم"
-            : "Quiz submitted — answer pending teacher review"
-          : lang === "ar"
-            ? "تم حفظ نتيجة الاختبار"
-            : "Quiz result saved",
+          ? L(
+              "Quiz submitted — answer pending teacher review",
+              "تم إرسال الاختبار — الإجابة قيد مراجعة المعلم",
+            )[lang]
+          : L("Quiz result saved", "تم حفظ نتيجة الاختبار")[lang],
       );
     } finally {
       setSubmitting(false);
@@ -188,9 +186,9 @@ export function LessonQuizStudent({
   };
 
   const typeLabel = (type: QuizQuestion["type"]) => {
-    if (type === "true_false") return lang === "ar" ? "صح / خطأ" : "True / False";
-    if (type === "essay") return lang === "ar" ? "سؤال مقالي" : "Essay";
-    return lang === "ar" ? "اختيار من متعدد" : "Multiple choice";
+    if (type === "true_false") return L("True / False", "صح / خطأ")[lang];
+    if (type === "essay") return L("Essay", "سؤال مقالي")[lang];
+    return L("Multiple choice", "اختيار من متعدد")[lang];
   };
 
   return (
@@ -205,7 +203,7 @@ export function LessonQuizStudent({
       {!authReady || loadingSubmission ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {lang === "ar" ? "جارٍ تحميل نتيجة الاختبار…" : "Loading quiz result…"}
+          {L("Loading quiz result…", "جارٍ تحميل نتيجة الاختبار…")[lang]}
         </div>
       ) : showResults ? (
         <LessonQuizResults
@@ -232,7 +230,10 @@ export function LessonQuizStudent({
                       {typeLabel(q.type)}
                     </span>
                     <span className="text-[10px] rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-primary">
-                      {q.points} {lang === "ar" ? "نقطة" : q.points === 1 ? "pt" : "pts"}
+                      {q.points}{" "}
+                      {q.points === 1
+                        ? L("pt", "نقطة")[lang]
+                        : L("pts", "نقاط")[lang]}
                     </span>
                   </div>
                   <TranslatedContentShell>
@@ -244,10 +245,8 @@ export function LessonQuizStudent({
                   {isEssay ? (
                     <textarea
                       className="w-full min-h-[140px] rounded-lg border border-border bg-background px-4 py-3 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      dir={lang === "ar" ? "rtl" : "ltr"}
-                      placeholder={
-                        lang === "ar" ? "اكتب إجابتك هنا..." : "Write your answer here..."
-                      }
+                      dir={dir}
+                      placeholder={L("Write your answer here...", "اكتب إجابتك هنا...")[lang]}
                       value={essayAnswers[i] ?? ""}
                       onChange={(e) =>
                         setEssayAnswers((a) => ({ ...a, [i]: e.target.value }))
@@ -283,9 +282,9 @@ export function LessonQuizStudent({
           <div className="mt-6 space-y-3">
             {!userId && (
               <p className="text-sm text-muted-foreground">
-                {lang === "ar" ? "سجّل الدخول لحفظ نتيجتك." : "Sign in to save your result."}{" "}
+                {L("Sign in to save your result.", "سجّل الدخول لحفظ نتيجتك.")[lang]}{" "}
                 <Link to="/auth" search={{ mode: "login" }} className="underline text-primary">
-                  {lang === "ar" ? "تسجيل الدخول" : "Sign in"}
+                  {tr("auth_submit_login")}
                 </Link>
               </p>
             )}
@@ -293,7 +292,7 @@ export function LessonQuizStudent({
               <div className="text-sm text-destructive">
                 {saveError}{" "}
                 <Link to="/auth" search={{ mode: "login" }} className="underline text-primary">
-                  {lang === "ar" ? "تسجيل الدخول" : "Sign in"}
+                  {tr("auth_submit_login")}
                 </Link>
               </div>
             )}

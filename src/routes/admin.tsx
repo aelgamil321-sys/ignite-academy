@@ -57,6 +57,7 @@ export const adminRouteHead = () => ({
 
 export function AdminGate() {
   const navigate = useNavigate();
+  const { tr } = useI18n();
   const [state, setState] = useState<"checking" | "ok" | "denied">("checking");
   const [email, setEmail] = useState<string>("");
 
@@ -87,17 +88,22 @@ export function AdminGate() {
 
   if (state !== "ok") {
     return (
-      <PageShell eyebrow="Admin" title="Admin Dashboard" lead="Checking access…" crumbs={[{ label: "Admin" }]}>
-        <div className="text-sm text-muted-foreground">Verifying your access…</div>
+      <PageShell
+        eyebrow={tr("nav_admin")}
+        title={tr("admin_title")}
+        lead={tr("checking_access")}
+        crumbs={[{ label: tr("nav_admin") }]}
+      >
+        <div className="text-sm text-muted-foreground">{tr("verifying_access")}</div>
       </PageShell>
     );
   }
   return <AdminLayoutShell email={email} />;
 }
 
-async function handleLogout(navigate: ReturnType<typeof useNavigate>) {
+async function handleLogout(navigate: ReturnType<typeof useNavigate>, signedOutMessage: string) {
   await supabase.auth.signOut();
-  toast.success("Signed out");
+  toast.success(signedOutMessage);
   navigate({ to: "/admin-login" });
 }
 
@@ -110,7 +116,7 @@ function parseAdminTab(search: Record<string, unknown>): Tab | undefined {
 
 export function AdminLayoutShell({ email }: { email: string }) {
   const navigate = useNavigate();
-  const { lang, bi, biMaybe } = useI18n();
+  const { lang, bi, biMaybe, tr } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const tab = parseAdminTab(search) ?? "overview";
@@ -175,7 +181,7 @@ export function AdminLayoutShell({ email }: { email: string }) {
         <AdminSidebar
           email={email}
           activeTab={tab}
-          onLogout={() => void handleLogout(navigate)}
+          onLogout={() => void handleLogout(navigate, tr("signed_out"))}
         />
         <div className="min-w-0 space-y-4">
           <Outlet />

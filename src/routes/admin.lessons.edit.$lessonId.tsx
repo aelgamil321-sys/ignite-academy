@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LessonEditForm } from "@/components/lesson-edit-form";
 import { parseVocabFromStorage } from "@/lib/lesson-vocab";
 import { useCMS, type CustomLesson } from "@/lib/cms";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/lessons/edit/$lessonId")({
   head: () => ({
@@ -109,7 +109,7 @@ function AdminLessonEditPage() {
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
       >
         <ChevronLeft className="h-4 w-4" />
-        {lang === "ar" ? "العودة إلى إدارة الدروس" : "Back to Manage Lessons"}
+        {L("Back to Manage Lessons", "العودة إلى إدارة الدروس")[lang]}
       </Link>
 
       <div className="rounded-xl border border-border bg-card p-4 text-xs font-mono space-y-1">
@@ -120,11 +120,11 @@ function AdminLessonEditPage() {
 
       {!lesson && (fetching || loading) ? (
         <div className="text-sm text-muted-foreground">
-          {lang === "ar" ? "جارٍ تحميل الدرس…" : "Loading lesson…"}
+          {L("Loading lesson…", "جارٍ تحميل الدرس…")[lang]}
         </div>
       ) : !lesson ? (
         <div className="text-sm text-destructive">
-          {lang === "ar" ? "الدرس غير موجود." : "Lesson not found."}
+          {L("Lesson not found.", "الدرس غير موجود.")[lang]}
         </div>
       ) : (
         <LessonEditForm

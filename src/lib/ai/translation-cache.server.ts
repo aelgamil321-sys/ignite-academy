@@ -10,7 +10,7 @@ export type TranslationCacheEntry = {
   cacheKey: string;
   sourceText: string;
   sourceLang: "en" | "ar";
-  targetLang: Exclude<Lang, "en" | "ar">;
+  targetLang: Lang;
   contentType?: EducationalContentType;
   lessonId?: string;
   fieldName?: string;

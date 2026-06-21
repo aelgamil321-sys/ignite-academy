@@ -10,9 +10,10 @@ import {
   BookOpen,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import {useI18n, L } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
+import { isRtlLang, contentLocale, type Lang } from "@/lib/i18n-config";
 import { customToLesson, type CustomLesson } from "@/lib/cms";
-import { subjectCategoryName } from "@/lib/categories";
+import { getSubjectCategory } from "@/lib/categories";
 import { normalizeQuizList } from "@/lib/lesson-quiz";
 import { fileNameFromUrl } from "@/lib/lesson-bilingual-files";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,19 +44,21 @@ function isLessonTouched(lessonId: string): boolean {
   }
 }
 
-function pickPdfUrl(custom: CustomLesson, lang: "en" | "ar"): string | null {
+function pickPdfUrl(custom: CustomLesson, lang: Lang): string | null {
+  const locale = contentLocale(lang);
   const ar = custom.pdfArUrl?.trim();
   const en = custom.pdfEnUrl?.trim();
   const legacy = custom.pdfUrl?.trim();
-  if (lang === "ar") return ar || en || legacy || null;
+  if (locale === "ar") return ar || en || legacy || null;
   return en || ar || legacy || null;
 }
 
-function pickWorksheetUrl(custom: CustomLesson, lang: "en" | "ar"): string | null {
+function pickWorksheetUrl(custom: CustomLesson, lang: Lang): string | null {
+  const locale = contentLocale(lang);
   const ar = custom.worksheetArUrl?.trim();
   const en = custom.worksheetEnUrl?.trim();
   const legacy = custom.worksheetUrl?.trim();
-  if (lang === "ar") return ar || en || legacy || null;
+  if (locale === "ar") return ar || en || legacy || null;
   return en || ar || legacy || null;
 }
 
@@ -169,7 +172,7 @@ export function GradeLessonsSection({
   gradeSlug: string;
   lessons: CustomLesson[];
 }) {
-  const { lang, tr, bi } = useI18n();
+  const { lang, tr, trf, bi } = useI18n();
   const [submissions, setSubmissions] = useState<Record<string, SubmissionMeta>>({});
   const [touchVersion, setTouchVersion] = useState(0);
 
@@ -247,9 +250,7 @@ export function GradeLessonsSection({
           </div>
           <Progress value={progress.pct} className="h-2.5" />
           <p className="mt-2 text-xs text-muted-foreground">
-            {lang === "ar"
-              ? `${progress.pct}% من الدروس مكتملة`
-              : `${progress.pct}% of lessons completed`}
+            {trf("progress_lessons_pct", { pct: String(progress.pct) })}
           </p>
         </div>
       )}
@@ -264,7 +265,8 @@ export function GradeLessonsSection({
           const hasQuiz = quizQuestions.length > 0;
           const submission = submissions[custom.id];
           const status = resolveStatus(custom.id, submission, hasQuiz);
-          const subject = subjectCategoryName(custom.subjectCategory, lang);
+          const subjectCat = getSubjectCategory(custom.subjectCategory);
+          const subject = subjectCat ? bi(subjectCat.name) : custom.subjectCategory;
 
           const quizLabel =
             status === "in_progress"

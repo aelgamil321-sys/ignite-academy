@@ -4,6 +4,9 @@
  */
 export {
   needsDynamicTranslation,
+  needsMachineTranslation,
+  resolveStoredBiText,
+  biSourceForTranslation,
   translateEducationalContent,
   translateEducationalBi,
   prefetchEducationalTranslations,

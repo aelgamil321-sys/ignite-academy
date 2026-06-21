@@ -316,6 +316,7 @@ export type Database = {
           email: string
           student_name: string
           student_grade: string
+          preferred_language: string
           created_at: string
           updated_at: string
         }
@@ -326,6 +327,7 @@ export type Database = {
           email?: string
           student_name?: string
           student_grade?: string
+          preferred_language?: string
           created_at?: string
           updated_at?: string
         }
@@ -336,6 +338,7 @@ export type Database = {
           email?: string
           student_name?: string
           student_grade?: string
+          preferred_language?: string
           created_at?: string
           updated_at?: string
         }
@@ -376,6 +379,7 @@ export type Database = {
           id: string
           islamic_group: string | null
           parent_link_code: string | null
+          preferred_language: string
           profile_photo_path: string | null
           section: string | null
           updated_at: string
@@ -391,6 +395,7 @@ export type Database = {
           id?: string
           islamic_group?: string | null
           parent_link_code?: string | null
+          preferred_language?: string
           profile_photo_path?: string | null
           section?: string | null
           updated_at?: string
@@ -406,6 +411,7 @@ export type Database = {
           id?: string
           islamic_group?: string | null
           parent_link_code?: string | null
+          preferred_language?: string
           profile_photo_path?: string | null
           section?: string | null
           updated_at?: string

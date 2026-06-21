@@ -4,6 +4,7 @@ import { ExternalLink, Play, Search, Video as VideoIcon } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
 import { EmptyState } from "@/components/empty-state";
 import { useI18n, type TKey } from "@/lib/i18n";
+import { contentLocale } from "@/lib/i18n-config";
 import { grades } from "@/lib/curriculum";
 import { gradeDisplayName, gradeMatches } from "@/lib/grade-utils";
 import {
@@ -121,7 +122,7 @@ function LessonVideoRow({
     <div className="p-5 sm:p-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="min-w-0 flex-1">
         <div className="text-xs uppercase tracking-wider text-primary font-semibold">
-          {gradeDisplayName(lesson.gradeSlug, lang === "ar" ? "ar" : "en")}
+          {gradeDisplayName(lesson.gradeSlug, contentLocale(lang))}
           {lesson.unit.en || lesson.unit.ar ? ` · ${bi(lesson.unit)}` : ""}
         </div>
         <h3 className="mt-1 font-display text-lg sm:text-xl text-foreground leading-snug">{bi(lesson.title)}</h3>

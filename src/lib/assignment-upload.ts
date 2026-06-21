@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { L, type Lang } from "@/lib/i18n-config";
 
 export const ASSIGNMENT_FILES_BUCKET = "assignment-files";
 
@@ -197,9 +198,9 @@ export function isPreviewableAssignmentFile(mime: string | null): boolean {
 export function formatAssignmentFileTypeLabel(
   mime: string | null,
   fileName: string | null,
-  lang: "en" | "ar",
+  lang: Lang,
 ): string {
-  if (isPdfMime(mime)) return lang === "ar" ? "PDF" : "PDF";
+  if (isPdfMime(mime)) return "PDF";
   if (mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
     return "DOCX";
   }
@@ -208,13 +209,13 @@ export function formatAssignmentFileTypeLabel(
     return "PPTX";
   }
   if (mime === "application/vnd.ms-powerpoint") return "PPT";
-  if (isImageMime(mime)) return lang === "ar" ? "صورة" : "Image";
+  if (isImageMime(mime)) return L("Image", "صورة")[lang];
   const ext = fileName?.split(".").pop()?.toUpperCase();
-  return ext || (lang === "ar" ? "ملف" : "File");
+  return ext || L("File", "ملف")[lang];
 }
 
-export function formatAssignmentFileSize(bytes: number | null | undefined, lang: "en" | "ar"): string {
-  if (bytes == null || Number.isNaN(bytes)) return lang === "ar" ? "غير متاح" : "N/A";
+export function formatAssignmentFileSize(bytes: number | null | undefined, lang: Lang): string {
+  if (bytes == null || Number.isNaN(bytes)) return L("N/A", "غير متاح")[lang];
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;

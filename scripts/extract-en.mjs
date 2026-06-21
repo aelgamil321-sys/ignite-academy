@@ -4,7 +4,9 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const s = readFileSync(join(root, "src/lib/i18n.tsx"), "utf8");
-const keys = [...s.matchAll(/^  (\w+):/gm)].map((m) => m[1]);
+const keys = [...s.matchAll(/^  ([a-z][\w]*):/gm)]
+  .map((m) => m[1])
+  .filter((k) => !["trf"].includes(k));
 const en = {};
 for (const k of keys) {
   const blockRe = new RegExp(`  ${k}:\\s*\\{[\\s\\S]*?en:\\s*"((?:[^"\\\\]|\\\\.)*)"`, "m");

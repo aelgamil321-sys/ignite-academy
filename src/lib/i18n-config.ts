@@ -32,6 +32,18 @@ export function isLang(value: string | null | undefined): value is Lang {
   return !!value && LANG_SET.has(value);
 }
 
+/** Map browser locale to a supported UI language; defaults to Arabic. */
+export function detectBrowserLang(): Lang {
+  if (typeof navigator === "undefined") return "ar";
+  const codes = navigator.languages?.length ? navigator.languages : [navigator.language];
+  for (const raw of codes) {
+    if (!raw) continue;
+    const base = raw.toLowerCase().split("-")[0];
+    if (isLang(base)) return base;
+  }
+  return "ar";
+}
+
 export function isRtlLang(lang: Lang): boolean {
   return lang === "ar" || lang === "ur";
 }
@@ -78,6 +90,14 @@ export function L(en: string, ar: string): Record<Lang, string> {
     ur: L_BY_EN.ur[en] ?? en,
     zh: L_BY_EN.zh[en] ?? en,
   };
+}
+
+/** Static bilingual UI copy (badges, notifications) for all six locales. */
+export function uiBi(text: Bi, lang: Lang): string {
+  const en = text.en?.trim() || text.ar?.trim() || "";
+  const ar = text.ar?.trim() || text.en?.trim() || "";
+  if (!en && !ar) return "";
+  return L(en, ar)[lang];
 }
 
 export function pickBi(text: Bi, lang: Lang): string {

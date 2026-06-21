@@ -7,6 +7,7 @@ import { ParentLinkCodeCard } from "@/components/parent-link-code-card";
 import { ProfilePhotoField } from "@/components/profile-photo-field";
 import { StudentAcademicFields } from "@/components/student-academic-fields";
 import { StudentProfileAvatar } from "@/components/student-profile-avatar";
+import { PreferredLanguageField } from "@/components/preferred-language-field";
 import { useI18n } from "@/lib/i18n";
 import { fetchMyParentLinkCode } from "@/lib/parent-link-code";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,7 @@ import {
   type StudentProfileForm,
 } from "@/lib/student-profile";
 import { islamicGroupLabel, sectionLabel, type IslamicGroup, type StudentSection } from "@/lib/student-academics";
+import type { Lang } from "@/lib/i18n-config";
 
 export const Route = createFileRoute("/student/profile")({
   head: () => ({
@@ -32,7 +34,7 @@ export const Route = createFileRoute("/student/profile")({
 
 function StudentProfilePage() {
   const navigate = useNavigate();
-  const { lang, dir, locale } = useI18n();
+  const { lang, dir, tr, setLang } = useI18n();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [email, setEmail] = useState("");
@@ -48,32 +50,8 @@ function StudentProfilePage() {
   });
   const [section, setSection] = useState<StudentSection | "">("");
   const [islamicGroup, setIslamicGroup] = useState<IslamicGroup | "">("");
+  const [preferredLanguage, setPreferredLanguage] = useState<Lang>("ar");
   const [parentLinkCode, setParentLinkCode] = useState<string | null>(null);
-
-  const T = {
-    eyebrow: lang === "ar" ? "الطالب" : "Student",
-    title: lang === "ar" ? "الملف الشخصي" : "Profile",
-    lead:
-      lang === "ar"
-        ? "عرض وتحديث بياناتك الشخصية والصورة والمجموعة الدراسية."
-        : "View and update your personal details, photo, and class grouping.",
-    arabicName: lang === "ar" ? "اسم الطالب بالعربية" : "Arabic Student Name",
-    arabicNameHint: lang === "ar" ? "اسم الطالب بالعربية" : "Arabic Student Name / اسم الطالب بالعربية",
-    englishName: lang === "ar" ? "اسم الطالب بالإنجليزية" : "English Student Name",
-    englishNameHint: lang === "ar" ? "اسم الطالب بالإنجليزية" : "English Student Name / اسم الطالب بالإنجليزية",
-    email: lang === "ar" ? "البريد الإلكتروني" : "Email",
-    grade: lang === "ar" ? "الصف الدراسي" : "Grade",
-    gradeEmpty: lang === "ar" ? "غير محدد" : "Not set",
-    save: lang === "ar" ? "حفظ التغييرات" : "Save changes",
-    saving: lang === "ar" ? "جارٍ الحفظ…" : "Saving…",
-    saved: lang === "ar" ? "تم تحديث الملف الشخصي" : "Profile updated",
-    back: lang === "ar" ? "العودة إلى لوحة الطالب" : "Back to dashboard",
-    certNote:
-      lang === "ar"
-        ? "تُستخدم هذه الأسماء والصورة على شهادات الإنجاز."
-        : "These names and your photo will be used on achievement certificates.",
-    changePhoto: lang === "ar" ? "تغيير الصورة" : "Change photo",
-  };
 
   useEffect(() => {
     let active = true;
@@ -111,6 +89,7 @@ function StudentProfilePage() {
         });
         setSection(profile?.section ?? "");
         setIslamicGroup(profile?.islamic_group ?? "");
+        setPreferredLanguage(profile?.preferred_language ?? lang);
         setParentLinkCode(await fetchMyParentLinkCode());
       } catch (error) {
         console.error("[student profile load]", error);
@@ -133,11 +112,11 @@ function StudentProfilePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.english_name.trim()) {
-      toast.error(lang === "ar" ? "اسم الطالب بالإنجليزية مطلوب" : "English student name is required");
+      toast.error(tr("auth_err_english_name"));
       return;
     }
     if (!form.arabic_name.trim()) {
-      toast.error(lang === "ar" ? "اسم الطالب بالعربية مطلوب" : "Arabic student name is required");
+      toast.error(tr("auth_err_arabic_name"));
       return;
     }
 
@@ -145,7 +124,7 @@ function StudentProfilePage() {
     try {
       const { data: authData } = await supabase.auth.getUser();
       const user = authData.user;
-      if (!user) throw new Error(lang === "ar" ? "يرجى تسجيل الدخول" : "Please sign in");
+      if (!user) throw new Error(tr("auth_err_email_password"));
 
       if (photoFile) {
         const path = await uploadProfilePhoto(user.id, photoFile);
@@ -158,6 +137,7 @@ function StudentProfilePage() {
         full_name: form.english_name.trim(),
         section: section || null,
         islamic_group: islamicGroup || null,
+        preferred_language: preferredLanguage,
       });
       setForm({
         full_name: updated.full_name,
@@ -168,8 +148,10 @@ function StudentProfilePage() {
       });
       setSection(updated.section ?? "");
       setIslamicGroup(updated.islamic_group ?? "");
+      setPreferredLanguage(updated.preferred_language);
       setProfilePhotoPath(updated.profile_photo_path);
-      toast.success(T.saved);
+      setLang(updated.preferred_language);
+      toast.success(tr("student_profile_updated"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
     } finally {
@@ -177,16 +159,16 @@ function StudentProfilePage() {
     }
   }
 
-  const gradeLabel = grade ? gradeDisplayName(grade, lang) : T.gradeEmpty;
+  const gradeLabel = grade ? gradeDisplayName(grade, lang) : tr("not_set");
 
   return (
     <PageShell
-      eyebrow={T.eyebrow}
-      title={T.title}
-      lead={T.lead}
+      eyebrow={tr("nav_student")}
+      title={tr("profile_student")}
+      lead={tr("student_profile_lead")}
       crumbs={[
-        { label: lang === "ar" ? "الطالب" : "Student", to: "/student" },
-        { label: T.title },
+        { label: tr("nav_student"), to: "/student" },
+        { label: tr("profile_student") },
       ]}
     >
       <div className="max-w-2xl">
@@ -195,7 +177,7 @@ function StudentProfilePage() {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6"
         >
           <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-          {T.back}
+          {tr("student_back_dashboard")}
         </Link>
 
         {parentLinkCode ? <div className="mb-6"><ParentLinkCodeCard code={parentLinkCode} /></div> : null}
@@ -203,7 +185,7 @@ function StudentProfilePage() {
         {loading ? (
           <div className="flex items-center gap-2 text-muted-foreground py-12">
             <Loader2 className="h-5 w-5 animate-spin" />
-            {lang === "ar" ? "جارٍ التحميل…" : "Loading…"}
+            {tr("loading")}
           </div>
         ) : (
           <form
@@ -225,33 +207,33 @@ function StudentProfilePage() {
                     {form.arabic_name}
                   </p>
                 ) : null}
-                <p className="text-xs text-muted-foreground pt-1">{T.certNote}</p>
+                <p className="text-xs text-muted-foreground pt-1">{tr("student_cert_note")}</p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-border bg-muted/20 p-4 grid gap-3 sm:grid-cols-3 text-sm">
               <div>
-                <div className="text-xs text-muted-foreground">{T.grade}</div>
+                <div className="text-xs text-muted-foreground">{tr("auth_grade")}</div>
                 <div className="font-semibold text-foreground mt-0.5">{gradeLabel}</div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">{lang === "ar" ? "الشعبة" : "Section"}</div>
+                <div className="text-xs text-muted-foreground">{tr("auth_section")}</div>
                 <div className="font-semibold text-foreground mt-0.5">
-                  {section ? sectionLabel(section, lang) : T.gradeEmpty}
+                  {section ? sectionLabel(section, lang) : tr("not_set")}
                 </div>
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">
-                  {lang === "ar" ? "المجموعة الإسلامية" : "Islamic Group"}
+                  {tr("auth_islamic_group")}
                 </div>
                 <div className="font-semibold text-foreground mt-0.5">
-                  {islamicGroup ? islamicGroupLabel(islamicGroup, lang) : T.gradeEmpty}
+                  {islamicGroup ? islamicGroupLabel(islamicGroup, lang) : tr("not_set")}
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{T.englishNameHint} *</label>
+              <label className="text-xs font-medium text-muted-foreground">{tr("auth_english_name_hint")} *</label>
               <input
                 type="text"
                 required
@@ -263,7 +245,7 @@ function StudentProfilePage() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{T.arabicNameHint} *</label>
+              <label className="text-xs font-medium text-muted-foreground">{tr("auth_arabic_name_hint")} *</label>
               <input
                 type="text"
                 required
@@ -276,7 +258,7 @@ function StudentProfilePage() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{T.email}</label>
+              <label className="text-xs font-medium text-muted-foreground">{tr("auth_email")}</label>
               <input
                 type="email"
                 readOnly
@@ -285,14 +267,17 @@ function StudentProfilePage() {
               />
             </div>
 
+            <PreferredLanguageField
+              value={preferredLanguage}
+              onChange={setPreferredLanguage}
+            />
+
             <ProfilePhotoField
-              lang={lang}
               file={photoFile}
               onChange={setPhotoFile}
             />
 
             <StudentAcademicFields
-              lang={lang}
               section={section}
               islamicGroup={islamicGroup}
               onSectionChange={setSection}
@@ -307,12 +292,12 @@ function StudentProfilePage() {
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {T.saving}
+                  {tr("student_saving")}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  {T.save}
+                  {tr("save_changes")}
                 </>
               )}
             </button>

@@ -4,10 +4,11 @@ import {
 } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
 import { EmptyState } from "@/components/empty-state";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
 import { SUBJECT_CATEGORIES, type SubjectCategory } from "@/lib/categories";
 import { useContentByCategory } from "@/lib/cms";
-import { gradeDisplayName } from "@/lib/grade-utils";
+import { useCategoryContentPrefetch } from "@/hooks/use-cms-content-prefetch";
+import { gradeDisplayName, gradeNameBi } from "@/lib/grade-utils";
 
 export const Route = createFileRoute("/categories/$category")({
   loader: ({ params }) => {
@@ -29,6 +30,12 @@ function CategoryPage() {
   const { category } = Route.useLoaderData();
   const { lang, dir, tr, bi } = useI18n();
   const { lessons, videos, files, articles } = useContentByCategory(category.slug as SubjectCategory);
+  const extras = [
+    ...videos.map((v) => ({ title: v.title, excerpt: v.description })),
+    ...files.map((f) => ({ title: f.title, excerpt: f.description })),
+    ...articles.map((a) => ({ title: a.title, excerpt: a.excerpt })),
+  ];
+  useCategoryContentPrefetch(category.slug, lessons, extras);
 
   const hasContent = lessons.length + videos.length + files.length + articles.length > 0;
 
@@ -42,15 +49,16 @@ function CategoryPage() {
       {!hasContent ? (
         <EmptyState
           icon={BookOpen}
-          title={lang === "ar" ? "لا يوجد محتوى بعد" : "No content yet"}
-          description={lang === "ar"
-            ? "سيظهر المحتوى هنا فور إضافته من لوحة الإدارة."
-            : "Content will appear here once added from the Admin dashboard."}
+          title={L("No content yet", "لا يوجد محتوى بعد")[lang]}
+          description={L(
+            "Content will appear here once added from the Admin dashboard.",
+            "سيظهر المحتوى هنا فور إضافته من لوحة الإدارة.",
+          )[lang]}
         />
       ) : (
         <div className="space-y-12">
           {lessons.length > 0 && (
-            <Section title={lang === "ar" ? "الدروس" : "Lessons"} icon={BookOpen}>
+            <Section title={L("Lessons", "الدروس")[lang]} icon={BookOpen}>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {lessons.map((l) => (
                   <Link
@@ -60,7 +68,7 @@ function CategoryPage() {
                     className="group rounded-2xl border border-border bg-card p-5 hover:border-primary transition-colors"
                   >
                     <div className="text-xs text-primary font-semibold uppercase tracking-wider">
-                      {gradeDisplayName(l.grade, lang)}
+                      {gradeNameBi(l.grade) ? bi(gradeNameBi(l.grade)!) : gradeDisplayName(l.grade, lang)}
                     </div>
                     <h3 className="mt-1 font-display text-lg text-foreground">{bi(l.title)}</h3>
                     <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{bi(l.outcome)}</p>
@@ -74,7 +82,7 @@ function CategoryPage() {
           )}
 
           {videos.length > 0 && (
-            <Section title={lang === "ar" ? "الفيديوهات" : "Videos"} icon={Video}>
+            <Section title={L("Videos", "الفيديوهات")[lang]} icon={Video}>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {videos.map((v) => (
                   <Link
@@ -100,7 +108,7 @@ function CategoryPage() {
           )}
 
           {files.length > 0 && (
-            <Section title={lang === "ar" ? "الملفات" : "Files"} icon={FileText}>
+            <Section title={L("Files", "الملفات")[lang]} icon={FileText}>
               <div className="grid gap-3 md:grid-cols-2">
                 {files.map((f) => (
                   <a
@@ -121,7 +129,7 @@ function CategoryPage() {
           )}
 
           {articles.length > 0 && (
-            <Section title={lang === "ar" ? "المقالات" : "Articles"} icon={Newspaper}>
+            <Section title={L("Articles", "المقالات")[lang]} icon={Newspaper}>
               <div className="grid gap-4 md:grid-cols-2">
                 {articles.map((a) => (
                   <Link

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { L, localeForFormatting, type Lang } from "@/lib/i18n-config";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import type { ParentLinkedChild } from "@/lib/parent-children";
 import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-progress";
@@ -85,9 +86,9 @@ async function fetchPeerRankings(studentUserId: string): Promise<ParentPerforman
   };
 }
 
-function formatTrendLabel(iso: string, lang: "en" | "ar"): string {
+function formatTrendLabel(iso: string, lang: Lang): string {
   try {
-    return new Date(iso).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB", {
+    return new Date(iso).toLocaleDateString(localeForFormatting(lang), {
       month: "short",
       day: "numeric",
     });
@@ -98,7 +99,7 @@ function formatTrendLabel(iso: string, lang: "en" | "ar"): string {
 
 async function fetchQuizTrend(
   studentUserId: string,
-  lang: "en" | "ar",
+  lang: Lang,
 ): Promise<{ trend: QuizTrendPoint[]; submissionCount: number }> {
   const { data, error } = await supabase
     .from("lesson_quiz_submissions")
@@ -127,7 +128,7 @@ async function fetchQuizTrend(
 
 export async function fetchParentPerformanceReport(
   child: ParentLinkedChild,
-  lang: "en" | "ar" = "en",
+  lang: Lang = "en",
   progressOverride?: StudentProgressData | null,
 ): Promise<{ data: ParentPerformanceReport | null; error: string | null }> {
   const progressResult = progressOverride
@@ -173,7 +174,7 @@ export async function fetchParentPerformanceReport(
 
 export function performanceStatusLabel(
   status: ParentPerformanceStatus,
-  lang: "en" | "ar",
+  lang: Lang,
 ): { primary: string; secondary: string } {
   const labels = {
     excellent: {
@@ -194,17 +195,18 @@ export function performanceStatusLabel(
     },
   }[status];
 
-  return lang === "ar"
-    ? { primary: labels.primary, secondary: labels.secondary }
-    : { primary: labels.secondary, secondary: labels.primary };
+  return {
+    primary: L(labels.secondary, labels.primary)[lang],
+    secondary: L(labels.primary, labels.secondary)[lang],
+  };
 }
 
-export function formatPeerRank(rank: PeerRankSlice, lang: "en" | "ar"): string {
+export function formatPeerRank(rank: PeerRankSlice, lang: Lang): string {
   if (rank.total <= 0) return "—";
   if (rank.rank === null) {
-    return lang === "ar" ? `— من ${rank.total}` : `— of ${rank.total}`;
+    return L(`— of ${rank.total}`, `— من ${rank.total}`)[lang];
   }
-  return lang === "ar" ? `${rank.rank} من ${rank.total}` : `${rank.rank} of ${rank.total}`;
+  return L(`${rank.rank} of ${rank.total}`, `${rank.rank} من ${rank.total}`)[lang];
 }
 
 /** Parent dashboard display: rank position only (e.g. #3). Logic unchanged. */

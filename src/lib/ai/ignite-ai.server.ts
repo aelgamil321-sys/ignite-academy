@@ -13,7 +13,7 @@ export const AI_DISABLED_MESSAGE_AR =
 export const AI_DISABLED_MESSAGE_EN =
   "AI service is not enabled yet. Please add OPENAI_API_KEY in Cloudflare.";
 
-export type TranslatableLang = Exclude<Lang, "en" | "ar">;
+export type TranslatableLang = Exclude<Lang, "en">;
 
 export type VocabAiSuggestion = {
   meaning: {
@@ -125,13 +125,15 @@ export async function igniteTranslateText(
     const openAiKey = process.env.OPENAI_API_KEY;
     if (openAiKey) {
       const langName =
-        targetLang === "fr"
-          ? "French"
-          : targetLang === "de"
-            ? "German"
-            : targetLang === "ur"
-              ? "Urdu"
-              : "Simplified Chinese";
+        targetLang === "ar"
+          ? "Arabic"
+          : targetLang === "fr"
+            ? "French"
+            : targetLang === "de"
+              ? "German"
+              : targetLang === "ur"
+                ? "Urdu"
+                : "Simplified Chinese";
       const out = await openAiChat(
         ISLAMIC_SYSTEM_PROMPT,
         `Translate the following ${sourceLang === "ar" ? "Arabic" : "English"} Islamic Studies text into ${langName}. Return ONLY the translation.\n\n${part}`,
@@ -266,7 +268,7 @@ export async function ignitePregenerateLessonTranslations(input: {
   serviceAvailable: boolean;
   byLanguage: Record<string, number>;
 }> {
-  const targetLangs: TranslatableLang[] = ["fr", "de", "ur", "zh"];
+  const targetLangs: TranslatableLang[] = ["ar", "fr", "de", "ur", "zh"];
   const { buildTranslationCacheKey, getDbCachedTranslations, setDbCachedTranslations } =
     await import("@/lib/ai/translation-cache.server");
 

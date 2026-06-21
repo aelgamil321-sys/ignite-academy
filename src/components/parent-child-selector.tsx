@@ -1,5 +1,5 @@
 import { GraduationCap, UserRound } from "lucide-react";
-import {useI18n, L } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import type { ParentLinkedChild } from "@/lib/parent-children";
 import { gradeDisplayName } from "@/lib/grade-utils";
 
@@ -13,7 +13,7 @@ export function ParentChildSelector({
   selectedStudentUserId: string;
   onSelect: (studentUserId: string) => void;
 }) {
-  const { lang, bi } = useI18n();
+  const { lang, bi, tr } = useI18n();
 
   if (linkedChildren.length <= 1) {
     return null;
@@ -22,12 +22,12 @@ export function ParentChildSelector({
   return (
     <section
       className="rounded-2xl border border-border bg-card p-4 md:p-5 shadow-[var(--shadow-soft)]"
-      aria-label={L("Select child", "اختر الطفل")[lang]}
+      aria-label={tr("parent_select_child")}
     >
       <div className="text-xs uppercase tracking-[0.2em] text-primary mb-3">
-        {L("Your children", "أبناؤك")[lang]}
+        {tr("parent_your_children")}
       </div>
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label={L("Linked children", "الأبناء المرتبطون")[lang]}>
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label={tr("parent_linked_children")}>
         {linkedChildren.map((child) => {
           const active = child.studentUserId === selectedStudentUserId;
           const gradeName = gradeDisplayName(child.gradeSlug, lang) || child.gradeSlug;

@@ -3,14 +3,14 @@ import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
 
 export function ParentLinkCodeCard({ code }: { code: string }) {
-  const { tr, lang, locale } = useI18n();
+  const { tr } = useI18n();
 
   async function copyCode() {
     try {
       await navigator.clipboard.writeText(code);
       toast.success(tr("parent_link_code_copied"));
     } catch {
-      toast.error(lang === "ar" ? "تعذر النسخ" : "Could not copy");
+      toast.error(tr("copy_failed"));
     }
   }
 

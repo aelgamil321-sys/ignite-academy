@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Bi } from "@/lib/curriculum";
+import { supabase } from "@/integrations/supabase/client";
 import {
   LANG_STORAGE_KEY,
   contentLocale,
@@ -10,6 +11,12 @@ import {
   type ContentLocale,
   type Lang,
 } from "@/lib/i18n-config";
+import {
+  applyLanguageForUser,
+  persistLanguage,
+  resolveGuestLanguage,
+  savePreferredLanguage,
+} from "@/lib/preferred-language";
 import { de } from "@/lib/i18n/locales/de";
 import { fr } from "@/lib/i18n/locales/fr";
 import { ur } from "@/lib/i18n/locales/ur";
@@ -24,11 +31,14 @@ import {
   needsDynamicTranslation,
   onTranslationAvailabilityChange,
   resetTranslationSession,
+  resolveStoredBiText,
+  biSourceForTranslation,
+  translateEducationalContent,
   type EducationalContentType,
 } from "@/lib/translate-content";
 
 export type { Lang, ContentLocale } from "@/lib/i18n-config";
-export { L, LANG_OPTIONS, pickBi, pickBiLocale } from "@/lib/i18n-config";
+export { L, LANG_OPTIONS, pickBi, pickBiLocale, uiBi } from "@/lib/i18n-config";
 export {
   translateEducationalContent,
   translateEducationalBi,
@@ -71,6 +81,7 @@ export const t = {
     en: "Department of Islamic Education – Ignite School",
     ar: "قسم التربية الإسلامية – مدرسة اجنايت",
   },
+  school_logo_alt: { en: "Ignite School", ar: "مدرسة اجنايت" },
   tagline: { en: "Igniting Knowledge, Faith, and Character", ar: "نُشعل المعرفة والإيمان والأخلاق" },
 
   // Hero
@@ -151,6 +162,7 @@ export const t = {
   grade_11: { en: "Grade 11", ar: "الصف الحادي عشر" },
   lesson_meta: { en: "Includes worksheet & quiz", ar: "يتضمن ورقة عمل واختبار" },
   minutes: { en: "min", ar: "دقيقة" },
+  progress_lessons_pct: { en: "{pct}% of lessons completed", ar: "{pct}% من الدروس مكتملة" },
 
   // Announcements
   ann_eyebrow: { en: "Announcements", ar: "الإعلانات" },
@@ -193,6 +205,7 @@ export const t = {
   ls_outcome: { en: "Learning Outcome", ar: "نواتج التعلّم" },
   ls_content: { en: "Lesson Content", ar: "محتوى الدرس" },
   ls_worksheet: { en: "Worksheet", ar: "ورقة العمل" },
+  ls_pdf: { en: "PDF", ar: "PDF" },
   ls_video: { en: "Video Lesson", ar: "الدرس المرئي" },
   ls_quiz: { en: "Quiz", ar: "الاختبار" },
   ls_downloads: { en: "Downloads", ar: "التحميلات" },
@@ -211,6 +224,7 @@ export const t = {
 
   // Ask Ignite AI
   ask_label: { en: "Ask Ignite", ar: "اسأل اجنايت" },
+  select_language: { en: "Select language", ar: "اختر اللغة" },
   ask_sub: { en: "Ignite Islamic Academy AI Assistant", ar: "مساعد أكاديمية اجنايت الإسلامية الذكي" },
   ask_greet: {
     en: "Peace be upon you! I'm Ask Ignite. Ask me anything about your Islamic Studies lessons — Quran, Hadith, Fiqh, Seerah, and more.",
@@ -269,6 +283,62 @@ export const t = {
   student_lead: { en: "Your dashboard, lessons, quizzes, and certificates — all in one place.", ar: "لوحة التحكم، والدروس، والاختبارات، والشهادات — في مكان واحد." },
   student_dashboard_title: { en: "Student Dashboard", ar: "لوحة تحكم الطالب" },
   student_dashboard_lead: { en: "Track your lesson progress, quiz scores, certificates, and achievements.", ar: "تابع تقدّمك في الدروس، ودرجات الاختبارات، والشهادات، والإنجازات." },
+  student_profile_lead: {
+    en: "View and update your personal details, photo, and class grouping.",
+    ar: "عرض وتحديث بياناتك الشخصية والصورة والمجموعة الدراسية.",
+  },
+  student_back_dashboard: { en: "Back to dashboard", ar: "العودة إلى لوحة الطالب" },
+  student_cert_note: {
+    en: "These names and your photo will be used on achievement certificates.",
+    ar: "تُستخدم هذه الأسماء والصورة على شهادات الإنجاز.",
+  },
+  student_profile_updated: { en: "Profile updated", ar: "تم تحديث الملف الشخصي" },
+  student_saving: { en: "Saving…", ar: "جارٍ الحفظ…" },
+  save_changes: { en: "Save changes", ar: "حفظ التغييرات" },
+  student_complete_profile_notice: {
+    en: "Please complete your profile (English and Arabic names) before generating certificates.",
+    ar: "يرجى إكمال ملفك الشخصي (الاسم بالإنجليزية والعربية) قبل إنشاء الشهادات.",
+  },
+  student_loading_progress: { en: "Loading your progress…", ar: "جارٍ تحميل التقدّم…" },
+  student_load_progress_error: {
+    en: "Could not load progress: {error}",
+    ar: "تعذر تحميل التقدّم: {error}",
+  },
+  welcome_greeting: { en: "Welcome", ar: "مرحبًا" },
+  profile_photo_hint: {
+    en: "Clear face photo — JPEG, PNG, or WebP (max 5 MB)",
+    ar: "صورة واضحة للوجه — JPEG أو PNG أو WebP (حتى 5 ميجابايت)",
+  },
+  profile_photo_choose: { en: "Choose photo", ar: "اختر صورة" },
+  profile_change_photo: { en: "Change photo", ar: "تغيير الصورة" },
+  profile_photo_remove: { en: "Remove", ar: "إزالة" },
+  profile_photo_invalid: {
+    en: "Invalid photo. Use JPEG, PNG, or WebP (max 5 MB).",
+    ar: "صورة غير صالحة. استخدم JPEG أو PNG أو WebP (حتى 5 ميجابايت).",
+  },
+  copy_failed: { en: "Could not copy", ar: "تعذر النسخ" },
+  select_placeholder: { en: "Select…", ar: "اختر…" },
+  admin_sign_in_title: { en: "Admin Sign In", ar: "دخول الإدارة" },
+  admin_sign_in_lead: {
+    en: "Restricted area. Only authorized administrators can manage content.",
+    ar: "منطقة محظورة. يمكن للإداريين المصرّح لهم فقط إدارة المحتوى.",
+  },
+  admin_login_crumb: { en: "Admin Login", ar: "دخول الإدارة" },
+  admin_create_account: { en: "Create admin account", ar: "إنشاء حساب إداري" },
+  admin_first_admin_link: { en: "First admin? Create an account", ar: "أول إداري؟ أنشئ حسابًا" },
+  admin_new_account_note: {
+    en: "New accounts have no admin access by default. An existing admin (or the project owner) must add your user to the admin role.",
+    ar: "الحسابات الجديدة لا تملك صلاحية إدارية افتراضيًا. يجب على إداري حالي (أو مالك المشروع) إضافة مستخدمك إلى دور الإدارة.",
+  },
+  admin_welcome_back: { en: "Welcome back.", ar: "مرحبًا بعودتك." },
+  admin_not_admin: {
+    en: "This account is not an administrator.",
+    ar: "هذا الحساب ليس حساب إداري.",
+  },
+  admin_signup_success: {
+    en: "Account created. Ask an existing admin to grant you access, then sign in.",
+    ar: "تم إنشاء الحساب. اطلب من إداري حالي منحك الصلاحية، ثم سجّل الدخول.",
+  },
   my_grade: { en: "My Grade", ar: "صفّي" },
   recent_lessons: { en: "Recent Lessons", ar: "الدروس الأخيرة" },
   my_quizzes: { en: "My Quizzes", ar: "اختباراتي" },
@@ -463,6 +533,18 @@ export const t = {
   },
   auth_email: { en: "Email", ar: "البريد الإلكتروني" },
   auth_password: { en: "Password", ar: "كلمة المرور" },
+  auth_preferred_language: {
+    en: "Preferred Language / اللغة المفضلة",
+    ar: "اللغة المفضلة / Preferred Language",
+  },
+  auth_preferred_language_hint: {
+    en: "The platform will open in this language after you sign in.",
+    ar: "ستفتح المنصة بهذه اللغة بعد تسجيل الدخول.",
+  },
+  profile_preferred_language_saved: {
+    en: "Preferred language updated.",
+    ar: "تم تحديث اللغة المفضلة.",
+  },
   auth_grade: { en: "Grade", ar: "الصف الدراسي" },
   auth_section: { en: "Section", ar: "الشعبة" },
   auth_islamic_group: { en: "Islamic Group", ar: "المجموعة الإسلامية" },
@@ -630,6 +712,143 @@ export const t = {
   notifications_empty: { en: "No notifications yet.", ar: "لا توجد إشعارات بعد." },
   notifications_mark_all_read: { en: "Mark all read", ar: "تعيين الكل كمقروء" },
   notifications_unread: { en: "unread", ar: "غير مقروء" },
+
+  // Parent dashboard (extended)
+  parent_hero_instant_lead: {
+    en: "Instant view of your child's academic performance and learning progress.",
+    ar: "متابعة فورية لأداء ابنكم الأكاديمي والتقدم الدراسي.",
+  },
+  parent_rec_tier_excellent: { en: "Excellent", ar: "ممتاز" },
+  parent_rec_tier_good: { en: "Good", ar: "جيد" },
+  parent_rec_tier_support: { en: "Needs support", ar: "يحتاج دعمًا" },
+  parent_rec_tier_awaiting: { en: "Awaiting data", ar: "بانتظار البيانات" },
+  parent_status_excellent: { en: "Excellent", ar: "ممتاز" },
+  parent_status_very_good: { en: "Very Good", ar: "جيد جداً" },
+  parent_status_good: { en: "Good", ar: "جيد" },
+  parent_status_no_data: { en: "No data yet", ar: "لا توجد بيانات بعد" },
+  parent_insight_top_pct: {
+    en: "Your child is in the top {n}% of the grade",
+    ar: "ابنكم ضمن أفضل {n}% من الصف",
+  },
+  parent_insight_avg_score: {
+    en: "Average score {n}%",
+    ar: "متوسط الدرجات {n}%",
+  },
+  parent_insight_all_lessons: {
+    en: "Completed all available lessons",
+    ar: "أكمل جميع الدروس المتاحة",
+  },
+  parent_insight_recent_cert: {
+    en: "Earned a new certificate this week",
+    ar: "حصل على شهادة جديدة هذا الأسبوع",
+  },
+  parent_insight_progress: {
+    en: "Overall progress {n}%",
+    ar: "التقدّم الدراسي {n}%",
+  },
+  parent_rec_no_data: {
+    en: "Recommendations will appear after your child completes their first quiz.",
+    ar: "ستظهر التوصيات بعد إكمال ابنكم لأول اختبار.",
+  },
+  parent_rec_excellent: {
+    en: "Your child is performing excellently and is encouraged to maintain this level.",
+    ar: "الطالب يحقق أداءً ممتازًا ويُنصح بالاستمرار على نفس المستوى.",
+  },
+  parent_rec_good: {
+    en: "Good performance. We recommend extra review before upcoming assessments.",
+    ar: "أداء جيد، ويوصى بزيادة المراجعة قبل الاختبارات القادمة.",
+  },
+  parent_rec_support: {
+    en: "Your child needs additional follow-up and academic support.",
+    ar: "يحتاج الطالب إلى متابعة إضافية ودعم أكاديمي.",
+  },
+  parent_assign_submitted: { en: "Submitted", ar: "تم التسليم" },
+  parent_assign_upcoming: { en: "Upcoming", ar: "قادمة" },
+  parent_assign_overdue: { en: "Overdue", ar: "متأخرة" },
+  parent_tap_view_details: { en: "Tap to view details", ar: "اضغط لعرض التفاصيل" },
+  parent_view_grade_lessons: { en: "view grade lessons", ar: "عرض دروس الصف" },
+  parent_go_to_section: { en: "go to section", ar: "الانتقال إلى القسم" },
+  parent_based_on_avg: {
+    en: "Based on average quiz score",
+    ar: "بناءً على متوسط درجات الاختبارات",
+  },
+  chart_score_label: { en: "Score", ar: "الدرجة" },
+  checking_access: { en: "Checking access…", ar: "جارٍ التحقق من الوصول…" },
+  verifying_access: { en: "Verifying your access…", ar: "جارٍ التحقق من صلاحيتك…" },
+  dashboard_label: { en: "Dashboard", ar: "لوحة التحكم" },
+  guide_not_found: { en: "Guide not found.", ar: "الدليل غير موجود." },
+  announcement_not_found: { en: "Announcement not found.", ar: "الإعلان غير موجود." },
+  parent_signed_in_multi: {
+    en: "Signed in to view your children's learning progress.",
+    ar: "أنت مسجّل الدخول لمتابعة تقدّم أبنائك التعليمي.",
+  },
+  parent_signed_in_single: {
+    en: "Signed in to view your child's learning progress.",
+    ar: "أنت مسجّل الدخول لمتابعة تقدّم ابنك/ابنتك التعليمي.",
+  },
+  parent_ui_preview_lead: {
+    en: "UI preview (dev only) — mock student data",
+    ar: "معاينة الواجهة (تطوير فقط) — بيانات تجريبية",
+  },
+  parent_smart_recommendation: {
+    en: "Smart Parent Recommendation",
+    ar: "توصية ذكية لولي الأمر",
+  },
+  parent_academic_performance: { en: "Academic Performance", ar: "الأداء الأكاديمي" },
+  parent_quiz_trend_lead: {
+    en: "Quiz score trend over time.",
+    ar: "اتجاه درجات الاختبارات عبر الزمن.",
+  },
+  parent_current_score: { en: "Current score", ar: "الدرجة الحالية" },
+  parent_performance_trend_single: {
+    en: "Performance trends will appear after additional assessments are added.",
+    ar: "سيظهر تطور الأداء بعد إضافة اختبارات إضافية",
+  },
+  parent_summary_title: { en: "Parent Summary", ar: "ملخص ولي الأمر" },
+  parent_summary_empty: {
+    en: "Insights will appear as your child completes lessons and quizzes.",
+    ar: "ستظهر الملخصات عند إكمال الدروس والاختبارات.",
+  },
+  parent_academic_progress: { en: "Academic Progress", ar: "التقدم الدراسي" },
+  parent_certificates_earned: { en: "Certificates Earned", ar: "الشهادات المكتسبة" },
+  parent_lessons_completed: { en: "Lessons Completed", ar: "الدروس المكتملة" },
+  parent_average_score: { en: "Average Score", ar: "متوسط الدرجات" },
+  parent_rank_grade: { en: "Rank in Grade", ar: "الترتيب في الصف" },
+  parent_rank_islamic: { en: "Rank in Islamic Group", ar: "الترتيب في الإسلامية" },
+  parent_current_rank: { en: "Current rank", ar: "المركز الحالي" },
+  parent_achievements_badges: { en: "Achievements & Badges", ar: "الإنجازات والشارات" },
+  parent_badge_locked: { en: "Locked", ar: "مقفلة" },
+  parent_latest_certificates: { en: "Latest Certificates", ar: "أحدث الشهادات" },
+  parent_no_certificates: {
+    en: "No certificates yet. Completed lesson quizzes will appear here.",
+    ar: "لا توجد شهادات بعد. ستظهر هنا عند إتمام اختبارات الدروس.",
+  },
+  parent_view_certificate: { en: "View certificate", ar: "عرض الشهادة" },
+  parent_certificate_details: { en: "Certificate Details", ar: "تفاصيل الشهادة" },
+  parent_lesson_label: { en: "Lesson", ar: "الدرس" },
+  parent_date_label: { en: "Date", ar: "التاريخ" },
+  parent_score_label: { en: "Score", ar: "الدرجة" },
+  parent_certificate_id: { en: "Certificate ID", ar: "رقم الشهادة" },
+  parent_recent_activity: { en: "Recent Activity", ar: "النشاط الأخير" },
+  parent_recent_activity_lead: {
+    en: "Quiz completions, certificates, and badge milestones.",
+    ar: "إتمام الاختبارات والشهادات وإنجازات الشارات.",
+  },
+  parent_activity_empty: {
+    en: "Activity will appear here once quizzes are submitted.",
+    ar: "سيظهر النشاط هنا بعد إرسال الاختبارات.",
+  },
+  parent_badge_unlocked: { en: "Badge unlocked", ar: "شارة مفتوحة" },
+  parent_certificate_earned: { en: "Certificate earned", ar: "شهادة مكتسبة" },
+  parent_quiz_completed: { en: "Quiz completed", ar: "اختبار مكتمل" },
+  parent_progress_label: { en: "Progress", ar: "التقدّم" },
+  parent_select_child: { en: "Select child", ar: "اختر الطفل" },
+  parent_your_children: { en: "Your children", ar: "أبناؤك" },
+  parent_linked_children: { en: "Linked children", ar: "الأبناء المرتبطون" },
+  parent_quiz_trend_empty: {
+    en: "Quiz scores will appear here after the first submission.",
+    ar: "ستظهر درجات الاختبارات هنا بعد أول إرسال.",
+  },
 } satisfies Dict;
 
 export type TKey = keyof typeof t;
@@ -651,6 +870,13 @@ function translate(key: TKey, lang: Lang): string {
   return t[key].en || t[key].ar;
 }
 
+export function interpolateTr(template: string, vars: Record<string, string | number>): string {
+  return Object.entries(vars).reduce(
+    (result, [name, value]) => result.replaceAll(`{${name}}`, String(value)),
+    template,
+  );
+}
+
 export type BiFieldMeta = {
   lessonId?: string;
   fieldName?: string;
@@ -664,6 +890,8 @@ interface I18nCtx {
   setLang: (l: Lang) => void;
   toggle: () => void;
   tr: (key: TKey) => string;
+  /** Translate with `{name}` placeholder substitution. */
+  trf: (key: TKey, vars: Record<string, string | number>) => string;
   /** Pick lesson/CMS text; dynamically translates for fr/de/ur/zh. */
   bi: (text?: Bi | null, meta?: BiFieldMeta) => string;
   /** Safe variant when bilingual text may be undefined. */
@@ -679,7 +907,9 @@ interface I18nCtx {
 const Ctx = createContext<I18nCtx | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("ar");
+  const [lang, setLangState] = useState<Lang>(() =>
+    typeof window === "undefined" ? "ar" : resolveGuestLanguage(),
+  );
   const [contentRev, setContentRev] = useState(0);
   const [contentTranslating, setContentTranslating] = useState(0);
   const [translationUnavailable, setTranslationUnavailable] = useState(false);
@@ -687,8 +917,20 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem(LANG_STORAGE_KEY);
-    if (isLang(saved)) setLangState(saved);
+    let cancelled = false;
+    void (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (cancelled) return;
+      if (data.user) {
+        const profileLang = await applyLanguageForUser(data.user.id);
+        if (!cancelled) setLangState(profileLang);
+        return;
+      }
+      if (!cancelled) setLangState(resolveGuestLanguage());
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -725,10 +967,19 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setContentRev((v) => v + 1);
   }, [lang]);
 
-  const setLang = (l: Lang) => {
+  const setLang = useCallback((l: Lang) => {
     setLangState(l);
-    if (typeof window !== "undefined") window.localStorage.setItem(LANG_STORAGE_KEY, l);
-  };
+    persistLanguage(l);
+    void (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return;
+      try {
+        await savePreferredLanguage(data.user.id, l);
+      } catch (error) {
+        console.warn("[setLang profile sync]", error);
+      }
+    })();
+  }, []);
 
   const setLessonScope = useCallback((lessonId: string | null) => {
     lessonScopeRef.current = lessonId;
@@ -736,14 +987,15 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const locale = contentLocale(lang);
 
-  /** Read-only: returns cache or English/Arabic fallback. Translation runs in useEffect via prefetch only. */
+  /** Read-only: returns stored locale, cache, or queues machine translation (no English fallback). */
   const bi = useCallback(
     (text?: Bi | null, meta?: BiFieldMeta) => {
       if (!text) return "";
-      if (!needsDynamicTranslation(lang)) {
-        return pickBiLocale(text, locale);
-      }
-      const source = text.en?.trim() || text.ar?.trim() || "";
+
+      const stored = resolveStoredBiText(text, lang);
+      if (stored) return stored;
+
+      const source = biSourceForTranslation(text, lang);
       if (!source) return "";
 
       const lessonId = meta?.lessonId ?? lessonScopeRef.current ?? undefined;
@@ -755,13 +1007,22 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         contentType,
         lessonId,
         fieldName,
-        source,
+        source: source.text,
       });
       if (cached) return cached;
 
-      return educationalDisplayFallback(source, lang, text);
+      void translateEducationalContent({
+        text: source.text,
+        targetLanguage: lang,
+        sourceLanguage: source.sourceLanguage,
+        contentType,
+        lessonId,
+        fieldName,
+      });
+
+      return "";
     },
-    [lang, locale, contentRev],
+    [lang, contentRev],
   );
 
   const biMaybe = useCallback(
@@ -776,6 +1037,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setLang,
     toggle: () => setLang(lang === "en" ? "ar" : "en"),
     tr: (key) => translate(key, lang),
+    trf: (key, vars) => interpolateTr(translate(key, lang), vars),
     bi,
     biMaybe,
     contentTranslating,

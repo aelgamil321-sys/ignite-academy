@@ -23,7 +23,7 @@ function ParentDetail() {
     body: custom.content,
     image: custom.imageUrl,
   } : null);
-  if (!guide) return <div className="container-page py-20">Guide not found.</div>;
+  if (!guide) return <div className="container-page py-20">{tr("guide_not_found")}</div>;
   const image = (guide as { image?: string }).image;
   return (
     <PageShell eyebrow={tr("nav_parent")} title={bi(guide.title)} lead={bi(guide.excerpt)}

@@ -1,6 +1,7 @@
-import { grades } from "./curriculum";
 import type { Lang } from "./i18n-config";
 import { contentLocale } from "./i18n-config";
+import { grades } from "./curriculum";
+import type { Bi } from "./curriculum";
 
 const SLUG_ALIASES: Record<string, string> = {
   "grade-8": "8", "grade 8": "8", "grade8": "8",
@@ -25,6 +26,11 @@ export function normalizeGradeSlug(value: string): string {
 
 export function gradeMatches(stored: string, slug: string): boolean {
   return normalizeGradeSlug(stored) === normalizeGradeSlug(slug);
+}
+
+export function gradeNameBi(slug: string): Bi | null {
+  const g = grades.find((x) => x.slug === normalizeGradeSlug(slug));
+  return g?.name ?? null;
 }
 
 export function gradeDisplayName(slug: string, lang: Lang | "en" | "ar"): string {

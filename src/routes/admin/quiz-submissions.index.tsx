@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCMS } from "@/lib/cms";
 import {useI18n, L } from "@/lib/i18n";
+import { localeForFormatting } from "@/lib/i18n-config";
 import {
   normalizeQuizList,
   parseSubmissionAnswers,
@@ -267,7 +268,7 @@ function AdminQuizSubmissionsPage() {
                         </span>
                       ) : null}
                       {" · "}
-                      {new Date(row.submitted_at).toLocaleString(lang === "ar" ? "ar" : "en")}
+                      {new Date(row.submitted_at).toLocaleString(localeForFormatting(lang))}
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">

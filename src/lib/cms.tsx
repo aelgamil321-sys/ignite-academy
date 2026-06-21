@@ -13,6 +13,7 @@ export { ytId };
 import { parseVocabFromStorage, serializeVocabForStorage, type VocabularyItem } from "./lesson-vocab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { L } from "@/lib/i18n-config";
 import {
   announcementTopicLabel,
   inferAnnouncementTopic,
@@ -469,12 +470,12 @@ export function lessonVideoEmbeds(
   const enId = ytId(custom.youtubeEnUrl ?? "");
   const legacyId = ytId(custom.youtubeUrl ?? "");
   const items: Array<{ label: string; ytId: string }> = [];
-  const arLabel = lang === "ar" ? "الفيديو العربي" : "Arabic Video";
-  const enLabel = lang === "ar" ? "الفيديو الإنجليزي" : "English Video";
+  const arLabel = L("Arabic Video", "الفيديو العربي")[lang];
+  const enLabel = L("English Video", "الفيديو الإنجليزي")[lang];
   if (arId) items.push({ label: arLabel, ytId: arId });
   if (enId) items.push({ label: enLabel, ytId: enId });
   if (!arId && !enId && legacyId) {
-    items.push({ label: lang === "ar" ? "فيديو الدرس" : "Lesson Video", ytId: legacyId });
+    items.push({ label: L("Lesson Video", "فيديو الدرس")[lang], ytId: legacyId });
   }
   return items;
 }

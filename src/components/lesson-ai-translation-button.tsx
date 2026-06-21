@@ -72,7 +72,7 @@ export function LessonAiTranslationButton({
       console.info("[IgniteAI] Pregenerate result", result);
 
       if (!result.serviceAvailable) {
-        const msg = aiDisabledMessage(lang === "ar" ? "ar" : "en");
+        const msg = aiDisabledMessage(lang);
         setStatus({ kind: "error", message: msg });
         toast.error(msg);
         return;
@@ -88,7 +88,7 @@ export function LessonAiTranslationButton({
       const msg =
         error instanceof IgniteAiError
           ? error.message
-          : aiDisabledMessage(lang === "ar" ? "ar" : "en");
+          : aiDisabledMessage(lang);
       console.error("[IgniteAI] Pregenerate failed", error);
       setStatus({ kind: "error", message: msg });
       toast.error(msg);

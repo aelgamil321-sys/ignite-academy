@@ -20,7 +20,7 @@ import {
   translatableSegments,
 } from "@/lib/islamic-text-protection";
 
-const translatableLang = z.enum(["fr", "de", "ur", "zh"]);
+const translatableLang = z.enum(["ar", "fr", "de", "ur", "zh"]);
 
 const translateBatchSchema = z.object({
   texts: z.array(z.string().max(8000)),

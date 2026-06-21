@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { useI18n, L, prefetchEducationalTranslations, useLessonTranslationScope } from "@/lib/i18n";
-import { needsDynamicTranslation } from "@/lib/translate-content";
-import type { EducationalField } from "@/lib/translate-content";
+import { biSourceForTranslation, type EducationalField } from "@/lib/translate-content";
 import type { QuizQuestion } from "@/lib/curriculum";
 import {
   gradeLabelForPercentage,
@@ -33,43 +32,31 @@ export function LessonQuizResults({
   const quizMeta = { lessonId };
 
   useEffect(() => {
-    if (!needsDynamicTranslation(lang)) return;
-    const source = (b: Bi) => b.en?.trim() || b.ar?.trim() || "";
+    if (lang === "en") return;
     const fields: EducationalField[] = [];
+    const pushBi = (b: Bi, fieldName: string, contentType: EducationalField["contentType"]) => {
+      const source = biSourceForTranslation(b, lang);
+      if (!source) return;
+      fields.push({
+        fieldName,
+        contentType,
+        text: source.text,
+        sourceLanguage: source.sourceLanguage,
+      });
+    };
     const answerByIndex = new Map<number, QuizSubmissionAnswerItem>();
     for (const a of submission.answers) answerByIndex.set(a.questionIndex, a);
 
     questions.forEach((q, i) => {
       const saved = answerByIndex.get(i);
       if (saved?.teacherFeedback) {
-        const fb = source(saved.teacherFeedback);
-        if (fb) {
-          fields.push({
-            fieldName: `quiz_feedback_${i}`,
-            contentType: "quiz_feedback",
-            text: fb,
-          });
-        }
+        pushBi(saved.teacherFeedback, `quiz_feedback_${i}`, "quiz_feedback");
       }
       if (saved && saved.type !== "essay") {
         const selected = q.options[saved.selectedIndex];
         const correct = q.options[saved.correctIndex];
-        const selText = selected ? source(selected) : "";
-        const corText = correct ? source(correct) : "";
-        if (selText) {
-          fields.push({
-            fieldName: `quiz_q_${i}_opt_${saved.selectedIndex}`,
-            contentType: "quiz_option",
-            text: selText,
-          });
-        }
-        if (corText) {
-          fields.push({
-            fieldName: `quiz_q_${i}_opt_${saved.correctIndex}`,
-            contentType: "quiz_option",
-            text: corText,
-          });
-        }
+        if (selected) pushBi(selected, `quiz_q_${i}_opt_${saved.selectedIndex}`, "quiz_option");
+        if (correct) pushBi(correct, `quiz_q_${i}_opt_${saved.correctIndex}`, "quiz_option");
       }
     });
 
@@ -87,9 +74,9 @@ export function LessonQuizResults({
   }
 
   const typeLabel = (type: QuizQuestion["type"]) => {
-    if (type === "true_false") return lang === "ar" ? "صح / خطأ" : "True / False";
-    if (type === "essay") return lang === "ar" ? "سؤال مقالي" : "Essay";
-    return lang === "ar" ? "اختيار من متعدد" : "Multiple choice";
+    if (type === "true_false") return L("True / False", "صح / خطأ")[lang];
+    if (type === "essay") return L("Essay", "سؤال مقالي")[lang];
+    return L("Multiple choice", "اختيار من متعدد")[lang];
   };
 
   return (
@@ -171,7 +158,7 @@ export function LessonQuizResults({
                   {typeLabel(q.type)}
                 </span>
                 <span className="text-[10px] rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-primary">
-                  {q.points} {lang === "ar" ? "نقطة" : q.points === 1 ? "pt" : "pts"}
+                  {q.points} {L(q.points === 1 ? "pt" : "pts", "نقطة")[lang]}
                 </span>
               </div>
 

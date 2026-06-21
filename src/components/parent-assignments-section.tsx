@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { FileText, ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useI18n, L } from "@/lib/i18n";
+import { useI18n, type TKey } from "@/lib/i18n";
+import { localeForFormatting, contentLocale, pickBiLocale } from "@/lib/i18n-config";
 import {
   assignmentTitle,
   fetchParentChildAssignments,
@@ -30,26 +31,23 @@ function statusLabel(
 
 const FILTER_META: Record<
   AssignmentFilter,
-  { emoji: string; labelEn: string; labelAr: string; ring: string; active: string }
+  { emoji: string; labelKey: TKey; ring: string; active: string }
 > = {
   submitted: {
     emoji: "🟢",
-    labelEn: "Submitted",
-    labelAr: "تم التسليم",
+    labelKey: "parent_assign_submitted",
     ring: "ring-emerald-500/30",
     active: "border-emerald-500/50 bg-emerald-500/8 shadow-[0_8px_24px_-8px_rgba(16,185,129,0.35)]",
   },
   upcoming: {
     emoji: "🟡",
-    labelEn: "Upcoming",
-    labelAr: "قادمة",
+    labelKey: "parent_assign_upcoming",
     ring: "ring-amber-500/30",
     active: "border-amber-500/50 bg-amber-500/8 shadow-[0_8px_24px_-8px_rgba(245,158,11,0.35)]",
   },
   overdue: {
     emoji: "🔴",
-    labelEn: "Overdue",
-    labelAr: "متأخرة",
+    labelKey: "parent_assign_overdue",
     ring: "ring-red-500/30",
     active: "border-red-500/50 bg-red-500/8 shadow-[0_8px_24px_-8px_rgba(239,68,68,0.35)]",
   },
@@ -104,7 +102,7 @@ export function ParentAssignmentsSection({ studentUserId }: { studentUserId: str
           : [];
 
   const formatDue = (iso: string) =>
-    new Date(iso).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB", {
+    new Date(iso).toLocaleDateString(localeForFormatting(lang), {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -150,10 +148,10 @@ export function ParentAssignmentsSection({ studentUserId }: { studentUserId: str
                 </span>
               </div>
               <div className="mt-2 text-sm font-semibold text-foreground">
-                {lang === "ar" ? meta.labelAr : meta.labelEn}
+                {tr(meta.labelKey)}
               </div>
               <div className="mt-1 text-xs text-muted-foreground">
-                {L("Tap to view details", "اضغط لعرض التفاصيل")[lang]}
+                {tr("parent_tap_view_details")}
               </div>
             </button>
           );
@@ -163,9 +161,7 @@ export function ParentAssignmentsSection({ studentUserId }: { studentUserId: str
       {activeFilter && (
         <div className="mt-4 rounded-2xl border border-border bg-background p-4">
           <h3 className="mb-3 text-sm font-semibold text-foreground">
-            {lang === "ar"
-              ? FILTER_META[activeFilter].labelAr
-              : FILTER_META[activeFilter].labelEn}
+            {tr(FILTER_META[activeFilter].labelKey)}
           </h3>
           {loading ? (
             <p className="text-sm italic text-muted-foreground">{tr("loading")}</p>
@@ -221,9 +217,13 @@ export function ParentAssignmentsSection({ studentUserId }: { studentUserId: str
                 </div>
                 {(item.submission?.feedback_en || item.submission?.feedback_ar) && (
                   <p className="mt-2 whitespace-pre-wrap text-xs text-muted-foreground">
-                    {lang === "ar"
-                      ? item.submission?.feedback_ar || item.submission?.feedback_en
-                      : item.submission?.feedback_en || item.submission?.feedback_ar}
+                    {pickBiLocale(
+                      {
+                        en: item.submission?.feedback_en ?? "",
+                        ar: item.submission?.feedback_ar ?? "",
+                      },
+                      contentLocale(lang),
+                    )}
                   </p>
                 )}
               </li>

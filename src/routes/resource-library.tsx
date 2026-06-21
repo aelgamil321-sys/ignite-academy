@@ -150,7 +150,7 @@ function ResourceCard({
         <div className="font-medium text-foreground">{item.label}</div>
         <div className="text-sm text-foreground/80 mt-1 truncate">{bi(item.lessonTitle)}</div>
         <div className="text-xs text-muted-foreground mt-1">
-          {gradeDisplayName(item.gradeSlug, lang === "ar" ? "ar" : "en")}
+          {gradeDisplayName(item.gradeSlug, locale)}
           {item.unit.en || item.unit.ar ? ` · ${bi(item.unit)}` : ""}
         </div>
       </div>

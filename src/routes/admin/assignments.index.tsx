@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCMS } from "@/lib/cms";
 import { useI18n, L } from "@/lib/i18n";
+import { localeForFormatting } from "@/lib/i18n-config";
 import { grades } from "@/lib/curriculum";
 import {
   assignmentTitle,
@@ -475,7 +476,7 @@ function AdminAssignmentsPage() {
                     {row.section ? ` · ${row.section}` : ""}
                     {row.islamic_group ? ` · ${row.islamic_group}` : ""}
                     {" · "}
-                    {new Date(row.due_date).toLocaleString(lang === "ar" ? "ar" : "en")}
+                    {new Date(row.due_date).toLocaleString(localeForFormatting(lang))}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

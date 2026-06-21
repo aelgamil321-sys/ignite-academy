@@ -113,7 +113,7 @@ export function findLessonTranslationBySource(
   lessonId: string | undefined,
   source: string,
 ): string | null {
-  if (!source || lang === "en" || lang === "ar") return null;
+  if (!source || lang === "en") return null;
   const store = loadStore();
   const hash = contentHash(source);
   const lessonPart = lessonId ?? "_";

@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Lang } from "@/lib/i18n-config";
+import { normalizePreferredLang } from "@/lib/preferred-language";
 import {
   normalizeIslamicGroup,
   normalizeStudentSection,
@@ -16,6 +18,7 @@ export type StudentProfileRow = {
   section: StudentSection | null;
   islamic_group: IslamicGroup | null;
   profile_photo_path: string | null;
+  preferred_language: Lang;
 };
 
 export type StudentProfileForm = {
@@ -24,6 +27,7 @@ export type StudentProfileForm = {
   english_name: string;
   section?: StudentSection | null;
   islamic_group?: IslamicGroup | null;
+  preferred_language?: Lang;
 };
 
 export const CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE =
@@ -35,7 +39,7 @@ export type StudentProfileCertificateFields = Pick<
 >;
 
 const profileSelect =
-  "user_id, full_name, arabic_name, english_name, email, grade, section, islamic_group, profile_photo_path";
+  "user_id, full_name, arabic_name, english_name, email, grade, section, islamic_group, profile_photo_path, preferred_language";
 
 function mapProfileRow(data: {
   user_id: string;
@@ -47,6 +51,7 @@ function mapProfileRow(data: {
   section: string | null;
   islamic_group: string | null;
   profile_photo_path: string | null;
+  preferred_language: string | null;
 }): StudentProfileRow {
   return {
     user_id: data.user_id,
@@ -58,6 +63,7 @@ function mapProfileRow(data: {
     section: normalizeStudentSection(data.section),
     islamic_group: normalizeIslamicGroup(data.islamic_group),
     profile_photo_path: data.profile_photo_path ?? null,
+    preferred_language: normalizePreferredLang(data.preferred_language) ?? "ar",
   };
 }
 
@@ -117,6 +123,7 @@ export async function saveStudentProfile(
         english_name: payload.english_name,
         section: payload.section,
         islamic_group: payload.islamic_group,
+        ...(form.preferred_language ? { preferred_language: form.preferred_language } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq("user_id", userId)

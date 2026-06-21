@@ -1,10 +1,10 @@
 import { Sparkles } from "lucide-react";
-import { useI18n, L } from "@/lib/i18n";
+import { useI18n, uiBi } from "@/lib/i18n";
 import { computeStudentBadges } from "@/lib/student-badges";
 import type { StudentProgressData } from "@/lib/student-progress";
 
 export function ParentDashboardBadges({ progress }: { progress: StudentProgressData }) {
-  const { lang, bi } = useI18n();
+  const { tr, lang } = useI18n();
   const { badges } = computeStudentBadges(progress);
 
   return (
@@ -14,7 +14,7 @@ export function ParentDashboardBadges({ progress }: { progress: StudentProgressD
           <Sparkles className="h-5 w-5" />
         </div>
         <h2 className="font-display text-xl text-foreground">
-          {L("Achievements & Badges", "الإنجازات والشارات")[lang]}
+          {tr("parent_achievements_badges")}
         </h2>
       </div>
 
@@ -36,14 +36,14 @@ export function ParentDashboardBadges({ progress }: { progress: StudentProgressD
               {badge.icon}
             </div>
             <h3 className="mt-2 font-display text-sm leading-snug text-foreground">
-              {bi(badge.title)}
+              {uiBi(badge.title, lang)}
             </h3>
             <p className="mt-1 text-[11px] leading-snug text-muted-foreground line-clamp-2">
-              {bi(badge.description)}
+              {uiBi(badge.description, lang)}
             </p>
             {!badge.unlocked && (
               <span className="mt-2 inline-block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {L("Locked", "مقفلة")[lang]}
+                {tr("parent_badge_locked")}
               </span>
             )}
           </article>

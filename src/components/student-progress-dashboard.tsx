@@ -9,14 +9,15 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { StudentBadgesSection } from "@/components/student-badges-section";
-import {useI18n, L } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
+import { localeForFormatting, type Lang } from "@/lib/i18n-config";
 import type { StudentProgressData } from "@/lib/student-progress";
 
 
-function formatDate(iso: string, lang: "en" | "ar"): string {
+function formatDate(iso: string, lang: Lang): string {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB", {
+    return new Date(iso).toLocaleDateString(localeForFormatting(lang), {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -26,12 +27,12 @@ function formatDate(iso: string, lang: "en" | "ar"): string {
   }
 }
 
-function learningLevelClass(label: string): string {
-  if (label === "Excellent" || label === "ممتاز") return "bg-primary/15 text-primary border-primary/30";
-  if (label === "Very Good" || label === "جيد جدًا") return "bg-primary/10 text-primary border-primary/25";
-  if (label === "Good" || label === "جيد") return "bg-sky-500/10 text-sky-700 border-sky-500/25";
-  if (label === "Pass" || label === "مقبول") return "bg-amber-500/10 text-amber-800 border-amber-500/25";
-  if (label === "Not started" || label === "لم يبدأ بعد") return "bg-muted text-muted-foreground border-border";
+function learningLevelClass(enLabel: string): string {
+  if (enLabel === "Excellent") return "bg-primary/15 text-primary border-primary/30";
+  if (enLabel === "Very Good") return "bg-primary/10 text-primary border-primary/25";
+  if (enLabel === "Good") return "bg-sky-500/10 text-sky-700 border-sky-500/25";
+  if (enLabel === "Pass") return "bg-amber-500/10 text-amber-800 border-amber-500/25";
+  if (enLabel === "Not started") return "bg-muted text-muted-foreground border-border";
   return "bg-destructive/10 text-destructive border-destructive/25";
 }
 
@@ -45,7 +46,7 @@ export function StudentProgressDashboard({
   gradeSlug: string;
 }) {
   const { lang, bi } = useI18n();
-  const learningLevel = lang === "ar" ? progress.learningLevelAr : progress.learningLevelEn;
+  const learningLevel = L(progress.learningLevelEn, progress.learningLevelAr)[lang];
 
   const statCards = [
     {
@@ -88,7 +89,7 @@ export function StudentProgressDashboard({
       value: learningLevel,
       sub: (
         <span
-          className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${learningLevelClass(learningLevel)}`}
+          className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${learningLevelClass(progress.learningLevelEn)}`}
         >
           {learningLevel}
         </span>

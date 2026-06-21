@@ -138,7 +138,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
           </div>
           <div className="flex flex-wrap gap-2 pt-1">
             <span className="inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold">
-              {lang === "ar" ? report.gradeLabelAr : report.gradeLabelEn}
+              {L(report.gradeLabelEn, report.gradeLabelAr)[lang]}
             </span>
             <span className="inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold">
               {sectionLabel(report.section, lang)}
@@ -161,7 +161,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
               <div className="flex items-center gap-2 text-primary mb-2">
                 <Icon className="h-4 w-4" />
                 <span className="text-xs font-medium text-muted-foreground">
-                  {lang === "ar" ? metric.labelAr : metric.labelEn}
+                  {L(metric.labelEn, metric.labelAr)[lang]}
                 </span>
               </div>
               <div className="font-display text-2xl text-foreground">{metric.value}</div>
@@ -184,10 +184,10 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
               className="rounded-xl border border-border bg-background px-4 py-3"
             >
               <div className="text-xs text-muted-foreground">
-                {lang === "ar" ? item.labelAr : item.labelEn}
+                {L(item.labelEn, item.labelAr)[lang]}
               </div>
               <div className="text-sm font-medium text-foreground mt-0.5">
-                {lang === "ar" ? item.contextAr : item.contextEn}
+                {L(item.contextEn, item.contextAr)[lang]}
               </div>
               <div className="font-display text-xl text-primary mt-2">
                 {formatPeerRank(item.rank, lang)}
@@ -237,7 +237,7 @@ export function ParentPerformanceReportCard({ report }: { report: ParentPerforma
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    formatter={(value) => [`${value}%`, lang === "ar" ? "الدرجة" : "Score"]}
+                    formatter={(value) => [`${value}%`, L("Score", "الدرجة")[lang]]}
                   />
                 }
               />

@@ -9,12 +9,10 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { useI18n, type TKey, prefetchEducationalTranslations, useLessonTranslationScope } from "@/lib/i18n";
-import { needsDynamicTranslation } from "@/lib/translate-content";
-import type { EducationalField } from "@/lib/translate-content";
+import { useI18n, L, type TKey, prefetchEducationalTranslations, useLessonTranslationScope } from "@/lib/i18n";
+import { biSourceForTranslation, type EducationalContentType, type EducationalField } from "@/lib/translate-content";
 import type { Bi } from "@/lib/curriculum";
 import { LessonVocabularyCards } from "@/components/lesson-vocabulary-cards";
-import { pickVocabMeaningBi, pickVocabWordBi } from "@/lib/lesson-vocab";
 import { getGrade } from "@/lib/curriculum";
 import { useResolveLesson, lessonVideoEmbeds, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
 import { studentDownloadItems, fileNameFromUrl, type StudentDownloadItem } from "@/lib/lesson-bilingual-files";
@@ -46,36 +44,61 @@ function LessonPage() {
   useLessonTranslationScope(lessonSlug);
 
   useEffect(() => {
-    if (!lessonReady || !resolved?.lesson || !needsDynamicTranslation(lang)) return;
+    if (!lessonReady || !resolved?.lesson) return;
     const lesson = resolved.lesson;
-    const source = (b: Bi) => b.en?.trim() || b.ar?.trim() || "";
-    const fields: EducationalField[] = [
-      { fieldName: "title", contentType: "title", text: source(lesson.title) },
-      { fieldName: "outcome", contentType: "outcome", text: source(lesson.outcome) },
-      { fieldName: "explanation", contentType: "content", text: source(lesson.explanation) },
-      { fieldName: "grade", contentType: "general", text: source(resolved.grade.name) },
-      { fieldName: "subject", contentType: "general", text: source(lesson.subject) },
-      { fieldName: "unit", contentType: "general", text: source(lesson.unit) },
-      ...resolved.lessonFiles.map((f) => ({
-        fieldName: `file_${f.id}`,
-        contentType: "resource_label" as const,
-        text: source(f.title),
-      })),
-      ...lesson.vocab.flatMap((v, i) => [
-        { fieldName: `vocab_term_${i}`, contentType: "vocab_term" as const, text: source(pickVocabWordBi(v, lang === "ar" ? "ar" : "en")) },
-        { fieldName: `vocab_def_${i}`, contentType: "vocab_def" as const, text: source(pickVocabMeaningBi(v, lang === "ar" ? "ar" : "en")) },
-      ]),
-      ...normalizeQuizList(resolved.custom?.quiz ?? lesson.quiz).flatMap((q, qi) => [
-        { fieldName: `quiz_q_${qi}`, contentType: "quiz_question" as const, text: source(q.q) },
-        ...q.options.map((o, oi) => ({
-          fieldName: `quiz_q_${qi}_opt_${oi}`,
-          contentType: "quiz_option" as const,
-          text: source(o),
-        })),
-      ]),
-    ].filter((f) => f.text);
-    prefetchEducationalTranslations(lessonSlug, fields, lang);
-  }, [lessonSlug, lang, lessonReady]);
+    const fields: EducationalField[] = [];
+    const pushBi = (bi: Bi, fieldName: string, contentType: EducationalContentType) => {
+      const source = biSourceForTranslation(bi, lang);
+      if (!source) return;
+      fields.push({
+        fieldName,
+        contentType,
+        text: source.text,
+        sourceLanguage: source.sourceLanguage,
+      });
+    };
+
+    pushBi(lesson.title, "title", "title");
+    pushBi(lesson.outcome, "outcome", "outcome");
+    pushBi(lesson.explanation, "explanation", "content");
+    pushBi(resolved.grade.name, "grade", "general");
+    pushBi(lesson.subject, "subject", "general");
+    pushBi(lesson.unit, "unit", "general");
+
+    for (const f of resolved.lessonFiles) {
+      pushBi(f.title, `file_${f.id}`, "resource_label");
+    }
+
+    for (const [i, v] of lesson.vocab.entries()) {
+      const wordSource = biSourceForTranslation(v.word, lang);
+      if (wordSource) {
+        fields.push({
+          fieldName: `vocab_term_${i}`,
+          contentType: "vocab_term",
+          text: wordSource.text,
+          sourceLanguage: wordSource.sourceLanguage,
+        });
+      }
+      const meaningSource = biSourceForTranslation(v.meaning, lang);
+      if (meaningSource) {
+        fields.push({
+          fieldName: `vocab_def_${i}`,
+          contentType: "vocab_def",
+          text: meaningSource.text,
+          sourceLanguage: meaningSource.sourceLanguage,
+        });
+      }
+    }
+
+    for (const [qi, q] of normalizeQuizList(resolved.custom?.quiz ?? lesson.quiz).entries()) {
+      pushBi(q.q, `quiz_q_${qi}`, "quiz_question");
+      for (const [oi, opt] of q.options.entries()) {
+        pushBi(opt, `quiz_q_${qi}_opt_${oi}`, "quiz_option");
+      }
+    }
+
+    if (fields.length > 0) prefetchEducationalTranslations(lessonSlug, fields, lang);
+  }, [lessonSlug, lang, lessonReady, resolved]);
 
   useLessonHashScroll(lessonReady, lessonSlug);
 
@@ -102,7 +125,7 @@ function LessonPage() {
             <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
             {tr("back_to_grade")} · {bi(grade.name)}
           </Link>
-          <p className="mt-6 text-muted-foreground">Lesson not found.</p>
+          <p className="mt-6 text-muted-foreground">{L("Lesson not found.", "الدرس غير موجود.")[lang]}</p>
         </main>
         <SiteFooter />
       </div>
@@ -150,9 +173,8 @@ function LessonPage() {
             >
               <ChevronLeft className={`h-4 w-4 shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
               <span>
-                {lang === "ar"
-                  ? `العودة إلى ${bi(grade.name, { ...lessonMeta, fieldName: "grade", contentType: "general" })}`
-                  : `${tr("back_to_grade")} ${bi(grade.name, { ...lessonMeta, fieldName: "grade", contentType: "general" })}`}
+                {tr("back_to_grade")}{" "}
+                {bi(grade.name, { ...lessonMeta, fieldName: "grade", contentType: "general" })}
               </span>
             </Link>
             <div className="mt-2 hidden text-xs uppercase tracking-[0.22em] text-primary md:mb-2 md:block">
@@ -182,7 +204,7 @@ function LessonPage() {
             </a>
             <a href="#lesson-pdf" className={resourceBtn}>
               <FileText className="h-4 w-4 shrink-0" />
-              PDF
+              {tr("ls_pdf")}
             </a>
             <a href="#lesson-worksheet" className={resourceBtn}>
               <ClipboardList className="h-4 w-4 shrink-0" />
@@ -201,7 +223,7 @@ function LessonPage() {
           <div className="min-w-0 lg:col-span-2 space-y-4 md:space-y-6">
             {sections.map((s) => {
               const Icon = s.icon;
-              const fallback = lang === "ar" ? "لم تتم إضافة هذا المحتوى بعد" : "This content has not been added yet";
+              const fallback = L("This content has not been added yet", "لم تتم إضافة هذا المحتوى بعد")[lang];
               const body = (s.body ?? "").trim();
               return (
                 <div key={s.key} className={lessonCard}>
@@ -259,7 +281,7 @@ function LessonPage() {
                   <div className="absolute inset-0 bg-primary/70 grid place-content-center text-primary-foreground">
                     <div className="text-center px-6">
                       <Video className="h-10 w-10 mx-auto opacity-90" />
-                      <div className="mt-3 font-display text-lg">{lang === "ar" ? "لم يتم رفع فيديو بعد" : "No video uploaded yet"}</div>
+                      <div className="mt-3 font-display text-lg">{L("No video uploaded yet", "لم يتم رفع فيديو بعد")[lang]}</div>
                     </div>
                   </div>
                 </div>
@@ -319,7 +341,8 @@ function LessonDownloads({
   lessonCardTitle: string;
   resourceBtn: string;
 }) {
-  const items = custom ? studentDownloadItems(custom) : [];
+  const { lang, tr } = useI18n();
+  const items = custom ? studentDownloadItems(custom, lang) : [];
   const pdfItems = items.filter(
     (item) =>
       item.key === "pdfArUrl" ||
@@ -331,24 +354,29 @@ function LessonDownloads({
     (item) => item.key === "worksheetArUrl" || item.key === "worksheetEnUrl",
   );
   const sectionProps = { lessonCard, lessonCardHeader, lessonCardIcon, lessonCardTitle, resourceBtn };
+  const pdfEmpty = L("No PDF attached to this lesson.", "لا يوجد PDF مرفق لهذا الدرس.");
+  const worksheetEmpty = L(
+    "No worksheet attached to this lesson.",
+    "لا توجد ورقة عمل مرفقة لهذا الدرس.",
+  );
 
   if (items.length === 0) {
     return (
       <div className="space-y-4 md:space-y-6">
         <LessonFileSection
           id="lesson-pdf"
-          title="PDF"
+          title={tr("ls_pdf")}
           items={[]}
-          emptyEn="No PDF attached to this lesson."
-          emptyAr="لا يوجد PDF مرفق لهذا الدرس."
+          emptyEn={pdfEmpty.en}
+          emptyAr={pdfEmpty.ar}
           {...sectionProps}
         />
         <LessonFileSection
           id="lesson-worksheet"
-          title="Worksheet / ورقة العمل"
+          title={tr("ls_worksheet")}
           items={[]}
-          emptyEn="No worksheet attached to this lesson."
-          emptyAr="لا توجد ورقة عمل مرفقة لهذا الدرس."
+          emptyEn={worksheetEmpty.en}
+          emptyAr={worksheetEmpty.ar}
           {...sectionProps}
         />
       </div>
@@ -359,18 +387,18 @@ function LessonDownloads({
     <div className="space-y-4 md:space-y-6">
       <LessonFileSection
         id="lesson-pdf"
-        title="PDF"
+        title={tr("ls_pdf")}
         items={pdfItems}
-        emptyEn="No PDF attached to this lesson."
-        emptyAr="لا يوجد PDF مرفق لهذا الدرس."
+        emptyEn={pdfEmpty.en}
+        emptyAr={pdfEmpty.ar}
         {...sectionProps}
       />
       <LessonFileSection
         id="lesson-worksheet"
-        title="Worksheet / ورقة العمل"
+        title={tr("ls_worksheet")}
         items={worksheetItems}
-        emptyEn="No worksheet attached to this lesson."
-        emptyAr="لا توجد ورقة عمل مرفقة لهذا الدرس."
+        emptyEn={worksheetEmpty.en}
+        emptyAr={worksheetEmpty.ar}
         {...sectionProps}
       />
     </div>
@@ -400,6 +428,8 @@ function LessonFileSection({
   lessonCardTitle: string;
   resourceBtn: string;
 }) {
+  const { lang } = useI18n();
+
   return (
     <div
       id={id}
@@ -416,9 +446,7 @@ function LessonFileSection({
         <DownloadGrid items={items} resourceBtn={resourceBtn} />
       ) : (
         <p className="text-sm leading-[1.8] text-muted-foreground md:text-base">
-          {emptyAr}
-          <br />
-          {emptyEn}
+          {L(emptyEn, emptyAr)[lang]}
         </p>
       )}
     </div>

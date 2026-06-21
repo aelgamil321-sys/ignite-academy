@@ -13,7 +13,8 @@
     "db:apply-parent-links": "node scripts/apply-parent-student-links-migration.mjs",
     "db:apply-parent-link-codes": "node scripts/apply-parent-link-codes-migration.mjs",
     "db:apply-parent-flow": "node scripts/apply-parent-flow-migrations.mjs",
-    "db:apply-parent-link-codes-fix": "node scripts/apply-parent-link-codes-pgcrypto-fix.mjs"
+    "db:apply-parent-link-codes-fix": "node scripts/apply-parent-link-codes-pgcrypto-fix.mjs",
+    "db:apply-preferred-language": "node scripts/apply-preferred-language-migration.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

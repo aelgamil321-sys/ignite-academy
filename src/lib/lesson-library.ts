@@ -9,6 +9,7 @@ import {
 import { useCMS, ytId } from "@/lib/cms";
 import type { CustomLesson, FileType } from "@/lib/cms";
 import { gradeDisplayName, gradeMatches } from "@/lib/grade-utils";
+import { L, pickBiLocale, type ContentLocale } from "@/lib/i18n-config";
 
 export type LessonResourceType = "pdf" | "ppt" | "worksheet";
 
@@ -48,8 +49,8 @@ const BILINGUAL_RESOURCE_TYPE: Record<BilingualFileKey, LessonResourceType> = {
   worksheetEnUrl: "worksheet",
 };
 
-function bilingualLabel(slot: (typeof BILINGUAL_LESSON_FILE_SLOTS)[number], lang: "en" | "ar"): string {
-  return lang === "ar" ? slot.labelAr : slot.labelEn;
+function bilingualLabel(slot: (typeof BILINGUAL_LESSON_FILE_SLOTS)[number], lang: ContentLocale): string {
+  return L(slot.labelEn, slot.labelAr)[lang];
 }
 
 function legacyResource(
@@ -74,7 +75,7 @@ function legacyResource(
   };
 }
 
-function resourcesFromLesson(lesson: CustomLesson, lang: "en" | "ar"): LessonResourceItem[] {
+function resourcesFromLesson(lesson: CustomLesson, lang: ContentLocale): LessonResourceItem[] {
   const items: LessonResourceItem[] = [];
 
   for (const slot of BILINGUAL_LESSON_FILE_SLOTS) {
@@ -94,14 +95,14 @@ function resourcesFromLesson(lesson: CustomLesson, lang: "en" | "ar"): LessonRes
   }
 
   const legacyItems = [
-    legacyResource(lesson, "pdf", lesson.pdfUrl, lesson.pdfName, lang === "ar" ? "PDF" : "PDF"),
-    legacyResource(lesson, "ppt", lesson.pptUrl, lesson.pptName, lang === "ar" ? "باوربوينت" : "PowerPoint"),
+    legacyResource(lesson, "pdf", lesson.pdfUrl, lesson.pdfName, "PDF"),
+    legacyResource(lesson, "ppt", lesson.pptUrl, lesson.pptName, L("PowerPoint", "باوربوينت")[lang]),
     legacyResource(
       lesson,
       "worksheet",
       lesson.worksheetUrl,
       lesson.worksheetName,
-      lang === "ar" ? "ورقة عمل" : "Worksheet",
+      L("Worksheet", "ورقة عمل")[lang],
     ),
   ].filter((item): item is LessonResourceItem => item !== null);
 
@@ -115,7 +116,7 @@ function fileTypeToResourceType(type: FileType): LessonResourceType {
 }
 
 /** All downloadable lesson resources from CMS lessons + linked files table rows. */
-export function useLessonLibraryResources(lang: "en" | "ar" = "en"): LessonResourceItem[] {
+export function useLessonLibraryResources(lang: ContentLocale = "en"): LessonResourceItem[] {
   const { lessons, files } = useCMS();
 
   return useMemo(() => {
@@ -143,7 +144,7 @@ export function useLessonLibraryResources(lang: "en" | "ar" = "en"): LessonResou
         gradeSlug: f.grade,
         unit: f.unit,
         type: fileTypeToResourceType(f.type),
-        label: lang === "ar" ? f.title.ar || f.title.en : f.title.en || f.title.ar,
+        label: pickBiLocale(f.title, lang),
         url: f.fileUrl,
         fileName: f.fileName || fileNameFromUrl(f.fileUrl),
       });
