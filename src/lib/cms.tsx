@@ -9,6 +9,7 @@ import { gradeDisplayName, gradeMatches, normalizeGradeSlug } from "./grade-util
 import { normalizeQuizList } from "./lesson-quiz";
 import { computeHomepageStats } from "./homepage-stats";
 import { ytId } from "./youtube-url";
+export { ytId };
 import { parseVocabFromStorage, serializeVocabForStorage, type VocabularyItem } from "./lesson-vocab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -458,10 +459,6 @@ export function useCMS() {
   if (!c) throw new Error("useCMS must be used inside CMSProvider");
   return c;
 }
-
-import { ytId } from "./youtube-url";
-
-export { ytId } from "./youtube-url";
 
 export function lessonVideoEmbeds(
   custom: CustomLesson | undefined,
