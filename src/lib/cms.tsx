@@ -4,9 +4,11 @@ import { grades } from "./curriculum";
 import {
   type VideoItem, type Resource, type Announcement, type ParentGuide,
 } from "./extras";
-import { type SubjectCategory, subjectCategoryName } from "./categories";
+import { type SubjectCategory, subjectCategoryName, SUBJECT_CATEGORIES } from "./categories";
 import { gradeDisplayName, gradeMatches, normalizeGradeSlug } from "./grade-utils";
 import { normalizeQuizList } from "./lesson-quiz";
+import { computeHomepageStats } from "./homepage-stats";
+import { ytId } from "./youtube-url";
 import { parseVocabFromStorage, serializeVocabForStorage, type VocabularyItem } from "./lesson-vocab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -453,11 +455,9 @@ export function useCMS() {
   return c;
 }
 
-export function ytId(url: string): string {
-  if (!url) return "";
-  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
-  return m ? m[1] : url.trim();
-}
+import { ytId } from "./youtube-url";
+
+export { ytId } from "./youtube-url";
 
 export function lessonVideoEmbeds(
   custom: CustomLesson | undefined,
@@ -614,13 +614,17 @@ export function useContentByCategory(category: SubjectCategory) {
 }
 
 export function useCMSStats() {
-  const { lessons, videos, files, articles } = useCMS();
+  const { lessons } = useCMS();
+  const homepage = computeHomepageStats(lessons);
   return {
-    lessonCount: lessons.filter((l) => l.published).length,
-    videoCount: videos.filter((v) => v.published).length,
-    fileCount: files.filter((f) => f.published).length,
-    articleCount: articles.filter((a) => a.published).length,
-    gradeCount: 14,
-    subjectCount: 6,
+    lessonCount: homepage.lessonCount,
+    videoCount: homepage.videoCount,
+    fileCount: homepage.educationalFileCount,
+    articleCount: homepage.assessmentCount,
+    worksheetCount: homepage.educationalFileCount,
+    educationalFileCount: homepage.educationalFileCount,
+    assessmentCount: homepage.assessmentCount,
+    gradeCount: grades.length,
+    subjectCount: SUBJECT_CATEGORIES.length,
   };
 }

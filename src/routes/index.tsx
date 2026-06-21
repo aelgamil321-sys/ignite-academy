@@ -334,9 +334,9 @@ function Home() {
             <div className="grid gap-10 md:grid-cols-4 text-center">
               {[
                 { n: String(stats.lessonCount), l: tr("stat_lessons") },
-                { n: String(stats.fileCount), l: tr("stat_worksheets") },
+                { n: String(stats.educationalFileCount), l: tr("stat_educational_files") },
                 { n: String(stats.videoCount), l: tr("stat_videos") },
-                { n: String(stats.articleCount), l: tr("stat_assessments") },
+                { n: String(stats.assessmentCount), l: tr("stat_assessments") },
               ].map((s) => (
                 <div key={s.l}>
                   <div className="font-display text-5xl md:text-6xl text-primary">{s.n}</div>

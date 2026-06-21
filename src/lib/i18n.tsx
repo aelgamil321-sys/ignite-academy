@@ -92,9 +92,10 @@ export const t = {
   stat_lessons: { en: "Lessons", ar: "الدروس" },
   stat_grades: { en: "Grade Levels", ar: "الصفوف الدراسية" },
   stat_subjects: { en: "Subjects", ar: "المواد" },
-  stat_worksheets: { en: "Worksheets", ar: "أوراق العمل" },
+  stat_worksheets: { en: "Educational Files", ar: "الملفات التعليمية" },
+  stat_educational_files: { en: "Educational Files", ar: "الملفات التعليمية" },
   stat_students: { en: "Students", ar: "الطلاب" },
-  stat_assessments: { en: "Assessments", ar: "التقييمات" },
+  stat_assessments: { en: "Quizzes", ar: "الاختبارات" },
   stat_videos: { en: "Videos", ar: "الفيديوهات" },
   questions: { en: "Questions", ar: "أسئلة" },
 
