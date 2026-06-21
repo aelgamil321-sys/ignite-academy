@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { FileText, ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
 import {
   assignmentTitle,
   fetchParentChildAssignments,
@@ -9,6 +9,8 @@ import {
   statusBadgeClass,
   type AssignmentWithSubmission,
 } from "@/lib/assignment";
+
+type AssignmentFilter = "submitted" | "upcoming" | "overdue";
 
 function statusLabel(
   status: AssignmentWithSubmission["displayStatus"],
@@ -26,10 +28,38 @@ function statusLabel(
   }
 }
 
+const FILTER_META: Record<
+  AssignmentFilter,
+  { emoji: string; labelEn: string; labelAr: string; ring: string; active: string }
+> = {
+  submitted: {
+    emoji: "🟢",
+    labelEn: "Submitted",
+    labelAr: "تم التسليم",
+    ring: "ring-emerald-500/30",
+    active: "border-emerald-500/50 bg-emerald-500/8 shadow-[0_8px_24px_-8px_rgba(16,185,129,0.35)]",
+  },
+  upcoming: {
+    emoji: "🟡",
+    labelEn: "Upcoming",
+    labelAr: "قادمة",
+    ring: "ring-amber-500/30",
+    active: "border-amber-500/50 bg-amber-500/8 shadow-[0_8px_24px_-8px_rgba(245,158,11,0.35)]",
+  },
+  overdue: {
+    emoji: "🔴",
+    labelEn: "Overdue",
+    labelAr: "متأخرة",
+    ring: "ring-red-500/30",
+    active: "border-red-500/50 bg-red-500/8 shadow-[0_8px_24px_-8px_rgba(239,68,68,0.35)]",
+  },
+};
+
 export function ParentAssignmentsSection({ studentUserId }: { studentUserId: string }) {
-  const { tr, lang, dir, bi } = useI18n();
+  const { tr, lang, bi } = useI18n();
   const [items, setItems] = useState<AssignmentWithSubmission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<AssignmentFilter | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -52,9 +82,26 @@ export function ParentAssignmentsSection({ studentUserId }: { studentUserId: str
     () => items.filter((a) => a.displayStatus === "submitted" || a.displayStatus === "graded"),
     [items],
   );
-  const missing = useMemo(() => items.filter((a) => a.displayStatus === "missing"), [items]);
-  const late = useMemo(() => items.filter((a) => a.displayStatus === "late"), [items]);
+  const overdue = useMemo(
+    () => items.filter((a) => a.displayStatus === "late" || a.displayStatus === "missing"),
+    [items],
+  );
   const graded = useMemo(() => items.filter((a) => a.displayStatus === "graded"), [items]);
+
+  const counts: Record<AssignmentFilter, number> = {
+    submitted: submitted.length,
+    upcoming: upcoming.length,
+    overdue: overdue.length,
+  };
+
+  const filteredList =
+    activeFilter === "submitted"
+      ? submitted
+      : activeFilter === "upcoming"
+        ? upcoming
+        : activeFilter === "overdue"
+          ? overdue
+          : [];
 
   const formatDue = (iso: string) =>
     new Date(iso).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB", {
@@ -63,89 +110,117 @@ export function ParentAssignmentsSection({ studentUserId }: { studentUserId: str
       day: "numeric",
     });
 
-  function renderList(list: AssignmentWithSubmission[], empty: string) {
-    if (loading) {
-      return <p className="text-sm text-muted-foreground italic">{tr("loading")}</p>;
-    }
-    if (list.length === 0) {
-      return <p className="text-sm text-muted-foreground italic">{empty}</p>;
-    }
-    return (
-      <ul className="space-y-2">
-        {list.slice(0, 8).map((item) => (
-          <li
-            key={item.id}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-background px-4 py-3"
-          >
-            <div className="min-w-0">
-              <div className="font-medium text-sm truncate">{bi(assignmentTitle(item))}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">
-                {tr("assignment_due_date")}: {formatDue(item.due_date)}
-              </div>
-              {item.displayStatus === "graded" && item.submission?.score != null && (
-                <div className="text-xs text-primary font-semibold mt-1">
-                  {tr("assignment_your_score")}: {item.submission.score}
-                  {item.submission.max_points != null ? ` / ${item.submission.max_points}` : ""}
-                </div>
-              )}
-            </div>
-            <span
-              className={`text-xs rounded-full px-2 py-0.5 font-semibold shrink-0 ${statusBadgeClass(item.displayStatus)}`}
-            >
-              {statusLabel(item.displayStatus, tr)}
-            </span>
-          </li>
-        ))}
-      </ul>
-    );
+  function toggleFilter(filter: AssignmentFilter) {
+    setActiveFilter((current) => (current === filter ? null : filter));
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 md:p-7 shadow-[var(--shadow-soft)]">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <FileText className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="font-display text-xl text-foreground">{tr("parent_assignments_title")}</h2>
-            <p className="text-sm text-muted-foreground">{tr("parent_assignments_lead")}</p>
-          </div>
+    <section className="rounded-2xl border border-primary/15 bg-card p-5 shadow-[var(--shadow-soft)] sm:p-6">
+      <div className="mb-4 flex items-center gap-2.5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <FileText className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="font-display text-xl text-foreground">{tr("parent_assignments_title")}</h2>
+          <p className="text-sm text-muted-foreground">{tr("parent_assignments_lead")}</p>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-2">{tr("assignment_upcoming")}</h3>
-          {renderList(upcoming, tr("assignment_no_upcoming"))}
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-2">{tr("assignment_status_submitted")}</h3>
-          {renderList(submitted, tr("assignment_no_submitted"))}
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-2">{tr("assignment_status_missing")}</h3>
-          {renderList(missing, tr("assignment_no_missing"))}
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-2">{tr("assignment_status_late")}</h3>
-          {renderList(late, tr("assignment_no_late"))}
-        </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {(Object.keys(FILTER_META) as AssignmentFilter[]).map((filter) => {
+          const meta = FILTER_META[filter];
+          const isActive = activeFilter === filter;
+          return (
+            <button
+              key={filter}
+              type="button"
+              onClick={() => toggleFilter(filter)}
+              className={`group rounded-2xl border p-4 text-start transition-all duration-300 hover:-translate-y-0.5 ${
+                isActive
+                  ? `${meta.active} ring-2 ${meta.ring}`
+                  : "border-border bg-background hover:border-primary/25 hover:shadow-[var(--shadow-soft)]"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xl" aria-hidden>
+                  {meta.emoji}
+                </span>
+                <span className="font-display text-3xl leading-none text-foreground">
+                  {loading ? "…" : counts[filter]}
+                </span>
+              </div>
+              <div className="mt-2 text-sm font-semibold text-foreground">
+                {lang === "ar" ? meta.labelAr : meta.labelEn}
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {L("Tap to view details", "اضغط لعرض التفاصيل")[lang]}
+              </div>
+            </button>
+          );
+        })}
       </div>
+
+      {activeFilter && (
+        <div className="mt-4 rounded-2xl border border-border bg-background p-4">
+          <h3 className="mb-3 text-sm font-semibold text-foreground">
+            {lang === "ar"
+              ? FILTER_META[activeFilter].labelAr
+              : FILTER_META[activeFilter].labelEn}
+          </h3>
+          {loading ? (
+            <p className="text-sm italic text-muted-foreground">{tr("loading")}</p>
+          ) : filteredList.length === 0 ? (
+            <p className="text-sm italic text-muted-foreground">
+              {activeFilter === "submitted"
+                ? tr("assignment_no_submitted")
+                : activeFilter === "upcoming"
+                  ? tr("assignment_no_upcoming")
+                  : tr("assignment_no_late")}
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {filteredList.slice(0, 10).map((item) => (
+                <li
+                  key={item.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium">{bi(assignmentTitle(item))}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      {tr("assignment_due_date")}: {formatDue(item.due_date)}
+                    </div>
+                    {item.displayStatus === "graded" && item.submission?.score != null && (
+                      <div className="mt-1 text-xs font-semibold text-primary">
+                        {tr("assignment_your_score")}: {item.submission.score}
+                        {item.submission.max_points != null ? ` / ${item.submission.max_points}` : ""}
+                      </div>
+                    )}
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${statusBadgeClass(item.displayStatus)}`}
+                  >
+                    {statusLabel(item.displayStatus, tr)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {graded.length > 0 && (
-        <div className="mt-6 pt-6 border-t border-border">
-          <h3 className="text-sm font-semibold text-foreground mb-3">{tr("assignment_grade_feedback")}</h3>
+        <div className="mt-5 border-t border-border pt-5">
+          <h3 className="mb-3 text-sm font-semibold text-foreground">{tr("assignment_grade_feedback")}</h3>
           <ul className="space-y-3">
             {graded.slice(0, 5).map((item) => (
               <li key={item.id} className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
-                <div className="font-medium text-sm">{bi(assignmentTitle(item))}</div>
-                <div className="text-lg font-display text-primary mt-1">
+                <div className="text-sm font-medium">{bi(assignmentTitle(item))}</div>
+                <div className="mt-1 font-display text-lg text-primary">
                   {item.submission?.score ?? "—"}
                   {item.submission?.max_points != null ? ` / ${item.submission.max_points}` : ""}
                 </div>
                 {(item.submission?.feedback_en || item.submission?.feedback_ar) && (
-                  <p className="text-xs text-muted-foreground mt-2 whitespace-pre-wrap">
+                  <p className="mt-2 whitespace-pre-wrap text-xs text-muted-foreground">
                     {lang === "ar"
                       ? item.submission?.feedback_ar || item.submission?.feedback_en
                       : item.submission?.feedback_en || item.submission?.feedback_ar}
@@ -165,7 +240,7 @@ export function StudentAssignmentsLinkCard() {
   return (
     <Link
       to="/assignments"
-      className="group rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] hover:border-primary hover:shadow-[var(--shadow-elegant)] transition-all flex items-center justify-between gap-4"
+      className="group flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] transition-all hover:border-primary hover:shadow-[var(--shadow-elegant)]"
     >
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -176,7 +251,7 @@ export function StudentAssignmentsLinkCard() {
           <p className="text-sm text-muted-foreground">{tr("assignments_lead")}</p>
         </div>
       </div>
-      <ArrowRight className={`h-5 w-5 text-primary shrink-0 ${dir === "rtl" ? "rotate-180" : ""}`} />
+      <ArrowRight className={`h-5 w-5 shrink-0 text-primary ${dir === "rtl" ? "rotate-180" : ""}`} />
     </Link>
   );
 }

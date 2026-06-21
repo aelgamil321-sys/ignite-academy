@@ -1,0 +1,69 @@
+import type { ParentPerformanceReport } from "@/lib/parent-performance-report";
+import type { StudentProgressData } from "@/lib/student-progress";
+
+/** Build parent-facing insight bullets from existing dashboard metrics (display only). */
+export function buildParentInsights(
+  report: ParentPerformanceReport,
+  progress: StudentProgressData,
+  lang: "en" | "ar",
+): string[] {
+  const insights: string[] = [];
+  const { grade } = report.rankings;
+
+  if (grade.rank !== null && grade.total > 0) {
+    const topPct = Math.ceil((grade.rank / grade.total) * 100);
+    if (topPct <= 25) {
+      insights.push(
+        lang === "ar"
+          ? `ابنكم ضمن أفضل ${topPct}% من الصف`
+          : `Your child is in the top ${topPct}% of the grade`,
+      );
+    }
+  }
+
+  if (report.averageQuizScorePct !== null) {
+    insights.push(
+      lang === "ar"
+        ? `متوسط الدرجات ${report.averageQuizScorePct}%`
+        : `Average score ${report.averageQuizScorePct}%`,
+    );
+  }
+
+  if (progress.totalLessons > 0 && progress.completedLessons >= progress.totalLessons) {
+    insights.push(
+      lang === "ar" ? "أكمل جميع الدروس المتاحة" : "Completed all available lessons",
+    );
+  }
+
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const recentCert = progress.certificates.some(
+    (c) => new Date(c.issuedAt).getTime() >= weekAgo,
+  );
+  if (recentCert) {
+    insights.push(
+      lang === "ar"
+        ? "حصل على شهادة جديدة هذا الأسبوع"
+        : "Earned a new certificate this week",
+    );
+  }
+
+  if (progress.overallProgressPct >= 75) {
+    insights.push(
+      lang === "ar"
+        ? `التقدّم الدراسي ${progress.overallProgressPct}%`
+        : `Overall progress ${progress.overallProgressPct}%`,
+    );
+  }
+
+  return insights.slice(0, 5);
+}
+
+export function heroStatusLabel(
+  status: ParentPerformanceReport["status"],
+  lang: "en" | "ar",
+): string {
+  if (status === "excellent") return lang === "ar" ? "ممتاز" : "Excellent";
+  if (status === "good") return lang === "ar" ? "جيد جداً" : "Very Good";
+  if (status === "needs_support") return lang === "ar" ? "جيد" : "Good";
+  return lang === "ar" ? "لا توجد بيانات بعد" : "No data yet";
+}

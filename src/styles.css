@@ -211,11 +211,32 @@
   animation: announcement-fade-up 0.6s ease-out both;
 }
 
+@keyframes parent-dash-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.parent-dash-enter {
+  animation: parent-dash-fade-up 0.65s ease-out both;
+}
+
+.parent-dash-card-enter {
+  animation: parent-dash-fade-up 0.55s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .announcement-section-enter,
   .announcement-empty-enter,
   .announcement-empty-item,
-  .announcement-card-enter {
+  .announcement-card-enter,
+  .parent-dash-enter,
+  .parent-dash-card-enter {
     animation: none;
   }
 }
