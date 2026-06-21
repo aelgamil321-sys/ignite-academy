@@ -155,6 +155,10 @@ export const t = {
   // Announcements
   ann_eyebrow: { en: "Announcements", ar: "الإعلانات" },
   ann_title: { en: "What's new", ar: "آخر المستجدات" },
+  ann_subtitle: {
+    en: "Official school updates for students, parents, and staff — news, exams, events, and announcements.",
+    ar: "آخر المستجدات الرسمية للطلاب وأولياء الأمور — أخبار المدرسة والاختبارات والفعاليات.",
+  },
   ann_view_all: { en: "View all announcements", ar: "عرض جميع الإعلانات" },
   ann_school: { en: "School News", ar: "أخبار المدرسة" },
   ann_1: { en: "Mid-Term Assessment Schedule Published", ar: "نشر جدول الاختبارات النصفية" },
@@ -535,7 +539,12 @@ export const t = {
   },
   empty_published_lessons: { en: "No published lessons yet.", ar: "لا توجد دروس منشورة بعد." },
   empty_announcements_short: { en: "No announcements yet.", ar: "لا توجد إعلانات بعد." },
-  empty_announcements_title: { en: "No announcements right now", ar: "لا توجد إعلانات حالياً" },
+  empty_announcements_title: { en: "No updates right now", ar: "لا توجد مستجدات حالياً" },
+  empty_announcements_intro: { en: "Coming soon:", ar: "سيتم نشر:" },
+  empty_announcements_item_news: { en: "School news", ar: "أخبار المدرسة" },
+  empty_announcements_item_exams: { en: "Upcoming exams", ar: "الاختبارات القادمة" },
+  empty_announcements_item_events: { en: "Events & activities", ar: "الفعاليات والأنشطة" },
+  empty_announcements_item_parents: { en: "Parent announcements", ar: "إعلانات أولياء الأمور" },
   empty_announcements_desc: {
     en: "The latest school news and updates will be published here.",
     ar: "وسيتم نشر آخر الأخبار والمستجدات هنا.",
