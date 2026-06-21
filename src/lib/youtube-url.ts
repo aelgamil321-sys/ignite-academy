@@ -1,11 +1,16 @@
-/** Extract YouTube video id from a watch, embed, or youtu.be URL. */
-export function ytId(url: string): string {
-  if (!url) return "";
-  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
-  return m ? m[1] : url.trim();
+/** Extract normalized 11-char YouTube video id, or empty if not a YouTube link. */
+export function extractYoutubeVideoId(url?: string | null): string {
+  if (!url?.trim()) return "";
+  const m = url.trim().match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
+  return m ? m[1] : "";
 }
 
-/** True when the URL looks like a usable YouTube link. */
+/** @deprecated Use extractYoutubeVideoId */
+export function ytId(url: string): string {
+  return extractYoutubeVideoId(url);
+}
+
+/** True when the URL contains a recognizable YouTube video id. */
 export function hasYoutubeUrl(url?: string | null): boolean {
-  return Boolean(ytId(url ?? ""));
+  return Boolean(extractYoutubeVideoId(url));
 }

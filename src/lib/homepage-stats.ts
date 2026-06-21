@@ -1,4 +1,5 @@
 import { serializeQuizForSave } from "@/lib/lesson-quiz";
+import { extractYoutubeVideoId } from "@/lib/youtube-url";
 import type { QuizQuestion } from "@/lib/curriculum";
 
 function hasNonEmptyUrl(url?: string | null): boolean {
@@ -41,12 +42,27 @@ const EDUCATIONAL_FILE_FIELDS: Array<keyof LessonStatsSource> = [
   "pptUrl",
 ];
 
-/** Count every non-empty video URL field on a lesson. */
-export function countLessonVideoUrls(lesson: LessonStatsSource): number {
-  return VIDEO_URL_FIELDS.reduce((sum, key) => {
+/** Unique YouTube video ids on one lesson (AR/EN/legacy deduped). */
+export function collectLessonYoutubeIds(lesson: LessonStatsSource): string[] {
+  const ids = new Set<string>();
+  for (const key of VIDEO_URL_FIELDS) {
     const value = lesson[key];
-    return sum + (typeof value === "string" && hasNonEmptyUrl(value) ? 1 : 0);
-  }, 0);
+    if (typeof value !== "string") continue;
+    const id = extractYoutubeVideoId(value);
+    if (id) ids.add(id);
+  }
+  return [...ids];
+}
+
+/** Unique YouTube video ids across all published lessons. */
+export function countUniqueYoutubeIds(lessons: LessonStatsSource[]): number {
+  const ids = new Set<string>();
+  for (const lesson of lessons.filter((l) => l.published)) {
+    for (const id of collectLessonYoutubeIds(lesson)) {
+      ids.add(id);
+    }
+  }
+  return ids.size;
 }
 
 /** Count all uploaded educational files (worksheets, PDFs, PowerPoints). */
@@ -57,16 +73,24 @@ export function countLessonEducationalFiles(lesson: LessonStatsSource): number {
   }, 0);
 }
 
-/** Saved quiz questions with question text (matches admin save rules). */
-export function countLessonQuizQuestions(lesson: LessonStatsSource): number {
-  return serializeQuizForSave(lesson.quiz).length;
+/** List non-empty educational file URLs on a lesson. */
+export function collectLessonEducationalFileUrls(lesson: LessonStatsSource): string[] {
+  return EDUCATIONAL_FILE_FIELDS.flatMap((key) => {
+    const value = lesson[key];
+    return typeof value === "string" && hasNonEmptyUrl(value) ? [value.trim()] : [];
+  });
+}
+
+/** Lesson has a saved quiz (at least one question with text). */
+export function lessonHasQuiz(lesson: LessonStatsSource): boolean {
+  return serializeQuizForSave(lesson.quiz).length > 0;
 }
 
 export type HomepageStats = {
   lessonCount: number;
   videoCount: number;
   educationalFileCount: number;
-  assessmentCount: number;
+  quizCount: number;
 };
 
 /** Aggregate homepage statistics from published lessons. */
@@ -75,8 +99,8 @@ export function computeHomepageStats(lessons: LessonStatsSource[]): HomepageStat
 
   return {
     lessonCount: published.length,
-    videoCount: published.reduce((sum, l) => sum + countLessonVideoUrls(l), 0),
+    videoCount: countUniqueYoutubeIds(published),
     educationalFileCount: published.reduce((sum, l) => sum + countLessonEducationalFiles(l), 0),
-    assessmentCount: published.reduce((sum, l) => sum + countLessonQuizQuestions(l), 0),
+    quizCount: published.filter(lessonHasQuiz).length,
   };
 }

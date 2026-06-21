@@ -620,10 +620,11 @@ export function useCMSStats() {
     lessonCount: homepage.lessonCount,
     videoCount: homepage.videoCount,
     fileCount: homepage.educationalFileCount,
-    articleCount: homepage.assessmentCount,
+    articleCount: homepage.quizCount,
     worksheetCount: homepage.educationalFileCount,
     educationalFileCount: homepage.educationalFileCount,
-    assessmentCount: homepage.assessmentCount,
+    assessmentCount: homepage.quizCount,
+    quizCount: homepage.quizCount,
     gradeCount: grades.length,
     subjectCount: SUBJECT_CATEGORIES.length,
   };

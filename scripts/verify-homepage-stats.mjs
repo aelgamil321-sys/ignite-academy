@@ -26,6 +26,12 @@ function hasUrl(v) {
   return Boolean(v?.trim());
 }
 
+function extractYoutubeVideoId(url) {
+  if (!url?.trim()) return "";
+  const m = url.trim().match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
+  return m ? m[1] : "";
+}
+
 const VIDEO_COLUMNS = ["youtube_url_ar", "youtube_url_en", "youtube_url"];
 const FILE_COLUMNS = [
   "worksheet_ar_url",
@@ -39,18 +45,35 @@ const FILE_COLUMNS = [
   "ppt_url",
 ];
 
-function countFields(row, columns) {
-  return columns.reduce((sum, col) => sum + (hasUrl(row[col]) ? 1 : 0), 0);
+function lessonTitle(row) {
+  const t = row.title;
+  if (t && typeof t === "object") {
+    return String(t.en || t.ar || row.id).trim() || row.id;
+  }
+  return row.id;
 }
 
-function countQuiz(raw) {
-  if (!Array.isArray(raw)) return 0;
-  return raw.filter((q) => {
+function collectLessonYoutubeIds(row) {
+  const ids = new Set();
+  for (const col of VIDEO_COLUMNS) {
+    const id = extractYoutubeVideoId(row[col]);
+    if (id) ids.add(id);
+  }
+  return [...ids];
+}
+
+function collectLessonFileUrls(row) {
+  return FILE_COLUMNS.flatMap((col) => (hasUrl(row[col]) ? [row[col].trim()] : []));
+}
+
+function lessonHasQuiz(row) {
+  if (!Array.isArray(row.quiz)) return false;
+  return row.quiz.some((q) => {
     const text = q?.q;
     const en = typeof text?.en === "string" ? text.en.trim() : "";
     const ar = typeof text?.ar === "string" ? text.ar.trim() : "";
     return Boolean(en || ar);
-  }).length;
+  });
 }
 
 const env = loadEnv();
@@ -64,6 +87,7 @@ if (!url || !key) {
 
 const select = [
   "id",
+  "title",
   "published",
   "is_deleted",
   ...VIDEO_COLUMNS,
@@ -86,26 +110,47 @@ if (!res.ok) {
 const rows = await res.json();
 const active = rows.filter((r) => !r.is_deleted);
 
+const uniqueVideoIds = new Set();
+for (const row of active) {
+  for (const id of collectLessonYoutubeIds(row)) {
+    uniqueVideoIds.add(id);
+  }
+}
+
 const stats = {
   lessonCount: active.length,
-  videoCount: active.reduce((sum, r) => sum + countFields(r, VIDEO_COLUMNS), 0),
-  educationalFileCount: active.reduce((sum, r) => sum + countFields(r, FILE_COLUMNS), 0),
-  assessmentCount: active.reduce((sum, r) => sum + countQuiz(r.quiz), 0),
+  videoCount: uniqueVideoIds.size,
+  educationalFileCount: active.reduce((sum, r) => sum + collectLessonFileUrls(r).length, 0),
+  quizCount: active.filter(lessonHasQuiz).length,
 };
 
-console.log("Lessons:", stats.lessonCount);
-console.log("Video URLs:", stats.videoCount);
-console.log("Educational files:", stats.educationalFileCount);
-console.log("Quiz questions:", stats.assessmentCount);
+console.log("--- Per lesson ---\n");
+for (const row of active) {
+  const videoIds = collectLessonYoutubeIds(row);
+  const fileUrls = collectLessonFileUrls(row);
+  const hasQuiz = lessonHasQuiz(row);
+  console.log(`Lesson: ${lessonTitle(row)}`);
+  console.log(`  unique video IDs: ${videoIds.length ? videoIds.join(", ") : "(none)"}`);
+  console.log(`  educational files: ${fileUrls.length}`);
+  for (const fileUrl of fileUrls) {
+    const preview = fileUrl.length > 80 ? `${fileUrl.slice(0, 80)}…` : fileUrl;
+    console.log(`    - ${preview}`);
+  }
+  console.log(`  quiz: ${hasQuiz ? "yes" : "no"}`);
+  console.log("");
+}
 
-const ok =
-  stats.lessonCount >= 2 &&
-  stats.videoCount > 0 &&
-  stats.educationalFileCount > 0 &&
-  stats.assessmentCount > 0;
+console.log("--- Totals ---");
+console.log("Lessons:", stats.lessonCount);
+console.log("Unique videos:", stats.videoCount);
+console.log("Educational files:", stats.educationalFileCount);
+console.log("Quizzes (lessons with quiz):", stats.quizCount);
+
+const expected = { lessonCount: 2, videoCount: 3, educationalFileCount: 4, quizCount: 2 };
+const ok = Object.entries(expected).every(([key, value]) => stats[key] === value);
 
 if (!ok) {
-  console.error("Verification failed — expected lessons>=2, videos>0, files>0, quizzes>0");
+  console.error("Verification failed — expected:", expected, "got:", stats);
   process.exit(1);
 }
 
