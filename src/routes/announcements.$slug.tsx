@@ -3,6 +3,7 @@ import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
 import { getAnnouncement } from "@/lib/extras";
 import { useCMS } from "@/lib/cms";
+import { announcementTopicLabel, inferAnnouncementTopic } from "@/lib/announcement-topics";
 import { Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/announcements/$slug")({
@@ -19,15 +20,17 @@ function AnnouncementDetail() {
   const custom = articles.find((a) => a.id === slug && a.published && a.category === "announcement");
   const ann = builtIn ?? (custom ? {
     slug: custom.id,
+    createdAt: custom.createdAt,
     date: new Date(custom.createdAt).toLocaleDateString(),
-    tag: { en: "News", ar: "خبر" },
+    topic: inferAnnouncementTopic(custom.title, custom.content, custom.category),
+    tag: announcementTopicLabel(inferAnnouncementTopic(custom.title, custom.content, custom.category)),
     title: custom.title,
-    excerpt: { en: "", ar: "" },
+    excerpt: { en: custom.content.en.slice(0, 160), ar: custom.content.ar.slice(0, 160) },
     body: custom.content,
-    image: custom.imageUrl,
+    imageUrl: custom.imageUrl,
   } : null);
   if (!ann) return <div className="container-page py-20">Announcement not found.</div>;
-  const image = (ann as { image?: string }).image;
+  const image = ann.imageUrl;
 
   return (
     <PageShell eyebrow={bi(ann.tag)} title={bi(ann.title)}

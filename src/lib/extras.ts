@@ -1,4 +1,5 @@
 import type { Bi, QuizQuestion } from "./curriculum";
+import type { AnnouncementTopic } from "./announcement-topics";
 
 export interface VideoItem {
   slug: string;
@@ -32,10 +33,13 @@ export function getQuiz(slug: string) {
 export interface Announcement {
   slug: string;
   date: string;
+  createdAt: number;
   tag: Bi;
+  topic: AnnouncementTopic;
   title: Bi;
   excerpt: Bi;
   body: Bi;
+  imageUrl?: string;
 }
 
 export const announcements: Announcement[] = [];

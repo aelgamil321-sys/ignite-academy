@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, BookOpen, GraduationCap, Library, Video, ClipboardCheck,
-  Users, Megaphone, Award, Sparkles, Play, Calendar
+  Users, Award, Sparkles, Play,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero.jpg";
@@ -18,6 +18,7 @@ import { gradeDisplayName } from "@/lib/grade-utils";
 import { SITE_NAME } from "@/lib/site-branding";
 import { certificateIslamicLogoUrl } from "@/lib/certificate-branding";
 import { DepartmentLogoCard } from "@/components/brand-logo";
+import { HomepageAnnouncements } from "@/components/homepage-announcements";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -227,63 +228,36 @@ function Home() {
           </div>
         </section>
 
-        {/* FEATURED + LATEST LESSONS */}
-        <section className="container-page py-20 grid lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2">
-            <SectionHeader eyebrow={tr("lessons_eyebrow")} title={tr("lessons_title")} align="left" />
-            <div className="mt-10 space-y-4">
-              {featuredLessons.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{tr("empty_published_lessons")}</p>
-              ) : featuredLessons.map((l) => (
-                <Link
-                  key={l.id}
-                  to="/grades/$grade/$lesson"
-                  params={{ grade: l.grade, lesson: l.id }}
-                  className="group flex items-center gap-6 rounded-2xl bg-white border border-foreground/10 p-5 hover:border-primary hover:shadow-[var(--shadow-soft)] transition-all"
-                >
-                  <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center text-foreground shrink-0">
-                    <BookOpen className="h-7 w-7" />
+        {/* FEATURED LESSONS */}
+        <section className="container-page py-20">
+          <SectionHeader eyebrow={tr("lessons_eyebrow")} title={tr("lessons_title")} align="left" />
+          <div className="mt-10 space-y-4">
+            {featuredLessons.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{tr("empty_published_lessons")}</p>
+            ) : featuredLessons.map((l) => (
+              <Link
+                key={l.id}
+                to="/grades/$grade/$lesson"
+                params={{ grade: l.grade, lesson: l.id }}
+                className="group flex items-center gap-6 rounded-2xl bg-white border border-foreground/10 p-5 hover:border-primary hover:shadow-[var(--shadow-soft)] transition-all"
+              >
+                <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center text-foreground shrink-0">
+                  <BookOpen className="h-7 w-7" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs uppercase tracking-wider text-primary font-semibold">
+                    {gradeDisplayName(l.grade, lang)} · {bi(l.unit)}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs uppercase tracking-wider text-primary font-semibold">
-                      {gradeDisplayName(l.grade, lang)} · {bi(l.unit)}
-                    </div>
-                    <div className="mt-1 font-display text-xl text-foreground truncate">{bi(l.title)}</div>
-                    <div className="text-xs text-foreground/60 mt-1">{l.quiz.length} {tr("questions")} · {tr("lesson_meta")}</div>
-                  </div>
-                  <ArrowRight className={`h-5 w-5 text-foreground/40 group-hover:text-primary transition-all ${dir === "rtl" ? "rotate-180 group-hover:-translate-x-1" : "group-hover:translate-x-1"}`} />
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Announcements */}
-          <div>
-            <SectionHeader eyebrow={tr("ann_eyebrow")} title={tr("ann_title")} align="left" />
-            <div className="mt-10 rounded-3xl bg-brand-dark text-white p-6 shadow-[var(--shadow-soft)]">
-              <div className="flex items-center gap-2 text-primary">
-                <Megaphone className="h-5 w-5" />
-                <span className="text-sm font-semibold uppercase tracking-wider">{tr("ann_school")}</span>
-              </div>
-              <ul className="mt-6 space-y-5">
-                {announcements.length === 0 ? (
-                  <li className="text-sm opacity-80">{tr("empty_announcements_short")}</li>
-                ) : announcements.slice(0, 3).map((a) => (
-                  <li key={a.slug} className="border-b border-white/10 last:border-0 pb-5 last:pb-0">
-                    <Link to="/announcements/$slug" params={{ slug: a.slug }} className="block hover:opacity-90">
-                      <div className="flex items-center gap-2 text-xs">
-                        <Calendar className="h-3.5 w-3.5 text-primary" />
-                        <span className="opacity-80">{a.date}</span>
-                        <span className="ms-auto rounded-full bg-primary/20 text-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{bi(a.tag)}</span>
-                      </div>
-                      <div className="mt-2 font-medium leading-snug">{bi(a.title)}</div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  <div className="mt-1 font-display text-xl text-foreground truncate">{bi(l.title)}</div>
+                  <div className="text-xs text-foreground/60 mt-1">{l.quiz.length} {tr("questions")} · {tr("lesson_meta")}</div>
+                </div>
+                <ArrowRight className={`h-5 w-5 text-foreground/40 group-hover:text-primary transition-all ${dir === "rtl" ? "rotate-180 group-hover:-translate-x-1" : "group-hover:translate-x-1"}`} />
+              </Link>
+            ))}
           </div>
         </section>
+
+        <HomepageAnnouncements announcements={announcements} />
 
         {/* FEATURES strip */}
         <section className="bg-brand-dark text-white relative overflow-hidden">

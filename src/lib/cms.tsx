@@ -12,6 +12,10 @@ import { ytId } from "./youtube-url";
 import { parseVocabFromStorage, serializeVocabForStorage, type VocabularyItem } from "./lesson-vocab";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  announcementTopicLabel,
+  inferAnnouncementTopic,
+} from "./announcement-topics";
 
 // ---------- Types ----------
 export interface CustomLesson {
@@ -562,18 +566,33 @@ export function useAllResources(): UnifiedResource[] {
     }));
 }
 
+function excerptFromContent(content: Bi, max = 160): Bi {
+  const trim = (s: string) => {
+    const t = s.replace(/\s+/g, " ").trim();
+    return t.length > max ? `${t.slice(0, max).trimEnd()}…` : t;
+  };
+  return { en: trim(content.en), ar: trim(content.ar) };
+}
+
 export function useAllAnnouncements(): UnifiedAnnouncement[] {
   const { articles } = useCMS();
   return articles
     .filter((a) => a.published && a.category === "announcement")
-    .map((a) => ({
-      slug: a.id,
-      date: new Date(a.createdAt).toLocaleDateString(),
-      tag: { en: "News", ar: "خبر" },
-      title: a.title,
-      excerpt: { en: a.content.en.slice(0, 160), ar: a.content.ar.slice(0, 160) },
-      body: a.content,
-    }));
+    .map((a) => {
+      const topic = inferAnnouncementTopic(a.title, a.content, a.category);
+      return {
+        slug: a.id,
+        createdAt: a.createdAt,
+        date: new Date(a.createdAt).toLocaleDateString(),
+        topic,
+        tag: announcementTopicLabel(topic),
+        title: a.title,
+        excerpt: excerptFromContent(a.content),
+        body: a.content,
+        imageUrl: a.imageUrl,
+      };
+    })
+    .sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export function useAllParentGuides(): UnifiedParentGuide[] {

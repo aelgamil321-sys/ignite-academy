@@ -1,10 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/page-shell";
 import { EmptyState } from "@/components/empty-state";
 import { Megaphone } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAllAnnouncements } from "@/lib/cms";
-import { Calendar, ArrowRight } from "lucide-react";
+import { AnnouncementCard } from "@/components/announcement-card";
 
 export const Route = createFileRoute("/announcements/")({
   head: () => ({
@@ -21,29 +21,24 @@ export const Route = createFileRoute("/announcements/")({
 });
 
 function AnnouncementsIndex() {
-  const { tr, lang, dir, bi } = useI18n();
+  const { tr } = useI18n();
   const announcements = useAllAnnouncements();
+
   return (
-    <PageShell eyebrow={tr("nav_announcements")} title={tr("ann_page_title")} lead={tr("ann_page_lead")} crumbs={[{ label: tr("nav_announcements") }]}>
+    <PageShell
+      eyebrow={tr("nav_announcements")}
+      title={tr("ann_page_title")}
+      lead={tr("ann_page_lead")}
+      crumbs={[{ label: tr("nav_announcements") }]}
+    >
       {announcements.length === 0 ? (
-        <EmptyState icon={Megaphone} title={tr("empty_articles")} />
+        <EmptyState icon={Megaphone} title={tr("empty_announcements_title")} description={tr("empty_announcements_desc")} />
       ) : (
-      <div className="grid gap-6 md:grid-cols-2">
-        {announcements.map((a) => (
-          <Link key={a.slug} to="/announcements/$slug" params={{ slug: a.slug }}
-            className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:border-primary hover:shadow-[var(--shadow-elegant)] transition-all flex flex-col">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5 text-primary" /> {a.date}
-              <span className="ms-auto rounded-full bg-gold/20 text-gold px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">{bi(a.tag)}</span>
-            </div>
-            <h3 className="mt-3 font-display text-xl text-foreground leading-snug">{bi(a.title)}</h3>
-            <p className="mt-2 text-sm text-muted-foreground flex-1">{bi(a.excerpt)}</p>
-            <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary group-hover:text-primary">
-              {tr("read_more")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-            </div>
-          </Link>
-        ))}
-      </div>
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {announcements.map((announcement) => (
+            <AnnouncementCard key={announcement.slug} announcement={announcement} variant="light" />
+          ))}
+        </div>
       )}
     </PageShell>
   );

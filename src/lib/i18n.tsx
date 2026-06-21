@@ -155,6 +155,7 @@ export const t = {
   // Announcements
   ann_eyebrow: { en: "Announcements", ar: "الإعلانات" },
   ann_title: { en: "What's new", ar: "آخر المستجدات" },
+  ann_view_all: { en: "View all announcements", ar: "عرض جميع الإعلانات" },
   ann_school: { en: "School News", ar: "أخبار المدرسة" },
   ann_1: { en: "Mid-Term Assessment Schedule Published", ar: "نشر جدول الاختبارات النصفية" },
   ann_2: { en: "Annual Quran Recitation Competition", ar: "المسابقة السنوية لتلاوة القرآن الكريم" },
@@ -534,6 +535,11 @@ export const t = {
   },
   empty_published_lessons: { en: "No published lessons yet.", ar: "لا توجد دروس منشورة بعد." },
   empty_announcements_short: { en: "No announcements yet.", ar: "لا توجد إعلانات بعد." },
+  empty_announcements_title: { en: "No announcements right now", ar: "لا توجد إعلانات حالياً" },
+  empty_announcements_desc: {
+    en: "The latest school news and updates will be published here.",
+    ar: "وسيتم نشر آخر الأخبار والمستجدات هنا.",
+  },
   hof_avg_score_label: { en: "Avg. score", ar: "متوسط الدرجات" },
   hof_certificates_label: { en: "Certificates", ar: "الشهادات" },
   grade_champion_suffix: { en: "Champion", ar: "بطل" },
