@@ -128,9 +128,14 @@ function debugTranslate(
   });
 }
 
-/** Arabic, then English — shown while machine translation is pending or unavailable. */
-export function biPendingDisplayText(bi: Bi): string {
-  return bi.ar?.trim() || bi.en?.trim() || "";
+/** Sync fallback while machine translation is pending or unavailable. */
+export function biPendingDisplayText(bi: Bi, lang: Lang): string {
+  const ar = bi.ar?.trim() || "";
+  const en = bi.en?.trim() || "";
+  if (lang === "ar") return ar || en;
+  if (lang === "en") return en || ar;
+  // fr/de/ur/zh: English first — never show Arabic while target translation loads
+  return en || ar;
 }
 
 /** Sync display before async translation completes. */
@@ -143,7 +148,7 @@ export function educationalDisplayFallback(
   if (stored) return stored;
   if (lang === "en") return text;
   if (bi) {
-    const pending = biPendingDisplayText(bi);
+    const pending = biPendingDisplayText(bi, lang);
     if (pending) return pending;
   }
   return text?.trim() ?? "";

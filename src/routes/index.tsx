@@ -222,8 +222,12 @@ function Home() {
                   <div className="h-11 w-11 rounded-xl bg-primary flex items-center justify-center text-foreground font-display text-lg">
                     {i + 1}
                   </div>
-                  <div className="mt-4 font-display text-xl text-foreground group-hover:text-primary">{bi(c.name)}</div>
-                  <div className="mt-1 text-sm text-foreground/65">{bi(c.desc)}</div>
+                  <div className="mt-4 font-display text-xl text-foreground group-hover:text-primary">
+                    {bi(c.name, { fieldName: `category_${c.slug}_name`, contentType: "title" })}
+                  </div>
+                  <div className="mt-1 text-sm text-foreground/65">
+                    {bi(c.desc, { fieldName: `category_${c.slug}_desc`, contentType: "general" })}
+                  </div>
                 </Link>
               ))}
             </div>

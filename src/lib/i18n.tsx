@@ -997,7 +997,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       if (stored) return stored;
 
       const source = biSourceForTranslation(text, lang);
-      if (!source) return biPendingDisplayText(text);
+      if (!source) return biPendingDisplayText(text, lang);
 
       const lessonId = meta?.lessonId ?? lessonScopeRef.current ?? undefined;
       const fieldName = meta?.fieldName ?? "content";
@@ -1021,7 +1021,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         fieldName,
       });
 
-      return biPendingDisplayText(text);
+      return biPendingDisplayText(text, lang);
     },
     [lang, contentRev],
   );
