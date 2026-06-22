@@ -6,13 +6,14 @@ import { Award, Download, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Bi } from "@/lib/curriculum";
+import type { Lang } from "@/lib/i18n-config";
 import type { SavedQuizSubmission } from "@/lib/lesson-quiz";
 import {
   buildCertificateDisplayData,
-  CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE,
   downloadCertificatePdf,
   getOrCreateQuizCertificate,
   isStudentProfileComplete,
+  loadLinkedChildCertificatePreview,
   resolveCertificateStudentNames,
   type CertificateDisplayData,
 } from "@/lib/certificate";
@@ -35,6 +36,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+function certificateProfileIncompleteText(lang: Lang): string {
+  return L(
+    "Please complete your profile before generating certificates.",
+    "يرجى إكمال ملفك الشخصي قبل إنشاء الشهادات.",
+  )[lang];
+}
+
+function missingRequiredFieldsText(lang: Lang, fields: string[]): string {
+  return `${L("Missing required fields", "الحقول المطلوبة ناقصة")[lang]}: ${fields.join(", ")}`;
+}
 
 function validateCertificateInputs(
   submission: SavedQuizSubmission,
@@ -134,20 +145,29 @@ function CertificatePdfSource({
   return createPortal(<CertificateExport ref={pdfRef} data={data} />, document.body);
 }
 
+function parentCertificateLoadErrorText(lang: Lang): string {
+  return L(
+    "The certificate could not be loaded. Please try again.",
+    "تعذر تحميل الشهادة. حاول مرة أخرى.",
+  )[lang];
+}
+
 export function CertificateModal({
   open,
   onOpenChange,
+  lang,
+  parentView,
   submission,
   gradeName,
   lessonTitle,
-  lang,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  submission: SavedQuizSubmission;
-  gradeName: Bi;
-  lessonTitle: Bi;
-  lang: "en" | "ar";
+  lang: Lang;
+  parentView?: { certificateId: string; studentUserId: string };
+  submission?: SavedQuizSubmission;
+  gradeName?: Bi;
+  lessonTitle?: Bi;
 }) {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [displayData, setDisplayData] = useState<CertificateDisplayData | null>(null);
@@ -161,50 +181,128 @@ export function CertificateModal({
     setLoadError(null);
     setPdfError(null);
     try {
-      const inputMissing = validateCertificateInputs(submission, gradeName, lessonTitle, null);
+      let activeSubmission: SavedQuizSubmission;
+      let activeGradeName: Bi;
+      let activeLessonTitle: Bi;
+      let certificateRecord;
+
+      if (parentView) {
+        const loaded = await loadLinkedChildCertificatePreview(
+          parentView.certificateId,
+          parentView.studentUserId,
+        );
+        activeSubmission = loaded.submission;
+        activeGradeName = loaded.gradeName;
+        activeLessonTitle = loaded.lessonTitle;
+        certificateRecord = loaded.certificate;
+
+        const inputMissing = validateCertificateInputs(
+          activeSubmission,
+          activeGradeName,
+          activeLessonTitle,
+          null,
+        );
+        const inputOnly = inputMissing.filter((f) => f !== "displayData");
+        if (inputOnly.length > 0) {
+          throw new Error(missingRequiredFieldsText(lang, inputOnly));
+        }
+
+        const built = buildCertificateDisplayData(
+          activeSubmission,
+          certificateRecord,
+          loaded.studentNames,
+          activeGradeName,
+          activeLessonTitle,
+        );
+        const qrDataUrl = await buildCertificateQrDataUrl(built.certificateId);
+        const withQr = { ...built, qrDataUrl };
+
+        const missing = validateCertificateInputs(
+          activeSubmission,
+          activeGradeName,
+          activeLessonTitle,
+          withQr,
+        );
+        if (missing.length > 0) {
+          throw new Error(missingRequiredFieldsText(lang, missing));
+        }
+
+        setDisplayData(withQr);
+        return;
+      }
+
+      if (!submission || !gradeName || !lessonTitle) {
+        throw new Error(missingRequiredFieldsText(lang, ["submission", "gradeName", "lessonTitle"]));
+      }
+
+      activeSubmission = submission;
+      activeGradeName = gradeName;
+      activeLessonTitle = lessonTitle;
+
+      const inputMissing = validateCertificateInputs(
+        activeSubmission,
+        activeGradeName,
+        activeLessonTitle,
+        null,
+      );
       const inputOnly = inputMissing.filter((f) => f !== "displayData");
       if (inputOnly.length > 0) {
-        throw new Error(`Missing required fields: ${inputOnly.join(", ")}`);
+        throw new Error(missingRequiredFieldsText(lang, inputOnly));
       }
 
       const { data: sessionData } = await supabase.auth.getSession();
       const user = sessionData.session?.user;
-      if (!user?.id) throw new Error("Missing required fields: authenticated user (not signed in)");
+      if (!user?.id) {
+        throw new Error(
+          L(
+            "Missing required fields: authenticated user (not signed in)",
+            "الحقول المطلوبة ناقصة: المستخدم غير مسجل الدخول",
+          )[lang],
+        );
+      }
 
       const profile = await fetchStudentProfile(user.id);
       if (!isStudentProfileComplete(profile)) {
-        throw new Error(CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE);
+        throw new Error(certificateProfileIncompleteText(lang));
       }
 
       const studentNames = resolveCertificateStudentNames(profile);
 
-      const certificate = await getOrCreateQuizCertificate(submission);
+      certificateRecord = await getOrCreateQuizCertificate(activeSubmission);
       const built = buildCertificateDisplayData(
-        submission,
-        certificate,
+        activeSubmission,
+        certificateRecord,
         studentNames,
-        gradeName,
-        lessonTitle,
+        activeGradeName,
+        activeLessonTitle,
       );
       const qrDataUrl = await buildCertificateQrDataUrl(built.certificateId);
       const withQr = { ...built, qrDataUrl };
 
-      const missing = validateCertificateInputs(submission, gradeName, lessonTitle, withQr);
+      const missing = validateCertificateInputs(
+        activeSubmission,
+        activeGradeName,
+        activeLessonTitle,
+        withQr,
+      );
       if (missing.length > 0) {
-        throw new Error(`Missing required fields: ${missing.join(", ")}`);
+        throw new Error(missingRequiredFieldsText(lang, missing));
       }
 
       setDisplayData(withQr);
     } catch (error) {
       console.error("[certificate prepare]", error);
-      const message =
-        error instanceof Error ? error.message : "Could not load certificate";
+      const message = parentView
+        ? parentCertificateLoadErrorText(lang)
+        : error instanceof Error
+          ? error.message
+          : L("Certificate could not be loaded", "تعذر تحميل الشهادة")[lang];
       setLoadError(message);
       setDisplayData(null);
     } finally {
       setLoading(false);
     }
-  }, [submission, gradeName, lessonTitle]);
+  }, [submission, gradeName, lessonTitle, lang, parentView]);
 
   useEffect(() => {
     if (open) {
@@ -240,8 +338,18 @@ export function CertificateModal({
   };
 
   const missingFields = displayData
-    ? validateCertificateInputs(submission, gradeName, lessonTitle, displayData)
-    : validateCertificateInputs(submission, gradeName, lessonTitle, null);
+    ? validateCertificateInputs(
+        submission ?? ({} as SavedQuizSubmission),
+        gradeName ?? { en: "", ar: "" },
+        lessonTitle ?? { en: "", ar: "" },
+        displayData,
+      )
+    : validateCertificateInputs(
+        submission ?? ({} as SavedQuizSubmission),
+        gradeName ?? { en: "", ar: "" },
+        lessonTitle ?? { en: "", ar: "" },
+        null,
+      );
 
   return (
     <>
@@ -277,15 +385,8 @@ export function CertificateModal({
             </div>
           ) : loadError ? (
             <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive space-y-2">
-              <div className="font-semibold">
-                {loadError === CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE
-                  ? CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE
-                  : L("Certificate could not be loaded", "تعذر تحميل الشهادة")[lang]}
-              </div>
-              {loadError !== CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE && (
-                <div className="font-mono text-xs break-all">{loadError}</div>
-              )}
-              {loadError === CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE && (
+              <div className="font-semibold">{loadError}</div>
+              {loadError === certificateProfileIncompleteText(lang) && !parentView && (
                 <Link
                   to="/student/profile"
                   className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
@@ -293,8 +394,10 @@ export function CertificateModal({
                   {L("Complete profile", "إكمال الملف الشخصي")[lang]}
                 </Link>
               )}
-              {missingFields.length > 0 && loadError !== CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE && (
-                <div className="text-xs">
+              {missingFields.length > 0 &&
+                loadError !== certificateProfileIncompleteText(lang) &&
+                !parentView && (
+                <div className="text-xs font-mono break-all">
                   {L("Missing fields", "الحقول الناقصة")[lang]}: {missingFields.join(", ")}
                 </div>
               )}
@@ -308,7 +411,7 @@ export function CertificateModal({
                   {downloading && (
                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Generating PDF...
+                      {L("Generating PDF...", "جارٍ إنشاء PDF...")[lang]}
                     </div>
                   )}
 
@@ -373,7 +476,7 @@ export function CertificateButton({
   submission: SavedQuizSubmission;
   gradeName: Bi;
   lessonTitle: Bi;
-  lang: "en" | "ar";
+  lang: Lang;
 }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -392,7 +495,7 @@ export function CertificateButton({
 
       const profile = await fetchStudentProfile(user.id);
       if (!isStudentProfileComplete(profile)) {
-        toast.error(CERTIFICATE_PROFILE_INCOMPLETE_MESSAGE, {
+        toast.error(certificateProfileIncompleteText(lang), {
           action: {
             label: L("Profile", "الملف الشخصي")[lang],
             onClick: () => navigate({ to: "/student/profile" }),

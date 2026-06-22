@@ -1,6 +1,13 @@
 import type { Bi, QuizQuestion } from "@/lib/curriculum";
+import { grades } from "@/lib/curriculum";
 import { supabase } from "@/integrations/supabase/client";
-import { gradeLabelForPercentage, type SavedQuizSubmission } from "@/lib/lesson-quiz";
+import { normalizeGradeSlug } from "@/lib/grade-utils";
+import {
+  gradeLabelForPercentage,
+  submissionRowToSaved,
+  type SavedQuizSubmission,
+} from "@/lib/lesson-quiz";
+import { fetchStudentProfile } from "@/lib/student-profile";
 
 export type QuizCertificateRecord = {
   id: string;
@@ -42,6 +49,97 @@ function rowToCertificate(row: Record<string, unknown>): QuizCertificateRecord {
     score: Number(row.score ?? 0),
     percentage: Number(row.percentage ?? 0),
     issued_at: String(row.issued_at ?? ""),
+  };
+}
+
+function parseLessonTitle(raw: unknown): Bi {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const o = raw as Record<string, unknown>;
+    return { en: String(o.en ?? ""), ar: String(o.ar ?? "") };
+  }
+  return { en: "", ar: "" };
+}
+
+/** Read-only fetch — RLS limits parents to linked children. */
+export async function fetchQuizCertificateRecord(
+  certificateId: string,
+  studentUserId: string,
+): Promise<QuizCertificateRecord | null> {
+  const { data, error } = await supabase
+    .from("quiz_certificates")
+    .select("*")
+    .eq("certificate_id", certificateId)
+    .eq("student_id", studentUserId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[quiz certificate fetch]", error);
+    throw error;
+  }
+
+  return data ? rowToCertificate(data as Record<string, unknown>) : null;
+}
+
+export type LinkedChildCertificatePreview = {
+  submission: SavedQuizSubmission;
+  certificate: QuizCertificateRecord;
+  gradeName: Bi;
+  lessonTitle: Bi;
+  studentNames: CertificateStudentNames;
+};
+
+/** Load certificate preview data for a parent viewing a linked child's certificate. */
+export async function loadLinkedChildCertificatePreview(
+  certificateId: string,
+  studentUserId: string,
+): Promise<LinkedChildCertificatePreview> {
+  const certificate = await fetchQuizCertificateRecord(certificateId, studentUserId);
+  if (!certificate) {
+    throw new Error("certificate_not_found");
+  }
+
+  const { data: submissionRow, error: submissionError } = await supabase
+    .from("lesson_quiz_submissions")
+    .select("*")
+    .eq("id", certificate.submission_id)
+    .eq("student_id", studentUserId)
+    .maybeSingle();
+
+  if (submissionError) {
+    console.error("[quiz certificate submission fetch]", submissionError);
+    throw submissionError;
+  }
+  if (!submissionRow) {
+    throw new Error("submission_not_found");
+  }
+
+  const submission = submissionRowToSaved(submissionRow as Record<string, unknown>);
+  const profile = await fetchStudentProfile(studentUserId);
+  const studentNames = resolveCertificateStudentNames(profile);
+
+  const gradeSlug = normalizeGradeSlug(profile?.grade ?? "") || "8";
+  const grade = grades.find((g) => g.slug === gradeSlug);
+  const gradeName = grade?.name ?? { en: "Grade", ar: "صف" };
+
+  const { data: lessonRow, error: lessonError } = await supabase
+    .from("lessons")
+    .select("title")
+    .eq("id", certificate.lesson_id)
+    .maybeSingle();
+
+  if (lessonError) {
+    console.error("[quiz certificate lesson fetch]", lessonError);
+    throw lessonError;
+  }
+
+  const lessonTitle = parseLessonTitle(lessonRow?.title);
+
+  return {
+    submission,
+    certificate,
+    gradeName,
+    lessonTitle,
+    studentNames,
   };
 }
 

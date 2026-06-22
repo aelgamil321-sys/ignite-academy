@@ -22,8 +22,10 @@ export {
   canIssueQuizCertificate,
   CERTIFICATE_NAME_FALLBACK_AR,
   CERTIFICATE_NAME_FALLBACK_EN,
+  fetchQuizCertificateRecord,
   generateCertificateId,
   getOrCreateQuizCertificate,
+  loadLinkedChildCertificatePreview,
   resolveCertificateStudentNames,
 } from "@/lib/quiz-certificate";
 

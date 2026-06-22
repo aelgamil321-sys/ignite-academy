@@ -62,7 +62,10 @@ export function ParentDashboardView({ data }: { data: ParentDashboardData }) {
 
       <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
         <div id={PARENT_SECTION_IDS.certificates} className="scroll-mt-24">
-          <ParentDashboardCertificates certificates={progress.certificates} />
+          <ParentDashboardCertificates
+            certificates={progress.certificates}
+            studentUserId={data.studentUserId}
+          />
         </div>
         <ParentDashboardBadges progress={progress} />
       </div>

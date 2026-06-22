@@ -833,6 +833,10 @@ export const t = {
     ar: "لا توجد شهادات بعد. ستظهر هنا عند إتمام اختبارات الدروس.",
   },
   parent_view_certificate: { en: "View certificate", ar: "عرض الشهادة" },
+  parent_certificate_load_error: {
+    en: "The certificate could not be loaded. Please try again.",
+    ar: "تعذر تحميل الشهادة. حاول مرة أخرى.",
+  },
   parent_certificate_details: { en: "Certificate Details", ar: "تفاصيل الشهادة" },
   parent_lesson_label: { en: "Lesson", ar: "الدرس" },
   parent_date_label: { en: "Date", ar: "التاريخ" },
