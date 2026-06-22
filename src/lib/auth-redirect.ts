@@ -1,8 +1,22 @@
 import { supabase } from "@/integrations/supabase/client";
+import { ENABLE_EMAIL_VERIFICATION } from "@/lib/auth-config";
 
 /** Where Supabase sends users after confirming signup email (must be allowlisted in Supabase Auth). */
 export const SIGNUP_EMAIL_REDIRECT_URL =
   "https://ignite-academy.pages.dev/auth?mode=login&email_confirmed=true";
+
+/** Sign-up options that only request confirmation emails when verification is enabled. */
+export function signupAuthOptions(
+  data: Record<string, unknown>,
+): { emailRedirectTo?: string; data: Record<string, unknown> } {
+  if (!ENABLE_EMAIL_VERIFICATION) {
+    return { data };
+  }
+  return {
+    emailRedirectTo: SIGNUP_EMAIL_REDIRECT_URL,
+    data,
+  };
+}
 
 export type EmailConfirmedParam = true | false | undefined;
 

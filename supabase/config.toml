@@ -1,1 +1,12 @@
 project_id = "lctktkjjftmuagmpjgvk"
+
+# Local / linked project auth defaults. Hosted project: run
+# `node scripts/configure-auth-email-verification.mjs disable` with SUPABASE_ACCESS_TOKEN.
+[auth]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+# Set to true when re-enabling email verification in production.
+enable_confirmations = false

@@ -14,16 +14,18 @@ import { PreferredLanguageField } from "@/components/preferred-language-field";
 import { uploadProfilePhoto } from "@/lib/profile-photo";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 import {
-  SIGNUP_EMAIL_REDIRECT_URL,
   clearAuthCallbackUrl,
   hasSupabaseAuthHash,
   isEmailNotConfirmedError,
   isEmailRateLimitError,
   parseEmailConfirmedParam,
+  signupAuthOptions,
   waitForSupabaseHashSession,
 } from "@/lib/auth-redirect";
+import { ENABLE_EMAIL_VERIFICATION, shouldRequireEmailConfirmation } from "@/lib/auth-config";
 import { applyLanguageForUser, resolveGuestLanguage } from "@/lib/preferred-language";
 import { isLang, type Lang } from "@/lib/i18n-config";
+import { pageHeadTitle } from "@/lib/page-head";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -33,7 +35,7 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Student Sign In — Ignite Islamic Academy" },
+      { title: pageHeadTitle("auth") },
       { name: "description", content: "Sign in or create a student account to access lessons, videos, quizzes and progress tracking." },
       { name: "robots", content: "noindex,nofollow" },
     ],
@@ -78,6 +80,23 @@ function AuthPage() {
     let cancelled = false;
 
     void (async () => {
+      if (!ENABLE_EMAIL_VERIFICATION) {
+        const { data } = await supabase.auth.getSession();
+        if (cancelled) return;
+
+        const user = data.session?.user;
+        if (!user) return;
+
+        const role = await getAccountRole(user.id);
+        if (cancelled) return;
+        if (initialAccountType === "parent" && role === "student") return;
+        if (initialAccountType === "student" && role === "parent") return;
+        await applyLanguageForUser(user.id);
+        if (cancelled) return;
+        window.location.replace(postAuthPathForRole(role));
+        return;
+      }
+
       const confirmedParam = emailConfirmedSearch;
       const hashPresent = hasSupabaseAuthHash();
 
@@ -162,6 +181,27 @@ function AuthPage() {
     return null;
   }
 
+  async function ensureSignupSession(
+    submitEmail: string,
+    submitPassword: string,
+    signUpResult: Awaited<ReturnType<typeof supabase.auth.signUp>>,
+  ) {
+    if (signUpResult.data.session) return signUpResult.data.session;
+    if (ENABLE_EMAIL_VERIFICATION) return null;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: submitEmail,
+      password: submitPassword,
+    });
+    if (error) throw error;
+    return data.session;
+  }
+
+  async function finishSignupAndRedirect(userId: string) {
+    await applyLanguageForUser(userId);
+    const redirectPath = await getPostAuthPath(userId);
+    window.location.assign(redirectPath);
+  }
+
   async function callSignUpOnce(
     label: "student" | "parent",
     params: Parameters<typeof supabase.auth.signUp>[0],
@@ -170,7 +210,8 @@ function AuthPage() {
     const callId = signUpCallCount.current;
     console.debug(`[auth signup] auth.signUp call #${callId} START (${label})`, {
       email: params.email,
-      emailRedirectTo: params.options?.emailRedirectTo,
+      emailRedirectTo: params.options?.emailRedirectTo ?? null,
+      emailVerificationEnabled: ENABLE_EMAIL_VERIFICATION,
       totalCallsThisPage: callId,
     });
     const result = await supabase.auth.signUp(params);
@@ -245,26 +286,38 @@ function AuthPage() {
           const { data, error } = await callSignUpOnce("student", {
             email: submitEmail,
             password: submitPassword,
-            options: {
-              emailRedirectTo: SIGNUP_EMAIL_REDIRECT_URL,
-              data: {
-                full_name: submitEnglishName,
-                arabic_name: submitArabicName,
-                english_name: submitEnglishName,
-                role_intent: "student",
-                grade: submitGrade,
-                section: submitSection,
-                islamic_group: submitIslamicGroup,
-                preferred_language: submitPreferredLanguage,
-              },
-            },
+            options: signupAuthOptions({
+              full_name: submitEnglishName,
+              arabic_name: submitArabicName,
+              english_name: submitEnglishName,
+              role_intent: "student",
+              grade: submitGrade,
+              section: submitSection,
+              islamic_group: submitIslamicGroup,
+              preferred_language: submitPreferredLanguage,
+            }),
           });
           if (error) {
             console.error("[auth signup] supabase signUp error", error);
             throw error;
           }
+          if (!data.user) {
+            showSignupError(tr("auth_err_email_password"), { step: "no_user" });
+            return;
+          }
 
-          if (data.user && profilePhotoFile && data.session) {
+          const session = await ensureSignupSession(submitEmail, submitPassword, { data, error });
+          if (!session && ENABLE_EMAIL_VERIFICATION) {
+            await supabase.auth.signOut();
+            console.debug("[auth signup] signed out after signup — awaiting email confirmation", {
+              signUpCallsThisSubmit: 1,
+              totalSignUpCalls: signUpCallCount.current,
+            });
+            setSignupSuccessAlert(tr("auth_success_student"));
+            return;
+          }
+
+          if (profilePhotoFile && session) {
             try {
               await uploadProfilePhoto(data.user.id, profilePhotoFile);
               console.debug("[auth signup] profile photo uploaded during signup session");
@@ -273,13 +326,8 @@ function AuthPage() {
             }
           }
 
-          await supabase.auth.signOut();
-          console.debug("[auth signup] signed out after signup — awaiting email confirmation", {
-            signUpCallsThisSubmit: 1,
-            totalSignUpCalls: signUpCallCount.current,
-          });
-
-          setSignupSuccessAlert(tr("auth_success_student"));
+          toast.success(tr("auth_success_login"));
+          await finishSignupAndRedirect(data.user.id);
           return;
         }
 
@@ -306,20 +354,23 @@ function AuthPage() {
         const { data, error } = await callSignUpOnce("parent", {
           email: submitEmail,
           password: submitPassword,
-          options: {
-            emailRedirectTo: SIGNUP_EMAIL_REDIRECT_URL,
-            data: {
-              full_name: submitParentFullName,
-              role_intent: "parent",
-              parent_link_code: submitParentLinkCode,
-              preferred_language: submitPreferredLanguage,
-            },
-          },
+          options: signupAuthOptions({
+            full_name: submitParentFullName,
+            role_intent: "parent",
+            parent_link_code: submitParentLinkCode,
+            preferred_language: submitPreferredLanguage,
+          }),
         });
         if (error) {
           console.error("[auth signup] supabase signUp error (parent)", error);
           throw error;
         }
+        if (!data.user) {
+          showSignupError(tr("auth_err_email_password"), { step: "no_user" });
+          return;
+        }
+
+        const session = await ensureSignupSession(submitEmail, submitPassword, { data, error });
 
         if (data.user) {
           const { error: profileError } = await supabase.from("parent_profiles").upsert(
@@ -338,13 +389,18 @@ function AuthPage() {
           }
         }
 
-        await supabase.auth.signOut();
-        console.debug("[auth signup] signed out after parent signup — awaiting email confirmation", {
-          signUpCallsThisSubmit: 1,
-          totalSignUpCalls: signUpCallCount.current,
-        });
+        if (!session && ENABLE_EMAIL_VERIFICATION) {
+          await supabase.auth.signOut();
+          console.debug("[auth signup] signed out after parent signup — awaiting email confirmation", {
+            signUpCallsThisSubmit: 1,
+            totalSignUpCalls: signUpCallCount.current,
+          });
+          setSignupSuccessAlert(tr("auth_success_parent"));
+          return;
+        }
 
-        setSignupSuccessAlert(tr("auth_success_parent"));
+        toast.success(tr("auth_success_login"));
+        await finishSignupAndRedirect(data.user.id);
         return;
       }
 
@@ -358,7 +414,7 @@ function AuthPage() {
         password: submitPassword,
       });
       if (error) {
-        if (isEmailNotConfirmedError(error)) {
+        if (ENABLE_EMAIL_VERIFICATION && isEmailNotConfirmedError(error)) {
           setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
           await supabase.auth.signOut();
           return;
@@ -366,7 +422,7 @@ function AuthPage() {
         throw error;
       }
 
-      if (!loginData.user?.email_confirmed_at) {
+      if (shouldRequireEmailConfirmation(loginData.user)) {
         setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
         await supabase.auth.signOut();
         return;
@@ -385,7 +441,7 @@ function AuthPage() {
         showSignupError(tr("auth_duplicate_email"), err);
         return;
       }
-      if (mode === "login" && isEmailNotConfirmedError(err)) {
+      if (mode === "login" && ENABLE_EMAIL_VERIFICATION && isEmailNotConfirmedError(err)) {
         setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
         await supabase.auth.signOut();
         return;
@@ -430,7 +486,7 @@ function AuthPage() {
             </button>
           </div>
 
-          {emailNotConfirmedAlert && mode === "login" && (
+          {ENABLE_EMAIL_VERIFICATION && emailNotConfirmedAlert && mode === "login" && (
             <div
               role="alert"
               className="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-5 py-4 text-sm text-foreground"
@@ -442,7 +498,7 @@ function AuthPage() {
             </div>
           )}
 
-          {emailConfirmedAlert && mode === "login" && (
+          {ENABLE_EMAIL_VERIFICATION && emailConfirmedAlert && mode === "login" && (
             <div
               role="status"
               className="mb-4 rounded-2xl border border-primary/40 bg-primary/10 px-5 py-4 text-sm text-foreground"
@@ -454,7 +510,7 @@ function AuthPage() {
             </div>
           )}
 
-          {signupSuccessAlert && (
+          {ENABLE_EMAIL_VERIFICATION && signupSuccessAlert && (
             <div
               role="status"
               className="mb-4 rounded-2xl border border-primary/40 bg-primary/10 px-5 py-4 text-sm text-foreground"
