@@ -19,15 +19,8 @@ import {
 } from "@/lib/certificate";
 import { fetchStudentProfile } from "@/lib/student-profile";
 import { buildCertificateQrDataUrl } from "@/lib/certificate-qr";
-import {
-  CERTIFICATE_HEIGHT_PX,
-  CERTIFICATE_WIDTH_PX,
-  CertificateDocument,
-} from "@/components/certificate-document";
-import {
-  CERTIFICATE_EXPORT_ID,
-  CertificateExport,
-} from "@/components/certificate-export";
+import { CERTIFICATE_EXPORT_ID, CertificateExport } from "@/components/certificate-export";
+import { CertificatePreview } from "@/components/certificate-preview";
 import {
   Dialog,
   DialogContent,
@@ -71,65 +64,6 @@ function validateCertificateInputs(
   if (!displayData.gradeLabelEn?.trim()) missing.push("gradeLabelEn");
   if (!displayData.gradeLabelAr?.trim()) missing.push("gradeLabelAr");
   return missing;
-}
-
-/** Responsive on-screen preview only — never used for PDF capture. */
-function CertificatePreviewScaler({ data }: { data: CertificateDisplayData }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.3);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const update = () => {
-      const w = el.clientWidth;
-      if (w > 0) {
-        setScale(Math.min(1, w / CERTIFICATE_WIDTH_PX));
-      }
-    };
-
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener("resize", update);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, [data]);
-
-  const scaledHeight = CERTIFICATE_HEIGHT_PX * scale;
-  const scaledWidth = CERTIFICATE_WIDTH_PX * scale;
-
-  return (
-    <div className="w-full max-w-full overflow-x-hidden">
-      <div
-        ref={containerRef}
-        className="w-full max-w-full mx-auto overflow-hidden rounded-lg border border-border bg-muted/30"
-        style={{ height: scaledHeight }}
-      >
-        <div
-          className="mx-auto overflow-hidden"
-          style={{
-            width: scaledWidth,
-            height: scaledHeight,
-          }}
-        >
-          <div
-            style={{
-              width: CERTIFICATE_WIDTH_PX,
-              height: CERTIFICATE_HEIGHT_PX,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
-            }}
-          >
-            <CertificateDocument data={data} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 /** Hidden #certificate-export — portaled to body, used only for PDF (never the modal). */
@@ -363,6 +297,7 @@ export function CertificateModal({
             "flex flex-col gap-3 p-4 sm:p-6",
             "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
             "w-[95vw] max-w-[420px] max-h-[90vh] overflow-hidden",
+            "data-[state=open]:!animate-none data-[state=closed]:!animate-none",
           ].join(" ")}
         >
           <DialogHeader className="shrink-0 pr-8">
@@ -404,9 +339,9 @@ export function CertificateModal({
             </div>
           ) : displayData ? (
             <>
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full max-w-full">
+              <div className="flex-1 min-h-[220px] overflow-y-auto overflow-x-hidden w-full max-w-full">
                 <div className="flex flex-col gap-4 w-full max-w-full">
-                  <CertificatePreviewScaler data={displayData} />
+                  <CertificatePreview data={displayData} className="mx-auto w-full" />
 
                   {downloading && (
                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">

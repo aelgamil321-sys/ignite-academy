@@ -15,6 +15,8 @@ export {
 
 export { CertificateDocument } from "@/components/certificate-document";
 
+export { CertificatePageContent, CertificatePreview } from "@/components/certificate-preview";
+
 export { CertificateExport, CERTIFICATE_EXPORT_ID } from "@/components/certificate-export";
 
 export { CertificateButton, CertificateModal } from "@/components/certificate-modal";

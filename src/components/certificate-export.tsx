@@ -1,11 +1,7 @@
 import { forwardRef, type CSSProperties } from "react";
 import type { CertificateDisplayData } from "@/lib/certificate";
-import {
-  CertificatePageBody,
-  CERTIFICATE_HEIGHT_PX,
-  CERTIFICATE_WIDTH_PX,
-  certificatePageStyle,
-} from "@/components/certificate-body";
+import { CertificatePageContent } from "@/components/certificate-preview";
+import { CERTIFICATE_HEIGHT_PX, CERTIFICATE_WIDTH_PX } from "@/components/certificate-body";
 
 /** Element id passed to html2canvas — must not use className or theme CSS */
 export const CERTIFICATE_EXPORT_ID = "certificate-export";
@@ -41,9 +37,7 @@ export const CertificateExport = forwardRef<
 >(function CertificateExport({ data }, ref) {
   return (
     <div id={CERTIFICATE_EXPORT_ID} ref={ref} aria-hidden={true} style={exportRootStyle}>
-      <div style={certificatePageStyle()}>
-        <CertificatePageBody data={data} />
-      </div>
+      <CertificatePageContent data={data} />
     </div>
   );
 });
