@@ -192,7 +192,10 @@ function AuthPage() {
       email: submitEmail,
       password: submitPassword,
     });
-    if (error) throw error;
+    if (error) {
+      console.warn("[auth signup] auto sign-in after signup failed", error);
+      return null;
+    }
     return data.session;
   }
 
@@ -200,6 +203,31 @@ function AuthPage() {
     await applyLanguageForUser(userId);
     const redirectPath = await getPostAuthPath(userId);
     window.location.assign(redirectPath);
+  }
+
+  async function completeSignupAfterRegister(
+    userId: string,
+    session: Awaited<ReturnType<typeof ensureSignupSession>>,
+    account: "student" | "parent",
+    afterSession?: () => Promise<void>,
+  ) {
+    if (session) {
+      if (afterSession) await afterSession();
+      toast.success(tr("auth_success_login"));
+      await finishSignupAndRedirect(userId);
+      return;
+    }
+
+    await supabase.auth.signOut();
+
+    if (ENABLE_EMAIL_VERIFICATION) {
+      setSignupSuccessAlert(
+        account === "parent" ? tr("auth_success_parent") : tr("auth_success_student"),
+      );
+    } else {
+      setSignupSuccessAlert(tr("auth_signup_complete"));
+    }
+    setMode("login");
   }
 
   async function callSignUpOnce(
@@ -307,27 +335,17 @@ function AuthPage() {
           }
 
           const session = await ensureSignupSession(submitEmail, submitPassword, { data, error });
-          if (!session && ENABLE_EMAIL_VERIFICATION) {
-            await supabase.auth.signOut();
-            console.debug("[auth signup] signed out after signup — awaiting email confirmation", {
-              signUpCallsThisSubmit: 1,
-              totalSignUpCalls: signUpCallCount.current,
-            });
-            setSignupSuccessAlert(tr("auth_success_student"));
-            return;
-          }
 
-          if (profilePhotoFile && session) {
-            try {
-              await uploadProfilePhoto(data.user.id, profilePhotoFile);
-              console.debug("[auth signup] profile photo uploaded during signup session");
-            } catch (photoErr) {
-              console.error("[auth signup] profile photo upload failed", photoErr);
+          await completeSignupAfterRegister(data.user.id, session, "student", async () => {
+            if (profilePhotoFile && session) {
+              try {
+                await uploadProfilePhoto(data.user!.id, profilePhotoFile);
+                console.debug("[auth signup] profile photo uploaded during signup session");
+              } catch (photoErr) {
+                console.error("[auth signup] profile photo upload failed", photoErr);
+              }
             }
-          }
-
-          toast.success(tr("auth_success_login"));
-          await finishSignupAndRedirect(data.user.id);
+          });
           return;
         }
 
@@ -389,18 +407,7 @@ function AuthPage() {
           }
         }
 
-        if (!session && ENABLE_EMAIL_VERIFICATION) {
-          await supabase.auth.signOut();
-          console.debug("[auth signup] signed out after parent signup — awaiting email confirmation", {
-            signUpCallsThisSubmit: 1,
-            totalSignUpCalls: signUpCallCount.current,
-          });
-          setSignupSuccessAlert(tr("auth_success_parent"));
-          return;
-        }
-
-        toast.success(tr("auth_success_login"));
-        await finishSignupAndRedirect(data.user.id);
+        await completeSignupAfterRegister(data.user.id, session, "parent");
         return;
       }
 
@@ -510,7 +517,7 @@ function AuthPage() {
             </div>
           )}
 
-          {ENABLE_EMAIL_VERIFICATION && signupSuccessAlert && (
+          {signupSuccessAlert && (
             <div
               role="status"
               className="mb-4 rounded-2xl border border-primary/40 bg-primary/10 px-5 py-4 text-sm text-foreground"

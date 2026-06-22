@@ -601,6 +601,10 @@ export const t = {
     en: "Activation link sent to your email.",
     ar: "تم إرسال رابط التفعيل إلى بريدك الإلكتروني",
   },
+  auth_signup_complete: {
+    en: "Account created successfully. You can log in now.",
+    ar: "تم إنشاء الحساب بنجاح. يمكنك تسجيل الدخول الآن.",
+  },
   auth_email_confirmed: {
     en: "Email confirmed successfully. You can now log in.",
     ar: "تم تأكيد البريد الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
