@@ -7,6 +7,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero.jpg";
 import patternImg from "@/assets/pattern.jpg";
+import { getStage } from "@/lib/curriculum";
 import { HOMEPAGE_STAGE_CARDS, STAGE_CARD_CONFIG, STAGE_CARD_IMAGES } from "@/lib/stage-images";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -70,6 +71,7 @@ function Home() {
     ...card,
     img: STAGE_CARD_IMAGES[card.key],
     ...STAGE_CARD_CONFIG[card.key],
+    stage: getStage(card.stageSlug),
   }));
 
   return (
@@ -186,7 +188,7 @@ function Home() {
                 <div className="aspect-[4/5] overflow-hidden">
                   <img
                     src={s.img}
-                    alt=""
+                    alt={tr(s.name)}
                     width={800}
                     height={1000}
                     loading="lazy"
@@ -198,6 +200,15 @@ function Home() {
                 <div className="absolute inset-0 flex flex-col justify-end p-6 text-white [text-shadow:0_1px_12px_rgba(47,53,66,0.55)]">
                   <div className="text-xs uppercase tracking-wider text-primary">{tr(s.grades)}</div>
                   <div className="font-display text-2xl mt-1">{tr(s.name)}</div>
+                  <div className="mt-1 text-sm font-medium opacity-95">{tr(s.subtitle)}</div>
+                  {s.stage ? (
+                    <div className="mt-1 text-sm opacity-85 line-clamp-2">
+                      {bi(s.stage.desc, {
+                        fieldName: `stage_${s.stageSlug}_desc`,
+                        contentType: "general",
+                      })}
+                    </div>
+                  ) : null}
                   <div className="mt-3 inline-flex items-center gap-1 text-sm opacity-90 group-hover:gap-2 transition-all">
                     {tr("explore")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                   </div>

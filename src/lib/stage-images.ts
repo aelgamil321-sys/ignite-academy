@@ -1,5 +1,5 @@
 /** Islamic education stage card imagery — served from /public/images */
-const STAGE_IMAGE_CACHE_VERSION = "3";
+const STAGE_IMAGE_CACHE_VERSION = "5";
 
 export const STAGE_CARD_IMAGES = {
   kg: `/images/stage-kg.jpg?v=${STAGE_IMAGE_CACHE_VERSION}`,
@@ -45,14 +45,46 @@ export const STAGE_CARD_CONFIG: Record<
   },
 };
 
+export type StageSlug = "kindergarten" | "elementary" | "middle" | "high";
+
 export const HOMEPAGE_STAGE_CARDS: Array<{
   key: StageCardKey;
+  stageSlug: StageSlug;
   name: "stage_kg" | "stage_elem" | "stage_mid" | "stage_high";
+  subtitle: "stage_kg_subtitle" | "stage_elem_subtitle" | "stage_mid_subtitle" | "stage_high_subtitle";
   grades: "stage_kg_grades" | "stage_elem_grades" | "stage_mid_grades" | "stage_high_grades";
   to: "/grades";
 }> = [
-  { key: "kg", name: "stage_kg", grades: "stage_kg_grades", to: "/grades" },
-  { key: "elementary", name: "stage_elem", grades: "stage_elem_grades", to: "/grades" },
-  { key: "middle", name: "stage_mid", grades: "stage_mid_grades", to: "/grades" },
-  { key: "high", name: "stage_high", grades: "stage_high_grades", to: "/grades" },
+  {
+    key: "kg",
+    stageSlug: "kindergarten",
+    name: "stage_kg",
+    subtitle: "stage_kg_subtitle",
+    grades: "stage_kg_grades",
+    to: "/grades",
+  },
+  {
+    key: "elementary",
+    stageSlug: "elementary",
+    name: "stage_elem",
+    subtitle: "stage_elem_subtitle",
+    grades: "stage_elem_grades",
+    to: "/grades",
+  },
+  {
+    key: "middle",
+    stageSlug: "middle",
+    name: "stage_mid",
+    subtitle: "stage_mid_subtitle",
+    grades: "stage_mid_grades",
+    to: "/grades",
+  },
+  {
+    key: "high",
+    stageSlug: "high",
+    name: "stage_high",
+    subtitle: "stage_high_subtitle",
+    grades: "stage_high_grades",
+    to: "/grades",
+  },
 ];

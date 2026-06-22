@@ -3,7 +3,7 @@ import type { Announcement } from "@/lib/extras";
 import type { CustomLesson } from "@/lib/cms";
 import { SUBJECT_CATEGORIES } from "@/lib/categories";
 import { announcementTopicLabel } from "@/lib/announcement-topics";
-import { grades } from "@/lib/curriculum";
+import { grades, stages } from "@/lib/curriculum";
 import type { Lang } from "@/lib/i18n-config";
 import { normalizeQuizList } from "@/lib/lesson-quiz";
 import {
@@ -69,6 +69,7 @@ function announcementFields(announcement: Announcement, lang: Lang): Educational
   };
   push(announcement.title, "title", "title");
   push(announcement.excerpt, "excerpt", "content");
+  push(announcement.body, "body", "content");
   push(announcement.tag, "tag", "general");
   return fields;
 }
@@ -90,6 +91,11 @@ export function prefetchHomepageContent(
 
   for (const g of grades) {
     const f = fieldFromBi(g.name, lang, `grade_${g.slug}`, "general", `grade_${g.slug}`);
+    if (f) fields.push(f);
+  }
+
+  for (const stage of stages) {
+    const f = fieldFromBi(stage.desc, lang, `stage_${stage.slug}_desc`, "general", `stage_${stage.slug}`);
     if (f) fields.push(f);
   }
 
