@@ -165,18 +165,22 @@ export async function captureCertificateToImage(
   }
 }
 
-export async function downloadCertificatePdf(
+/**
+ * Render the certificate to a PDF Blob from #certificate-export.
+ * Single source of truth for both the in-modal preview and the download.
+ */
+export async function renderCertificatePdfBlob(
   element: HTMLElement,
-  studentName: string,
-): Promise<void> {
+): Promise<Blob> {
   const imgData = await captureCertificateToImage(element);
   const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   pdf.addImage(imgData, "PNG", 0, 0, 297, 210);
+  return pdf.output("blob");
+}
 
-  const filename = safeCertificateFilename(studentName);
-  const blob = pdf.output("blob");
+/** Trigger a browser download for an already-generated certificate PDF Blob. */
+export function triggerCertificatePdfDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
-
   try {
     const link = document.createElement("a");
     link.href = url;
@@ -188,4 +192,12 @@ export async function downloadCertificatePdf(
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+export async function downloadCertificatePdf(
+  element: HTMLElement,
+  studentName: string,
+): Promise<void> {
+  const blob = await renderCertificatePdfBlob(element);
+  triggerCertificatePdfDownload(blob, safeCertificateFilename(studentName));
 }

@@ -36,7 +36,9 @@ export {
 
 export {
   downloadCertificatePdf,
+  renderCertificatePdfBlob,
   safeCertificateFilename,
+  triggerCertificatePdfDownload,
 } from "@/lib/certificate-pdf";
 
 export { buildCertificateQrDataUrl } from "@/lib/certificate-qr";

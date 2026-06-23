@@ -10,17 +10,18 @@ import type { Lang } from "@/lib/i18n-config";
 import type { SavedQuizSubmission } from "@/lib/lesson-quiz";
 import {
   buildCertificateDisplayData,
-  downloadCertificatePdf,
   getOrCreateQuizCertificate,
   isStudentProfileComplete,
   loadLinkedChildCertificatePreview,
+  renderCertificatePdfBlob,
   resolveCertificateStudentNames,
+  safeCertificateFilename,
+  triggerCertificatePdfDownload,
   type CertificateDisplayData,
 } from "@/lib/certificate";
 import { fetchStudentProfile } from "@/lib/student-profile";
 import { buildCertificateQrDataUrl } from "@/lib/certificate-qr";
 import { CERTIFICATE_EXPORT_ID, CertificateExport } from "@/components/certificate-export";
-import { CertificatePreview } from "@/components/certificate-preview";
 import {
   Dialog,
   DialogContent,
@@ -109,6 +110,9 @@ export function CertificateModal({
   const [downloading, setDownloading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+  const [buildingPdf, setBuildingPdf] = useState(false);
 
   const prepareCertificate = useCallback(async () => {
     setLoading(true);
@@ -245,12 +249,48 @@ export function CertificateModal({
       setDisplayData(null);
       setLoadError(null);
       setPdfError(null);
+      setPdfBlob(null);
+      setPdfUrl(null);
     }
   }, [open, prepareCertificate]);
 
+  // Build the PDF once data is ready; the same Blob powers both the preview and the download.
+  useEffect(() => {
+    if (!open || !displayData) return;
+
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    setBuildingPdf(true);
+    setPdfError(null);
+
+    void (async () => {
+      try {
+        const el = pdfRef.current;
+        if (!el) {
+          throw new Error(`PDF source element not found (#${CERTIFICATE_EXPORT_ID})`);
+        }
+        const blob = await renderCertificatePdfBlob(el);
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setPdfBlob(blob);
+        setPdfUrl(objectUrl);
+      } catch (error) {
+        if (cancelled) return;
+        console.error("[certificate pdf preview]", error);
+        setPdfError(error instanceof Error ? error.message : String(error));
+      } finally {
+        if (!cancelled) setBuildingPdf(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [open, displayData]);
+
   const handleDownloadPdf = async () => {
-    const el = pdfRef.current;
-    if (!el || !displayData) {
+    if (!displayData) {
       setPdfError(`PDF source element not found (#${CERTIFICATE_EXPORT_ID})`);
       return;
     }
@@ -258,7 +298,17 @@ export function CertificateModal({
     setDownloading(true);
     setPdfError(null);
     try {
-      await downloadCertificatePdf(el, displayData.studentName);
+      const filename = safeCertificateFilename(displayData.studentName);
+      let blob = pdfBlob;
+      if (!blob) {
+        const el = pdfRef.current;
+        if (!el) {
+          throw new Error(`PDF source element not found (#${CERTIFICATE_EXPORT_ID})`);
+        }
+        blob = await renderCertificatePdfBlob(el);
+        setPdfBlob(blob);
+      }
+      triggerCertificatePdfDownload(blob, filename);
       toast.success(L("Certificate downloaded", "تم تحميل الشهادة")[lang]);
     } catch (error) {
       console.error("[certificate pdf]", error);
@@ -341,7 +391,25 @@ export function CertificateModal({
             <>
               <div className="flex-1 min-h-[220px] overflow-y-auto overflow-x-hidden w-full max-w-full">
                 <div className="flex flex-col gap-4 w-full max-w-full">
-                  <CertificatePreview data={displayData} className="mx-auto w-full" />
+                  {buildingPdf || !pdfUrl ? (
+                    <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      {L("Preparing certificate…", "جارٍ تجهيز الشهادة…")[lang]}
+                    </div>
+                  ) : (
+                    <object
+                      data={pdfUrl}
+                      type="application/pdf"
+                      aria-label={L("Certificate preview", "معاينة الشهادة")[lang]}
+                      className="w-full h-[320px] sm:h-[420px] rounded-lg border border-border bg-muted/30"
+                    >
+                      <iframe
+                        src={pdfUrl}
+                        title={L("Certificate preview", "معاينة الشهادة")[lang]}
+                        className="w-full h-[320px] sm:h-[420px] rounded-lg border-0"
+                      />
+                    </object>
+                  )}
 
                   {downloading && (
                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
