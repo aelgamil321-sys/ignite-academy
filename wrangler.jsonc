@@ -3,11 +3,10 @@
   "name": "ignite-academy",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
-  // Nitro (via @lovable.dev/vite-tanstack-config) bundles the worker to .output/server/index.mjs.
-  // src/server.ts wraps @tanstack/react-start/server-entry at build time — do not point main at the package entry here.
-  "main": ".output/server/index.mjs",
+  // @lovable.dev/vite-tanstack-config outputs Nitro cloudflare-module to dist/server + dist/client.
+  "main": "dist/server/index.mjs",
   "assets": {
-    "directory": ".output/public",
+    "directory": "dist/client",
     "binding": "ASSETS"
   },
   "observability": {
