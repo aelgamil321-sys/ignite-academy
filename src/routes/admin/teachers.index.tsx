@@ -16,6 +16,7 @@ import {
   grantTeacherRole,
   removeTeacherAssignment,
   revokeTeacherRole,
+  setTeacherLeadStatus,
   updateTeacherAssignment,
   type AdminTeacherRow,
   type RegisteredUserOption,
@@ -247,6 +248,7 @@ function TeacherCard({
   const [adding, setAdding] = useState(false);
   const [revoking, setRevoking] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [leadUpdating, setLeadUpdating] = useState(false);
 
   const addAssignment = async () => {
     setAdding(true);
@@ -286,6 +288,23 @@ function TeacherCard({
     }
   };
 
+  const toggleLeadTeacher = async () => {
+    setLeadUpdating(true);
+    try {
+      await setTeacherLeadStatus(teacher.userId, !teacher.isLeadTeacher);
+      toast.success(
+        teacher.isLeadTeacher
+          ? L("Lead Teacher permission removed.", "تمت إزالة صلاحية مسؤول القسم.")[lang]
+          : L("Lead Teacher permission granted.", "تم منح صلاحية مسؤول القسم.")[lang],
+      );
+      await onRefresh();
+    } catch (error) {
+      toast.error(formatError(error));
+    } finally {
+      setLeadUpdating(false);
+    }
+  };
+
   const statusLabel =
     teacher.status === "active"
       ? L("Active", "نشط")[lang]
@@ -304,9 +323,27 @@ function TeacherCard({
           <p className="text-sm text-muted-foreground">{teacher.email || "—"}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {teacher.isLeadTeacher && (
+            <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
+              {L("Lead Teacher / مسؤول القسم", "مسؤول القسم / Lead Teacher")[lang]}
+            </span>
+          )}
           <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass}`}>
             {statusLabel}
           </span>
+          <button
+            type="button"
+            disabled={leadUpdating}
+            onClick={() => void toggleLeadTeacher()}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:bg-muted disabled:opacity-60"
+          >
+            {leadUpdating ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : null}
+            {teacher.isLeadTeacher
+              ? L("Remove Lead Teacher", "إزالة مسؤول القسم")[lang]
+              : L("Lead Teacher / مسؤول القسم", "مسؤول القسم / Lead Teacher")[lang]}
+          </button>
           <button
             type="button"
             disabled={revoking}

@@ -59,6 +59,12 @@ export async function approveTeacherRequest(requestId: string): Promise<void> {
       .from("user_roles")
       .insert({ user_id: request.user_id, role: "teacher" });
     if (roleError) throw roleError;
+    const { error: profileError } = await supabase.from("teacher_profiles").upsert({
+      user_id: request.user_id,
+      is_lead_teacher: false,
+      updated_at: new Date().toISOString(),
+    });
+    if (profileError) throw profileError;
   }
 
   const { data: authData } = await supabase.auth.getUser();

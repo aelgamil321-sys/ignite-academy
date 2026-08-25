@@ -431,6 +431,33 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_profiles: {
+        Row: {
+          created_at: string
+          is_lead_teacher: boolean
+          lead_granted_at: string | null
+          lead_granted_by: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          is_lead_teacher?: boolean
+          lead_granted_at?: string | null
+          lead_granted_by?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          is_lead_teacher?: boolean
+          lead_granted_at?: string | null
+          lead_granted_by?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           arabic_name: string

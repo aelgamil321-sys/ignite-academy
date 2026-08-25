@@ -565,6 +565,97 @@ export const t = {
     en: "Teacher request rejected.",
     ar: "تم رفض طلب المعلم.",
   },
+  teacher_title: { en: "Teacher Dashboard", ar: "لوحة المعلم" },
+  teacher_welcome: { en: "Teacher Dashboard", ar: "لوحة المعلم" },
+  teacher_lead: {
+    en: "View and manage your classes, students, lessons, quizzes, and assignments within your assigned scope.",
+    ar: "اعرض وادِر صفوفك وطلابك ودروسك واختباراتك وواجباتك ضمن نطاق تكليفك.",
+  },
+  teacher_welcome_name: { en: "Welcome, {name}", ar: "مرحبًا، {name}" },
+  teacher_scope_lead: {
+    en: "You only see students and data within your assigned teaching scope.",
+    ar: "ترى فقط الطلاب والبيانات ضمن نطاق تدريسك المكلّف.",
+  },
+  teacher_assigned_grades: { en: "Assigned grades", ar: "الصفوف المكلّفة" },
+  teacher_assigned_sections: { en: "Assigned sections", ar: "الشعب المكلّفة" },
+  teacher_assigned_groups: { en: "Islamic groups", ar: "المجموعات الإسلامية" },
+  teacher_all_sections: { en: "All sections", ar: "كل الشعب" },
+  teacher_all_groups: { en: "Both groups", ar: "كلا المجموعتين" },
+  teacher_loading: { en: "Loading…", ar: "جارٍ التحميل…" },
+  teacher_load_error: { en: "Could not load teacher dashboard.", ar: "تعذّر تحميل لوحة المعلم." },
+  teacher_access_denied: {
+    en: "This area is only available to approved teachers.",
+    ar: "هذه المنطقة متاحة للمعلمين الموافق عليهم فقط.",
+  },
+  teacher_nav_overview: { en: "Overview", ar: "نظرة عامة" },
+  teacher_nav_classes: { en: "My Classes", ar: "صفوفي" },
+  teacher_nav_students: { en: "My Students", ar: "طلابي" },
+  teacher_nav_lessons: { en: "Lessons", ar: "الدروس" },
+  teacher_nav_quizzes: { en: "Quizzes", ar: "الاختبارات" },
+  teacher_nav_assignments: { en: "Assignments", ar: "الواجبات" },
+  teacher_nav_performance: { en: "Student Performance", ar: "أداء الطلاب" },
+  teacher_stat_students: { en: "My Students", ar: "طلابي" },
+  teacher_stat_classes: { en: "My Classes", ar: "صفوفي" },
+  teacher_stat_lessons: { en: "Lessons", ar: "الدروس" },
+  teacher_stat_quizzes: { en: "Quiz activity", ar: "نشاط الاختبارات" },
+  teacher_stat_assignments: { en: "Assignments", ar: "الواجبات" },
+  teacher_stat_submitted: { en: "Submitted work", ar: "الأعمال المسلّمة" },
+  teacher_stat_avg_quiz: { en: "Average quiz score", ar: "متوسط درجات الاختبارات" },
+  teacher_my_classes: { en: "My Classes", ar: "صفوفي" },
+  teacher_no_classes: { en: "No class assignments yet.", ar: "لا توجد تكليفات صفوف بعد." },
+  teacher_no_students: { en: "No students in your scope.", ar: "لا يوجد طلاب في نطاقك." },
+  teacher_view_students: { en: "View students", ar: "عرض الطلاب" },
+  teacher_filtered_by: { en: "Filtered by", ar: "مُصفّى حسب" },
+  teacher_col_name: { en: "Student", ar: "الطالب" },
+  teacher_col_scope: { en: "Grade / Section / Group", ar: "الصف / الشعبة / المجموعة" },
+  teacher_col_progress: { en: "Progress", ar: "التقدّم" },
+  teacher_col_avg_quiz: { en: "Avg quiz", ar: "متوسط الاختبار" },
+  teacher_col_certificates: { en: "Certificates", ar: "الشهادات" },
+  teacher_col_lessons: { en: "Lessons done", ar: "دروس مكتملة" },
+  teacher_back_students: { en: "Back to students", ar: "العودة إلى الطلاب" },
+  teacher_student_not_found: { en: "Student not found in your scope.", ar: "الطالب غير موجود في نطاقك." },
+  teacher_sign_out: { en: "Sign out", ar: "تسجيل الخروج" },
+  teacher_no_lessons: { en: "No lessons in your assigned grades.", ar: "لا توجد دروس في الصفوف المكلّفة." },
+  teacher_draft: { en: "Draft", ar: "مسودة" },
+  teacher_edit: { en: "Edit", ar: "تعديل" },
+  teacher_lesson_not_found: { en: "Lesson not found.", ar: "الدرس غير موجود." },
+  teacher_lesson_out_of_scope: {
+    en: "You cannot edit lessons outside your assigned grades.",
+    ar: "لا يمكنك تعديل دروس خارج الصفوف المكلّفة.",
+  },
+  teacher_back_lessons: { en: "Back to lessons", ar: "العودة إلى الدروس" },
+  teacher_no_quiz_submissions: { en: "No quiz submissions in your scope.", ar: "لا توجد إرسالات اختبار في نطاقك." },
+  teacher_quiz_saved: { en: "Quiz review saved.", ar: "تم حفظ مراجعة الاختبار." },
+  teacher_save_review: { en: "Save review", ar: "حفظ المراجعة" },
+  teacher_assignment_graded: { en: "Submission graded.", ar: "تم تقييم الإرسال." },
+  teacher_grade: { en: "Grade", ar: "تقييم" },
+  teacher_new_lesson: { en: "New lesson", ar: "درس جديد" },
+  teacher_save_failed: { en: "Save failed.", ar: "تعذّر الحفظ." },
+  teacher_delete: { en: "Delete", ar: "حذف" },
+  teacher_cancel: { en: "Cancel", ar: "إلغاء" },
+  teacher_deleting: { en: "Deleting…", ar: "جارٍ الحذف…" },
+  teacher_delete_lesson_title: { en: "Delete lesson", ar: "حذف الدرس" },
+  teacher_delete_lesson_confirm: {
+    en: "This will hide the lesson from students. Quiz submissions, certificates, and scores linked to this lesson will remain in the system until permanently removed by an administrator.",
+    ar: "سيؤدي هذا إلى إخفاء الدرس عن الطلاب. ستبقى إرسالات الاختبارات والشهادات والدرجات المرتبطة بهذا الدرس في النظام حتى يزيلها المسؤول نهائيًا.",
+  },
+  teacher_lesson_deleted: { en: "Lesson deleted.", ar: "تم حذف الدرس." },
+  teacher_delete_assignment_title: { en: "Delete assignment", ar: "حذف الواجب" },
+  teacher_delete_assignment_confirm: {
+    en: "This permanently deletes the assignment and all student submissions, scores, and feedback for it. This cannot be undone.",
+    ar: "سيؤدي هذا إلى حذف الواجب نهائيًا وجميع إرسالات الطلاب ودرجاتهم وملاحظاتهم عليه. لا يمكن التراجع عن هذا الإجراء.",
+  },
+  teacher_assignment_deleted: { en: "Assignment deleted.", ar: "تم حذف الواجب." },
+  teacher_lead_analytics_note: {
+    en: "As Lead Teacher, you can view Islamic Department academic analytics across all grades, sections, and Islamic groups.",
+    ar: "بصفتك مسؤول القسم، يمكنك عرض تحليلات الأداء الأكاديمي لقسم الدراسات الإسلامية في كل الصفوف والشعب والمجموعات.",
+  },
+  teacher_analytics_summary: { en: "Analytics summary", ar: "ملخص التحليلات" },
+  teacher_all_grades: { en: "All grades", ar: "كل الصفوف" },
+  teacher_analytics_not_permitted: {
+    en: "This analytics filter is outside your assigned teaching scope.",
+    ar: "عامل تصفية التحليلات هذا خارج نطاق تدريسك المكلّف.",
+  },
   auth_parent_full_name: { en: "Parent full name", ar: "الاسم الكامل لولي الأمر" },
   auth_parent_link_code: { en: "Student Link Code", ar: "كود الطالب" },
   auth_parent_link_code_hint: {
@@ -926,6 +1017,10 @@ function translate(key: TKey, lang: Lang): string {
   if (lang === "ar") return t[key].ar;
   if (lang === "en") return t[key].en;
   return t[key].en || t[key].ar;
+}
+
+export function translateKey(key: TKey, lang: Lang): string {
+  return translate(key, lang);
 }
 
 export function interpolateTr(template: string, vars: Record<string, string | number>): string {

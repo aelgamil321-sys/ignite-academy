@@ -23,6 +23,7 @@ export type AdminTeacherRow = {
   fullName: string;
   email: string;
   status: "active" | "no_assignments";
+  isLeadTeacher: boolean;
   assignments: TeacherAssignmentRow[];
 };
 
@@ -63,12 +64,13 @@ function displayName(
 }
 
 export async function fetchAdminTeachers(): Promise<AdminTeacherRow[]> {
-  const [rolesRes, assignmentsRes, profilesRes, parentProfilesRes, teacherRequestsRes] = await Promise.all([
+  const [rolesRes, assignmentsRes, profilesRes, parentProfilesRes, teacherRequestsRes, teacherProfilesRes] = await Promise.all([
     supabase.from("user_roles").select("user_id, role"),
     supabase.from("teacher_assignments").select("*").order("grade").order("section"),
     supabase.from("profiles").select("user_id, full_name, email"),
     supabase.from("parent_profiles").select("user_id, full_name, email"),
     supabase.from("teacher_requests").select("user_id, full_name, email"),
+    supabase.from("teacher_profiles").select("user_id, is_lead_teacher"),
   ]);
 
   if (rolesRes.error) throw rolesRes.error;
@@ -76,6 +78,11 @@ export async function fetchAdminTeachers(): Promise<AdminTeacherRow[]> {
   if (profilesRes.error) throw profilesRes.error;
   if (parentProfilesRes.error) throw parentProfilesRes.error;
   if (teacherRequestsRes.error) throw teacherRequestsRes.error;
+  if (teacherProfilesRes.error) throw teacherProfilesRes.error;
+
+  const leadTeacherMap = new Map(
+    (teacherProfilesRes.data ?? []).map((row) => [row.user_id, row.is_lead_teacher]),
+  );
 
   const teacherIds = (rolesRes.data ?? [])
     .filter((row) => row.role === "teacher")
@@ -106,6 +113,7 @@ export async function fetchAdminTeachers(): Promise<AdminTeacherRow[]> {
       fullName,
       email,
       status: assignments.length > 0 ? "active" : "no_assignments",
+      isLeadTeacher: leadTeacherMap.get(userId) ?? false,
       assignments,
     };
   });
@@ -160,6 +168,12 @@ export async function fetchRegisteredUserOptions(): Promise<RegisteredUserOption
 export async function grantTeacherRole(userId: string): Promise<void> {
   const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "teacher" });
   if (error) throw error;
+  const { error: profileError } = await supabase.from("teacher_profiles").upsert({
+    user_id: userId,
+    is_lead_teacher: false,
+    updated_at: new Date().toISOString(),
+  });
+  if (profileError) throw profileError;
 }
 
 export async function revokeTeacherRole(userId: string): Promise<void> {
@@ -169,12 +183,30 @@ export async function revokeTeacherRole(userId: string): Promise<void> {
     .eq("teacher_id", userId);
   if (assignmentsError) throw assignmentsError;
 
+  const { error: profileError } = await supabase
+    .from("teacher_profiles")
+    .delete()
+    .eq("user_id", userId);
+  if (profileError) throw profileError;
+
   const { error: roleError } = await supabase
     .from("user_roles")
     .delete()
     .eq("user_id", userId)
     .eq("role", "teacher");
   if (roleError) throw roleError;
+}
+
+export async function setTeacherLeadStatus(userId: string, isLeadTeacher: boolean): Promise<void> {
+  const { data: auth } = await supabase.auth.getUser();
+  const { error } = await supabase.from("teacher_profiles").upsert({
+    user_id: userId,
+    is_lead_teacher: isLeadTeacher,
+    lead_granted_by: isLeadTeacher ? auth.user?.id ?? null : null,
+    lead_granted_at: isLeadTeacher ? new Date().toISOString() : null,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
 }
 
 export async function addTeacherAssignment(
