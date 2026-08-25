@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Pencil } from "lucide-react";
 import { useCMS } from "@/lib/cms";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/lessons/")({
   head: () => ({
@@ -22,7 +22,7 @@ function AdminLessonsPage() {
       <h1 className="font-display text-2xl text-foreground">Manage Lessons Page Loaded</h1>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading lessons…</p>
+        <p className="text-sm text-muted-foreground">{L("Loading lessons…", "جارٍ تحميل الدروس…")[lang]}</p>
       ) : lessons.length === 0 ? (
         <p className="text-sm text-muted-foreground">No lessons found.</p>
       ) : (

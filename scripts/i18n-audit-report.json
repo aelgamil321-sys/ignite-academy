@@ -1,0 +1,459 @@
+{
+  "generatedAt": "2026-06-21T15:24:06.602Z",
+  "summary": {
+    "totalTKeys": 478,
+    "totalLStrings": 372,
+    "hardcodedPatternHits": 86,
+    "hardcodedFiles": 42,
+    "modifiedFilesCount": 41
+  },
+  "missingTranslationKeys": {
+    "fr": {
+      "missingT": 0,
+      "missingTKeys": [],
+      "missingL": 0,
+      "missingLSamples": []
+    },
+    "de": {
+      "missingT": 0,
+      "missingTKeys": [],
+      "missingL": 0,
+      "missingLSamples": []
+    },
+    "ur": {
+      "missingT": 0,
+      "missingTKeys": [],
+      "missingL": 0,
+      "missingLSamples": []
+    },
+    "zh": {
+      "missingT": 0,
+      "missingTKeys": [],
+      "missingL": 0,
+      "missingLSamples": []
+    }
+  },
+  "hardcodedTextsFound": [
+    {
+      "file": "src/routes/admin/analytics.index.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 7,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/parent-performance-report.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 5,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/lib/lesson-library.ts",
+      "pattern": "lang_ar_ternary",
+      "count": 5,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/lib/lesson-quiz.ts",
+      "pattern": "lang_ar_ternary",
+      "count": 5,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/routes/grades.$grade.$lesson.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 5,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\"\r\n                  ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/lesson-quiz-results.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 4,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/lib/assignment-upload.ts",
+      "pattern": "lang_ar_ternary",
+      "count": 4,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/lib/parent-performance-report.ts",
+      "pattern": "lang_ar_ternary",
+      "count": 4,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\"\n    ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/lib/cms.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 3,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/routes/admin.lessons.edit.$lessonId.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 3,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/routes/grades.$grade.units.$unit.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 3,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/lesson-ai-translation-button.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 2,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/lesson-vocab-builder.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 2,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/parent-assignments-section.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 2,
+      "samples": [
+        "lang === \"ar\" ?",
+        "lang === \"ar\"\n                      ?"
+      ]
+    },
+    {
+      "file": "src/components/ui/pagination.tsx",
+      "pattern": "inline_english_ui",
+      "count": 2,
+      "samples": [
+        "label=\"Go to previous page\"",
+        "label=\"Go to next page\""
+      ]
+    },
+    {
+      "file": "src/components/ui/sidebar.tsx",
+      "pattern": "inline_english_ui",
+      "count": 2,
+      "samples": [
+        "label=\"Toggle Sidebar\"",
+        "title=\"Toggle Sidebar\""
+      ]
+    },
+    {
+      "file": "src/routes/grades.$grade.$lesson.tsx",
+      "pattern": "inline_english_ui",
+      "count": 2,
+      "samples": [
+        "title=\"Worksheet / ورقة العمل\"",
+        "title=\"Worksheet / ورقة العمل\""
+      ]
+    },
+    {
+      "file": "src/routes/videos.index.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 2,
+      "samples": [
+        "lang === \"ar\"\n    ?",
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/admin-assignment-submission-file.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/ask-mr-ahmed.tsx",
+      "pattern": "inline_english_ui",
+      "count": 1,
+      "samples": [
+        "label=\"Close\""
+      ]
+    },
+    {
+      "file": "src/components/breadcrumbs.tsx",
+      "pattern": "inline_english_ui",
+      "count": 1,
+      "samples": [
+        "label=\"Breadcrumb\""
+      ]
+    },
+    {
+      "file": "src/components/grade-lessons-section.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\"\n              ?"
+      ]
+    },
+    {
+      "file": "src/components/language-selector.tsx",
+      "pattern": "inline_english_ui",
+      "count": 1,
+      "samples": [
+        "label=\"Select language\""
+      ]
+    },
+    {
+      "file": "src/components/lesson-bilingual-file-fields.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/lesson-quiz-builder.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/lesson-vocabulary-cards.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/notification-bell.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/parent-dashboard-hero.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/parent-dashboard.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/components/parent-link-child-form.tsx",
+      "pattern": "inline_english_ui",
+      "count": 1,
+      "samples": [
+        "placeholder=\"IIA-X7K92A\""
+      ]
+    },
+    {
+      "file": "src/components/site-header.tsx",
+      "pattern": "inline_english_ui",
+      "count": 1,
+      "samples": [
+        "label=\"Toggle menu\""
+      ]
+    },
+    {
+      "file": "src/lib/ai/ignite-ai.ts",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/lib/notifications.ts",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/routes/admin/assignments.index.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/routes/admin/quiz-submissions.index.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/routes/assignments.$assignmentId.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/routes/assignments.index.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/routes/auth.tsx",
+      "pattern": "inline_english_ui",
+      "count": 1,
+      "samples": [
+        "placeholder=\"IIA-X7K92A\""
+      ]
+    },
+    {
+      "file": "src/routes/grades.$grade.units.$unit.tsx",
+      "pattern": "inline_english_ui",
+      "count": 1,
+      "samples": [
+        "placeholder=\"Question (EN)\""
+      ]
+    },
+    {
+      "file": "src/routes/quizzes.$slug.tsx",
+      "pattern": "inline_english_ui",
+      "count": 1,
+      "samples": [
+        "title=\"Quiz not found\""
+      ]
+    },
+    {
+      "file": "src/routes/resource-library.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    },
+    {
+      "file": "src/routes/video-lessons.tsx",
+      "pattern": "lang_ar_ternary",
+      "count": 1,
+      "samples": [
+        "lang === \"ar\" ?"
+      ]
+    }
+  ],
+  "filesModified": [
+    "scripts/en-l.json",
+    "scripts/en-t.json",
+    "scripts/extract-en.mjs",
+    "scripts/l-strings-en.json",
+    "scripts/locale-packs/de.mjs",
+    "scripts/locale-packs/fr.mjs",
+    "scripts/locale-packs/ur.mjs",
+    "scripts/locale-packs/zh.mjs",
+    "src/components/announcement-card.tsx",
+    "src/components/lesson-quiz-student.tsx",
+    "src/components/parent-academic-chart.tsx",
+    "src/components/parent-assignments-section.tsx",
+    "src/components/parent-child-selector.tsx",
+    "src/components/parent-dashboard-badges.tsx",
+    "src/components/parent-dashboard-certificates.tsx",
+    "src/components/parent-dashboard-hero.tsx",
+    "src/components/parent-dashboard-insights.tsx",
+    "src/components/parent-dashboard-recommendation.tsx",
+    "src/components/parent-dashboard-summary.tsx",
+    "src/components/parent-dashboard.tsx",
+    "src/components/parent-link-code-card.tsx",
+    "src/components/profile-photo-field.tsx",
+    "src/components/student-academic-fields.tsx",
+    "src/components/student-progress-dashboard.tsx",
+    "src/lib/i18n.tsx",
+    "src/lib/i18n/locales/de.ts",
+    "src/lib/i18n/locales/fr.ts",
+    "src/lib/i18n/locales/ur.ts",
+    "src/lib/i18n/locales/zh.ts",
+    "src/lib/parent-dashboard-insights.ts",
+    "src/lib/student-academics.ts",
+    "src/routes/admin-login.tsx",
+    "src/routes/admin.tsx",
+    "src/routes/announcements.$slug.tsx",
+    "src/routes/auth.tsx",
+    "src/routes/categories.$category.tsx",
+    "src/routes/grades.$grade.index.tsx",
+    "src/routes/parent.$slug.tsx",
+    "src/routes/parent.dashboard.tsx",
+    "src/routes/student.index.tsx",
+    "src/routes/student.profile.tsx"
+  ]
+}

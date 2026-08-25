@@ -368,6 +368,69 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_requests: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      teacher_assignments: {
+        Row: {
+          created_at: string
+          grade: string
+          id: string
+          islamic_group: string | null
+          section: string | null
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          grade: string
+          id?: string
+          islamic_group?: string | null
+          section?: string | null
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          grade?: string
+          id?: string
+          islamic_group?: string | null
+          section?: string | null
+          teacher_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           arabic_name: string
@@ -596,9 +659,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      teacher_can_read_student: {
+        Args: {
+          target_student_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "admin" | "user" | "student" | "parent"
+      app_role: "admin" | "user" | "student" | "parent" | "teacher"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -726,7 +795,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "student", "parent"],
+      app_role: ["admin", "user", "student", "parent", "teacher"],
     },
   },
 } as const

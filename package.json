@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && node scripts/patch-secondary-stage-asset.mjs",
+    "build": "vite build && node scripts/patch-secondary-stage-asset.mjs && node scripts/write-wrangler-config.mjs",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -16,7 +16,8 @@
     "db:apply-parent-link-codes-fix": "node scripts/apply-parent-link-codes-pgcrypto-fix.mjs",
     "db:apply-preferred-language": "node scripts/apply-preferred-language-migration.mjs",
     "auth:disable-email-verification": "node scripts/configure-auth-email-verification.mjs disable",
-    "auth:enable-email-verification": "node scripts/configure-auth-email-verification.mjs enable"
+    "auth:enable-email-verification": "node scripts/configure-auth-email-verification.mjs enable",
+    "deploy": "npm run build && npx wrangler deploy --config .output/server/wrangler.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -20,6 +20,7 @@ import { LessonQuizStudent } from "@/components/lesson-quiz-student";
 import { normalizeQuizList } from "@/lib/lesson-quiz";
 import { useLessonHashScroll } from "@/lib/lesson-hash-scroll";
 import { TranslatedContentShell } from "@/components/translation-loading-indicator";
+import { pageHeadTitle } from "@/lib/page-head";
 import videoPlaceholder from "@/assets/video-placeholder.jpg";
 
 export const Route = createFileRoute("/grades/$grade/$lesson")({
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/grades/$grade/$lesson")({
     if (!grade) throw notFound();
     return { gradeSlug: params.grade, lessonSlug: params.lesson };
   },
-  head: () => ({ meta: [{ title: "Lesson — Ignite Islamic Academy" }] }),
+  head: () => ({ meta: [{ title: pageHeadTitle("lesson") }] }),
   component: LessonPage,
   notFoundComponent: () => <div className="container-page py-20">Lesson not found.</div>,
   errorComponent: ({ error }) => <div className="container-page py-20">Error: {error.message}</div>,
@@ -106,7 +107,9 @@ function LessonPage() {
     return (
       <div className="min-h-screen flex flex-col">
         <SiteHeader />
-        <main className="flex-1 container-page py-20 text-muted-foreground">Loading lesson…</main>
+        <main className="flex-1 container-page py-20 text-muted-foreground">
+          {L("Loading lesson…", "جارٍ تحميل الدرس…")[lang]}
+        </main>
         <SiteFooter />
       </div>
     );

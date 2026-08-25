@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
 import { getAnnouncement } from "@/lib/extras";
 import { useCMS } from "@/lib/cms";
 import { announcementTopicLabel, inferAnnouncementTopic } from "@/lib/announcement-topics";
+import { prefetchAnnouncementsContent } from "@/lib/cms-content-prefetch";
+import { needsDynamicTranslation } from "@/lib/translate-educational-content";
 import { Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/announcements/$slug")({
@@ -29,6 +32,12 @@ function AnnouncementDetail() {
     body: custom.content,
     imageUrl: custom.imageUrl,
   } : null);
+
+  useEffect(() => {
+    if (!ann || !needsDynamicTranslation(lang)) return;
+    prefetchAnnouncementsContent(lang, [ann]);
+  }, [ann, lang]);
+
   if (!ann) return <div className="container-page py-20">{tr("announcement_not_found")}</div>;
   const image = ann.imageUrl;
 

@@ -520,6 +520,51 @@ export const t = {
   auth_account_type: { en: "Account type", ar: "نوع الحساب" },
   auth_student_account: { en: "Student Account", ar: "حساب طالب" },
   auth_parent_account: { en: "Parent Account", ar: "حساب ولي أمر" },
+  auth_teacher_account: { en: "Teacher Account", ar: "حساب مدرس" },
+  auth_create_teacher: { en: "Create Teacher Account", ar: "إنشاء حساب مدرس" },
+  auth_teacher_full_name: { en: "Full name", ar: "الاسم الكامل" },
+  auth_teacher_phone: { en: "Phone number (optional)", ar: "رقم الهاتف (اختياري)" },
+  auth_confirm_password: { en: "Confirm password", ar: "تأكيد كلمة المرور" },
+  auth_err_teacher_name: {
+    en: "Please enter your full name.",
+    ar: "يرجى إدخال الاسم الكامل.",
+  },
+  auth_err_confirm_password: {
+    en: "Please confirm your password.",
+    ar: "يرجى تأكيد كلمة المرور.",
+  },
+  auth_err_password_mismatch: {
+    en: "Passwords do not match.",
+    ar: "كلمتا المرور غير متطابقتين.",
+  },
+  auth_success_teacher_pending: {
+    en: "Your teacher account request was submitted. An administrator will review it before access is granted.",
+    ar: "تم إرسال طلب حساب المعلم. ستراجع الإدارة الطلب قبل تفعيل الحساب.",
+  },
+  auth_teacher_pending_login: {
+    en: "Your teacher account is awaiting administrator approval.",
+    ar: "حساب المعلم قيد مراجعة الإدارة. سيتم تفعيل لوحة المعلم بعد الموافقة.",
+  },
+  auth_teacher_rejected_login: {
+    en: "Your teacher account request was not approved. Please contact the school administration.",
+    ar: "لم تتم الموافقة على طلب حساب المعلم. يرجى التواصل مع إدارة المدرسة.",
+  },
+  admin_teacher_requests_title: { en: "Pending teacher requests", ar: "طلبات المعلمين المعلقة" },
+  admin_teacher_requests_empty: {
+    en: "No pending teacher requests.",
+    ar: "لا توجد طلبات معلمين معلقة.",
+  },
+  admin_teacher_request_date: { en: "Request date", ar: "تاريخ الطلب" },
+  admin_teacher_approve: { en: "Approve", ar: "موافقة" },
+  admin_teacher_reject: { en: "Reject", ar: "رفض" },
+  admin_teacher_request_approved: {
+    en: "Teacher request approved.",
+    ar: "تمت الموافقة على طلب المعلم.",
+  },
+  admin_teacher_request_rejected: {
+    en: "Teacher request rejected.",
+    ar: "تم رفض طلب المعلم.",
+  },
   auth_parent_full_name: { en: "Parent full name", ar: "الاسم الكامل لولي الأمر" },
   auth_parent_link_code: { en: "Student Link Code", ar: "كود الطالب" },
   auth_parent_link_code_hint: {

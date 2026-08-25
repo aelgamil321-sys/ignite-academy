@@ -6,11 +6,12 @@ import { useI18n } from "@/lib/i18n";
 import { useAllAnnouncements } from "@/lib/cms";
 import { useAnnouncementsContentPrefetch } from "@/hooks/use-cms-content-prefetch";
 import { AnnouncementCard } from "@/components/announcement-card";
+import { pageHeadTitle } from "@/lib/page-head";
 
 export const Route = createFileRoute("/announcements/")({
   head: () => ({
     meta: [
-      { title: "Announcements — Ignite Islamic Academy" },
+      { title: pageHeadTitle("announcements") },
       { name: "description", content: "Latest news, events, exam schedules and competition updates from Ignite Islamic Academy." },
       { property: "og:title", content: "Announcements — Ignite Islamic Academy" },
       { property: "og:description", content: "School news, events and competitions from Ignite Islamic Academy." },

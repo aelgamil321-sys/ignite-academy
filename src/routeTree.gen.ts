@@ -40,6 +40,7 @@ import { Route as AssignmentsAssignmentIdRouteImport } from './routes/assignment
 import { Route as AnnouncementsSlugRouteImport } from './routes/announcements.$slug'
 import { Route as AdminUploadTestRouteImport } from './routes/admin/upload-test'
 import { Route as GradesGradeIndexRouteImport } from './routes/grades.$grade.index'
+import { Route as AdminTeachersIndexRouteImport } from './routes/admin/teachers.index'
 import { Route as AdminQuizSubmissionsIndexRouteImport } from './routes/admin/quiz-submissions.index'
 import { Route as AdminLessonsIndexRouteImport } from './routes/admin/lessons.index'
 import { Route as AdminAssignmentsIndexRouteImport } from './routes/admin/assignments.index'
@@ -203,6 +204,11 @@ const GradesGradeIndexRoute = GradesGradeIndexRouteImport.update({
   path: '/grades/$grade/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTeachersIndexRoute = AdminTeachersIndexRouteImport.update({
+  id: '/teachers/',
+  path: '/teachers/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminQuizSubmissionsIndexRoute =
   AdminQuizSubmissionsIndexRouteImport.update({
     id: '/quiz-submissions/',
@@ -277,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/admin/assignments/': typeof AdminAssignmentsIndexRoute
   '/admin/lessons/': typeof AdminLessonsIndexRoute
   '/admin/quiz-submissions/': typeof AdminQuizSubmissionsIndexRoute
+  '/admin/teachers/': typeof AdminTeachersIndexRoute
   '/grades/$grade/': typeof GradesGradeIndexRoute
   '/admin/lessons/edit/$lessonId': typeof AdminLessonsEditLessonIdRoute
   '/grades/$grade/units/$unit': typeof GradesGradeUnitsUnitRoute
@@ -315,6 +322,7 @@ export interface FileRoutesByTo {
   '/admin/assignments': typeof AdminAssignmentsIndexRoute
   '/admin/lessons': typeof AdminLessonsIndexRoute
   '/admin/quiz-submissions': typeof AdminQuizSubmissionsIndexRoute
+  '/admin/teachers': typeof AdminTeachersIndexRoute
   '/grades/$grade': typeof GradesGradeIndexRoute
   '/admin/lessons/edit/$lessonId': typeof AdminLessonsEditLessonIdRoute
   '/grades/$grade/units/$unit': typeof GradesGradeUnitsUnitRoute
@@ -356,6 +364,7 @@ export interface FileRoutesById {
   '/admin/assignments/': typeof AdminAssignmentsIndexRoute
   '/admin/lessons/': typeof AdminLessonsIndexRoute
   '/admin/quiz-submissions/': typeof AdminQuizSubmissionsIndexRoute
+  '/admin/teachers/': typeof AdminTeachersIndexRoute
   '/grades/$grade/': typeof GradesGradeIndexRoute
   '/admin/lessons/edit/$lessonId': typeof AdminLessonsEditLessonIdRoute
   '/grades/$grade/units/$unit': typeof GradesGradeUnitsUnitRoute
@@ -398,6 +407,7 @@ export interface FileRouteTypes {
     | '/admin/assignments/'
     | '/admin/lessons/'
     | '/admin/quiz-submissions/'
+    | '/admin/teachers/'
     | '/grades/$grade/'
     | '/admin/lessons/edit/$lessonId'
     | '/grades/$grade/units/$unit'
@@ -436,6 +446,7 @@ export interface FileRouteTypes {
     | '/admin/assignments'
     | '/admin/lessons'
     | '/admin/quiz-submissions'
+    | '/admin/teachers'
     | '/grades/$grade'
     | '/admin/lessons/edit/$lessonId'
     | '/grades/$grade/units/$unit'
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '/admin/assignments/'
     | '/admin/lessons/'
     | '/admin/quiz-submissions/'
+    | '/admin/teachers/'
     | '/grades/$grade/'
     | '/admin/lessons/edit/$lessonId'
     | '/grades/$grade/units/$unit'
@@ -732,6 +744,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GradesGradeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/teachers/': {
+      id: '/admin/teachers/'
+      path: '/teachers'
+      fullPath: '/admin/teachers/'
+      preLoaderRoute: typeof AdminTeachersIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/quiz-submissions/': {
       id: '/admin/quiz-submissions/'
       path: '/quiz-submissions'
@@ -791,6 +810,7 @@ interface AdminRouteRouteChildren {
   AdminAssignmentsIndexRoute: typeof AdminAssignmentsIndexRoute
   AdminLessonsIndexRoute: typeof AdminLessonsIndexRoute
   AdminQuizSubmissionsIndexRoute: typeof AdminQuizSubmissionsIndexRoute
+  AdminTeachersIndexRoute: typeof AdminTeachersIndexRoute
   AdminLessonsEditLessonIdRoute: typeof AdminLessonsEditLessonIdRoute
 }
 
@@ -801,6 +821,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAssignmentsIndexRoute: AdminAssignmentsIndexRoute,
   AdminLessonsIndexRoute: AdminLessonsIndexRoute,
   AdminQuizSubmissionsIndexRoute: AdminQuizSubmissionsIndexRoute,
+  AdminTeachersIndexRoute: AdminTeachersIndexRoute,
   AdminLessonsEditLessonIdRoute: AdminLessonsEditLessonIdRoute,
 }
 

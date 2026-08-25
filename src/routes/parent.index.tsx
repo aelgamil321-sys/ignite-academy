@@ -4,6 +4,7 @@ import { ParentAccountRequired } from "@/components/parent-account-required";
 import { useI18n } from "@/lib/i18n";
 import { useAllParentGuides } from "@/lib/cms";
 import { resolveParentCornerAccess } from "@/lib/parent-corner-access";
+import { pageHeadTitle } from "@/lib/page-head";
 import { ArrowRight, Users } from "lucide-react";
 
 export const Route = createFileRoute("/parent/")({
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/parent/")({
   },
   head: () => ({
     meta: [
-      { title: "Parent Corner — Ignite Islamic Academy" },
+      { title: pageHeadTitle("parent_corner") },
       { name: "description", content: "Parent guides, resources and tips to support your child's Islamic education at home, from KG1 through Grade 12." },
       { property: "og:title", content: "Parent Corner — Ignite Islamic Academy" },
       { property: "og:description", content: "Guides and resources for parents supporting Islamic education at home." },

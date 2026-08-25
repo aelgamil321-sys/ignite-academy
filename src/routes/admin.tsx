@@ -128,13 +128,18 @@ export function AdminLayoutShell({ email }: { email: string }) {
     pathname === "/admin/assignments" || pathname === "/admin/assignments/";
   const onAnalytics =
     pathname === "/admin/analytics" || pathname === "/admin/analytics/";
+  const onTeachers =
+    pathname === "/admin/teachers" || pathname === "/admin/teachers/";
 
   const adminLabel = L("Admin", "الإدارة")[lang];
   const manageLessonsLabel = L("Manage Lessons", "إدارة الدروس")[lang];
   const quizSubmissionsLabel = L("Quiz Submissions", "إرسالات الاختبارات")[lang];
   const assignmentsLabel = L("Assignments Management", "إدارة الواجبات")[lang];
   const analyticsLabel = L("Analytics", "التحليلات")[lang];
-  const title = onAnalytics
+  const teachersLabel = L("Teachers", "المعلمون")[lang];
+  const title = onTeachers
+    ? teachersLabel
+    : onAnalytics
     ? analyticsLabel
     : onAssignments
     ? assignmentsLabel
@@ -145,7 +150,12 @@ export function AdminLayoutShell({ email }: { email: string }) {
       : onLessonsEdit
         ? L("Edit Lesson", "تعديل الدرس")[lang]
         : L("Admin Dashboard", "لوحة الإدارة")[lang];
-  const lead = onAnalytics
+  const lead = onTeachers
+    ? L(
+        "Assign teacher roles and manage grade, section, and Islamic group teaching scope.",
+        "عيّن صلاحيات المعلمين وأدر نطاق التدريس حسب الصف والشعبة والمجموعة الإسلامية.",
+      )[lang]
+    : onAnalytics
     ? L(
         "Compare student quiz performance and certificates by grade, section, and Islamic group.",
         "قارن أداء الطلاب في الاختبارات والشهادات حسب الصف والشعبة والمجموعة الإسلامية.",
@@ -163,7 +173,9 @@ export function AdminLayoutShell({ email }: { email: string }) {
         ? L("Update the existing lesson.", "تحديث بيانات الدرس الحالي.")[lang]
         : L("Create, edit, publish, and manage all content via Supabase CMS.",
             "أنشئ المحتوى وحرّره وانشره وأدره عبر نظام إدارة المحتوى.")[lang];
-  const crumbs = onAnalytics
+  const crumbs = onTeachers
+    ? [{ label: adminLabel, to: "/admin" }, { label: teachersLabel }]
+    : onAnalytics
     ? [{ label: adminLabel, to: "/admin" }, { label: analyticsLabel }]
     : onQuizSubmissions
     ? [{ label: adminLabel, to: "/admin" }, { label: quizSubmissionsLabel }]

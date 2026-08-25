@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BookOpen, Video, FileUp, Newspaper, Folder, GraduationCap,
-  Layers, ClipboardCheck, Megaphone, LogOut, Users, BarChart3, FileText,
+  Layers, ClipboardCheck, Megaphone, LogOut, Users, BarChart3, FileText, School,
 } from "lucide-react";
 import {useI18n, L } from "@/lib/i18n";
 
@@ -52,7 +52,9 @@ export function AdminSidebar({
     pathname === "/admin/assignments" || pathname.startsWith("/admin/assignments/");
   const onAnalyticsRoute =
     pathname === "/admin/analytics" || pathname.startsWith("/admin/analytics/");
-  const onDedicatedRoute = onLessonsRoute || onQuizSubmissionsRoute || onAssignmentsRoute || onAnalyticsRoute;
+  const onTeachersRoute =
+    pathname === "/admin/teachers" || pathname.startsWith("/admin/teachers/");
+  const onDedicatedRoute = onLessonsRoute || onQuizSubmissionsRoute || onAssignmentsRoute || onAnalyticsRoute || onTeachersRoute;
 
   return (
     <aside className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] h-fit">
@@ -97,6 +99,11 @@ export function AdminSidebar({
       <Link to="/admin/analytics" search={{}} className={sideClass(onAnalyticsRoute)}>
         <BarChart3 className="h-4 w-4 shrink-0" />
         <span className="text-start">{L("Analytics", "التحليلات")[lang]}</span>
+      </Link>
+
+      <Link to="/admin/teachers" search={{}} className={sideClass(onTeachersRoute)}>
+        <School className="h-4 w-4 shrink-0" />
+        <span className="text-start">{L("Teachers", "المعلمون")[lang]}</span>
       </Link>
 
       {manageTabItems.map((s) => {

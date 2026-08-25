@@ -979,4 +979,25 @@ export const urByEn: Record<string, string> = {
   "videos": "ویڈیوز",
   "— None —": "— کوئی نہیں —",
   "…or upload a video file": "…یا ویڈیو فائل اپ لوڈ کریں",
+  auth_teacher_account: "استاد اکاؤنٹ",
+  auth_create_teacher: "استاد اکاؤنٹ بنائیں",
+  auth_teacher_full_name: "پورا نام",
+  auth_teacher_phone: "فون نمبر (اختیاری)",
+  auth_confirm_password: "پاس ورڈ کی تصدیق",
+  auth_err_teacher_name: "براہ کرم اپنا پورا نام درج کریں۔",
+  auth_err_confirm_password: "براہ کرم پاس ورڈ کی تصدیق کریں۔",
+  auth_err_password_mismatch: "پاس ورڈ مماثل نہیں ہیں۔",
+  auth_success_teacher_pending:
+    "آپ کی استاد اکاؤنٹ کی درخواست جمع ہو گئی۔ فعال ہونے سے پہلے انتظامیہ اس کا جائزہ لے گی۔",
+  auth_teacher_pending_login:
+    "آپ کا استاد اکاؤنٹ انتظامیہ کی منظوری کا منتظر ہے۔",
+  auth_teacher_rejected_login:
+    "آپ کی استاد اکاؤنٹ کی درخواست منظور نہیں ہوئی۔ براہ کرم اسکول انتظامیہ سے رابطہ کریں۔",
+  admin_teacher_requests_title: "زیرِ التواء استاد کی درخواستیں",
+  admin_teacher_requests_empty: "کوئی زیرِ التواء استاد کی درخواست نہیں۔",
+  admin_teacher_request_date: "درخواست کی تاریخ",
+  admin_teacher_approve: "منظور کریں",
+  admin_teacher_reject: "مسترد کریں",
+  admin_teacher_request_approved: "استاد کی درخواست منظور ہو گئی۔",
+  admin_teacher_request_rejected: "استاد کی درخواست مسترد ہو گئی۔",
 };

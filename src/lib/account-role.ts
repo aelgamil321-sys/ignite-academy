@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type AccountRole = "parent" | "student" | "admin";
+export type AccountRole = "parent" | "student" | "admin" | "teacher";
 
 export async function getAccountRole(userId: string): Promise<AccountRole | null> {
   const { data: roles, error } = await supabase
@@ -16,6 +16,7 @@ export async function getAccountRole(userId: string): Promise<AccountRole | null
   const roleList = (roles ?? []).map((row) => row.role);
   if (roleList.includes("admin")) return "admin";
   if (roleList.includes("parent")) return "parent";
+  if (roleList.includes("teacher")) return "teacher";
   if (roleList.includes("student")) return "student";
   return null;
 }
@@ -26,6 +27,7 @@ export async function isParentAccount(userId: string): Promise<boolean> {
 
 export function postAuthPathForRole(role: AccountRole | null): string {
   if (role === "parent") return "/parent/dashboard";
+  if (role === "teacher") return "/";
   return "/student";
 }
 

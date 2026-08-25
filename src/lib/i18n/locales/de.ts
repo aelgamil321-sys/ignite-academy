@@ -979,4 +979,25 @@ export const deByEn: Record<string, string> = {
   "videos": "Videos",
   "— None —": "— Keine —",
   "…or upload a video file": "…oder eine Videodatei hochladen",
+  auth_teacher_account: "Lehrerkonto",
+  auth_create_teacher: "Lehrerkonto erstellen",
+  auth_teacher_full_name: "Vollständiger Name",
+  auth_teacher_phone: "Telefonnummer (optional)",
+  auth_confirm_password: "Passwort bestätigen",
+  auth_err_teacher_name: "Bitte geben Sie Ihren vollständigen Namen ein.",
+  auth_err_confirm_password: "Bitte bestätigen Sie Ihr Passwort.",
+  auth_err_password_mismatch: "Die Passwörter stimmen nicht überein.",
+  auth_success_teacher_pending:
+    "Ihre Lehreranfrage wurde eingereicht. Ein Administrator prüft sie vor der Freischaltung.",
+  auth_teacher_pending_login:
+    "Ihr Lehrerkonto wartet auf die Genehmigung durch die Administration.",
+  auth_teacher_rejected_login:
+    "Ihre Lehreranfrage wurde nicht genehmigt. Bitte kontaktieren Sie die Schulverwaltung.",
+  admin_teacher_requests_title: "Ausstehende Lehreranfragen",
+  admin_teacher_requests_empty: "Keine ausstehenden Lehreranfragen.",
+  admin_teacher_request_date: "Anfragedatum",
+  admin_teacher_approve: "Genehmigen",
+  admin_teacher_reject: "Ablehnen",
+  admin_teacher_request_approved: "Lehreranfrage genehmigt.",
+  admin_teacher_request_rejected: "Lehreranfrage abgelehnt.",
 };

@@ -979,4 +979,25 @@ export const frByEn: Record<string, string> = {
   "videos": "vidéos",
   "— None —": "— Aucun —",
   "…or upload a video file": "…ou télécharger un fichier vidéo",
+  auth_teacher_account: "Compte enseignant",
+  auth_create_teacher: "Créer un compte enseignant",
+  auth_teacher_full_name: "Nom complet",
+  auth_teacher_phone: "Numéro de téléphone (facultatif)",
+  auth_confirm_password: "Confirmer le mot de passe",
+  auth_err_teacher_name: "Veuillez saisir votre nom complet.",
+  auth_err_confirm_password: "Veuillez confirmer votre mot de passe.",
+  auth_err_password_mismatch: "Les mots de passe ne correspondent pas.",
+  auth_success_teacher_pending:
+    "Votre demande de compte enseignant a été envoyée. Un administrateur l'examinera avant l'activation.",
+  auth_teacher_pending_login:
+    "Votre compte enseignant est en attente d'approbation par l'administrateur.",
+  auth_teacher_rejected_login:
+    "Votre demande de compte enseignant n'a pas été approuvée. Veuillez contacter l'administration.",
+  admin_teacher_requests_title: "Demandes d'enseignants en attente",
+  admin_teacher_requests_empty: "Aucune demande d'enseignant en attente.",
+  admin_teacher_request_date: "Date de la demande",
+  admin_teacher_approve: "Approuver",
+  admin_teacher_reject: "Refuser",
+  admin_teacher_request_approved: "Demande d'enseignant approuvée.",
+  admin_teacher_request_rejected: "Demande d'enseignant refusée.",
 };

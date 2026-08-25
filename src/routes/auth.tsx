@@ -5,8 +5,9 @@ import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
 import { getAccountRole, getPostAuthPath, postAuthPathForRole } from "@/lib/account-role";
 import { parseAuthAccountType } from "@/lib/parent-corner-access";
+import { fetchTeacherRequestForUser } from "@/lib/teacher-requests";
 import { toast } from "sonner";
-import { GraduationCap, LogIn, UserPlus, AlertCircle, Users, CheckCircle } from "lucide-react";
+import { GraduationCap, LogIn, UserPlus, AlertCircle, Users, CheckCircle, School } from "lucide-react";
 import { grades } from "@/lib/curriculum";
 import { StudentAcademicFields } from "@/components/student-academic-fields";
 import { ProfilePhotoField } from "@/components/profile-photo-field";
@@ -23,7 +24,7 @@ import {
   waitForSupabaseHashSession,
 } from "@/lib/auth-redirect";
 import { ENABLE_EMAIL_VERIFICATION, shouldRequireEmailConfirmation } from "@/lib/auth-config";
-import { applyLanguageForUser, resolveGuestLanguage } from "@/lib/preferred-language";
+import { applyLanguageForUser, persistLanguage, resolveGuestLanguage } from "@/lib/preferred-language";
 import { isLang, type Lang } from "@/lib/i18n-config";
 import { pageHeadTitle } from "@/lib/page-head";
 
@@ -48,12 +49,15 @@ function AuthPage() {
     Route.useSearch();
   const { lang, bi, tr } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
-  const [accountType, setAccountType] = useState<"student" | "parent">(initialAccountType);
+  const [accountType, setAccountType] = useState<"student" | "parent" | "teacher">(initialAccountType);
   const [arabicName, setArabicName] = useState("");
   const [englishName, setEnglishName] = useState("");
   const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const [parentFullName, setParentFullName] = useState("");
   const [parentLinkCode, setParentLinkCode] = useState("");
+  const [teacherFullName, setTeacherFullName] = useState("");
+  const [teacherPhone, setTeacherPhone] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [grade, setGrade] = useState(grades.find((g) => g.slug === "8")?.slug ?? grades[0]?.slug ?? "");
@@ -65,6 +69,8 @@ function AuthPage() {
   const [signupSuccessAlert, setSignupSuccessAlert] = useState<string | null>(null);
   const [emailConfirmedAlert, setEmailConfirmedAlert] = useState<string | null>(null);
   const [emailNotConfirmedAlert, setEmailNotConfirmedAlert] = useState<string | null>(null);
+  const [teacherPendingAlert, setTeacherPendingAlert] = useState<string | null>(null);
+  const [teacherRejectedAlert, setTeacherRejectedAlert] = useState<string | null>(null);
   const authInitDone = useRef(false);
   const signupInFlight = useRef(false);
   const signUpCallCount = useRef(0);
@@ -91,6 +97,16 @@ function AuthPage() {
         if (cancelled) return;
         if (initialAccountType === "parent" && role === "student") return;
         if (initialAccountType === "student" && role === "parent") return;
+        if (initialAccountType === "teacher" && role && role !== "teacher") return;
+        if (role === "teacher") {
+          await applyLanguageForUser(user.id);
+          if (cancelled) return;
+          window.location.replace(postAuthPathForRole("teacher"));
+          return;
+        }
+        const teacherRequest = await fetchTeacherRequestForUser(user.id);
+        if (cancelled) return;
+        if (teacherRequest?.status === "pending") return;
         await applyLanguageForUser(user.id);
         if (cancelled) return;
         window.location.replace(postAuthPathForRole(role));
@@ -135,6 +151,16 @@ function AuthPage() {
       if (cancelled) return;
       if (initialAccountType === "parent" && role === "student") return;
       if (initialAccountType === "student" && role === "parent") return;
+      if (initialAccountType === "teacher" && role && role !== "teacher") return;
+      if (role === "teacher") {
+        await applyLanguageForUser(user.id);
+        if (cancelled) return;
+        window.location.replace(postAuthPathForRole("teacher"));
+        return;
+      }
+      const teacherRequest = await fetchTeacherRequestForUser(user.id);
+      if (cancelled) return;
+      if (teacherRequest?.status === "pending") return;
       await applyLanguageForUser(user.id);
       if (cancelled) return;
       window.location.replace(postAuthPathForRole(role));
@@ -208,11 +234,18 @@ function AuthPage() {
   async function completeSignupAfterRegister(
     userId: string,
     session: Awaited<ReturnType<typeof ensureSignupSession>>,
-    account: "student" | "parent",
+    account: "student" | "parent" | "teacher",
     afterSession?: () => Promise<void>,
   ) {
     if (session) {
       if (afterSession) await afterSession();
+      if (account === "teacher") {
+        toast.success(tr("auth_success_teacher_pending"));
+        await supabase.auth.signOut();
+        setSignupSuccessAlert(tr("auth_success_teacher_pending"));
+        setMode("login");
+        return;
+      }
       toast.success(tr("auth_success_login"));
       await finishSignupAndRedirect(userId);
       return;
@@ -222,16 +255,22 @@ function AuthPage() {
 
     if (ENABLE_EMAIL_VERIFICATION) {
       setSignupSuccessAlert(
-        account === "parent" ? tr("auth_success_parent") : tr("auth_success_student"),
+        account === "parent"
+          ? tr("auth_success_parent")
+          : account === "teacher"
+            ? tr("auth_success_teacher_pending")
+            : tr("auth_success_student"),
       );
     } else {
-      setSignupSuccessAlert(tr("auth_signup_complete"));
+      setSignupSuccessAlert(
+        account === "teacher" ? tr("auth_success_teacher_pending") : tr("auth_signup_complete"),
+      );
     }
     setMode("login");
   }
 
   async function callSignUpOnce(
-    label: "student" | "parent",
+    label: "student" | "parent" | "teacher",
     params: Parameters<typeof supabase.auth.signUp>[0],
   ) {
     signUpCallCount.current += 1;
@@ -278,6 +317,8 @@ function AuthPage() {
     setSignupSuccessAlert(null);
     setEmailConfirmedAlert(null);
     setEmailNotConfirmedAlert(null);
+    setTeacherPendingAlert(null);
+    setTeacherRejectedAlert(null);
     try {
       const form = e.currentTarget;
       const fd = new FormData(form);
@@ -346,6 +387,57 @@ function AuthPage() {
               }
             }
           });
+          return;
+        }
+
+        if (accountType === "teacher") {
+          const submitTeacherFullName = String(fd.get("teacher_full_name") ?? teacherFullName).trim();
+          const submitTeacherPhone = String(fd.get("teacher_phone") ?? teacherPhone).trim();
+          const submitConfirmPassword = String(fd.get("confirm_password") ?? confirmPassword);
+
+          if (!submitTeacherFullName) {
+            showSignupError(tr("auth_err_teacher_name"), { step: "validation" });
+            return;
+          }
+          if (!submitEmail || !submitPassword) {
+            showSignupError(tr("auth_err_email_password"), { step: "validation" });
+            return;
+          }
+          if (!submitConfirmPassword) {
+            showSignupError(tr("auth_err_confirm_password"), { step: "validation" });
+            return;
+          }
+          if (submitPassword !== submitConfirmPassword) {
+            showSignupError(tr("auth_err_password_mismatch"), { step: "validation" });
+            return;
+          }
+          if (submitPassword.length < 8) {
+            showSignupError(tr("auth_err_password_length"), { step: "validation" });
+            return;
+          }
+
+          const { data, error } = await callSignUpOnce("teacher", {
+            email: submitEmail,
+            password: submitPassword,
+            options: signupAuthOptions({
+              full_name: submitTeacherFullName,
+              role_intent: "teacher",
+              phone: submitTeacherPhone || undefined,
+              preferred_language: submitPreferredLanguage,
+            }),
+          });
+          if (error) {
+            console.error("[auth signup] supabase signUp error (teacher)", error);
+            throw error;
+          }
+          if (!data.user) {
+            showSignupError(tr("auth_err_email_password"), { step: "no_user" });
+            return;
+          }
+
+          const session = await ensureSignupSession(submitEmail, submitPassword, { data, error });
+          persistLanguage(submitPreferredLanguage);
+          await completeSignupAfterRegister(data.user.id, session, "teacher");
           return;
         }
 
@@ -437,6 +529,25 @@ function AuthPage() {
 
       toast.success(tr("auth_success_login"));
       await applyLanguageForUser(loginData.user.id);
+
+      const role = await getAccountRole(loginData.user.id);
+      if (role === "teacher") {
+        window.location.assign(postAuthPathForRole("teacher"));
+        return;
+      }
+
+      const teacherRequest = await fetchTeacherRequestForUser(loginData.user.id);
+      if (teacherRequest?.status === "pending") {
+        setTeacherPendingAlert(tr("auth_teacher_pending_login"));
+        await supabase.auth.signOut();
+        return;
+      }
+      if (teacherRequest?.status === "rejected") {
+        setTeacherRejectedAlert(tr("auth_teacher_rejected_login"));
+        await supabase.auth.signOut();
+        return;
+      }
+
       const redirectPath = await getPostAuthPath(loginData.user.id);
       window.location.assign(redirectPath);
     } catch (err) {
@@ -482,7 +593,12 @@ function AuthPage() {
               onClick={() => { setMode("signup"); setSignupAlert(null); setSignupSuccessAlert(null); }}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${mode === "signup" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
             >
-              <UserPlus className="h-4 w-4" /> {accountType === "parent" ? tr("auth_create_parent") : tr("auth_create_student")}
+              <UserPlus className="h-4 w-4" />{" "}
+              {accountType === "parent"
+                ? tr("auth_create_parent")
+                : accountType === "teacher"
+                  ? tr("auth_create_teacher")
+                  : tr("auth_create_student")}
             </button>
             <button
               type="button"
@@ -492,6 +608,30 @@ function AuthPage() {
               <LogIn className="h-4 w-4" /> {tr("auth_login")}
             </button>
           </div>
+
+          {teacherPendingAlert && mode === "login" && (
+            <div
+              role="alert"
+              className="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-5 py-4 text-sm text-foreground"
+            >
+              <div className="flex gap-3">
+                <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" aria-hidden />
+                <p className="font-medium leading-relaxed">{teacherPendingAlert}</p>
+              </div>
+            </div>
+          )}
+
+          {teacherRejectedAlert && mode === "login" && (
+            <div
+              role="alert"
+              className="mb-4 rounded-2xl border border-destructive/40 bg-destructive/10 px-5 py-4 text-sm text-destructive"
+            >
+              <div className="flex gap-3">
+                <AlertCircle className="h-5 w-5 shrink-0" aria-hidden />
+                <p className="font-medium leading-relaxed">{teacherRejectedAlert}</p>
+              </div>
+            </div>
+          )}
 
           {ENABLE_EMAIL_VERIFICATION && emailNotConfirmedAlert && mode === "login" && (
             <div
@@ -558,20 +698,27 @@ function AuthPage() {
             {mode === "signup" && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground">{tr("auth_account_type")}</label>
-                <div className="mt-2 inline-flex w-full rounded-full border border-border p-1">
+                <div className="mt-2 grid grid-cols-1 gap-1 rounded-full border border-border p-1 sm:grid-cols-3">
                   <button
                     type="button"
                     onClick={() => setAccountType("student")}
-                    className={`inline-flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "student" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
+                    className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "student" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
                   >
-                    <GraduationCap className="h-4 w-4" /> {tr("auth_student_account")}
+                    <GraduationCap className="h-4 w-4 shrink-0" /> {tr("auth_student_account")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setAccountType("parent")}
-                    className={`inline-flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "parent" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
+                    className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "parent" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
                   >
-                    <Users className="h-4 w-4" /> {tr("auth_parent_account")}
+                    <Users className="h-4 w-4 shrink-0" /> {tr("auth_parent_account")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAccountType("teacher")}
+                    className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "teacher" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
+                  >
+                    <School className="h-4 w-4 shrink-0" /> {tr("auth_teacher_account")}
                   </button>
                 </div>
               </div>
@@ -659,6 +806,34 @@ function AuthPage() {
                 </div>
               </>
             )}
+            {mode === "signup" && accountType === "teacher" && (
+              <>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("auth_teacher_full_name")} *</label>
+                  <input
+                    type="text"
+                    name="teacher_full_name"
+                    autoComplete="name"
+                    value={teacherFullName}
+                    onChange={(e) => setTeacherFullName(e.target.value)}
+                    maxLength={100}
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("auth_teacher_phone")}</label>
+                  <input
+                    type="tel"
+                    name="teacher_phone"
+                    autoComplete="tel"
+                    value={teacherPhone}
+                    onChange={(e) => setTeacherPhone(e.target.value)}
+                    maxLength={30}
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
+                  />
+                </div>
+              </>
+            )}
             {mode === "signup" && (
               <PreferredLanguageField
                 value={preferredLanguage}
@@ -689,6 +864,19 @@ function AuthPage() {
                 className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
               />
             </div>
+            {mode === "signup" && accountType === "teacher" && (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">{tr("auth_confirm_password")} *</label>
+                <input
+                  type="password"
+                  name="confirm_password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
+                />
+              </div>
+            )}
             <button
               type="submit"
               disabled={busy}
@@ -700,7 +888,9 @@ function AuthPage() {
                 : mode === "signup"
                   ? accountType === "parent"
                     ? tr("auth_create_parent")
-                    : tr("auth_submit_signup")
+                    : accountType === "teacher"
+                      ? tr("auth_create_teacher")
+                      : tr("auth_submit_signup")
                   : tr("auth_submit_login")}
             </button>
           </form>
