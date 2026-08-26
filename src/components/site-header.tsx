@@ -2,9 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X, BookOpen, User, LayoutDashboard } from "lucide-react";
 import { LanguageSelector } from "@/components/language-selector";
 import { TranslationLoadingIndicator } from "@/components/translation-loading-indicator";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
-import { supabase } from "@/integrations/supabase/client";
 import { useAccountRole } from "@/hooks/use-account-role";
 import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
 import { BrandLogo } from "@/components/brand-logo";
@@ -52,24 +51,19 @@ const mobileNavPillActive = cn(
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
   const { tr, lang, locale } = useI18n();
-  const { isParent, isTeacher, role, loading: roleLoading, roleQueryError, roleUnresolved, sessionReady } =
-    useAccountRole();
+  const {
+    isParent,
+    isTeacher,
+    role,
+    loading: roleLoading,
+    roleQueryError,
+    roleUnresolved,
+    sessionExists,
+    authLoading,
+  } = useAccountRole();
 
-  useEffect(() => {
-    let active = true;
-    void supabase.auth.getUser().then(({ data }) => {
-      if (active) setSignedIn(!!data.user);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSignedIn(!!session?.user);
-    });
-    return () => {
-      active = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
+  const signedIn = sessionExists;
 
   const allNav: Array<{ label: string; to: string }> = [
     { label: tr("nav_home"), to: "/" },
@@ -99,12 +93,14 @@ export function SiteHeader() {
   ];
 
   const roleNavReady =
-    sessionReady && !roleLoading && !roleQueryError && !roleUnresolved && role !== null;
+    !authLoading && sessionExists && !roleLoading && !roleQueryError && !roleUnresolved && role !== null;
 
   const nav =
     !signedIn
       ? allNav
-      : !roleNavReady
+      : authLoading || !sessionExists
+        ? [{ label: tr("nav_home"), to: "/" }]
+        : !roleNavReady
         ? [{ label: tr("nav_home"), to: "/" }]
         : role === "parent"
           ? parentNav
@@ -127,7 +123,9 @@ export function SiteHeader() {
   const desktopNav =
     !signedIn
       ? allNav.filter((item) => (DESKTOP_NAV_PATHS as readonly string[]).includes(item.to))
-      : !roleNavReady
+      : authLoading || !sessionExists
+        ? [{ label: tr("nav_home"), to: "/" }]
+        : !roleNavReady
         ? [{ label: tr("nav_home"), to: "/" }]
         : role === "parent"
           ? parentNav
@@ -150,7 +148,7 @@ export function SiteHeader() {
                 )
               : [{ label: tr("nav_home"), to: "/" }];
   const profilePath =
-    !signedIn || !roleNavReady
+    !signedIn || authLoading || !sessionExists || !roleNavReady
       ? "/"
       : role === "parent"
         ? "/parent/settings"
@@ -160,7 +158,7 @@ export function SiteHeader() {
             ? "/student/profile"
             : "/";
   const profileLabel =
-    !signedIn || !roleNavReady
+    !signedIn || authLoading || !sessionExists || !roleNavReady
       ? tr("nav_home")
       : role === "parent"
         ? tr("profile_parent")

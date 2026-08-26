@@ -4,7 +4,7 @@ import {
   resolveRoleFromRows,
   type AccountRole,
 } from "@/lib/account-role";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth-session";
 
 export type HomeVariant =
   | "public"
@@ -16,9 +16,16 @@ export type HomeVariant =
   | "admin";
 
 export function useAccountRole() {
-  const [sessionReady, setSessionReady] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
+  const {
+    authLoading,
+    sessionExists,
+    authUserId,
+    authEmail,
+    authEvents,
+    authStorageKeyPresent,
+    loginSnapshot,
+  } = useAuthSession();
+
   const [role, setRole] = useState<AccountRole | null>(null);
   const [rawUserRoles, setRawUserRoles] = useState<string[]>([]);
   const [roleLoading, setRoleLoading] = useState(true);
@@ -27,12 +34,22 @@ export function useAccountRole() {
 
   useEffect(() => {
     let active = true;
-    let sessionResolved = false;
 
-    const loadRoleForUser = async (uid: string, userEmail: string | undefined) => {
-      if (!active) return;
-      setUserId(uid);
-      setEmail(userEmail ?? null);
+    if (authLoading) {
+      setRoleLoading(true);
+      return;
+    }
+
+    if (!sessionExists || !authUserId) {
+      setRole(null);
+      setRawUserRoles([]);
+      setRoleQueryError(null);
+      setRoleQueryStatus(null);
+      setRoleLoading(false);
+      return;
+    }
+
+    const loadRoleForUser = async (uid: string) => {
       setRoleLoading(true);
       setRoleQueryError(null);
       setRoleQueryStatus(null);
@@ -66,61 +83,30 @@ export function useAccountRole() {
       setRoleLoading(false);
     };
 
-    const clearRole = () => {
-      if (!active) return;
-      setUserId(null);
-      setEmail(null);
-      setRole(null);
-      setRawUserRoles([]);
-      setRoleQueryError(null);
-      setRoleQueryStatus(null);
-      setRoleLoading(false);
-      setSessionReady(true);
-      sessionResolved = true;
-    };
-
-    void supabase.auth.getSession().then(({ data }) => {
-      const session = data.session;
-      setSessionReady(true);
-      const uid = session?.user?.id;
-      if (uid) void loadRoleForUser(uid, session?.user?.email);
-      else clearRole();
-      sessionResolved = true;
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        clearRole();
-        return;
-      }
-
-      const uid = session?.user?.id;
-      if (!uid) {
-        if (!sessionResolved) return;
-        clearRole();
-        return;
-      }
-
-      setSessionReady(true);
-      void loadRoleForUser(uid, session.user.email);
-    });
+    void loadRoleForUser(authUserId);
 
     return () => {
       active = false;
-      sub.subscription.unsubscribe();
     };
-  }, []);
+  }, [authLoading, sessionExists, authUserId]);
 
   const roleUnresolved =
-    sessionReady && userId !== null && !roleLoading && role === null;
+    sessionExists && authUserId !== null && !authLoading && !roleLoading && role === null;
 
   return {
-    sessionReady,
-    userId,
-    email,
+    authLoading,
+    sessionExists,
+    authUserId,
+    authEmail,
+    authEvents,
+    authStorageKeyPresent,
+    loginSnapshot,
+    sessionReady: !authLoading,
+    userId: authUserId,
+    email: authEmail,
     role,
     rawUserRoles,
-    roleLoading,
+    roleLoading: authLoading || (sessionExists && roleLoading),
     roleQueryError,
     roleQueryStatus,
     roleUnresolved,

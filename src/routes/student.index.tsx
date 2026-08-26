@@ -126,16 +126,16 @@ function StudentGate() {
   }
 
   return (
-  <>
-    <StudentDashboardPage
-      userId={userId}
-      email={email}
-      gradeSlug={gradeSlug}
-      profileComplete={profileComplete}
-      parentLinkCode={parentLinkCode}
-    />
-    <AuthDebugPanel homeVariant="student" />
-  </>
+    <>
+      <StudentDashboardPage
+        userId={userId}
+        email={email}
+        gradeSlug={gradeSlug}
+        profileComplete={profileComplete}
+        parentLinkCode={parentLinkCode}
+      />
+      <AuthDebugPanel homeVariant="student" />
+    </>
   );
 }
 

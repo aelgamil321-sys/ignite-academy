@@ -7,9 +7,13 @@ type AuthDebugPanelProps = {
 
 export function AuthDebugPanel({ homeVariant }: AuthDebugPanelProps) {
   const {
-    sessionReady,
-    userId,
-    email,
+    authLoading,
+    sessionExists,
+    authUserId,
+    authEmail,
+    authEvents,
+    authStorageKeyPresent,
+    loginSnapshot,
     role,
     rawUserRoles,
     roleLoading,
@@ -19,8 +23,6 @@ export function AuthDebugPanel({ homeVariant }: AuthDebugPanelProps) {
     isStudent,
   } = useAccountRole();
 
-  if (!sessionReady || !userId) return null;
-
   const currentPath =
     typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
 
@@ -29,12 +31,17 @@ export function AuthDebugPanel({ homeVariant }: AuthDebugPanelProps) {
       className="fixed bottom-0 left-0 right-0 z-[9999] border-t-2 border-amber-500 bg-amber-50 text-amber-950 shadow-lg"
       aria-label="Auth debug panel (temporary)"
     >
-      <div className="container-page py-3 text-xs font-mono leading-relaxed max-h-[40vh] overflow-auto">
+      <div className="container-page py-3 text-xs font-mono leading-relaxed max-h-[45vh] overflow-auto">
         <div className="font-bold text-sm mb-2 text-amber-900">AUTH DEBUG (temporary)</div>
         <div>supabaseHost: {supabaseProjectHost()}</div>
-        <div>userId: {userId}</div>
-        <div>email: {email ?? "—"}</div>
-        <div>sessionReady: {sessionReady}</div>
+        <div>currentPath: {currentPath}</div>
+        <div>sessionExists: {sessionExists}</div>
+        <div>authUserId: {authUserId ?? "—"}</div>
+        <div>authEmail: {authEmail ?? "—"}</div>
+        <div>authLoading: {authLoading}</div>
+        <div>authStorageKeyPresent: {authStorageKeyPresent}</div>
+        <div>authEvents: {authEvents.length ? authEvents.join(", ") : "—"}</div>
+        <div>loginSnapshot: {loginSnapshot ? JSON.stringify(loginSnapshot) : "—"}</div>
         <div>roleLoading: {roleLoading}</div>
         <div>roleQueryStatus: {roleQueryStatus ?? "—"}</div>
         <div>roleQueryError: {roleQueryError ?? "—"}</div>
@@ -42,7 +49,6 @@ export function AuthDebugPanel({ homeVariant }: AuthDebugPanelProps) {
         <div>resolvedRole: {role ?? "null"}</div>
         <div>isTeacher: {isTeacher}</div>
         <div>isStudent: {isStudent}</div>
-        <div>currentPath: {currentPath}</div>
         <div>homeVariant: {homeVariant ?? "—"}</div>
       </div>
     </div>

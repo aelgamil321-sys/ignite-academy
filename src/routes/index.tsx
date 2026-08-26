@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowRight, BookOpen, GraduationCap, Library, Video, ClipboardCheck,
   Users, Award, Sparkles, Play, Loader2,
@@ -42,71 +42,42 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const {
+    sessionExists,
+    authLoading,
     role,
     roleLoading,
     roleQueryError,
     roleUnresolved,
   } = useAccountRole();
-  const [signedIn, setSignedIn] = useState(false);
-  const [authReady, setAuthReady] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setSignedIn(!!data.session?.user);
-      setAuthReady(true);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSignedIn(!!session?.user);
-      setAuthReady(true);
-    });
-    return () => {
-      active = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
 
   const homeVariant = resolveHomeVariant(
-    signedIn,
+    sessionExists,
     roleLoading,
     role,
     roleQueryError,
     roleUnresolved,
   );
 
-  if (!authReady || homeVariant === "loading") {
-    return <HomeRoleLoading signedIn={signedIn} homeVariant="loading" />;
-  }
-
-  if (homeVariant === "error") {
-    return <HomeRoleError homeVariant="error" />;
-  }
-
-  if (homeVariant === "teacher") {
-    return (
-      <>
-        <TeacherHomepage />
-        <AuthDebugPanel homeVariant="teacher" />
-      </>
-    );
+  let content: ReactNode;
+  if (authLoading || homeVariant === "loading") {
+    content = <HomeRoleLoading />;
+  } else if (homeVariant === "error") {
+    content = <HomeRoleError />;
+  } else if (homeVariant === "teacher") {
+    content = <TeacherHomepage />;
+  } else {
+    content = <PublicHome signedIn={sessionExists} />;
   }
 
   return (
     <>
-      <PublicHome signedIn={signedIn} authReady={authReady} />
-      {signedIn ? <AuthDebugPanel homeVariant={homeVariant} /> : null}
+      {content}
+      <AuthDebugPanel homeVariant={homeVariant} />
     </>
   );
 }
 
-function HomeRoleLoading({
-  signedIn,
-  homeVariant,
-}: {
-  signedIn: boolean;
-  homeVariant: "loading";
-}) {
+function HomeRoleLoading() {
   const { tr } = useI18n();
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -116,12 +87,11 @@ function HomeRoleLoading({
         {tr("teacher_loading")}
       </main>
       <SiteFooter />
-      {signedIn ? <AuthDebugPanel homeVariant={homeVariant} /> : null}
     </div>
   );
 }
 
-function HomeRoleError({ homeVariant }: { homeVariant: "error" }) {
+function HomeRoleError() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
@@ -134,12 +104,11 @@ function HomeRoleError({ homeVariant }: { homeVariant: "error" }) {
         </p>
       </main>
       <SiteFooter />
-      <AuthDebugPanel homeVariant={homeVariant} />
     </div>
   );
 }
 
-function PublicHome({ signedIn, authReady }: { signedIn: boolean; authReady: boolean }) {
+function PublicHome({ signedIn }: { signedIn: boolean }) {
   const { tr, dir, lang, bi } = useI18n();
   const { lessons } = useCMS();
   const stats = useCMSStats();
@@ -213,7 +182,7 @@ function PublicHome({ signedIn, authReady }: { signedIn: boolean; authReady: boo
                 {tr("hero_desc")}
               </p>
               <div className="relative z-20 mt-7 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
-                {authReady && signedIn ? (
+                {signedIn ? (
                   <a
                     href={dashboardPath}
                     onClick={(e) => {

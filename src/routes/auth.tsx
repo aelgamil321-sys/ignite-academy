@@ -27,6 +27,8 @@ import { ENABLE_EMAIL_VERIFICATION, shouldRequireEmailConfirmation } from "@/lib
 import { applyLanguageForUser, persistLanguage, resolveGuestLanguage } from "@/lib/preferred-language";
 import { isLang, type Lang } from "@/lib/i18n-config";
 import { pageHeadTitle } from "@/lib/page-head";
+import { AuthDebugPanel } from "@/components/auth-debug-panel";
+import { ensureSessionPersisted, recordLoginSessionDebug } from "@/lib/supabase-auth-storage";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -531,6 +533,9 @@ function AuthPage() {
       toast.success(tr("auth_success_login"));
       await applyLanguageForUser(loginData.user.id);
 
+      await ensureSessionPersisted(loginData.session);
+      await recordLoginSessionDebug("after-signInWithPassword");
+
       const role = await getAccountRole(loginData.user.id);
       const redirectPath =
         role === "teacher" ? postAuthPathForRole("teacher") : await getPostAuthPath(loginData.user.id);
@@ -581,6 +586,7 @@ function AuthPage() {
 
 
   return (
+    <>
     <PageShell
       eyebrow={tr("student_title")}
       title={tr("auth_title")}
@@ -932,5 +938,7 @@ function AuthPage() {
         </div>
       </div>
     </PageShell>
+    <AuthDebugPanel />
+    </>
   );
 }
