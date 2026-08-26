@@ -113,12 +113,7 @@ function TeacherPerformancePage() {
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-xl text-foreground">{tr("teacher_nav_performance")}</h2>
-        {context?.isLeadTeacher && (
-          <p className="text-sm text-muted-foreground mt-1">{tr("teacher_lead_analytics_note")}</p>
-        )}
-        {!context?.isLeadTeacher && (
-          <p className="text-sm text-muted-foreground mt-1">{tr("teacher_scope_lead")}</p>
-        )}
+        <p className="text-sm text-muted-foreground mt-1">{tr("teacher_scope_lead")}</p>
       </div>
 
       <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] space-y-4">

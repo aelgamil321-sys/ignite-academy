@@ -18,6 +18,7 @@ import { useCMS, useCMSStats, useAllAnnouncements } from "@/lib/cms";
 import { gradeNameBi } from "@/lib/grade-utils";
 import { useHomepageContentPrefetch } from "@/hooks/use-cms-content-prefetch";
 import { SITE_NAME } from "@/lib/site-branding";
+import { getAccountRole, postAuthPathForRole } from "@/lib/account-role";
 import { certificateIslamicLogoUrl } from "@/lib/certificate-branding";
 import { DepartmentLogoCard } from "@/components/brand-logo";
 import { HomepageAnnouncements } from "@/components/homepage-announcements";
@@ -45,16 +46,31 @@ function Home() {
   useHomepageContentPrefetch(lessons.filter((l) => l.published), announcements);
   const [signedIn, setSignedIn] = useState(false);
   const [authReady, setAuthReady] = useState(false);
+  const [dashboardPath, setDashboardPath] = useState("/student");
 
   useEffect(() => {
     let active = true;
-    void supabase.auth.getUser().then(({ data }) => {
+    void supabase.auth.getUser().then(async ({ data }) => {
       if (!active) return;
       setSignedIn(!!data.user);
+      if (data.user) {
+        const role = await getAccountRole(data.user.id);
+        if (!active) return;
+        setDashboardPath(postAuthPathForRole(role));
+      } else {
+        setDashboardPath("/student");
+      }
       setAuthReady(true);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       setSignedIn(!!session?.user);
+      if (session?.user) {
+        void getAccountRole(session.user.id).then((role) => {
+          if (active) setDashboardPath(postAuthPathForRole(role));
+        });
+      } else {
+        setDashboardPath("/student");
+      }
       setAuthReady(true);
     });
     return () => {
@@ -63,8 +79,8 @@ function Home() {
     };
   }, []);
 
-  function goToStudent() {
-    window.location.assign("/student");
+  function goToDashboard() {
+    window.location.assign(dashboardPath);
   }
 
   const stages = HOMEPAGE_STAGE_CARDS.map((card) => ({
@@ -103,14 +119,19 @@ function Home() {
               <div className="relative z-20 mt-7 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
                 {authReady && signedIn ? (
                   <a
-                    href="/student"
+                    href={dashboardPath}
                     onClick={(e) => {
                       e.preventDefault();
-                      goToStudent();
+                      goToDashboard();
                     }}
                     className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-foreground shadow-[0_10px_30px_-10px_rgba(242,178,27,0.45)] hover:translate-y-[-2px] transition-transform"
                   >
-                    {tr("nav_student")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+                    {dashboardPath === "/teacher"
+                      ? tr("teacher_title")
+                      : dashboardPath === "/parent/dashboard"
+                        ? tr("parent_dashboard_title")
+                        : tr("nav_student")}
+                    <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                   </a>
                 ) : (
                   <>

@@ -54,7 +54,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const { tr, lang, locale } = useI18n();
-  const { isParent, loading: roleLoading } = useAccountRole();
+  const { isParent, isTeacher, loading: roleLoading } = useAccountRole();
 
   useEffect(() => {
     let active = true;
@@ -97,17 +97,45 @@ export function SiteHeader() {
     { label: tr("nav_admin"), to: "/admin" },
   ];
 
-  const nav = signedIn && isParent ? parentNav : allNav.filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
+  const nav =
+    signedIn && isParent
+      ? parentNav
+      : signedIn && isTeacher
+        ? [
+            { label: tr("nav_home"), to: "/" },
+            { label: tr("teacher_title"), to: "/teacher" },
+            { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
+            { label: tr("teacher_nav_students"), to: "/teacher/students" },
+            { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
+            { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
+            { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
+            { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
+            { label: tr("nav_announcements"), to: "/announcements" },
+            { label: tr("nav_contact"), to: "/contact" },
+          ]
+        : allNav.filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
   const desktopNav =
     signedIn && isParent
       ? parentNav
-      : allNav.filter(
-          (item) =>
-            (DESKTOP_NAV_PATHS as readonly string[]).includes(item.to) &&
-            (!signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to)),
-        );
-  const profilePath = signedIn && isParent ? "/parent/settings" : "/student/profile";
-  const profileLabel = signedIn && isParent ? tr("profile_parent") : tr("profile_student");
+      : signedIn && isTeacher
+        ? [
+            { label: tr("teacher_title"), to: "/teacher" },
+            { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
+            { label: tr("teacher_nav_students"), to: "/teacher/students" },
+            { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
+            { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
+            { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
+            { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
+          ]
+        : allNav.filter(
+            (item) =>
+              (DESKTOP_NAV_PATHS as readonly string[]).includes(item.to) &&
+              (!signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to)),
+          );
+  const profilePath =
+    signedIn && isParent ? "/parent/settings" : signedIn && isTeacher ? "/teacher" : "/student/profile";
+  const profileLabel =
+    signedIn && isParent ? tr("profile_parent") : signedIn && isTeacher ? tr("teacher_title") : tr("profile_student");
 
   const schoolLogoUrl = certificateSchoolLogoUrl();
   const schoolLogoAlt = tr("school_logo_alt");
@@ -157,6 +185,16 @@ export function SiteHeader() {
           to="/parent/dashboard"
           aria-label={tr("parent_dashboard_title")}
           title={tr("parent_dashboard_title")}
+          className={cn(headerPillBase, "hidden md:inline-flex h-8 w-8 shrink-0 bg-primary text-primary-foreground hover:bg-primary-hover hover:text-primary-foreground hover:border-primary")}
+        >
+          <LayoutDashboard className="h-3.5 w-3.5" />
+        </Link>
+      )}
+      {signedIn && isTeacher && (
+        <Link
+          to="/teacher"
+          aria-label={tr("teacher_title")}
+          title={tr("teacher_title")}
           className={cn(headerPillBase, "hidden md:inline-flex h-8 w-8 shrink-0 bg-primary text-primary-foreground hover:bg-primary-hover hover:text-primary-foreground hover:border-primary")}
         >
           <LayoutDashboard className="h-3.5 w-3.5" />
@@ -275,6 +313,16 @@ export function SiteHeader() {
               >
                 <LayoutDashboard className="h-4 w-4 shrink-0" />
                 {tr("parent_dashboard_title")}
+              </Link>
+            )}
+            {signedIn && isTeacher && (
+              <Link
+                to="/teacher"
+                onClick={() => setOpen(false)}
+                className={cn(mobileNavPillBase, "gap-2")}
+              >
+                <LayoutDashboard className="h-4 w-4 shrink-0" />
+                {tr("teacher_title")}
               </Link>
             )}
             {signedIn && (

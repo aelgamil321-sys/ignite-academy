@@ -13,6 +13,7 @@ import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-pr
 import { LogOut, User } from "lucide-react";
 import { toast } from "sonner";
 import { isStudentProfileComplete } from "@/lib/student-profile";
+import { getAccountRole } from "@/lib/account-role";
 
 export const Route = createFileRoute("/student/")({
   head: () => ({
@@ -42,6 +43,17 @@ function StudentGate() {
       if (!active) return;
       if (!data.user) {
         navigate({ to: "/auth", search: { mode: "login" } });
+        return;
+      }
+
+      const role = await getAccountRole(data.user.id);
+      if (!active) return;
+      if (role === "teacher") {
+        navigate({ to: "/teacher" });
+        return;
+      }
+      if (role === "parent") {
+        navigate({ to: "/parent/dashboard" });
         return;
       }
 

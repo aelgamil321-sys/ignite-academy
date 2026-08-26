@@ -44,6 +44,7 @@ export function useAccountRole() {
     loading,
     isParent: role === "parent",
     isStudent: role === "student",
+    isTeacher: role === "teacher",
     isAdmin: role === "admin",
   };
 }
