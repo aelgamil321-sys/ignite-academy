@@ -119,6 +119,7 @@ export function SiteHeader() {
       ? parentNav
       : signedIn && isTeacher
         ? [
+            { label: tr("nav_home"), to: "/" },
             { label: tr("teacher_title"), to: "/teacher" },
             { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
             { label: tr("teacher_nav_students"), to: "/teacher/students" },

@@ -27,7 +27,7 @@ export async function isParentAccount(userId: string): Promise<boolean> {
 
 export function postAuthPathForRole(role: AccountRole | null): string {
   if (role === "parent") return "/parent/dashboard";
-  if (role === "teacher") return "/teacher";
+  if (role === "teacher") return "/";
   return "/student";
 }
 

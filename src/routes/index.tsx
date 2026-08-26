@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, BookOpen, GraduationCap, Library, Video, ClipboardCheck,
-  Users, Award, Sparkles, Play,
+  Users, Award, Sparkles, Play, Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero.jpg";
@@ -22,6 +22,8 @@ import { getAccountRole, postAuthPathForRole } from "@/lib/account-role";
 import { certificateIslamicLogoUrl } from "@/lib/certificate-branding";
 import { DepartmentLogoCard } from "@/components/brand-logo";
 import { HomepageAnnouncements } from "@/components/homepage-announcements";
+import { TeacherHomepage } from "@/components/teacher-homepage";
+import { useAccountRole } from "@/hooks/use-account-role";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,21 +40,65 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const { isTeacher, loading: roleLoading } = useAccountRole();
+  const [signedIn, setSignedIn] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      setSignedIn(!!data.user);
+      setAuthReady(true);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(!!session?.user);
+      setAuthReady(true);
+    });
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (!authReady || (signedIn && roleLoading)) {
+    return <HomeRoleLoading />;
+  }
+
+  if (signedIn && isTeacher) {
+    return <TeacherHomepage />;
+  }
+
+  return <PublicHome signedIn={signedIn} authReady={authReady} />;
+}
+
+function HomeRoleLoading() {
+  const { tr } = useI18n();
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
+      <main className="container-page flex items-center gap-2 py-24 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {tr("teacher_loading")}
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+function PublicHome({ signedIn, authReady }: { signedIn: boolean; authReady: boolean }) {
   const { tr, dir, lang, bi } = useI18n();
   const { lessons } = useCMS();
   const stats = useCMSStats();
   const announcements = useAllAnnouncements();
   const featuredLessons = lessons.filter((l) => l.published).slice(0, 3);
   useHomepageContentPrefetch(lessons.filter((l) => l.published), announcements);
-  const [signedIn, setSignedIn] = useState(false);
-  const [authReady, setAuthReady] = useState(false);
   const [dashboardPath, setDashboardPath] = useState("/student");
 
   useEffect(() => {
     let active = true;
     void supabase.auth.getUser().then(async ({ data }) => {
       if (!active) return;
-      setSignedIn(!!data.user);
       if (data.user) {
         const role = await getAccountRole(data.user.id);
         if (!active) return;
@@ -60,10 +106,8 @@ function Home() {
       } else {
         setDashboardPath("/student");
       }
-      setAuthReady(true);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSignedIn(!!session?.user);
       if (session?.user) {
         void getAccountRole(session.user.id).then((role) => {
           if (active) setDashboardPath(postAuthPathForRole(role));
@@ -71,7 +115,6 @@ function Home() {
       } else {
         setDashboardPath("/student");
       }
-      setAuthReady(true);
     });
     return () => {
       active = false;

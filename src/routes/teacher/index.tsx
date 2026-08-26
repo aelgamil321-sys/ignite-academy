@@ -114,7 +114,6 @@ function TeacherOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-xs font-mono text-muted-foreground">TEACHER DASHBOARD LOADED</p>
       <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
         <h2 className="font-display text-xl text-foreground mb-1">
           {trf("teacher_welcome_name", { name: context.fullName })}
