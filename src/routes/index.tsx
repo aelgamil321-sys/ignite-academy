@@ -23,7 +23,6 @@ import { certificateIslamicLogoUrl } from "@/lib/certificate-branding";
 import { DepartmentLogoCard } from "@/components/brand-logo";
 import { HomepageAnnouncements } from "@/components/homepage-announcements";
 import { TeacherHomepage } from "@/components/teacher-homepage";
-import { AuthDebugPanel } from "@/components/auth-debug-panel";
 import { useAccountRole, resolveHomeVariant } from "@/hooks/use-account-role";
 
 export const Route = createFileRoute("/")({
@@ -69,12 +68,7 @@ function Home() {
     content = <PublicHome signedIn={sessionExists} />;
   }
 
-  return (
-    <>
-      {content}
-      <AuthDebugPanel homeVariant={homeVariant} />
-    </>
-  );
+  return content;
 }
 
 function HomeRoleLoading() {
@@ -100,7 +94,7 @@ function HomeRoleError() {
           Could not resolve account role from public.user_roles.
         </p>
         <p className="text-xs text-muted-foreground">
-          Student or teacher UI is hidden until role resolves. See AUTH DEBUG panel below.
+          Sign out and sign in again, or contact support if this persists.
         </p>
       </main>
       <SiteFooter />

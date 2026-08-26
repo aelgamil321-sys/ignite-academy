@@ -15,7 +15,6 @@ import { toast } from "sonner";
 import { isStudentProfileComplete } from "@/lib/student-profile";
 import { destinationForAccountRole } from "@/lib/account-role";
 import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
-import { AuthDebugPanel } from "@/components/auth-debug-panel";
 
 export const Route = createFileRoute("/student/")({
   head: () => ({
@@ -88,54 +87,45 @@ function StudentGate() {
 
   if (state === "error") {
     return (
-      <>
-        <PageShell
-          eyebrow={tr("nav_student")}
-          title={tr("student_dashboard_title")}
-          lead={tr("checking_access")}
-          crumbs={[{ label: tr("nav_student") }]}
-        >
-          <div className="space-y-2 text-sm">
-            <p className="text-destructive font-medium">
-              Could not confirm student role from public.user_roles.
-            </p>
-            <p className="text-muted-foreground">
-              Student Dashboard is hidden until resolvedRole === &quot;student&quot;. See AUTH DEBUG below.
-            </p>
-          </div>
-        </PageShell>
-        <AuthDebugPanel homeVariant="error" />
-      </>
+      <PageShell
+        eyebrow={tr("nav_student")}
+        title={tr("student_dashboard_title")}
+        lead={tr("checking_access")}
+        crumbs={[{ label: tr("nav_student") }]}
+      >
+        <div className="space-y-2 text-sm">
+          <p className="text-destructive font-medium">
+            Could not confirm student role from public.user_roles.
+          </p>
+          <p className="text-muted-foreground">
+            Sign out and sign in again, or contact support if this persists.
+          </p>
+        </div>
+      </PageShell>
     );
   }
 
   if (state !== "ok" || !userId) {
     return (
-      <>
-        <PageShell
-          eyebrow={tr("nav_student")}
-          title={tr("student_dashboard_title")}
-          lead={tr("checking_access")}
-          crumbs={[{ label: tr("nav_student") }]}
-        >
-          <div className="text-sm text-muted-foreground">{tr("verifying_access")}</div>
-        </PageShell>
-        <AuthDebugPanel homeVariant="loading" />
-      </>
+      <PageShell
+        eyebrow={tr("nav_student")}
+        title={tr("student_dashboard_title")}
+        lead={tr("checking_access")}
+        crumbs={[{ label: tr("nav_student") }]}
+      >
+        <div className="text-sm text-muted-foreground">{tr("verifying_access")}</div>
+      </PageShell>
     );
   }
 
   return (
-    <>
-      <StudentDashboardPage
-        userId={userId}
-        email={email}
-        gradeSlug={gradeSlug}
-        profileComplete={profileComplete}
-        parentLinkCode={parentLinkCode}
-      />
-      <AuthDebugPanel homeVariant="student" />
-    </>
+    <StudentDashboardPage
+      userId={userId}
+      email={email}
+      gradeSlug={gradeSlug}
+      profileComplete={profileComplete}
+      parentLinkCode={parentLinkCode}
+    />
   );
 }
 

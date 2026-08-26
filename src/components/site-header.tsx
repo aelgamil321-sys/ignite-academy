@@ -56,7 +56,7 @@ export function SiteHeader() {
     isParent,
     isTeacher,
     role,
-    loading: roleLoading,
+    roleLoading,
     roleQueryError,
     roleUnresolved,
     sessionExists,

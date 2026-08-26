@@ -16,21 +16,11 @@ export type HomeVariant =
   | "admin";
 
 export function useAccountRole() {
-  const {
-    authLoading,
-    sessionExists,
-    authUserId,
-    authEmail,
-    authEvents,
-    authStorageKeyPresent,
-    loginSnapshot,
-  } = useAuthSession();
+  const { authLoading, sessionExists, authUserId, authEmail } = useAuthSession();
 
   const [role, setRole] = useState<AccountRole | null>(null);
-  const [rawUserRoles, setRawUserRoles] = useState<string[]>([]);
   const [roleLoading, setRoleLoading] = useState(true);
   const [roleQueryError, setRoleQueryError] = useState<string | null>(null);
-  const [roleQueryStatus, setRoleQueryStatus] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -42,9 +32,7 @@ export function useAccountRole() {
 
     if (!sessionExists || !authUserId) {
       setRole(null);
-      setRawUserRoles([]);
       setRoleQueryError(null);
-      setRoleQueryStatus(null);
       setRoleLoading(false);
       return;
     }
@@ -52,15 +40,10 @@ export function useAccountRole() {
     const loadRoleForUser = async (uid: string) => {
       setRoleLoading(true);
       setRoleQueryError(null);
-      setRoleQueryStatus(null);
-      setRawUserRoles([]);
       setRole(null);
 
       const direct = await queryUserRolesDirect(uid);
       if (!active) return;
-
-      setRawUserRoles(direct.rawRoles);
-      setRoleQueryStatus(direct.status);
 
       if (direct.error) {
         setRoleQueryError(direct.error);
@@ -98,17 +81,12 @@ export function useAccountRole() {
     sessionExists,
     authUserId,
     authEmail,
-    authEvents,
-    authStorageKeyPresent,
-    loginSnapshot,
     sessionReady: !authLoading,
     userId: authUserId,
     email: authEmail,
     role,
-    rawUserRoles,
     roleLoading: authLoading || (sessionExists && roleLoading),
     roleQueryError,
-    roleQueryStatus,
     roleUnresolved,
     isParent: role === "parent",
     isStudent: role === "student",
@@ -137,18 +115,14 @@ export function resolveHomeVariant(
 /** One-shot role fetch for route guards (reuses direct query). */
 export async function fetchResolvedAccountRole(userId: string): Promise<{
   role: AccountRole | null;
-  rawUserRoles: string[];
   error: string | null;
-  status: number | null;
 }> {
   const direct = await queryUserRolesDirect(userId);
   if (direct.error) {
-    return { role: null, rawUserRoles: direct.rawRoles, error: direct.error, status: direct.status };
+    return { role: null, error: direct.error };
   }
   return {
     role: resolveRoleFromRows(direct.data),
-    rawUserRoles: direct.rawRoles,
     error: null,
-    status: direct.status,
   };
 }
