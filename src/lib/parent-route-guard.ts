@@ -1,5 +1,6 @@
 import { redirect } from "@tanstack/react-router";
-import { destinationForAccountRole, getAccountRole } from "@/lib/account-role";
+import { destinationForAccountRole } from "@/lib/account-role";
+import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
 import { supabase } from "@/integrations/supabase/client";
 
 export const PARENT_DASHBOARD_PATH = "/parent/dashboard";
@@ -11,8 +12,12 @@ export async function blockParentFromStudentRoutes(): Promise<void> {
   const user = sessionData.session?.user;
   if (!user) return;
 
-  const role = await getAccountRole(user.id);
-  if (role === "student") return;
+  const resolved = await fetchResolvedAccountRole(user.id);
+  if (resolved.role === "student") return;
 
-  throw redirect({ to: destinationForAccountRole(role) });
+  if (resolved.error || resolved.role === null) {
+    throw redirect({ to: "/" });
+  }
+
+  throw redirect({ to: destinationForAccountRole(resolved.role) });
 }

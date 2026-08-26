@@ -18,7 +18,8 @@ import {
   saveStudentProfile,
   type StudentProfileForm,
 } from "@/lib/student-profile";
-import { destinationForAccountRole, getAccountRole } from "@/lib/account-role";
+import { destinationForAccountRole } from "@/lib/account-role";
+import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
 import { islamicGroupLabel, sectionLabel, type IslamicGroup, type StudentSection } from "@/lib/student-academics";
 import type { Lang } from "@/lib/i18n-config";
 
@@ -67,10 +68,14 @@ function StudentProfilePage() {
         return;
       }
 
-      const role = await getAccountRole(user.id);
+      const roleResult = await fetchResolvedAccountRole(user.id);
       if (!active) return;
-      if (role !== "student") {
-        navigate({ to: destinationForAccountRole(role) });
+      if (roleResult.error || roleResult.role === null) {
+        navigate({ to: "/" });
+        return;
+      }
+      if (roleResult.role !== "student") {
+        navigate({ to: destinationForAccountRole(roleResult.role) });
         return;
       }
 

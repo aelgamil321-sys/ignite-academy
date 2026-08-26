@@ -23,7 +23,8 @@ import { certificateIslamicLogoUrl } from "@/lib/certificate-branding";
 import { DepartmentLogoCard } from "@/components/brand-logo";
 import { HomepageAnnouncements } from "@/components/homepage-announcements";
 import { TeacherHomepage } from "@/components/teacher-homepage";
-import { useAccountRole } from "@/hooks/use-account-role";
+import { AuthDebugPanel } from "@/components/auth-debug-panel";
+import { useAccountRole, resolveHomeVariant } from "@/hooks/use-account-role";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,15 +41,20 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { role, loading: roleLoading } = useAccountRole();
+  const {
+    role,
+    roleLoading,
+    roleQueryError,
+    roleUnresolved,
+  } = useAccountRole();
   const [signedIn, setSignedIn] = useState(false);
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     let active = true;
-    void supabase.auth.getUser().then(({ data }) => {
+    void supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
-      setSignedIn(!!data.user);
+      setSignedIn(!!data.session?.user);
       setAuthReady(true);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -61,18 +67,46 @@ function Home() {
     };
   }, []);
 
-  if (!authReady || (signedIn && roleLoading)) {
-    return <HomeRoleLoading />;
+  const homeVariant = resolveHomeVariant(
+    signedIn,
+    roleLoading,
+    role,
+    roleQueryError,
+    roleUnresolved,
+  );
+
+  if (!authReady || homeVariant === "loading") {
+    return <HomeRoleLoading signedIn={signedIn} homeVariant="loading" />;
   }
 
-  if (signedIn && role === "teacher") {
-    return <TeacherHomepage />;
+  if (homeVariant === "error") {
+    return <HomeRoleError homeVariant="error" />;
   }
 
-  return <PublicHome signedIn={signedIn} authReady={authReady} />;
+  if (homeVariant === "teacher") {
+    return (
+      <>
+        <TeacherHomepage />
+        <AuthDebugPanel homeVariant="teacher" />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <PublicHome signedIn={signedIn} authReady={authReady} />
+      {signedIn ? <AuthDebugPanel homeVariant={homeVariant} /> : null}
+    </>
+  );
 }
 
-function HomeRoleLoading() {
+function HomeRoleLoading({
+  signedIn,
+  homeVariant,
+}: {
+  signedIn: boolean;
+  homeVariant: "loading";
+}) {
   const { tr } = useI18n();
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -82,6 +116,25 @@ function HomeRoleLoading() {
         {tr("teacher_loading")}
       </main>
       <SiteFooter />
+      {signedIn ? <AuthDebugPanel homeVariant={homeVariant} /> : null}
+    </div>
+  );
+}
+
+function HomeRoleError({ homeVariant }: { homeVariant: "error" }) {
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
+      <main className="container-page py-24 space-y-2">
+        <p className="text-sm font-semibold text-destructive">
+          Could not resolve account role from public.user_roles.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Student or teacher UI is hidden until role resolves. See AUTH DEBUG panel below.
+        </p>
+      </main>
+      <SiteFooter />
+      <AuthDebugPanel homeVariant={homeVariant} />
     </div>
   );
 }

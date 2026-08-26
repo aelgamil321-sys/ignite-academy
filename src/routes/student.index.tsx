@@ -13,7 +13,9 @@ import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-pr
 import { LogOut, User } from "lucide-react";
 import { toast } from "sonner";
 import { isStudentProfileComplete } from "@/lib/student-profile";
-import { getAccountRole, destinationForAccountRole } from "@/lib/account-role";
+import { destinationForAccountRole } from "@/lib/account-role";
+import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
+import { AuthDebugPanel } from "@/components/auth-debug-panel";
 
 export const Route = createFileRoute("/student/")({
   head: () => ({
@@ -29,7 +31,7 @@ export const Route = createFileRoute("/student/")({
 function StudentGate() {
   const navigate = useNavigate();
   const { tr } = useI18n();
-  const [state, setState] = useState<"checking" | "ok">("checking");
+  const [state, setState] = useState<"checking" | "ok" | "error">("checking");
   const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [gradeSlug, setGradeSlug] = useState("8");
@@ -39,30 +41,37 @@ function StudentGate() {
   useEffect(() => {
     let active = true;
     void (async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data: sessionData } = await supabase.auth.getSession();
       if (!active) return;
-      if (!data.user) {
+      const user = sessionData.session?.user;
+      if (!user) {
         navigate({ to: "/auth", search: { mode: "login" } });
         return;
       }
 
-      const role = await getAccountRole(data.user.id);
+      const resolved = await fetchResolvedAccountRole(user.id);
       if (!active) return;
-      if (role !== "student") {
-        navigate({ to: destinationForAccountRole(role) });
+
+      if (resolved.error || resolved.role === null) {
+        setState("error");
+        return;
+      }
+
+      if (resolved.role !== "student") {
+        navigate({ to: destinationForAccountRole(resolved.role) });
         return;
       }
 
       const { data: profile } = await supabase
         .from("profiles")
         .select("email, grade, arabic_name, english_name")
-        .eq("user_id", data.user.id)
+        .eq("user_id", user.id)
         .maybeSingle();
 
       const code = await fetchMyParentLinkCode();
 
-      setUserId(data.user.id);
-      setEmail(profile?.email ?? data.user.email ?? "");
+      setUserId(user.id);
+      setEmail(profile?.email ?? user.email ?? "");
       setGradeSlug(normalizeGradeSlug(profile?.grade ?? "8") || "8");
       setParentLinkCode(code);
       setProfileComplete(isStudentProfileComplete(profile));
@@ -77,20 +86,47 @@ function StudentGate() {
     };
   }, [navigate]);
 
+  if (state === "error") {
+    return (
+      <>
+        <PageShell
+          eyebrow={tr("nav_student")}
+          title={tr("student_dashboard_title")}
+          lead={tr("checking_access")}
+          crumbs={[{ label: tr("nav_student") }]}
+        >
+          <div className="space-y-2 text-sm">
+            <p className="text-destructive font-medium">
+              Could not confirm student role from public.user_roles.
+            </p>
+            <p className="text-muted-foreground">
+              Student Dashboard is hidden until resolvedRole === &quot;student&quot;. See AUTH DEBUG below.
+            </p>
+          </div>
+        </PageShell>
+        <AuthDebugPanel homeVariant="error" />
+      </>
+    );
+  }
+
   if (state !== "ok" || !userId) {
     return (
-      <PageShell
-        eyebrow={tr("nav_student")}
-        title={tr("student_dashboard_title")}
-        lead={tr("checking_access")}
-        crumbs={[{ label: tr("nav_student") }]}
-      >
-        <div className="text-sm text-muted-foreground">{tr("verifying_access")}</div>
-      </PageShell>
+      <>
+        <PageShell
+          eyebrow={tr("nav_student")}
+          title={tr("student_dashboard_title")}
+          lead={tr("checking_access")}
+          crumbs={[{ label: tr("nav_student") }]}
+        >
+          <div className="text-sm text-muted-foreground">{tr("verifying_access")}</div>
+        </PageShell>
+        <AuthDebugPanel homeVariant="loading" />
+      </>
     );
   }
 
   return (
+  <>
     <StudentDashboardPage
       userId={userId}
       email={email}
@@ -98,6 +134,8 @@ function StudentGate() {
       profileComplete={profileComplete}
       parentLinkCode={parentLinkCode}
     />
+    <AuthDebugPanel homeVariant="student" />
+  </>
   );
 }
 

@@ -54,7 +54,8 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const { tr, lang, locale } = useI18n();
-  const { isParent, isTeacher, role, loading: roleLoading } = useAccountRole();
+  const { isParent, isTeacher, role, loading: roleLoading, roleQueryError, roleUnresolved, sessionReady } =
+    useAccountRole();
 
   useEffect(() => {
     let active = true;
@@ -97,62 +98,77 @@ export function SiteHeader() {
     { label: tr("nav_admin"), to: "/admin" },
   ];
 
+  const roleNavReady =
+    sessionReady && !roleLoading && !roleQueryError && !roleUnresolved && role !== null;
+
   const nav =
-    signedIn && roleLoading
-      ? [{ label: tr("nav_home"), to: "/" }]
-      : signedIn && isParent
-        ? parentNav
-        : signedIn && isTeacher
-          ? [
-              { label: tr("nav_home"), to: "/" },
-              { label: tr("teacher_title"), to: "/teacher" },
-              { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
-              { label: tr("teacher_nav_students"), to: "/teacher/students" },
-              { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
-              { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
-              { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
-              { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
-              { label: tr("nav_announcements"), to: "/announcements" },
-              { label: tr("nav_contact"), to: "/contact" },
-            ]
-          : allNav.filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
+    !signedIn
+      ? allNav
+      : !roleNavReady
+        ? [{ label: tr("nav_home"), to: "/" }]
+        : role === "parent"
+          ? parentNav
+          : role === "teacher"
+            ? [
+                { label: tr("nav_home"), to: "/" },
+                { label: tr("teacher_title"), to: "/teacher" },
+                { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
+                { label: tr("teacher_nav_students"), to: "/teacher/students" },
+                { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
+                { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
+                { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
+                { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
+                { label: tr("nav_announcements"), to: "/announcements" },
+                { label: tr("nav_contact"), to: "/contact" },
+              ]
+            : role === "student"
+              ? allNav.filter((item) => !isParent || !STUDENT_ONLY_PATHS.has(item.to))
+              : [{ label: tr("nav_home"), to: "/" }];
   const desktopNav =
-    signedIn && roleLoading
-      ? [{ label: tr("nav_home"), to: "/" }]
-      : signedIn && isParent
-        ? parentNav
-        : signedIn && isTeacher
-          ? [
-              { label: tr("nav_home"), to: "/" },
-              { label: tr("teacher_title"), to: "/teacher" },
-              { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
-              { label: tr("teacher_nav_students"), to: "/teacher/students" },
-              { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
-              { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
-              { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
-              { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
-            ]
-          : allNav.filter(
-              (item) =>
-                (DESKTOP_NAV_PATHS as readonly string[]).includes(item.to) &&
-                (!signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to)),
-            );
+    !signedIn
+      ? allNav.filter((item) => (DESKTOP_NAV_PATHS as readonly string[]).includes(item.to))
+      : !roleNavReady
+        ? [{ label: tr("nav_home"), to: "/" }]
+        : role === "parent"
+          ? parentNav
+          : role === "teacher"
+            ? [
+                { label: tr("nav_home"), to: "/" },
+                { label: tr("teacher_title"), to: "/teacher" },
+                { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
+                { label: tr("teacher_nav_students"), to: "/teacher/students" },
+                { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
+                { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
+                { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
+                { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
+              ]
+            : role === "student"
+              ? allNav.filter(
+                  (item) =>
+                    (DESKTOP_NAV_PATHS as readonly string[]).includes(item.to) &&
+                    (!isParent || !STUDENT_ONLY_PATHS.has(item.to)),
+                )
+              : [{ label: tr("nav_home"), to: "/" }];
   const profilePath =
-    signedIn && roleLoading
+    !signedIn || !roleNavReady
       ? "/"
-      : signedIn && isParent
+      : role === "parent"
         ? "/parent/settings"
-        : signedIn && isTeacher
+        : role === "teacher"
           ? "/teacher"
-          : "/student/profile";
+          : role === "student"
+            ? "/student/profile"
+            : "/";
   const profileLabel =
-    signedIn && roleLoading
+    !signedIn || !roleNavReady
       ? tr("nav_home")
-      : signedIn && isParent
+      : role === "parent"
         ? tr("profile_parent")
-        : signedIn && isTeacher
+        : role === "teacher"
           ? tr("teacher_title")
-          : tr("profile_student");
+          : role === "student"
+            ? tr("profile_student")
+            : tr("nav_home");
 
   const schoolLogoUrl = certificateSchoolLogoUrl();
   const schoolLogoAlt = tr("school_logo_alt");
