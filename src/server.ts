@@ -4,6 +4,7 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { handleTranslateApi } from "./lib/api/translate-route.server";
 import { handleIgniteApi } from "./lib/api/ai-route.server";
 import { renderErrorPage } from "./lib/error-page";
+import { trailingSlashRedirectResponse } from "./lib/trailing-slash-redirect";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -60,6 +61,9 @@ export default {
       if (url.pathname.startsWith("/api/ignite")) {
         return handleIgniteApi(request);
       }
+
+      const slashRedirect = trailingSlashRedirectResponse(url);
+      if (slashRedirect) return slashRedirect;
 
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
