@@ -39,10 +39,12 @@ export function LessonEditForm({
   lesson,
   onSaved,
   onCancel,
+  allowedGrades,
 }: {
   lesson: CustomLesson;
   onSaved: () => void;
   onCancel: () => void;
+  allowedGrades?: string[];
 }) {
   const { lang, bi } = useI18n();
   const { updateLesson } = useCMS();
@@ -143,6 +145,10 @@ export function LessonEditForm({
     }
   };
 
+  const gradeOptions = allowedGrades
+    ? grades.filter((g) => allowedGrades.includes(g.slug))
+    : grades;
+
   return (
     <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -159,7 +165,7 @@ export function LessonEditForm({
       <Row>
         <Field label={L("Grade", "الصف")[lang]}>
           <select value={grade} onChange={(e) => setGrade(e.target.value)} className="lesson-input">
-            {grades.map((g) => <option key={g.slug} value={g.slug}>{bi(g.name)}</option>)}
+            {gradeOptions.map((g) => <option key={g.slug} value={g.slug}>{bi(g.name)}</option>)}
           </select>
         </Field>
       </Row>

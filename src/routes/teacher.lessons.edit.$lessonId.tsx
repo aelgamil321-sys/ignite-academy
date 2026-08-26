@@ -30,6 +30,7 @@ function TeacherLessonEditPage() {
   const [lesson, setLesson] = useState<CustomLesson | null>(null);
   const [fetching, setFetching] = useState(true);
   const [allowed, setAllowed] = useState(false);
+  const [assignedGrades, setAssignedGrades] = useState<string[]>([]);
 
   useEffect(() => {
     void refresh();
@@ -103,6 +104,7 @@ function TeacherLessonEditPage() {
       if (!data.user) return;
       const ctx = await fetchTeacherContext(data.user.id);
       const grade = normalizeGradeSlug(lesson.grade) || lesson.grade;
+      setAssignedGrades(ctx.assignedGrades);
       setAllowed(ctx.assignedGrades.includes(grade));
     })();
   }, [lesson]);
@@ -133,6 +135,7 @@ function TeacherLessonEditPage() {
       <LessonEditForm
         key={lesson.id}
         lesson={lesson}
+        allowedGrades={assignedGrades}
         onSaved={() => {
           void refresh();
           back();

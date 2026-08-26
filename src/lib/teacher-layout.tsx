@@ -86,7 +86,7 @@ export function TeacherGate() {
       lead={tr("teacher_lead")}
       crumbs={[{ label: tr("teacher_title") }]}
     >
-      <div className="grid gap-6 lg:grid-cols-[240px_1fr] items-start">
+      <div className="grid gap-6 lg:grid-cols-[minmax(280px,300px)_1fr] items-start">
         <TeacherSidebar email={email} teacherName={teacherName} />
         <div className="min-w-0">
           <Outlet />

@@ -5,9 +5,11 @@ import { fetchStudentProgress } from "@/lib/student-progress";
 import {
   formatStudentAcademics,
   islamicGroupLabel,
+  ISLAMIC_GROUPS,
   normalizeIslamicGroup,
   normalizeStudentSection,
   sectionLabel,
+  STUDENT_SECTIONS,
   type IslamicGroup,
   type StudentSection,
 } from "@/lib/student-academics";
@@ -265,4 +267,112 @@ export function formatStudentScopeLabel(
     },
     lang,
   );
+}
+
+export type ScopedParentRow = {
+  userId: string;
+  displayName: string;
+  email: string;
+  linkedStudents: Array<{ userId: string; displayName: string }>;
+};
+
+export async function fetchScopedParents(students: ScopedStudentRow[]): Promise<ScopedParentRow[]> {
+  const studentIds = students.map((s) => s.userId);
+  if (studentIds.length === 0) return [];
+
+  const { data: links, error: linksError } = await supabase
+    .from("parent_student_links")
+    .select("parent_user_id, student_user_id")
+    .in("student_user_id", studentIds);
+
+  if (linksError) throw linksError;
+
+  const studentNameMap = new Map(students.map((s) => [s.userId, s.displayName]));
+  const parentToStudents = new Map<string, string[]>();
+
+  for (const link of links ?? []) {
+    const list = parentToStudents.get(link.parent_user_id) ?? [];
+    list.push(link.student_user_id);
+    parentToStudents.set(link.parent_user_id, list);
+  }
+
+  const parentIds = [...parentToStudents.keys()];
+  if (parentIds.length === 0) return [];
+
+  const [profilesRes, parentProfilesRes] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("user_id, full_name, email, english_name, arabic_name")
+      .in("user_id", parentIds),
+    supabase.from("parent_profiles").select("user_id, full_name, email").in("user_id", parentIds),
+  ]);
+
+  if (profilesRes.error) throw profilesRes.error;
+  if (parentProfilesRes.error) throw parentProfilesRes.error;
+
+  const profileMap = new Map((profilesRes.data ?? []).map((p) => [p.user_id, p]));
+  const parentProfileMap = new Map((parentProfilesRes.data ?? []).map((p) => [p.user_id, p]));
+
+  return parentIds.map((parentId) => {
+    const profile = profileMap.get(parentId);
+    const parentProfile = parentProfileMap.get(parentId);
+    const displayName =
+      parentProfile?.full_name?.trim() ||
+      profile?.english_name?.trim() ||
+      profile?.arabic_name?.trim() ||
+      profile?.full_name?.trim() ||
+      parentId;
+    const email = parentProfile?.email?.trim() || profile?.email?.trim() || "";
+    const linkedStudentIds = parentToStudents.get(parentId) ?? [];
+    return {
+      userId: parentId,
+      displayName,
+      email,
+      linkedStudents: linkedStudentIds.map((sid) => ({
+        userId: sid,
+        displayName: studentNameMap.get(sid) ?? sid,
+      })),
+    };
+  });
+}
+
+/** Assignment section/group options for a grade within teacher scope. */
+export function assignmentScopeOptionsForGrade(
+  context: TeacherContext,
+  grade: string,
+): {
+  sections: Array<StudentSection | null>;
+  groups: Array<IslamicGroup | null>;
+} {
+  const gradeNorm = normalizeGradeSlug(grade) || grade;
+  if (context.isLeadTeacher) {
+    return {
+      sections: [null, ...STUDENT_SECTIONS],
+      groups: [null, ...ISLAMIC_GROUPS],
+    };
+  }
+
+  const matching = context.assignments.filter(
+    (a) => normalizeGradeSlug(a.grade) === gradeNorm || a.grade === gradeNorm,
+  );
+  if (matching.length === 0) {
+    return { sections: [], groups: [] };
+  }
+
+  const sectionSet = new Set<StudentSection | null>();
+  const groupSet = new Set<IslamicGroup | null>();
+  for (const a of matching) {
+    sectionSet.add(a.section);
+    groupSet.add(a.islamic_group);
+  }
+
+  return {
+    sections: [...sectionSet],
+    groups: [...groupSet],
+  };
+}
+
+export function teacherCanManageGrade(context: TeacherContext, grade: string): boolean {
+  const gradeNorm = normalizeGradeSlug(grade) || grade;
+  return context.assignedGrades.includes(gradeNorm);
 }

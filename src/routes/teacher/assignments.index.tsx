@@ -1,20 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import {
   fetchAllAssignmentsAdmin,
-  fetchAllSubmissionsAdmin,
-  gradeAssignmentSubmission,
-  statusBadgeClass,
   assignmentTitle,
-  type AssignmentSubmissionRow,
+  type AssignmentRow,
 } from "@/lib/assignment";
-import { fetchScopedStudents } from "@/lib/teacher-dashboard";
 import { useI18n } from "@/lib/i18n";
-import { AdminAssignmentSubmissionFile } from "@/components/admin-assignment-submission-file";
 import { TeacherDeleteAssignmentButton } from "@/components/teacher-delete-assignment-button";
+import {
+  TeacherAssignmentForm,
+  useTeacherAssignmentContext,
+} from "@/components/teacher-assignment-form";
 
 export const Route = createFileRoute("/teacher/assignments/")({
   component: TeacherAssignmentsPage,
@@ -22,63 +20,24 @@ export const Route = createFileRoute("/teacher/assignments/")({
 
 function TeacherAssignmentsPage() {
   const { bi, tr } = useI18n();
+  const { context, loading: contextLoading } = useTeacherAssignmentContext();
   const [loading, setLoading] = useState(true);
-  const [assignments, setAssignments] = useState<Awaited<ReturnType<typeof fetchAllAssignmentsAdmin>>["data"]>([]);
-  const [submissions, setSubmissions] = useState<AssignmentSubmissionRow[]>([]);
-  const [studentNames, setStudentNames] = useState<Map<string, string>>(new Map());
-  const [gradingId, setGradingId] = useState<string | null>(null);
-  const [view, setView] = useState<"list" | "submissions">("list");
-
-  useEffect(() => {
-    void (async () => {
-      setLoading(true);
-      const [aRes, sRes, students] = await Promise.all([
-        fetchAllAssignmentsAdmin(),
-        fetchAllSubmissionsAdmin(),
-        fetchScopedStudents(),
-      ]);
-      if (aRes.error) toast.error(aRes.error);
-      else setAssignments(aRes.data);
-      if (sRes.error) toast.error(sRes.error);
-      else setSubmissions(sRes.data);
-      setStudentNames(new Map(students.map((s) => [s.userId, s.displayName])));
-      setLoading(false);
-    })();
-  }, []);
-
-  const assignmentMap = useMemo(
-    () => new Map((assignments ?? []).map((a) => [a.id, a])),
-    [assignments],
-  );
+  const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<AssignmentRow | null>(null);
 
   async function reloadAssignments() {
     const aRes = await fetchAllAssignmentsAdmin();
     if (aRes.error) toast.error(aRes.error);
     else setAssignments(aRes.data);
+    setLoading(false);
   }
 
-  async function grade(sub: AssignmentSubmissionRow, score: number) {
-    setGradingId(sub.id);
-    const { data: auth } = await supabase.auth.getUser();
-    const a = assignmentMap.get(sub.assignment_id);
-    const { error } = await gradeAssignmentSubmission({
-      submissionId: sub.id,
-      score,
-      maxPoints: a?.max_points ?? sub.max_points ?? 100,
-      feedbackEn: "",
-      feedbackAr: "",
-      gradedBy: auth.user?.id ?? "",
-    });
-    setGradingId(null);
-    if (error) toast.error(error);
-    else {
-      toast.success(tr("teacher_assignment_graded"));
-      const sRes = await fetchAllSubmissionsAdmin();
-      if (!sRes.error) setSubmissions(sRes.data);
-    }
-  }
+  useEffect(() => {
+    void reloadAssignments();
+  }, []);
 
-  if (loading) {
+  if (loading || contextLoading || !context) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -89,26 +48,43 @@ function TeacherAssignmentsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setView("list")}
-          className={`rounded-full px-4 py-2 text-sm font-semibold ${view === "list" ? "bg-primary text-primary-foreground" : "border border-border"}`}
-        >
-          {tr("teacher_nav_assignments")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("submissions")}
-          className={`rounded-full px-4 py-2 text-sm font-semibold ${view === "submissions" ? "bg-primary text-primary-foreground" : "border border-border"}`}
-        >
-          {tr("teacher_stat_submitted")}
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-xl text-foreground">{tr("teacher_nav_assignments")}</h2>
+        {!showForm && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+          >
+            {tr("teacher_create_assignment")}
+          </button>
+        )}
       </div>
 
-      {view === "list" ? (
-        <ul className="space-y-3">
-          {(assignments ?? []).map((a) => (
+      {showForm && (
+        <TeacherAssignmentForm
+          context={context}
+          editing={editing}
+          onSaved={() => {
+            setShowForm(false);
+            setEditing(null);
+            void reloadAssignments();
+          }}
+          onCancel={() => {
+            setShowForm(false);
+            setEditing(null);
+          }}
+        />
+      )}
+
+      <ul className="space-y-3">
+        {assignments.length === 0 ? (
+          <p className="text-sm text-muted-foreground italic">{tr("teacher_no_assignments")}</p>
+        ) : (
+          assignments.map((a) => (
             <li key={a.id} className="rounded-xl border border-border bg-card p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -118,67 +94,25 @@ function TeacherAssignmentsPage() {
                     {!a.published ? ` · ${tr("teacher_draft")}` : ""}
                   </p>
                 </div>
-                <TeacherDeleteAssignmentButton assignment={a} onDeleted={() => void reloadAssignments()} />
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditing(a);
+                      setShowForm(true);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    {tr("teacher_edit")}
+                  </button>
+                  <TeacherDeleteAssignmentButton assignment={a} onDeleted={() => void reloadAssignments()} />
+                </div>
               </div>
             </li>
-          ))}
-        </ul>
-      ) : (
-        <ul className="space-y-3">
-          {submissions.map((sub) => {
-            const a = assignmentMap.get(sub.assignment_id);
-            return (
-              <li key={sub.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
-                <div className="flex flex-wrap justify-between gap-2">
-                  <div>
-                    <p className="font-medium">{studentNames.get(sub.student_id) ?? sub.student_id}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {a ? bi(assignmentTitle(a)) : sub.assignment_id}
-                    </p>
-                  </div>
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusBadgeClass(sub.status)}`}>
-                    {sub.status}
-                  </span>
-                </div>
-                {sub.text_response && (
-                  <p className="text-sm text-muted-foreground">{sub.text_response}</p>
-                )}
-                {sub.file_path && (
-                  <AdminAssignmentSubmissionFile
-                    filePath={sub.file_path}
-                    fileName={sub.file_name ?? "file"}
-                    fileMime={sub.file_mime}
-                  />
-                )}
-                {sub.status !== "graded" && a && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      max={a.max_points}
-                      defaultValue={sub.score ?? ""}
-                      className="w-24 rounded border border-border px-2 py-1 text-sm"
-                      id={`score-${sub.id}`}
-                    />
-                    <button
-                      type="button"
-                      disabled={gradingId === sub.id}
-                      onClick={() => {
-                        const el = document.getElementById(`score-${sub.id}`) as HTMLInputElement | null;
-                        const score = Number(el?.value ?? 0);
-                        void grade(sub, score);
-                      }}
-                      className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
-                    >
-                      {tr("teacher_grade")}
-                    </button>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+          ))
+        )}
+      </ul>
     </div>
   );
 }
