@@ -1,8 +1,12 @@
 import { redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { destinationForAccountRole, getAccountRole } from "@/lib/account-role";
+import { isBrowser } from "@/lib/runtime";
 
 export async function requireTeacherRole(): Promise<void> {
+  // Supabase browser auth uses localStorage — defer to TeacherGate after hydration.
+  if (!isBrowser()) return;
+
   const { data } = await supabase.auth.getUser();
   if (!data.user) {
     throw redirect({ to: "/auth", search: { mode: "login" } });

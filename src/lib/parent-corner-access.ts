@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getAccountRole } from "@/lib/account-role";
+import { isBrowser } from "@/lib/runtime";
 
 export type ParentCornerAccess =
   | { kind: "guest" }
@@ -8,6 +9,8 @@ export type ParentCornerAccess =
   | { kind: "other"; userId: string };
 
 export async function resolveParentCornerAccess(): Promise<ParentCornerAccess> {
+  if (!isBrowser()) return { kind: "guest" };
+
   const { data } = await supabase.auth.getUser();
   if (!data.user) return { kind: "guest" };
 

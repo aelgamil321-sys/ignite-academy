@@ -4,7 +4,7 @@ import { PageShell } from "@/components/page-shell";
 import { TeacherSidebar } from "@/components/teacher-sidebar";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
-import { getAccountRole } from "@/lib/account-role";
+import { destinationForAccountRole, getAccountRole } from "@/lib/account-role";
 import { fetchTeacherContext } from "@/lib/teacher-dashboard";
 import { requireTeacherRole } from "@/lib/teacher-route-guard";
 
@@ -18,7 +18,7 @@ export const teacherRouteHead = () => ({
 export function TeacherGate() {
   const navigate = useNavigate();
   const { tr } = useI18n();
-  const [state, setState] = useState<"checking" | "ok" | "denied">("checking");
+  const [state, setState] = useState<"checking" | "ok">("checking");
   const [email, setEmail] = useState("");
   const [teacherName, setTeacherName] = useState("");
 
@@ -34,7 +34,7 @@ export function TeacherGate() {
       const role = await getAccountRole(u.user.id);
       if (!active) return;
       if (role !== "teacher") {
-        setState("denied");
+        navigate({ to: destinationForAccountRole(role) });
         return;
       }
       const ctx = await fetchTeacherContext(u.user.id);
@@ -53,7 +53,7 @@ export function TeacherGate() {
     };
   }, [navigate]);
 
-  if (state === "checking") {
+  if (state !== "ok") {
     return (
       <PageShell
         eyebrow={tr("teacher_title")}
@@ -62,19 +62,6 @@ export function TeacherGate() {
         crumbs={[{ label: tr("teacher_title") }]}
       >
         <div className="text-sm text-muted-foreground">{tr("verifying_access")}</div>
-      </PageShell>
-    );
-  }
-
-  if (state === "denied") {
-    return (
-      <PageShell
-        eyebrow={tr("teacher_title")}
-        title={tr("teacher_title")}
-        lead={tr("teacher_access_denied")}
-        crumbs={[{ label: tr("teacher_title") }]}
-      >
-        <div className="text-sm text-muted-foreground">{tr("teacher_access_denied")}</div>
       </PageShell>
     );
   }
