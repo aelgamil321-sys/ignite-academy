@@ -4,33 +4,53 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function useAccountRole() {
   const [role, setRole] = useState<AccountRole | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
+    let sessionResolved = false;
 
-    const load = async (userId: string | undefined) => {
-      if (!userId) {
-        if (active) {
-          setRole(null);
-          setLoading(false);
-        }
-        return;
-      }
-      const nextRole = await getAccountRole(userId);
-      if (active) {
-        setRole(nextRole);
-        setLoading(false);
-      }
+    const loadRole = async (uid: string) => {
+      if (!active) return;
+      setUserId(uid);
+      setLoading(true);
+      const nextRole = await getAccountRole(uid);
+      if (!active) return;
+      setRole(nextRole);
+      setLoading(false);
+      sessionResolved = true;
     };
 
-    void supabase.auth.getUser().then(({ data }) => {
-      void load(data.user?.id);
+    const clearRole = () => {
+      if (!active) return;
+      setUserId(null);
+      setRole(null);
+      setLoading(false);
+      sessionResolved = true;
+    };
+
+    void supabase.auth.getSession().then(({ data }) => {
+      const uid = data.session?.user?.id;
+      if (uid) void loadRole(uid);
+      else clearRole();
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setLoading(true);
-      void load(session?.user?.id);
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        clearRole();
+        return;
+      }
+
+      const uid = session?.user?.id;
+      if (!uid) {
+        // Ignore transient empty sessions before the initial getSession() resolves.
+        if (!sessionResolved) return;
+        clearRole();
+        return;
+      }
+
+      void loadRole(uid);
     });
 
     return () => {
@@ -41,6 +61,7 @@ export function useAccountRole() {
 
   return {
     role,
+    userId,
     loading,
     isParent: role === "parent",
     isStudent: role === "student",

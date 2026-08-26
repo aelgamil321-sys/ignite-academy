@@ -18,6 +18,7 @@ import {
   saveStudentProfile,
   type StudentProfileForm,
 } from "@/lib/student-profile";
+import { destinationForAccountRole, getAccountRole } from "@/lib/account-role";
 import { islamicGroupLabel, sectionLabel, type IslamicGroup, type StudentSection } from "@/lib/student-academics";
 import type { Lang } from "@/lib/i18n-config";
 
@@ -63,6 +64,13 @@ function StudentProfilePage() {
       const user = authData.user;
       if (!user) {
         navigate({ to: "/auth", search: { mode: "login" } });
+        return;
+      }
+
+      const role = await getAccountRole(user.id);
+      if (!active) return;
+      if (role !== "student") {
+        navigate({ to: destinationForAccountRole(role) });
         return;
       }
 

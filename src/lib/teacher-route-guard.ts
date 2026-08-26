@@ -1,6 +1,6 @@
 import { redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { getAccountRole, postAuthPathForRole } from "@/lib/account-role";
+import { destinationForAccountRole, getAccountRole } from "@/lib/account-role";
 
 export async function requireTeacherRole(): Promise<void> {
   const { data } = await supabase.auth.getUser();
@@ -9,6 +9,6 @@ export async function requireTeacherRole(): Promise<void> {
   }
   const role = await getAccountRole(data.user.id);
   if (role !== "teacher") {
-    throw redirect({ to: postAuthPathForRole(role) });
+    throw redirect({ to: destinationForAccountRole(role) });
   }
 }

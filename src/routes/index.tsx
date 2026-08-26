@@ -40,7 +40,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { isTeacher, loading: roleLoading } = useAccountRole();
+  const { role, loading: roleLoading } = useAccountRole();
   const [signedIn, setSignedIn] = useState(false);
   const [authReady, setAuthReady] = useState(false);
 
@@ -65,7 +65,7 @@ function Home() {
     return <HomeRoleLoading />;
   }
 
-  if (signedIn && isTeacher) {
+  if (signedIn && role === "teacher") {
     return <TeacherHomepage />;
   }
 

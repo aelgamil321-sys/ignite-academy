@@ -54,7 +54,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const { tr, lang, locale } = useI18n();
-  const { isParent, isTeacher, loading: roleLoading } = useAccountRole();
+  const { isParent, isTeacher, role, loading: roleLoading } = useAccountRole();
 
   useEffect(() => {
     let active = true;
@@ -98,45 +98,61 @@ export function SiteHeader() {
   ];
 
   const nav =
-    signedIn && isParent
-      ? parentNav
-      : signedIn && isTeacher
-        ? [
-            { label: tr("nav_home"), to: "/" },
-            { label: tr("teacher_title"), to: "/teacher" },
-            { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
-            { label: tr("teacher_nav_students"), to: "/teacher/students" },
-            { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
-            { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
-            { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
-            { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
-            { label: tr("nav_announcements"), to: "/announcements" },
-            { label: tr("nav_contact"), to: "/contact" },
-          ]
-        : allNav.filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
+    signedIn && roleLoading
+      ? [{ label: tr("nav_home"), to: "/" }]
+      : signedIn && isParent
+        ? parentNav
+        : signedIn && isTeacher
+          ? [
+              { label: tr("nav_home"), to: "/" },
+              { label: tr("teacher_title"), to: "/teacher" },
+              { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
+              { label: tr("teacher_nav_students"), to: "/teacher/students" },
+              { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
+              { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
+              { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
+              { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
+              { label: tr("nav_announcements"), to: "/announcements" },
+              { label: tr("nav_contact"), to: "/contact" },
+            ]
+          : allNav.filter((item) => !signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to));
   const desktopNav =
-    signedIn && isParent
-      ? parentNav
-      : signedIn && isTeacher
-        ? [
-            { label: tr("nav_home"), to: "/" },
-            { label: tr("teacher_title"), to: "/teacher" },
-            { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
-            { label: tr("teacher_nav_students"), to: "/teacher/students" },
-            { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
-            { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
-            { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
-            { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
-          ]
-        : allNav.filter(
-            (item) =>
-              (DESKTOP_NAV_PATHS as readonly string[]).includes(item.to) &&
-              (!signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to)),
-          );
+    signedIn && roleLoading
+      ? [{ label: tr("nav_home"), to: "/" }]
+      : signedIn && isParent
+        ? parentNav
+        : signedIn && isTeacher
+          ? [
+              { label: tr("nav_home"), to: "/" },
+              { label: tr("teacher_title"), to: "/teacher" },
+              { label: tr("teacher_nav_classes"), to: "/teacher/classes" },
+              { label: tr("teacher_nav_students"), to: "/teacher/students" },
+              { label: tr("teacher_nav_lessons"), to: "/teacher/lessons" },
+              { label: tr("teacher_nav_quizzes"), to: "/teacher/quizzes" },
+              { label: tr("teacher_nav_assignments"), to: "/teacher/assignments" },
+              { label: tr("teacher_nav_performance"), to: "/teacher/performance" },
+            ]
+          : allNav.filter(
+              (item) =>
+                (DESKTOP_NAV_PATHS as readonly string[]).includes(item.to) &&
+                (!signedIn || !isParent || !STUDENT_ONLY_PATHS.has(item.to)),
+            );
   const profilePath =
-    signedIn && isParent ? "/parent/settings" : signedIn && isTeacher ? "/teacher" : "/student/profile";
+    signedIn && roleLoading
+      ? "/"
+      : signedIn && isParent
+        ? "/parent/settings"
+        : signedIn && isTeacher
+          ? "/teacher"
+          : "/student/profile";
   const profileLabel =
-    signedIn && isParent ? tr("profile_parent") : signedIn && isTeacher ? tr("teacher_title") : tr("profile_student");
+    signedIn && roleLoading
+      ? tr("nav_home")
+      : signedIn && isParent
+        ? tr("profile_parent")
+        : signedIn && isTeacher
+          ? tr("teacher_title")
+          : tr("profile_student");
 
   const schoolLogoUrl = certificateSchoolLogoUrl();
   const schoolLogoAlt = tr("school_logo_alt");

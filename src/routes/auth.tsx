@@ -156,12 +156,6 @@ function AuthPage() {
         await applyLanguageForUser(user.id);
         if (cancelled) return;
         const teacherRedirect = postAuthPathForRole("teacher");
-        console.info("[auth session] redirecting teacher", {
-          userId: user.id,
-          email: user.email,
-          resolvedRole: role,
-          redirectPath: teacherRedirect,
-        });
         window.location.replace(teacherRedirect);
         return;
       }
@@ -537,22 +531,9 @@ function AuthPage() {
       toast.success(tr("auth_success_login"));
       await applyLanguageForUser(loginData.user.id);
 
-      const { data: rolesData, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", loginData.user.id);
       const role = await getAccountRole(loginData.user.id);
       const redirectPath =
         role === "teacher" ? postAuthPathForRole("teacher") : await getPostAuthPath(loginData.user.id);
-
-      console.info("[auth login] post-login routing", {
-        userId: loginData.user.id,
-        email: loginData.user.email,
-        userRoles: rolesData ?? [],
-        rolesError: rolesError?.message ?? null,
-        resolvedRole: role,
-        postAuthPath: redirectPath,
-      });
 
       if (role === "teacher") {
         window.location.assign(postAuthPathForRole("teacher"));
