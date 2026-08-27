@@ -431,6 +431,191 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_plan_master_list_items: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label_ar: string
+          label_en: string
+          list_id: string
+          metadata: Json
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_ar?: string
+          label_en?: string
+          list_id: string
+          metadata?: Json
+          sort_order: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_ar?: string
+          label_en?: string
+          list_id?: string
+          metadata?: Json
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_plan_master_list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_plan_master_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weekly_plan_master_lists: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label_ar: string
+          label_en: string
+          list_key: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_ar?: string
+          label_en?: string
+          list_key: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_ar?: string
+          label_en?: string
+          list_key?: string
+        }
+        Relationships: []
+      }
+      weekly_plans: {
+        Row: {
+          academic_year: string
+          completion_percentage: number
+          created_at: string
+          cross_curricular_real_life: string | null
+          day: string | null
+          differentiation_eal: Json
+          differentiation_emirati: Json
+          differentiation_gt: Json
+          differentiation_sod: Json
+          domain: string | null
+          first_period: Json
+          grade: string
+          id: string
+          islamic_group: string | null
+          key_vocabulary: string | null
+          learning_outcomes: string | null
+          lesson_title: string | null
+          p21_skills: Json
+          phase: string | null
+          plan_date: string | null
+          plan_language: string
+          resources: string | null
+          second_period: Json
+          section: string | null
+          sections: string[]
+          sections_key: string
+          status: string
+          student_count: number | null
+          subject: string
+          success_criterion: string | null
+          teacher_id: string
+          teacher_reflection: string | null
+          unit: string | null
+          uae_culture: string | null
+          updated_at: string
+          week_number: number
+        }
+        Insert: {
+          academic_year?: string
+          completion_percentage?: number
+          created_at?: string
+          cross_curricular_real_life?: string | null
+          day?: string | null
+          differentiation_eal?: Json
+          differentiation_emirati?: Json
+          differentiation_gt?: Json
+          differentiation_sod?: Json
+          domain?: string | null
+          first_period?: Json
+          grade: string
+          id?: string
+          islamic_group?: string | null
+          key_vocabulary?: string | null
+          learning_outcomes?: string | null
+          lesson_title?: string | null
+          p21_skills?: Json
+          phase?: string | null
+          plan_date?: string | null
+          plan_language?: string
+          resources?: string | null
+          second_period?: Json
+          section?: string | null
+          sections?: string[]
+          sections_key?: string
+          status?: string
+          student_count?: number | null
+          subject?: string
+          success_criterion?: string | null
+          teacher_id: string
+          teacher_reflection?: string | null
+          unit?: string | null
+          uae_culture?: string | null
+          updated_at?: string
+          week_number: number
+        }
+        Update: {
+          academic_year?: string
+          completion_percentage?: number
+          created_at?: string
+          cross_curricular_real_life?: string | null
+          day?: string | null
+          differentiation_eal?: Json
+          differentiation_emirati?: Json
+          differentiation_gt?: Json
+          differentiation_sod?: Json
+          domain?: string | null
+          first_period?: Json
+          grade?: string
+          id?: string
+          islamic_group?: string | null
+          key_vocabulary?: string | null
+          learning_outcomes?: string | null
+          lesson_title?: string | null
+          p21_skills?: Json
+          phase?: string | null
+          plan_date?: string | null
+          plan_language?: string
+          resources?: string | null
+          second_period?: Json
+          section?: string | null
+          sections?: string[]
+          sections_key?: string
+          status?: string
+          student_count?: number | null
+          subject?: string
+          success_criterion?: string | null
+          teacher_id?: string
+          teacher_reflection?: string | null
+          unit?: string | null
+          uae_culture?: string | null
+          updated_at?: string
+          week_number?: number
+        }
+        Relationships: []
+      }
       teacher_profiles: {
         Row: {
           created_at: string

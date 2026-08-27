@@ -3,6 +3,7 @@ import {
   BookOpen,
   ChartBar,
   ClipboardCheck,
+  CalendarDays,
   FileText,
   Folder,
   GraduationCap,
@@ -114,6 +115,21 @@ const ASSESSMENT: NavItem[] = [
 ];
 
 const ACADEMIC: NavItem[] = [
+  {
+    to: "/teacher/weekly-planning/new",
+    icon: Plus,
+    labelKey: "teacher_nav_add_weekly_plan",
+    activeMatch: (p) => p === "/teacher/weekly-planning/new",
+  },
+  {
+    to: "/teacher/weekly-planning",
+    icon: CalendarDays,
+    labelKey: "teacher_nav_weekly_planning",
+    activeMatch: (p) =>
+      p.startsWith("/teacher/weekly-planning") &&
+      p !== "/teacher/weekly-planning/new" &&
+      !p.endsWith("/print"),
+  },
   { to: "/teacher/units", icon: Layers, labelKey: "teacher_nav_manage_units" },
   { to: "/teacher/curriculum", icon: BookOpen, labelKey: "teacher_nav_curriculum" },
   {

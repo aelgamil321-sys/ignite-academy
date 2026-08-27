@@ -1,15 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
-import { ENABLE_EMAIL_VERIFICATION } from "@/lib/auth-config";
+import { isEmailVerificationRequired } from "@/lib/auth-config";
 
 /** Where Supabase sends users after confirming signup email (must be allowlisted in Supabase Auth). */
 export const SIGNUP_EMAIL_REDIRECT_URL =
-  "https://ignite-academy.pages.dev/auth?mode=login&email_confirmed=true";
+  "https://ignite-academy.ignite-school.workers.dev/auth?mode=login&email_confirmed=true";
 
-/** Sign-up options that only request confirmation emails when verification is enabled. */
+/** Sign-up options that request confirmation emails when verification is required. */
 export function signupAuthOptions(
   data: Record<string, unknown>,
 ): { emailRedirectTo?: string; data: Record<string, unknown> } {
-  if (!ENABLE_EMAIL_VERIFICATION) {
+  if (!isEmailVerificationRequired()) {
     return { data };
   }
   return {
@@ -26,11 +26,31 @@ export function parseEmailConfirmedParam(value: unknown): EmailConfirmedParam {
   return undefined;
 }
 
+export type SupabaseAuthHashError = {
+  code: string;
+  description: string;
+};
+
+export function parseSupabaseAuthHashError(): SupabaseAuthHashError | null {
+  if (typeof window === "undefined") return null;
+  const hash = window.location.hash.replace(/^#/, "");
+  if (!hash) return null;
+  const params = new URLSearchParams(hash);
+  const error = params.get("error");
+  const errorCode = params.get("error_code");
+  if (!error && !errorCode) return null;
+  return {
+    code: errorCode ?? error ?? "unknown",
+    description: params.get("error_description") ?? "",
+  };
+}
+
 export function hasSupabaseAuthHash(): boolean {
   if (typeof window === "undefined") return false;
   const hash = window.location.hash.replace(/^#/, "");
   if (!hash) return false;
   const params = new URLSearchParams(hash);
+  if (params.get("error") || params.get("error_code")) return false;
   return (
     params.has("access_token") ||
     params.has("refresh_token") ||

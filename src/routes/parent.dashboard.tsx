@@ -19,6 +19,8 @@ import {
 } from "@/lib/parent-children";
 import { redeemPendingParentLinkCodeFromMetadata } from "@/lib/parent-link-code";
 import { isParentAccount } from "@/lib/account-role";
+import { resolveVerifiedSession } from "@/lib/email-verification";
+import { EmailVerificationRequired } from "@/components/email-verification-required";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/parent/dashboard")({
@@ -44,25 +46,31 @@ function ParentDashboardGate() {
   const navigate = useNavigate();
   const { tr } = useI18n();
   const { uiPreview } = Route.useSearch();
-  const [state, setState] = useState<"checking" | "ok" | "denied">("checking");
+  const [state, setState] = useState<"checking" | "ok" | "denied" | "unverified">("checking");
   const [userId, setUserId] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
 
   useEffect(() => {
     if (import.meta.env.DEV && uiPreview === "1") return;
     let active = true;
     void (async () => {
-      const { data } = await supabase.auth.getUser();
+      const session = await resolveVerifiedSession();
       if (!active) return;
-      if (!data.user) {
+      if (session.status === "none") {
         navigate({ to: "/auth", search: { mode: "login", accountType: "parent" } });
         return;
       }
-      const parent = await isParentAccount(data.user.id);
+      if (session.status === "unverified") {
+        setUnverifiedEmail(session.email);
+        setState("unverified");
+        return;
+      }
+      const parent = await isParentAccount(session.user.id);
       if (!parent) {
         setState("denied");
         return;
       }
-      setUserId(data.user.id);
+      setUserId(session.user.id);
       setState("ok");
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
@@ -83,6 +91,19 @@ function ParentDashboardGate() {
         crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: tr("parent_dashboard_title") }]}
       >
         <ParentDashboardView data={PARENT_DASHBOARD_UI_PREVIEW} />
+      </PageShell>
+    );
+  }
+
+  if (state === "unverified") {
+    return (
+      <PageShell
+        eyebrow={tr("nav_parent")}
+        title={tr("parent_dashboard_title")}
+        lead={tr("auth_email_not_confirmed")}
+        crumbs={[{ label: tr("nav_parent"), to: "/parent" }, { label: tr("parent_dashboard_title") }]}
+      >
+        <EmailVerificationRequired email={unverifiedEmail} />
       </PageShell>
     );
   }

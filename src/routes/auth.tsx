@@ -20,10 +20,13 @@ import {
   isEmailNotConfirmedError,
   isEmailRateLimitError,
   parseEmailConfirmedParam,
+  parseSupabaseAuthHashError,
   signupAuthOptions,
   waitForSupabaseHashSession,
 } from "@/lib/auth-redirect";
 import { ENABLE_EMAIL_VERIFICATION, shouldRequireEmailConfirmation } from "@/lib/auth-config";
+import { EmailVerificationRequired } from "@/components/email-verification-required";
+import { isEmailVerified } from "@/lib/email-verification";
 import { applyLanguageForUser, persistLanguage, resolveGuestLanguage } from "@/lib/preferred-language";
 import { isLang, type Lang } from "@/lib/i18n-config";
 import { pageHeadTitle } from "@/lib/page-head";
@@ -70,6 +73,7 @@ function AuthPage() {
   const [signupSuccessAlert, setSignupSuccessAlert] = useState<string | null>(null);
   const [emailConfirmedAlert, setEmailConfirmedAlert] = useState<string | null>(null);
   const [emailNotConfirmedAlert, setEmailNotConfirmedAlert] = useState<string | null>(null);
+  const [invalidLinkAlert, setInvalidLinkAlert] = useState<string | null>(null);
   const [teacherPendingAlert, setTeacherPendingAlert] = useState<string | null>(null);
   const [teacherRejectedAlert, setTeacherRejectedAlert] = useState<string | null>(null);
   const authInitDone = useRef(false);
@@ -114,6 +118,16 @@ function AuthPage() {
         return;
       }
 
+      const hashError = parseSupabaseAuthHashError();
+      if (hashError) {
+        await supabase.auth.signOut();
+        if (cancelled) return;
+        setInvalidLinkAlert(tr("auth_verification_link_invalid"));
+        setMode("login");
+        clearAuthCallbackUrl();
+        return;
+      }
+
       const confirmedParam = emailConfirmedSearch;
       const hashPresent = hasSupabaseAuthHash();
 
@@ -121,7 +135,7 @@ function AuthPage() {
         await waitForSupabaseHashSession();
         await supabase.auth.signOut();
         if (cancelled) return;
-        setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
+        setInvalidLinkAlert(tr("auth_verification_link_invalid"));
         setMode("login");
         clearAuthCallbackUrl();
         return;
@@ -129,6 +143,15 @@ function AuthPage() {
 
       if (confirmedParam === true || hashPresent) {
         await waitForSupabaseHashSession();
+        const { data: hashSession } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (hashSession.session?.user && !isEmailVerified(hashSession.session.user)) {
+          await supabase.auth.signOut();
+          setInvalidLinkAlert(tr("auth_verification_link_invalid"));
+          setMode("login");
+          clearAuthCallbackUrl();
+          return;
+        }
         await supabase.auth.signOut();
         if (cancelled) return;
         setEmailConfirmedAlert(tr("auth_email_confirmed"));
@@ -141,7 +164,7 @@ function AuthPage() {
       if (cancelled) return;
 
       const user = data.session?.user;
-      if (user && !user.email_confirmed_at) {
+      if (user && shouldRequireEmailConfirmation(user)) {
         await supabase.auth.signOut();
         return;
       }
@@ -319,6 +342,7 @@ function AuthPage() {
     setSignupSuccessAlert(null);
     setEmailConfirmedAlert(null);
     setEmailNotConfirmedAlert(null);
+    setInvalidLinkAlert(null);
     setTeacherPendingAlert(null);
     setTeacherRejectedAlert(null);
     try {
@@ -639,15 +663,33 @@ function AuthPage() {
             </div>
           )}
 
-          {ENABLE_EMAIL_VERIFICATION && emailNotConfirmedAlert && mode === "login" && (
-            <div
-              role="alert"
-              className="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-5 py-4 text-sm text-foreground"
-            >
-              <div className="flex gap-3">
-                <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" aria-hidden />
-                <p className="font-medium leading-relaxed">{emailNotConfirmedAlert}</p>
+          {ENABLE_EMAIL_VERIFICATION && invalidLinkAlert && mode === "login" && (
+            <div className="mb-4 space-y-3">
+              <div
+                role="alert"
+                className="rounded-2xl border border-destructive/40 bg-destructive/10 px-5 py-4 text-sm text-destructive"
+              >
+                <div className="flex gap-3">
+                  <AlertCircle className="h-5 w-5 shrink-0" aria-hidden />
+                  <p className="font-medium leading-relaxed">{invalidLinkAlert}</p>
+                </div>
               </div>
+              {email.trim() ? <EmailVerificationRequired email={email} variant="auth" /> : null}
+            </div>
+          )}
+
+          {ENABLE_EMAIL_VERIFICATION && emailNotConfirmedAlert && mode === "login" && (
+            <div className="mb-4 space-y-3">
+              <div
+                role="alert"
+                className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-5 py-4 text-sm text-foreground"
+              >
+                <div className="flex gap-3">
+                  <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" aria-hidden />
+                  <p className="font-medium leading-relaxed">{emailNotConfirmedAlert}</p>
+                </div>
+              </div>
+              {email.trim() ? <EmailVerificationRequired email={email} variant="auth" /> : null}
             </div>
           )}
 

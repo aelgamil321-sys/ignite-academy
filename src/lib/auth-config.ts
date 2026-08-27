@@ -8,17 +8,14 @@ function parseEnvFlag(value: string | undefined, defaultValue: boolean): boolean
 }
 
 /**
- * Require email confirmation before login/signup completion.
- * Set VITE_ENABLE_EMAIL_VERIFICATION=true (or ENABLE_EMAIL_VERIFICATION=true at build time)
- * to re-enable verification without changing the signup flow.
+ * Email verification is REQUIRED in production builds and cannot be disabled.
+ * Local development may opt out with VITE_DISABLE_EMAIL_VERIFICATION=true only.
  */
-export const ENABLE_EMAIL_VERIFICATION = parseEnvFlag(
-  import.meta.env.VITE_ENABLE_EMAIL_VERIFICATION ??
-    import.meta.env.ENABLE_EMAIL_VERIFICATION,
-  false,
-);
+const devBypassVerification = parseEnvFlag(import.meta.env.VITE_DISABLE_EMAIL_VERIFICATION, false);
 
-export function isEmailVerificationEnabled(): boolean {
+export const ENABLE_EMAIL_VERIFICATION = import.meta.env.PROD ? true : !devBypassVerification;
+
+export function isEmailVerificationRequired(): boolean {
   return ENABLE_EMAIL_VERIFICATION;
 }
 

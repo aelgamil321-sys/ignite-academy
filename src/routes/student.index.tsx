@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { isStudentProfileComplete } from "@/lib/student-profile";
 import { destinationForAccountRole } from "@/lib/account-role";
 import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
+import { resolveVerifiedSession } from "@/lib/email-verification";
+import { EmailVerificationRequired } from "@/components/email-verification-required";
 
 export const Route = createFileRoute("/student/")({
   head: () => ({
@@ -30,7 +32,8 @@ export const Route = createFileRoute("/student/")({
 function StudentGate() {
   const navigate = useNavigate();
   const { tr } = useI18n();
-  const [state, setState] = useState<"checking" | "ok" | "error">("checking");
+  const [state, setState] = useState<"checking" | "ok" | "error" | "unverified">("checking");
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [gradeSlug, setGradeSlug] = useState("8");
@@ -40,13 +43,18 @@ function StudentGate() {
   useEffect(() => {
     let active = true;
     void (async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
+      const session = await resolveVerifiedSession();
       if (!active) return;
-      const user = sessionData.session?.user;
-      if (!user) {
+      if (session.status === "none") {
         navigate({ to: "/auth", search: { mode: "login" } });
         return;
       }
+      if (session.status === "unverified") {
+        setUnverifiedEmail(session.email);
+        setState("unverified");
+        return;
+      }
+      const user = session.user;
 
       const resolved = await fetchResolvedAccountRole(user.id);
       if (!active) return;
@@ -84,6 +92,19 @@ function StudentGate() {
       sub.subscription.unsubscribe();
     };
   }, [navigate]);
+
+  if (state === "unverified") {
+    return (
+      <PageShell
+        eyebrow={tr("nav_student")}
+        title={tr("student_dashboard_title")}
+        lead={tr("auth_email_not_confirmed")}
+        crumbs={[{ label: tr("nav_student") }]}
+      >
+        <EmailVerificationRequired email={unverifiedEmail} />
+      </PageShell>
+    );
+  }
 
   if (state === "error") {
     return (

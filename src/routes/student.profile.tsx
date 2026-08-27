@@ -20,6 +20,8 @@ import {
 } from "@/lib/student-profile";
 import { destinationForAccountRole } from "@/lib/account-role";
 import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
+import { resolveVerifiedSession } from "@/lib/email-verification";
+import { EmailVerificationRequired } from "@/components/email-verification-required";
 import { islamicGroupLabel, sectionLabel, type IslamicGroup, type StudentSection } from "@/lib/student-academics";
 import type { Lang } from "@/lib/i18n-config";
 
@@ -38,6 +40,8 @@ function StudentProfilePage() {
   const navigate = useNavigate();
   const { lang, dir, tr, setLang } = useI18n();
   const [loading, setLoading] = useState(true);
+  const [unverified, setUnverified] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [email, setEmail] = useState("");
   const [grade, setGrade] = useState("");
@@ -59,14 +63,21 @@ function StudentProfilePage() {
     let active = true;
 
     void (async () => {
-      const { data: authData } = await supabase.auth.getUser();
+      const session = await resolveVerifiedSession();
       if (!active) return;
 
-      const user = authData.user;
-      if (!user) {
+      if (session.status === "none") {
         navigate({ to: "/auth", search: { mode: "login" } });
         return;
       }
+      if (session.status === "unverified") {
+        setUnverifiedEmail(session.email);
+        setUnverified(true);
+        setLoading(false);
+        return;
+      }
+
+      const user = session.user;
 
       const roleResult = await fetchResolvedAccountRole(user.id);
       if (!active) return;
@@ -200,6 +211,8 @@ function StudentProfilePage() {
             <Loader2 className="h-5 w-5 animate-spin" />
             {tr("loading")}
           </div>
+        ) : unverified ? (
+          <EmailVerificationRequired email={unverifiedEmail} />
         ) : (
           <form
             onSubmit={(e) => void handleSubmit(e)}
