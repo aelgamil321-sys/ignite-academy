@@ -913,6 +913,173 @@ export const t = {
   teacher_home_view_students: { en: "View students", ar: "عرض الطلاب" },
   teacher_home_view_performance: { en: "View performance", ar: "عرض الأداء" },
   teacher_home_scope_summary: { en: "Your teaching scope", ar: "نطاق تدريسك" },
+  teacher_dash_hero_lead: {
+    en: "Manage your classes, follow your students, and access your teaching tools.",
+    ar: "هنا يمكنك إدارة صفوفك ومتابعة طلابك والوصول إلى أدواتك التعليمية.",
+  },
+  teacher_dash_islamic_logo_alt: {
+    en: "Islamic Education Department",
+    ar: "قسم التربية الإسلامية",
+  },
+  teacher_dash_scope_stage: { en: "Educational stage", ar: "المرحلة الدراسية" },
+  teacher_dash_scope_more: { en: "+{count} more", ar: "+{count} أخرى" },
+  teacher_dash_kpi_avg_performance: { en: "Average Performance", ar: "متوسط أداء الطلاب" },
+  teacher_dash_kpi_quiz_activity_hint: {
+    en: "Completed quiz activity in your scope",
+    ar: "نشاط الاختبارات المكتملة ضمن نطاقك",
+  },
+  teacher_dash_kpi_load_error: {
+    en: "Overview statistics are temporarily unavailable. Your tools and class list remain accessible.",
+    ar: "إحصائيات النظرة العامة غير متاحة مؤقتًا. أدواتك وقائمة صفوفك ما زالت متاحة.",
+  },
+  teacher_dash_section_needs_attention: { en: "Needs Attention", ar: "يتطلب متابعة" },
+  teacher_dash_section_announcements: { en: "Announcements", ar: "الإعلانات" },
+  teacher_dash_section_analytics: { en: "Teaching Analytics", ar: "تحليلات التدريس" },
+  teacher_dash_section_recent_activity: { en: "Recent Activity", ar: "النشاط الأخير" },
+  teacher_dash_section_student_overview: { en: "Student Overview", ar: "نظرة على الطلاب" },
+  teacher_dash_placeholder_soon: { en: "Coming in the next update", ar: "قريبًا في التحديث القادم" },
+  teacher_dash_placeholder_needs_attention_desc: {
+    en: "Assignments, quizzes, and planning alerts will appear here.",
+    ar: "ستظهر هنا تنبيهات الواجبات والاختبارات والتخطيط الأسبوعي.",
+  },
+  teacher_dash_placeholder_announcements_desc: {
+    en: "School and department announcements for your scope will appear here.",
+    ar: "ستظهر هنا إعلانات المدرسة والقسم ضمن نطاقك.",
+  },
+  teacher_dash_placeholder_analytics_desc: {
+    en: "Scoped performance charts and insights will appear here.",
+    ar: "ستظهر هنا مخططات الأداء والرؤى ضمن نطاق تدريسك.",
+  },
+  teacher_dash_placeholder_activity_desc: {
+    en: "Recent submissions, lessons, and planning updates will appear here.",
+    ar: "ستظهر هنا أحدث الإرسالات والدروس وتحديثات التخطيط.",
+  },
+  teacher_dash_placeholder_student_overview_desc: {
+    en: "High performers and students needing support will appear here.",
+    ar: "ستظهر هنا الطلاب المتفوقون والطلاب الذين يحتاجون دعمًا.",
+  },
+  teacher_dash_action_add_assignment: { en: "Add Assignment", ar: "إضافة واجب" },
+  teacher_dash_action_create_quiz: { en: "Create Quiz", ar: "إنشاء اختبار" },
+  teacher_dash_action_manage_lessons: { en: "Manage Lessons", ar: "إدارة الدروس" },
+  teacher_dash_action_create_announcement: { en: "Create Announcement", ar: "إضافة إعلان" },
+  teacher_dash_action_weekly_planning: { en: "Weekly Planning", ar: "التخطيط الأسبوعي" },
+  teacher_dash_action_resources: { en: "Resources", ar: "الموارد" },
+  teacher_dash_schedule_title: { en: "My Schedule", ar: "جدولي" },
+  teacher_dash_schedule_empty: {
+    en: "Your school timetable will appear here soon.",
+    ar: "سيتم ربط جدولك المدرسي هنا قريباً.",
+  },
+  teacher_dash_scope_notice: {
+    en: "You only see students and data within your assigned teaching scope.",
+    ar: "ترى فقط الطلاب والبيانات ضمن نطاق تدريسك المكلّف.",
+  },
+  teacher_dash_view_performance: { en: "View Performance", ar: "عرض الأداء" },
+  teacher_dash_student_count: { en: "{count} students", ar: "{count} طالب" },
+  teacher_dash_widget_load_error: {
+    en: "This section is temporarily unavailable.",
+    ar: "هذا القسم غير متاح مؤقتًا.",
+  },
+  teacher_dash_analytics_cta: {
+    en: "View Detailed Analytics",
+    ar: "عرض التحليل التفصيلي",
+  },
+  teacher_overview_total_students: { en: "Total Students", ar: "إجمالي الطلاب" },
+  teacher_overview_with_scores: {
+    en: "Students with quiz scores",
+    ar: "طلاب لديهم درجات اختبار",
+  },
+  teacher_overview_need_followup: {
+    en: "Need Follow-up",
+    ar: "يحتاجون متابعة",
+  },
+  teacher_overview_top_students: { en: "Top Performers", ar: "أفضل الطلاب" },
+  teacher_overview_view_performance: {
+    en: "View Student Performance",
+    ar: "عرض أداء الطلاب",
+  },
+  teacher_perf_page_title: {
+    en: "My Students Performance Analytics",
+    ar: "تحليل أداء طلابي",
+  },
+  teacher_perf_page_lead: {
+    en: "Analyze student, grade and section performance within your assigned teaching scope.",
+    ar: "تحليل أداء الطلاب والصفوف والشعب ضمن نطاق تدريسك المكلّف.",
+  },
+  teacher_perf_filters: { en: "Filters", ar: "الفلاتر" },
+  teacher_perf_by_grade: { en: "Performance by Grade", ar: "الأداء حسب الصف" },
+  teacher_perf_by_section: { en: "Performance by Section", ar: "الأداء حسب الشعبة" },
+  teacher_perf_by_islamic_group: {
+    en: "Performance by Islamic Group",
+    ar: "الأداء حسب المجموعة الإسلامية",
+  },
+  teacher_perf_class_comparison: { en: "My Classes Comparison", ar: "مقارنة صفوفي" },
+  teacher_perf_no_data: { en: "No data", ar: "لا توجد بيانات" },
+  teacher_perf_no_comparison: {
+    en: "Not enough scoped data for a comparison chart yet.",
+    ar: "لا توجد بيانات كافية ضمن نطاقك لعرض مقارنة بعد.",
+  },
+  teacher_perf_top_empty: {
+    en: "No ranked students in your scope yet.",
+    ar: "لا يوجد طلاب مصنّفون ضمن نطاقك بعد.",
+  },
+  teacher_perf_followup_empty: {
+    en: "No students need follow-up right now.",
+    ar: "لا يوجد طلاب يحتاجون متابعة حالياً.",
+  },
+  teacher_perf_grade_empty: {
+    en: "No grade data for current filters.",
+    ar: "لا توجد بيانات صف للفلاتر الحالية.",
+  },
+  teacher_perf_section_empty: {
+    en: "No section data for current filters.",
+    ar: "لا توجد بيانات شعبة للفلاتر الحالية.",
+  },
+  teacher_perf_loading: { en: "Loading analytics…", ar: "جارٍ تحميل التحليلات…" },
+  teacher_perf_load_error: {
+    en: "Performance analytics are temporarily unavailable. Please try again.",
+    ar: "تحليلات الأداء غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى.",
+  },
+  teacher_perf_retry: { en: "Try again", ar: "إعادة المحاولة" },
+  teacher_attn_all_clear: {
+    en: "You're all caught up.",
+    ar: "لا توجد مهام عاجلة حالياً",
+  },
+  teacher_attn_quiz_review_title: { en: "Essay quizzes to review", ar: "اختبارات مقالية للمراجعة" },
+  teacher_attn_quiz_review_desc: {
+    en: "Quiz submissions waiting for your review.",
+    ar: "إرسالات اختبار بانتظار مراجعتك.",
+  },
+  teacher_attn_assignment_title: { en: "Assignments to grade", ar: "واجبات تحتاج تقييمًا" },
+  teacher_attn_assignment_desc: {
+    en: "Submitted work not yet graded.",
+    ar: "أعمال مسلّمة لم تُقيَّم بعد.",
+  },
+  teacher_attn_weekly_plan_title: { en: "Weekly plans in progress", ar: "خطط أسبوعية غير مكتملة" },
+  teacher_attn_weekly_plan_desc: {
+    en: "Plans that are not started or still in progress.",
+    ar: "خطط لم تبدأ أو ما زالت قيد الإعداد.",
+  },
+  teacher_attn_at_risk_title: { en: "Students needing follow-up", ar: "طلاب يحتاجون متابعة" },
+  teacher_attn_at_risk_desc: {
+    en: "Students below the platform at-risk threshold.",
+    ar: "طلاب دون عتبة المتابعة المعتمدة في المنصة.",
+  },
+  teacher_dash_ann_tab_incoming: { en: "Incoming", ar: "الواردة" },
+  teacher_dash_ann_tab_mine: { en: "My Announcements", ar: "إعلاناتي" },
+  teacher_dash_ann_create: { en: "Create Announcement", ar: "إضافة إعلان" },
+  teacher_dash_ann_source_admin: { en: "Administration", ar: "الإدارة" },
+  teacher_dash_ann_incoming_empty: {
+    en: "No incoming announcements right now.",
+    ar: "لا توجد إعلانات واردة حالياً.",
+  },
+  teacher_dash_ann_mine_empty: {
+    en: "You have not created any announcements yet.",
+    ar: "لم تنشئ أي إعلانات بعد.",
+  },
+  teacher_dash_activity_empty: {
+    en: "No recent activity to show.",
+    ar: "لا يوجد نشاط حديث لعرضه",
+  },
   teacher_sidebar_overview: { en: "Overview", ar: "نظرة عامة" },
   teacher_sidebar_content: { en: "Content", ar: "المحتوى" },
   teacher_sidebar_assessment: { en: "Assessment", ar: "التقييم" },

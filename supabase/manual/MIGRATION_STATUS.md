@@ -12,6 +12,7 @@ The following migration files were **manually applied to production** (not via a
 |---------|------|
 | `20260827140000` | `supabase/migrations/20260827140000_articles_targeting_admin_hof_security.sql` |
 | `20260828190000` | `supabase/migrations/20260828190000_admin_content_ownership_rls.sql` |
+| `20260829120000` | `supabase/migrations/20260829120000_teacher_announcement_targeting_rls.sql` |
 
 ### Articles targeting / admin Hall of Fame security (`20260827140000`)
 
@@ -22,6 +23,21 @@ The following migration files were **manually applied to production** (not via a
 - Enforces admin **SELECT** on all monitored content with **UPDATE/DELETE** limited to admin-owned rows (`created_by = auth.uid()`).
 - Legacy rows with `NULL created_by` remain read-only for admin writes.
 - **Production verification:** `supabase/manual/verify_admin_content_ownership_SUMMARY.sql` — **13/13 PASS**.
+
+### Teacher announcement targeting RLS (`20260829120000`)
+
+- Tightens teacher article **INSERT/UPDATE/DELETE** policies for announcement targeting and ownership.
+- Normal teachers: assigned grade/section, audiences `students`/`parents`, own-row mutation only.
+- Lead teachers (HOD): broader targeting on INSERT/WITH CHECK; **UPDATE/DELETE own rows only** (no peer ownership bypass).
+- Does **not** modify admin policies, published-read policies, `articles_teacher_select`, or `articles_protect_metadata`.
+- Islamic-group article targeting remains intentionally unsupported (`articles` has no `target_islamic_group` column).
+- **Status:** **MANUALLY APPLIED TO PRODUCTION — VERIFIED**
+- **Manual apply copy:** `supabase/manual/20260829120000_teacher_announcement_targeting_rls_MANUAL.sql`
+- **Production verification:** `supabase/manual/verify_teacher_announcement_targeting_rls.sql` — **catalog checks 1–9: ALL PASS**
+- **Verification date:** 2026-08-29
+- **Verification type:** production catalog/policy verification (not runtime user impersonation)
+- **No `db push` performed**
+- **No migration repair performed**
 
 ## Operational rules
 
@@ -35,7 +51,10 @@ The following migration files were **manually applied to production** (not via a
 
 ## Related documentation
 
-- Manual apply copy: `supabase/manual/20260828190000_admin_content_ownership_rls_MANUAL.sql`
-- Verification (summary): `supabase/manual/verify_admin_content_ownership_SUMMARY.sql`
-- Verification (detailed): `supabase/manual/verify_admin_content_ownership_READ_ONLY.sql`
-- Optional script (read-only checks): `scripts/verify-admin-content-ownership.mjs`
+- Manual apply copy (admin ownership): `supabase/manual/20260828190000_admin_content_ownership_rls_MANUAL.sql`
+- Manual apply copy (teacher announcement targeting): `supabase/manual/20260829120000_teacher_announcement_targeting_rls_MANUAL.sql`
+- Verification (admin summary): `supabase/manual/verify_admin_content_ownership_SUMMARY.sql`
+- Verification (admin detailed): `supabase/manual/verify_admin_content_ownership_READ_ONLY.sql`
+- Verification (teacher announcement targeting): `supabase/manual/verify_teacher_announcement_targeting_rls.sql`
+- Optional script (admin read-only checks): `scripts/verify-admin-content-ownership.mjs`
+- Optional script (teacher read-only checks): `scripts/verify-teacher-announcement-targeting.mjs`

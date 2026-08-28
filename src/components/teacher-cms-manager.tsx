@@ -12,14 +12,17 @@ import {
 import { grades, type Bi } from "@/lib/curriculum";
 import { SUBJECT_CATEGORIES, type SubjectCategory } from "@/lib/categories";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
-import { fetchTeacherContext } from "@/lib/teacher-dashboard";
+import { fetchTeacherContext, assignmentScopeOptionsForGrade, type TeacherContext } from "@/lib/teacher-dashboard";
 import { useI18n, L } from "@/lib/i18n";
 import { uploadToStorage, formatError } from "@/lib/upload";
 import type { FileType } from "@/lib/cms";
 import { AnnouncementTargetingFields } from "@/components/announcement-targeting-fields";
-import type { AnnouncementAudience } from "@/lib/announcement-audience";
+import {
+  TEACHER_ANNOUNCEMENT_AUDIENCES,
+  type AnnouncementAudience,
+} from "@/lib/announcement-audience";
 import type { AnnouncementTopic } from "@/lib/announcement-topics";
-import { type StudentSection } from "@/lib/student-academics";
+import { STUDENT_SECTIONS, type StudentSection } from "@/lib/student-academics";
 
 function Row({ children }: { children: React.ReactNode }) {
   return <div className="grid gap-4 md:grid-cols-2">{children}</div>;
@@ -76,6 +79,7 @@ function CmsItemRow({
 function useTeacherGrades() {
   const [assignedGrades, setAssignedGrades] = useState<string[]>([]);
   const [isLeadTeacher, setIsLeadTeacher] = useState(false);
+  const [teacherContext, setTeacherContext] = useState<TeacherContext | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -88,11 +92,12 @@ function useTeacherGrades() {
       const ctx = await fetchTeacherContext(data.user.id);
       setAssignedGrades(ctx.assignedGrades);
       setIsLeadTeacher(ctx.isLeadTeacher);
+      setTeacherContext(ctx);
       setLoading(false);
     })();
   }, []);
 
-  return { assignedGrades, isLeadTeacher, loading };
+  return { assignedGrades, isLeadTeacher, teacherContext, loading };
 }
 
 export function TeacherVideosManager({ mode = "manage" }: { mode?: "new" | "manage" }) {
@@ -431,7 +436,7 @@ export function TeacherArticlesManager({
 }) {
   const { lang, bi, tr } = useI18n();
   const { articles, addArticle, updateArticle, deleteArticle, refresh } = useCMS();
-  const { assignedGrades, loading: scopeLoading } = useTeacherGrades();
+  const { assignedGrades, loading: scopeLoading, teacherContext } = useTeacherGrades();
   const [titleEn, setTitleEn] = useState("");
   const [titleAr, setTitleAr] = useState("");
   const [bodyEn, setBodyEn] = useState("");
@@ -439,7 +444,7 @@ export function TeacherArticlesManager({
   const [cat, setCat] = useState<ArticleCategory>(defaultCategory ?? categoryFilter ?? "parent");
   const [grade, setGrade] = useState("");
   const [targetSection, setTargetSection] = useState<StudentSection | "">("");
-  const [audience, setAudience] = useState<AnnouncementAudience>("all");
+  const [audience, setAudience] = useState<AnnouncementAudience>("students");
   const [announcementTopic, setAnnouncementTopic] = useState<AnnouncementTopic>("school_news");
   const [subjectCategory, setSubjectCategory] = useState<SubjectCategory>("quran");
   const [img, setImg] = useState("");
@@ -453,6 +458,36 @@ export function TeacherArticlesManager({
   useEffect(() => {
     if (assignedGrades[0] && !grade) setGrade(assignedGrades[0]);
   }, [assignedGrades, grade]);
+
+  const announcementSectionOptions = useMemo(() => {
+    if (!teacherContext || !grade) return undefined;
+    const { sections } = assignmentScopeOptionsForGrade(teacherContext, grade);
+    const allowAllSections = sections.includes(null);
+    const specificSections = sections.filter((section): section is StudentSection => section !== null);
+    return {
+      allowAllSections,
+      sections: allowAllSections ? [...STUDENT_SECTIONS] : specificSections,
+    };
+  }, [teacherContext, grade]);
+
+  const announcementAudienceOptions = useMemo(() => {
+    if (teacherContext?.isLeadTeacher) return undefined;
+    return TEACHER_ANNOUNCEMENT_AUDIENCES;
+  }, [teacherContext]);
+
+  useEffect(() => {
+    if (!announcementAudienceOptions) return;
+    if (!announcementAudienceOptions.includes(audience)) {
+      setAudience(announcementAudienceOptions[0]);
+    }
+  }, [announcementAudienceOptions, audience]);
+
+  useEffect(() => {
+    if (!targetSection || !announcementSectionOptions) return;
+    if (!announcementSectionOptions.sections.includes(targetSection)) {
+      setTargetSection("");
+    }
+  }, [announcementSectionOptions, targetSection]);
 
   const scopedArticles = useMemo(() => {
     let filtered = articles.filter((a) =>
@@ -547,6 +582,8 @@ export function TeacherArticlesManager({
                 setTopic={setAnnouncementTopic}
                 gradeOptions={assignedGrades}
                 requireGrade
+                sectionOptions={announcementSectionOptions}
+                audienceOptions={announcementAudienceOptions}
               />
             ) : (
               <Field label={L("Grade", "الصف")[lang]} required>

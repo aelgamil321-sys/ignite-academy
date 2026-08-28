@@ -11,6 +11,12 @@ export const ANNOUNCEMENT_AUDIENCES: AnnouncementAudience[] = [
   "parents",
 ];
 
+/** Class-scoped teachers may only target students or parents (enforced by RLS). */
+export const TEACHER_ANNOUNCEMENT_AUDIENCES: AnnouncementAudience[] = [
+  "students",
+  "parents",
+];
+
 export const ANNOUNCEMENT_AUDIENCE_LABELS: Record<AnnouncementAudience, Bi> = {
   all: { en: "All", ar: "الجميع" },
   students: { en: "Students", ar: "الطلاب" },

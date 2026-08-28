@@ -20,6 +20,8 @@ export function AnnouncementTargetingFields({
   setTopic,
   gradeOptions,
   requireGrade = false,
+  sectionOptions,
+  audienceOptions,
 }: {
   grade: string;
   setGrade: (value: string) => void;
@@ -31,9 +33,20 @@ export function AnnouncementTargetingFields({
   setTopic: (value: AnnouncementTopic) => void;
   gradeOptions?: string[];
   requireGrade?: boolean;
+  /** When set, limits section choices to teacher assignment scope. */
+  sectionOptions?: {
+    allowAllSections: boolean;
+    sections: StudentSection[];
+  };
+  /** When set, limits audience choices (teacher UI should match RLS). */
+  audienceOptions?: AnnouncementAudience[];
 }) {
   const { lang, bi } = useI18n();
   const gradesList = gradeOptions ?? grades.map((g) => g.slug);
+  const sectionChoices = sectionOptions
+    ? sectionOptions.sections
+    : [...STUDENT_SECTIONS];
+  const audienceChoices = audienceOptions ?? ANNOUNCEMENT_AUDIENCES;
 
   return (
     <>
@@ -63,8 +76,10 @@ export function AnnouncementTargetingFields({
             value={targetSection}
             onChange={(e) => setTargetSection(e.target.value as StudentSection | "")}
           >
-            <option value="">{L("All sections", "جميع الشعب")[lang]}</option>
-            {STUDENT_SECTIONS.map((s) => (
+            {sectionOptions?.allowAllSections !== false ? (
+              <option value="">{L("All sections", "جميع الشعب")[lang]}</option>
+            ) : null}
+            {sectionChoices.map((s) => (
               <option key={s} value={s}>{sectionLabel(s, lang)}</option>
             ))}
           </select>
@@ -80,7 +95,7 @@ export function AnnouncementTargetingFields({
             value={audience}
             onChange={(e) => setAudience(e.target.value as AnnouncementAudience)}
           >
-            {ANNOUNCEMENT_AUDIENCES.map((a) => (
+            {audienceChoices.map((a) => (
               <option key={a} value={a}>{bi(announcementAudienceLabel(a))}</option>
             ))}
           </select>
