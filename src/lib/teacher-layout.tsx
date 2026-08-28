@@ -4,10 +4,11 @@ import { PageShell } from "@/components/page-shell";
 import { TeacherSidebar } from "@/components/teacher-sidebar";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
-import { destinationForAccountRole, getAccountRole } from "@/lib/account-role";
+import { getAccountRole, navigateTargetForAccountRole } from "@/lib/account-role";
 import { fetchTeacherContext } from "@/lib/teacher-dashboard";
 import { resolveVerifiedSession } from "@/lib/email-verification";
 import { EmailVerificationRequired } from "@/components/email-verification-required";
+import { shouldDeferToPasswordReset } from "@/lib/password-recovery";
 
 export const teacherRouteHead = () => ({
   meta: [
@@ -30,6 +31,10 @@ export function TeacherGate() {
   useEffect(() => {
     let active = true;
     const check = async () => {
+      if (shouldDeferToPasswordReset()) {
+        window.location.replace("/reset-password");
+        return;
+      }
       const session = await resolveVerifiedSession();
       if (!active) return;
       if (session.status === "none") {
@@ -45,7 +50,7 @@ export function TeacherGate() {
       const role = await getAccountRole(user.id);
       if (!active) return;
       if (role !== "teacher") {
-        navigate({ to: destinationForAccountRole(role) });
+        navigate(navigateTargetForAccountRole(role));
         return;
       }
       const ctx = await fetchTeacherContext(user.id);

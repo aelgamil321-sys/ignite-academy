@@ -16,38 +16,50 @@ export type Database = {
     Tables: {
       articles: {
         Row: {
+          announcement_topic: string | null
+          audience: string | null
           category: string
           content: Json
           created_at: string
+          created_by: string | null
           grade: string
           id: string
           image_url: string | null
           published: boolean
           subject_category: string
+          target_section: string | null
           title: Json
           unit_slug: string
         }
         Insert: {
+          announcement_topic?: string | null
+          audience?: string | null
           category?: string
           content?: Json
           created_at?: string
+          created_by?: string | null
           grade?: string
           id?: string
           image_url?: string | null
           published?: boolean
           subject_category?: string
+          target_section?: string | null
           title?: Json
           unit_slug?: string
         }
         Update: {
+          announcement_topic?: string | null
+          audience?: string | null
           category?: string
           content?: Json
           created_at?: string
+          created_by?: string | null
           grade?: string
           id?: string
           image_url?: string | null
           published?: boolean
           subject_category?: string
+          target_section?: string | null
           title?: Json
           unit_slug?: string
         }
@@ -864,6 +876,16 @@ export type Database = {
       get_student_peer_rankings: {
         Args: {
           p_student_user_id: string
+        }
+        Returns: Json
+      }
+      get_admin_hall_of_fame: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_announcement_creator_display_names: {
+        Args: {
+          p_user_ids: string[]
         }
         Returns: Json
       }

@@ -17,6 +17,7 @@ import { getGrade } from "@/lib/curriculum";
 import { useResolveLesson, lessonVideoEmbeds, type CustomFile, type CustomLesson, useCMS } from "@/lib/cms";
 import { studentDownloadItems, fileNameFromUrl, type StudentDownloadItem } from "@/lib/lesson-bilingual-files";
 import { LessonQuizStudent } from "@/components/lesson-quiz-student";
+import { LessonQuizPreview } from "@/components/lesson-quiz-preview";
 import { normalizeQuizList } from "@/lib/lesson-quiz";
 import { useLessonHashScroll } from "@/lib/lesson-hash-scroll";
 import { TranslatedContentShell } from "@/components/translation-loading-indicator";
@@ -31,16 +32,34 @@ export const Route = createFileRoute("/grades/$grade/$lesson")({
     return { gradeSlug: params.grade, lessonSlug: params.lesson };
   },
   head: () => ({ meta: [{ title: pageHeadTitle("lesson") }] }),
-  component: LessonPage,
+  component: LessonRoutePage,
   notFoundComponent: () => <div className="container-page py-20">Lesson not found.</div>,
   errorComponent: ({ error }) => <div className="container-page py-20">Error: {error.message}</div>,
 });
 
-function LessonPage() {
+function LessonRoutePage() {
   const { gradeSlug, lessonSlug } = Route.useLoaderData();
+  return <LessonPageBody gradeSlug={gradeSlug} lessonSlug={lessonSlug} />;
+}
+
+export function LessonPageBody({
+  gradeSlug,
+  lessonSlug,
+  gradesBasePath = "/grades",
+  shell = "public",
+}: {
+  gradeSlug: string;
+  lessonSlug: string;
+  gradesBasePath?: "/grades" | "/admin/grades";
+  shell?: "public" | "admin";
+}) {
   const { loading: cmsLoading } = useCMS();
   const resolved = useResolveLesson(gradeSlug, lessonSlug);
   const { tr, lang, dir, bi } = useI18n();
+  const gradeRoute =
+    gradesBasePath === "/admin/grades" ? "/admin/grades/$grade" : "/grades/$grade";
+  const gradesIndexRoute = gradesBasePath;
+  const showPublicChrome = shell === "public";
   const lessonReady = !cmsLoading && Boolean(resolved?.lesson);
   useLessonTranslationScope(lessonSlug);
 
@@ -105,12 +124,12 @@ function LessonPage() {
 
   if (cmsLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <SiteHeader />
-        <main className="flex-1 container-page py-20 text-muted-foreground">
+      <div className={showPublicChrome ? "min-h-screen flex flex-col" : ""}>
+        {showPublicChrome ? <SiteHeader /> : null}
+        <main className={`${showPublicChrome ? "flex-1 " : ""}container-page py-20 text-muted-foreground`}>
           {L("Loading lesson…", "جارٍ تحميل الدرس…")[lang]}
         </main>
-        <SiteFooter />
+        {showPublicChrome ? <SiteFooter /> : null}
       </div>
     );
   }
@@ -121,16 +140,16 @@ function LessonPage() {
   const { grade, lesson, custom, lessonFiles } = resolved;
   if (!lesson) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <SiteHeader />
-        <main className="flex-1 container-page py-20">
-          <Link to="/grades/$grade" params={{ grade: grade.slug }} className="text-primary hover:text-primary inline-flex items-center gap-2">
+      <div className={showPublicChrome ? "min-h-screen flex flex-col" : ""}>
+        {showPublicChrome ? <SiteHeader /> : null}
+        <main className={`${showPublicChrome ? "flex-1 " : ""}container-page py-20`}>
+          <Link to={gradeRoute} params={{ grade: grade.slug }} className="text-primary hover:text-primary inline-flex items-center gap-2">
             <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
             {tr("back_to_grade")} · {bi(grade.name)}
           </Link>
           <p className="mt-6 text-muted-foreground">{L("Lesson not found.", "الدرس غير موجود.")[lang]}</p>
         </main>
-        <SiteFooter />
+        {showPublicChrome ? <SiteFooter /> : null}
       </div>
     );
   }
@@ -157,20 +176,24 @@ function LessonPage() {
     "flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium transition-colors hover:border-primary hover:text-primary";
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <SiteHeader />
-      <main className="flex-1 overflow-x-hidden">
+    <div className={showPublicChrome ? "min-h-screen flex flex-col" : ""}>
+      {showPublicChrome ? <SiteHeader /> : null}
+      <main className={`${showPublicChrome ? "flex-1 " : ""}overflow-x-hidden`}>
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
-          <div className="container-page pt-3 pb-4 md:py-10">
+          <div className={`${showPublicChrome ? "container-page" : ""} pt-3 pb-4 md:py-10`}>
             <div className="hidden md:block mb-5">
               <Breadcrumbs items={[
-                { label: tr("nav_stages"), to: "/grades" },
-                { label: bi(grade.name, { ...lessonMeta, fieldName: "grade", contentType: "general" }), to: "/grades/$grade", params: { grade: grade.slug } },
+                { label: tr("nav_stages"), to: gradesIndexRoute },
+                {
+                  label: bi(grade.name, { ...lessonMeta, fieldName: "grade", contentType: "general" }),
+                  to: gradeRoute,
+                  params: { grade: grade.slug },
+                },
                 { label: bi(lesson.title, { ...lessonMeta, fieldName: "title", contentType: "title" }) },
               ]} />
             </div>
             <Link
-              to="/grades/$grade"
+              to={gradeRoute}
               params={{ grade: grade.slug }}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 md:mb-5 md:text-muted-foreground md:hover:text-primary"
             >
@@ -199,7 +222,7 @@ function LessonPage() {
           </div>
         </section>
 
-        <div className="container-page py-3 md:hidden">
+        <div className={`${showPublicChrome ? "container-page" : ""} py-3 md:hidden`}>
           <div className="grid grid-cols-2 gap-2">
             <a href="#lesson-video" className={resourceBtn}>
               <Video className="h-4 w-4 shrink-0" />
@@ -222,7 +245,7 @@ function LessonPage() {
           </div>
         </div>
 
-        <section className="container-page py-4 md:py-12 grid gap-4 md:gap-10 lg:grid-cols-3">
+        <section className={`${showPublicChrome ? "container-page" : ""} py-4 md:py-12 grid gap-4 md:gap-10 lg:grid-cols-3`}>
           <div className="min-w-0 lg:col-span-2 space-y-4 md:space-y-6">
             {sections.map((s) => {
               const Icon = s.icon;
@@ -293,14 +316,23 @@ function LessonPage() {
 
             <LessonDownloads custom={custom} lessonCard={lessonCard} lessonCardHeader={lessonCardHeader} lessonCardIcon={lessonCardIcon} lessonCardTitle={lessonCardTitle} resourceBtn={resourceBtn} />
 
-            {hasQuiz && (
+            {hasQuiz && custom && (
               <div id="lesson-quiz" tabIndex={-1} className="scroll-mt-28 outline-none">
-                <LessonQuizStudent
-                  lessonId={lessonSlug}
-                  questions={custom.quiz}
-                  gradeName={grade.name}
-                  lessonTitle={lesson.title}
-                />
+                {shell === "admin" ? (
+                  <LessonQuizPreview
+                    lessonId={lessonSlug}
+                    questions={custom.quiz}
+                    gradeName={grade.name}
+                    lessonTitle={lesson.title}
+                  />
+                ) : (
+                  <LessonQuizStudent
+                    lessonId={lessonSlug}
+                    questions={custom.quiz}
+                    gradeName={grade.name}
+                    lessonTitle={lesson.title}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -323,8 +355,8 @@ function LessonPage() {
           </aside>
         </section>
       </main>
-      <SiteFooter />
-      <AskMrAhmed />
+      {showPublicChrome ? <SiteFooter /> : null}
+      {showPublicChrome ? <AskMrAhmed /> : null}
     </div>
   );
 }

@@ -13,10 +13,11 @@ import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-pr
 import { LogOut, User } from "lucide-react";
 import { toast } from "sonner";
 import { isStudentProfileComplete } from "@/lib/student-profile";
-import { destinationForAccountRole } from "@/lib/account-role";
+import { navigateTargetForAccountRole } from "@/lib/account-role";
 import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
 import { resolveVerifiedSession } from "@/lib/email-verification";
 import { EmailVerificationRequired } from "@/components/email-verification-required";
+import { shouldDeferToPasswordReset } from "@/lib/password-recovery";
 
 export const Route = createFileRoute("/student/")({
   head: () => ({
@@ -43,6 +44,10 @@ function StudentGate() {
   useEffect(() => {
     let active = true;
     void (async () => {
+      if (shouldDeferToPasswordReset()) {
+        window.location.replace("/reset-password");
+        return;
+      }
       const session = await resolveVerifiedSession();
       if (!active) return;
       if (session.status === "none") {
@@ -65,7 +70,7 @@ function StudentGate() {
       }
 
       if (resolved.role !== "student") {
-        navigate({ to: destinationForAccountRole(resolved.role) });
+        navigate(navigateTargetForAccountRole(resolved.role));
         return;
       }
 

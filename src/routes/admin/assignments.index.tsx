@@ -47,6 +47,12 @@ import {
 import { formatError } from "@/lib/upload";
 import { syncAssignmentPublishNotifications } from "@/lib/notifications";
 import {
+  adminContentIsReadOnly,
+  useAdminContentActor,
+} from "@/lib/admin-content-ownership";
+import { AdminContentViewLink } from "@/components/admin-content-view-link";
+import { fetchAnnouncementCreatorNames } from "@/lib/announcement-creator-names";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -91,8 +97,9 @@ export const Route = createFileRoute("/admin/assignments/")({
 });
 
 function AdminAssignmentsPage() {
-  const { lang, bi } = useI18n();
+  const { lang, bi, tr } = useI18n();
   const { lessons } = useCMS();
+  const actorId = useAdminContentActor();
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
   const [submissions, setSubmissions] = useState<AssignmentSubmissionRow[]>([]);
   const [profiles, setProfiles] = useState<Map<string, ProfileRow>>(new Map());
@@ -107,6 +114,7 @@ function AdminAssignmentsPage() {
   const [expandedSubId, setExpandedSubId] = useState<string | null>(null);
   const [gradeDraft, setGradeDraft] = useState<Record<string, { score: string; feedbackEn: string; feedbackAr: string }>>({});
   const [gradingId, setGradingId] = useState<string | null>(null);
+  const [creatorNames, setCreatorNames] = useState<Record<string, string>>({});
 
   const [filterGrade, setFilterGrade] = useState("all");
   const [filterSection, setFilterSection] = useState("all");
@@ -136,6 +144,15 @@ function AdminAssignmentsPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    const ids = assignments.map((a) => a.created_by).filter(Boolean) as string[];
+    if (ids.length === 0) {
+      setCreatorNames({});
+      return;
+    }
+    void fetchAnnouncementCreatorNames(ids).then(setCreatorNames);
+  }, [assignments]);
 
   const analytics = useMemo(
     () =>
@@ -177,6 +194,7 @@ function AdminAssignmentsPage() {
   }
 
   function openEdit(row: AssignmentRow) {
+    if (adminContentIsReadOnly("assignment", row.created_by, actorId)) return;
     setEditingId(row.id);
     setForm({
       title_en: row.title_en,
@@ -254,6 +272,7 @@ function AdminAssignmentsPage() {
   async function handleDelete() {
     if (!deleteId) return;
     const row = assignments.find((a) => a.id === deleteId);
+    if (!row || adminContentIsReadOnly("assignment", row.created_by, actorId)) return;
     try {
       if (row?.attachment_path) {
         await deleteAssignmentStorageFile(row.attachment_path).catch(() => undefined);
@@ -305,11 +324,11 @@ function AdminAssignmentsPage() {
   }
 
   const filterBar = (
-    <div className="flex flex-wrap gap-2">
+    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       <select
         value={filterGrade}
         onChange={(e) => setFilterGrade(e.target.value)}
-        className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
       >
         <option value="all">{L("All grades", "كل الصفوف")[lang]}</option>
         {grades.map((g) => (
@@ -321,7 +340,7 @@ function AdminAssignmentsPage() {
       <select
         value={filterSection}
         onChange={(e) => setFilterSection(e.target.value)}
-        className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
       >
         <option value="all">{L("All sections", "كل الشعب")[lang]}</option>
         {STUDENT_SECTIONS.map((s) => (
@@ -333,7 +352,7 @@ function AdminAssignmentsPage() {
       <select
         value={filterGroup}
         onChange={(e) => setFilterGroup(e.target.value)}
-        className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
       >
         <option value="all">{L("All Islamic groups", "كل المجموعات")[lang]}</option>
         {ISLAMIC_GROUPS.map((g) => (
@@ -345,7 +364,7 @@ function AdminAssignmentsPage() {
       <select
         value={filterLesson}
         onChange={(e) => setFilterLesson(e.target.value)}
-        className="rounded-lg border border-border bg-card px-3 py-2 text-sm min-w-[140px]"
+        className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm min-w-0"
       >
         <option value="all">{L("All lessons", "كل الدروس")[lang]}</option>
         {lessons.map((l) => (
@@ -357,7 +376,7 @@ function AdminAssignmentsPage() {
       <select
         value={filterStatus}
         onChange={(e) => setFilterStatus(e.target.value as AssignmentSubmissionStatus | "all")}
-        className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
       >
         <option value="all">{L("All statuses", "كل الحالات")[lang]}</option>
         <option value="submitted">{L("Submitted", "مُرسل")[lang]}</option>
@@ -369,7 +388,7 @@ function AdminAssignmentsPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl text-foreground">
@@ -392,7 +411,7 @@ function AdminAssignmentsPage() {
         </button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {[
           { label: L("Total", "الإجمالي")[lang], value: analytics.total },
           { label: L("Submitted", "مُرسل")[lang], value: analytics.submitted },
@@ -467,9 +486,12 @@ function AdminAssignmentsPage() {
           </p>
         ) : (
           <ul className="space-y-3">
-            {assignments.map((row) => (
+            {assignments.map((row) => {
+              const readOnly = adminContentIsReadOnly("assignment", row.created_by, actorId);
+              const creatorName = row.created_by ? creatorNames[row.created_by] : null;
+              return (
               <li key={row.id} className="rounded-xl border border-border bg-card p-4 flex flex-wrap gap-3 justify-between">
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-1">
                   <div className="font-medium">{bi(assignmentTitle(row))}</div>
                   <div className="text-xs text-muted-foreground mt-1">
                     {L("Grade", "الصف")[lang]} {row.grade}
@@ -477,6 +499,7 @@ function AdminAssignmentsPage() {
                     {row.islamic_group ? ` · ${row.islamic_group}` : ""}
                     {" · "}
                     {new Date(row.due_date).toLocaleString(localeForFormatting(lang))}
+                    {creatorName ? ` · ${creatorName}` : ""}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -487,6 +510,13 @@ function AdminAssignmentsPage() {
                   >
                     {row.published ? L("Published", "منشور")[lang] : L("Draft", "مسودة")[lang]}
                   </span>
+                  <AdminContentViewLink
+                    to="/admin/assignments/$assignmentId"
+                    params={{ assignmentId: row.id }}
+                    labelKey="admin_content_view_assignment"
+                  />
+                  {!readOnly ? (
+                    <>
                   <button
                     type="button"
                     onClick={() => openEdit(row)}
@@ -501,9 +531,11 @@ function AdminAssignmentsPage() {
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
+                    </>
+                  ) : null}
                 </div>
               </li>
-            ))}
+            );})}
           </ul>
         )
       ) : filteredSubmissions.length === 0 ? (

@@ -1,12 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Award, Loader2, Medal, Star, Trophy } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
 import { EmptyState } from "@/components/empty-state";
 import { StudentProfileAvatar } from "@/components/student-profile-avatar";
-import { useI18n, type TKey } from "@/lib/i18n";
-import { gradeDisplayName } from "@/lib/grade-utils";
-import { islamicGroupLabel } from "@/lib/student-academics";
-import { fetchHallOfFame, type HallOfFameData, type HallOfFameStudent } from "@/lib/hall-of-fame";
+import { grades } from "@/lib/curriculum";
+import { gradeDisplayName, normalizeGradeSlug } from "@/lib/grade-utils";
+import {
+  fetchAdminHallOfFame,
+  type AdminHallOfFameData,
+  type AdminHallOfFameGradeChampion,
+  type AdminHallOfFameStudent,
+} from "@/lib/admin-hall-of-fame";
+import {
+  fetchHallOfFame,
+  type HallOfFameData,
+  type HallOfFameGradeChampion,
+  type HallOfFameStudent,
+} from "@/lib/hall-of-fame";
+import { ISLAMIC_GROUPS, islamicGroupLabel, STUDENT_SECTIONS, sectionLabel } from "@/lib/student-academics";
+import { useI18n, L, type TKey } from "@/lib/i18n";
 import { isRtlLang, type Lang } from "@/lib/i18n-config";
 import { cn } from "@/lib/utils";
 
@@ -54,10 +66,7 @@ function StudentCard({
         {islamicGroupLabel(student.islamicGroup, lang)}
       </p>
       <div className="mt-4 grid w-full grid-cols-2 gap-2">
-        <MetricPill
-          label={tr("hof_avg_score_label")}
-          value={`${student.averageScorePct}%`}
-        />
+        <MetricPill label={tr("hof_avg_score_label")} value={`${student.averageScorePct}%`} />
         <MetricPill
           label={tr("hof_certificates_label")}
           value={String(student.certificatesEarned)}
@@ -67,19 +76,105 @@ function StudentCard({
   );
 }
 
-export function HallOfFamePage() {
+function adminStudentToPublic(student: AdminHallOfFameStudent): HallOfFameStudent {
+  return {
+    arabicName: student.arabicName,
+    grade: student.grade,
+    islamicGroup: student.islamicGroup,
+    profilePhotoPath: student.profilePhotoPath,
+    averageScorePct: student.averageScorePct,
+    certificatesEarned: student.certificatesEarned,
+  };
+}
+
+function matchesAdminHonorFilters(
+  student: AdminHallOfFameStudent,
+  gradeFilter: string,
+  sectionFilter: string,
+  islamicFilter: string,
+): boolean {
+  if (gradeFilter && normalizeGradeSlug(student.grade ?? "") !== normalizeGradeSlug(gradeFilter)) {
+    return false;
+  }
+  if (sectionFilter && student.section !== sectionFilter) {
+    return false;
+  }
+  if (islamicFilter && student.islamicGroup !== islamicFilter) {
+    return false;
+  }
+  return true;
+}
+
+function matchesAdminChampionFilters(
+  champion: AdminHallOfFameGradeChampion,
+  gradeFilter: string,
+  sectionFilter: string,
+  islamicFilter: string,
+): boolean {
+  if (gradeFilter && champion.gradeSlug !== normalizeGradeSlug(gradeFilter)) {
+    return false;
+  }
+  if (sectionFilter && champion.section !== sectionFilter) {
+    return false;
+  }
+  if (islamicFilter && champion.islamicGroup !== islamicFilter) {
+    return false;
+  }
+  return true;
+}
+
+function matchesHonorFilters(
+  student: HallOfFameStudent,
+  gradeFilter: string,
+  islamicFilter: string,
+): boolean {
+  if (gradeFilter && normalizeGradeSlug(student.grade ?? "") !== normalizeGradeSlug(gradeFilter)) {
+    return false;
+  }
+  if (islamicFilter && student.islamicGroup !== islamicFilter) {
+    return false;
+  }
+  return true;
+}
+
+function matchesChampionFilters(
+  champion: HallOfFameGradeChampion,
+  gradeFilter: string,
+  islamicFilter: string,
+): boolean {
+  if (gradeFilter && champion.gradeSlug !== normalizeGradeSlug(gradeFilter)) {
+    return false;
+  }
+  if (islamicFilter && champion.islamicGroup !== islamicFilter) {
+    return false;
+  }
+  return true;
+}
+
+export function HallOfFameContent({ variant = "public" }: { variant?: "public" | "admin" }) {
   const { tr, lang } = useI18n();
-  const [data, setData] = useState<HallOfFameData | null>(null);
+  const [publicData, setPublicData] = useState<HallOfFameData | null>(null);
+  const [adminData, setAdminData] = useState<AdminHallOfFameData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [gradeFilter, setGradeFilter] = useState("");
+  const [sectionFilter, setSectionFilter] = useState("");
+  const [islamicFilter, setIslamicFilter] = useState("");
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setError(null);
 
     void (async () => {
       try {
-        const result = await fetchHallOfFame();
-        if (active) setData(result);
+        if (variant === "admin") {
+          const result = await fetchAdminHallOfFame();
+          if (active) setAdminData(result);
+        } else {
+          const result = await fetchHallOfFame();
+          if (active) setPublicData(result);
+        }
       } catch (err) {
         if (active) {
           setError(err instanceof Error ? err.message : tr("hof_error"));
@@ -92,15 +187,45 @@ export function HallOfFamePage() {
     return () => {
       active = false;
     };
-  }, [tr]);
+  }, [tr, variant]);
+
+  const filtered = useMemo(() => {
+    if (variant === "admin" && adminData) {
+      const topStudents = adminData.topStudents
+        .filter((s) => matchesAdminHonorFilters(s, gradeFilter, sectionFilter, islamicFilter))
+        .map((s) => ({ key: s.userId, student: adminStudentToPublic(s) }));
+      const studentOfMonth =
+        adminData.studentOfMonth &&
+        matchesAdminHonorFilters(adminData.studentOfMonth, gradeFilter, sectionFilter, islamicFilter)
+          ? adminStudentToPublic(adminData.studentOfMonth)
+          : null;
+      const gradeChampions = adminData.gradeChampions
+        .filter((c) => matchesAdminChampionFilters(c, gradeFilter, sectionFilter, islamicFilter))
+        .map((c) => ({ ...adminStudentToPublic(c), gradeSlug: c.gradeSlug }));
+      return { topStudents, studentOfMonth, gradeChampions };
+    }
+    if (!publicData) return null;
+    return {
+      topStudents: publicData.topStudents
+        .filter((s) => matchesHonorFilters(s, gradeFilter, islamicFilter))
+        .map((s, index) => ({ key: String(index), student: s })),
+      studentOfMonth:
+        publicData.studentOfMonth && matchesHonorFilters(publicData.studentOfMonth, gradeFilter, islamicFilter)
+          ? publicData.studentOfMonth
+          : null,
+      gradeChampions: publicData.gradeChampions.filter((c) =>
+        matchesChampionFilters(c, gradeFilter, islamicFilter),
+      ),
+    };
+  }, [variant, adminData, publicData, gradeFilter, sectionFilter, islamicFilter]);
 
   const isEmpty =
     !loading &&
     !error &&
-    data &&
-    data.topStudents.length === 0 &&
-    !data.studentOfMonth &&
-    data.gradeChampions.length === 0;
+    filtered &&
+    filtered.topStudents.length === 0 &&
+    !filtered.studentOfMonth &&
+    filtered.gradeChampions.length === 0;
 
   function gradeChampionLabel(gradeSlug: string): string {
     const grade = gradeDisplayName(gradeSlug, lang);
@@ -108,25 +233,85 @@ export function HallOfFamePage() {
     return `${grade} ${tr("grade_champion_suffix")}`;
   }
 
+  if (loading) {
+    return (
+      <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 text-muted-foreground">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm">{tr("hof_loading")}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <EmptyState icon={Trophy} title={tr("hof_error")} description={error} />;
+  }
+
   return (
-    <PageShell
-      eyebrow={tr("nav_hall_of_fame")}
-      title={tr("hof_title")}
-      lead={tr("hof_lead")}
-      crumbs={[{ label: tr("nav_hall_of_fame") }]}
-    >
-      {loading ? (
-        <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm">{tr("hof_loading")}</p>
-        </div>
-      ) : error ? (
-        <EmptyState icon={Trophy} title={tr("hof_error")} description={error} />
-      ) : isEmpty ? (
+    <div className="space-y-8">
+      {variant === "admin" ? (
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
+          <h2 className="font-display text-lg text-foreground mb-3">
+            {tr("admin_hof_filters_title")}
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <label className="block text-sm">
+              <span className="text-xs font-medium text-muted-foreground">{L("Grade", "الصف")[lang]}</span>
+              <select
+                value={gradeFilter}
+                onChange={(e) => setGradeFilter(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              >
+                <option value="">{L("All", "الكل")[lang]}</option>
+                {grades.map((g) => (
+                  <option key={g.slug} value={g.slug}>
+                    {gradeDisplayName(g.slug, lang)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="text-xs font-medium text-muted-foreground">
+                {tr("admin_hof_section_filter")}
+              </span>
+              <select
+                value={sectionFilter}
+                onChange={(e) => setSectionFilter(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              >
+                <option value="">{L("All", "الكل")[lang]}</option>
+                {STUDENT_SECTIONS.map((section) => (
+                  <option key={section} value={section}>
+                    {sectionLabel(section, lang)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="text-xs font-medium text-muted-foreground">
+                {L("Islamic Group", "المجموعة الإسلامية")[lang]}
+              </span>
+              <select
+                value={islamicFilter}
+                onChange={(e) => setIslamicFilter(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              >
+                <option value="">{L("All", "الكل")[lang]}</option>
+                {ISLAMIC_GROUPS.map((group) => (
+                  <option key={group} value={group}>
+                    {islamicGroupLabel(group, lang)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </section>
+      ) : null}
+
+      {isEmpty ? (
         <EmptyState icon={Trophy} title={tr("hof_empty_title")} description={tr("hof_empty_desc")} />
-      ) : (
+      ) : filtered ? (
         <div className="space-y-14">
-          {data?.studentOfMonth ? (
+          {filtered.studentOfMonth ? (
             <section>
               <div className="mb-6 flex items-center gap-2">
                 <Star className="h-5 w-5 text-gold" />
@@ -137,8 +322,8 @@ export function HallOfFamePage() {
               <div className="overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-gold/10 p-6 shadow-[var(--shadow-elegant)] sm:p-8">
                 <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">
                   <StudentProfileAvatar
-                    profilePhotoPath={data.studentOfMonth.profilePhotoPath}
-                    alt={data.studentOfMonth.arabicName}
+                    profilePhotoPath={filtered.studentOfMonth.profilePhotoPath}
+                    alt={filtered.studentOfMonth.arabicName}
                     className="h-32 w-32 rounded-3xl sm:h-40 sm:w-40"
                   />
                   <div className="flex-1 text-center sm:text-start">
@@ -147,23 +332,23 @@ export function HallOfFamePage() {
                       {tr("hof_achievement_badge")}
                     </div>
                     <h3 className="mt-4 font-display text-3xl font-semibold text-foreground">
-                      {data.studentOfMonth.arabicName}
+                      {filtered.studentOfMonth.arabicName}
                     </h3>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      {data.studentOfMonth.grade
-                        ? gradeDisplayName(data.studentOfMonth.grade, lang)
+                      {filtered.studentOfMonth.grade
+                        ? gradeDisplayName(filtered.studentOfMonth.grade, lang)
                         : tr("not_set")}
                       {" · "}
-                      {islamicGroupLabel(data.studentOfMonth.islamicGroup, lang)}
+                      {islamicGroupLabel(filtered.studentOfMonth.islamicGroup, lang)}
                     </p>
                     <div className="mt-5 grid max-w-md grid-cols-2 gap-3 sm:grid-cols-2">
                       <MetricPill
                         label={tr("hof_avg_score_label")}
-                        value={`${data.studentOfMonth.averageScorePct}%`}
+                        value={`${filtered.studentOfMonth.averageScorePct}%`}
                       />
                       <MetricPill
                         label={tr("hof_certificates_label")}
-                        value={String(data.studentOfMonth.certificatesEarned)}
+                        value={String(filtered.studentOfMonth.certificatesEarned)}
                       />
                     </div>
                   </div>
@@ -172,7 +357,7 @@ export function HallOfFamePage() {
             </section>
           ) : null}
 
-          {data && data.gradeChampions.length > 0 ? (
+          {filtered.gradeChampions.length > 0 ? (
             <section>
               <div className="mb-6 flex items-center gap-2">
                 <Medal className="h-5 w-5 text-primary" />
@@ -181,7 +366,7 @@ export function HallOfFamePage() {
                 </h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {data.gradeChampions.map((champion) => (
+                {filtered.gradeChampions.map((champion) => (
                   <article
                     key={champion.gradeSlug}
                     className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]"
@@ -208,7 +393,7 @@ export function HallOfFamePage() {
             </section>
           ) : null}
 
-          {data && data.topStudents.length > 0 ? (
+          {filtered.topStudents.length > 0 ? (
             <section>
               <div className="mb-6 flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-gold" />
@@ -217,14 +402,29 @@ export function HallOfFamePage() {
                 </h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {data.topStudents.map((student, index) => (
-                  <StudentCard key={index} student={student} lang={lang} tr={tr} />
+                {filtered.topStudents.map((entry) => (
+                  <StudentCard key={entry.key} student={entry.student} lang={lang} tr={tr} />
                 ))}
               </div>
             </section>
           ) : null}
         </div>
-      )}
+      ) : null}
+    </div>
+  );
+}
+
+export function HallOfFamePage() {
+  const { tr } = useI18n();
+
+  return (
+    <PageShell
+      eyebrow={tr("nav_hall_of_fame")}
+      title={tr("hof_title")}
+      lead={tr("hof_lead")}
+      crumbs={[{ label: tr("nav_hall_of_fame") }]}
+    >
+      <HallOfFameContent variant="public" />
     </PageShell>
   );
 }

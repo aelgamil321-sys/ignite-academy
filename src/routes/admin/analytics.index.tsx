@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { StudentProfileAvatar } from "@/components/student-profile-avatar";
+import { AdminTableScroll } from "@/components/admin-table-scroll";
 import { grades } from "@/lib/curriculum";
 import {useI18n, L } from "@/lib/i18n";
 import {
@@ -90,7 +91,7 @@ function AnalyticsTable({
   return (
     <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
       <h3 className="font-display text-lg text-foreground mb-4">{title}</h3>
-      <div className="overflow-x-auto -mx-1">
+      <AdminTableScroll>
         <table className="w-full min-w-[520px] text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -117,7 +118,7 @@ function AnalyticsTable({
             ))}
           </tbody>
         </table>
-      </div>
+      </AdminTableScroll>
     </section>
   );
 }
@@ -262,7 +263,7 @@ function TopStudentsTable({
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{T.empty}</p>
       ) : (
-        <div className="overflow-x-auto -mx-1">
+        <AdminTableScroll>
           <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -317,7 +318,7 @@ function TopStudentsTable({
               ))}
             </tbody>
           </table>
-        </div>
+        </AdminTableScroll>
       )}
     </section>
   );
@@ -349,7 +350,7 @@ function TopSectionsTable({
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{T.empty}</p>
       ) : (
-        <div className="overflow-x-auto -mx-1">
+        <AdminTableScroll>
           <table className="w-full min-w-[480px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -382,7 +383,7 @@ function TopSectionsTable({
               ))}
             </tbody>
           </table>
-        </div>
+        </AdminTableScroll>
       )}
     </section>
   );
@@ -421,7 +422,7 @@ function AtRiskStudentsTable({
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{T.empty}</p>
       ) : (
-        <div className="overflow-x-auto -mx-1">
+        <AdminTableScroll>
           <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -459,7 +460,7 @@ function AtRiskStudentsTable({
               ))}
             </tbody>
           </table>
-        </div>
+        </AdminTableScroll>
       )}
     </section>
   );
@@ -533,7 +534,7 @@ function AdminAnalyticsPage() {
     : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0">
       <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
         <div className="flex items-center gap-2 mb-4">
           <GraduationCap className="h-5 w-5 text-primary" />
@@ -599,7 +600,7 @@ function AdminAnalyticsPage() {
         <>
           <LeadingInsightsBanner data={data} lang={lang} />
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 xl:grid-cols-4">
             {summaryCards.map((card) => {
               const Icon = card.icon;
               return (

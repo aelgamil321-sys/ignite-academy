@@ -23,6 +23,7 @@ export type AssignmentRow = {
   published: boolean;
   created_at: string;
   updated_at: string;
+  created_by: string | null;
 };
 
 export type AssignmentSubmissionRow = {
@@ -80,6 +81,7 @@ export function normalizeAssignmentRow(row: Record<string, unknown>): Assignment
     ...(row as AssignmentRow),
     section: normalizeStudentSection(row.section as string | null),
     islamic_group: normalizeIslamicGroup(row.islamic_group as string | null),
+    created_by: typeof row.created_by === "string" ? row.created_by : null,
   };
 }
 

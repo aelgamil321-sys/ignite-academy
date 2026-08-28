@@ -18,7 +18,7 @@ import {
   saveStudentProfile,
   type StudentProfileForm,
 } from "@/lib/student-profile";
-import { destinationForAccountRole } from "@/lib/account-role";
+import { navigateTargetForAccountRole } from "@/lib/account-role";
 import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
 import { resolveVerifiedSession } from "@/lib/email-verification";
 import { EmailVerificationRequired } from "@/components/email-verification-required";
@@ -86,7 +86,7 @@ function StudentProfilePage() {
         return;
       }
       if (roleResult.role !== "student") {
-        navigate({ to: destinationForAccountRole(roleResult.role) });
+        navigate(navigateTargetForAccountRole(roleResult.role));
         return;
       }
 

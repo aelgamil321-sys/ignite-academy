@@ -15,7 +15,7 @@ import {
   type WeeklyPlanRow,
 } from "@/lib/weekly-planning";
 import type { TeacherContext } from "@/lib/teacher-dashboard";
-import { runWeeklyPlanDocumentCompletenessTests } from "@/lib/weekly-plan-document-completeness-tests";
+import { runWeeklyPlanDashboardTests } from "@/lib/weekly-planning-dashboard-tests";
 import { runWeeklyPlanPdfCaptureTests, runWeeklyPlanImageConstraintTest, runWeeklyPlanPdfPaginationTests } from "@/lib/weekly-plan-pdf-tests";
 
 export type WeeklyPlanUiTestResult = { name: string; pass: boolean; detail: string };
@@ -179,6 +179,7 @@ export function runWeeklyPlanUiTests(): WeeklyPlanUiTestResult[] {
       pass: masterListItemLabel(masterItem, "en") === "English",
       detail: masterListItemLabel(masterItem, "en"),
     },
+    ...runWeeklyPlanDashboardTests(),
     ...runWeeklyPlanDocumentCompletenessTests(),
     ...runWeeklyPlanPdfPaginationTests(),
     runWeeklyPlanImageConstraintTest(),

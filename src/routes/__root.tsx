@@ -15,6 +15,7 @@ import { I18nProvider } from "../lib/i18n";
 import { CMSProvider } from "../lib/cms";
 import { SITE_NAME } from "../lib/site-branding";
 import { Toaster } from "../components/ui/sonner";
+import { PasswordRecoveryGuard } from "../components/password-recovery-guard";
 
 
 function NotFoundComponent() {
@@ -126,6 +127,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <CMSProvider>
+          <PasswordRecoveryGuard />
           <Outlet />
           <Toaster richColors closeButton position="top-center" />
         </CMSProvider>

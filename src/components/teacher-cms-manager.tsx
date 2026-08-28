@@ -16,6 +16,10 @@ import { fetchTeacherContext } from "@/lib/teacher-dashboard";
 import { useI18n, L } from "@/lib/i18n";
 import { uploadToStorage, formatError } from "@/lib/upload";
 import type { FileType } from "@/lib/cms";
+import { AnnouncementTargetingFields } from "@/components/announcement-targeting-fields";
+import type { AnnouncementAudience } from "@/lib/announcement-audience";
+import type { AnnouncementTopic } from "@/lib/announcement-topics";
+import { type StudentSection } from "@/lib/student-academics";
 
 function Row({ children }: { children: React.ReactNode }) {
   return <div className="grid gap-4 md:grid-cols-2">{children}</div>;
@@ -434,6 +438,9 @@ export function TeacherArticlesManager({
   const [bodyAr, setBodyAr] = useState("");
   const [cat, setCat] = useState<ArticleCategory>(defaultCategory ?? categoryFilter ?? "parent");
   const [grade, setGrade] = useState("");
+  const [targetSection, setTargetSection] = useState<StudentSection | "">("");
+  const [audience, setAudience] = useState<AnnouncementAudience>("all");
+  const [announcementTopic, setAnnouncementTopic] = useState<AnnouncementTopic>("school_news");
   const [subjectCategory, setSubjectCategory] = useState<SubjectCategory>("quran");
   const [img, setImg] = useState("");
   const [pub, setPub] = useState(false);
@@ -468,6 +475,8 @@ export function TeacherArticlesManager({
     }
   };
 
+  const isAnnouncementFlow = categoryFilter === "announcement" || cat === "announcement";
+
   const submit = async () => {
     if (!titleEn || !titleAr || !grade) {
       toast.error(tr("teacher_article_grade_required"));
@@ -482,6 +491,9 @@ export function TeacherArticlesManager({
         subjectCategory,
         imageUrl: img,
         grade: normalizeGradeSlug(grade),
+        targetSection: isAnnouncementFlow && targetSection ? targetSection : null,
+        audience: isAnnouncementFlow ? audience : null,
+        announcementTopic: isAnnouncementFlow ? announcementTopic : null,
         published: pub,
       });
       toast.success(tr("teacher_article_saved"));
@@ -523,11 +535,26 @@ export function TeacherArticlesManager({
             </Field>
           </Row>
           <Row>
-            <Field label={L("Grade", "الصف")[lang]} required>
-              <select className="input w-full rounded-lg border border-border px-3 py-2" value={grade} onChange={(e) => setGrade(e.target.value)}>
-                {assignedGrades.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </Field>
+            {isAnnouncementFlow ? (
+              <AnnouncementTargetingFields
+                grade={grade}
+                setGrade={setGrade}
+                targetSection={targetSection}
+                setTargetSection={setTargetSection}
+                audience={audience}
+                setAudience={setAudience}
+                topic={announcementTopic}
+                setTopic={setAnnouncementTopic}
+                gradeOptions={assignedGrades}
+                requireGrade
+              />
+            ) : (
+              <Field label={L("Grade", "الصف")[lang]} required>
+                <select className="input w-full rounded-lg border border-border px-3 py-2" value={grade} onChange={(e) => setGrade(e.target.value)}>
+                  {assignedGrades.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </Field>
+            )}
             <Field label={L("Subject Category", "التصنيف")[lang]}>
               <select className="input w-full rounded-lg border border-border px-3 py-2" value={subjectCategory} onChange={(e) => setSubjectCategory(e.target.value as SubjectCategory)}>
                 {SUBJECT_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{bi(c.name)}</option>)}

@@ -6,7 +6,7 @@ import { PageShell } from "@/components/page-shell";
 import { ParentLinkChildForm } from "@/components/parent-link-child-form";
 import { PreferredLanguageField } from "@/components/preferred-language-field";
 import { useI18n } from "@/lib/i18n";
-import { getAccountRole, isParentAccount, postAuthPathForRole } from "@/lib/account-role";
+import { getAccountRole, isParentAccount, navigateTargetForAccountRole } from "@/lib/account-role";
 import { fetchParentLinkedChildren, type ParentLinkedChild } from "@/lib/parent-children";
 import { normalizePreferredLang, savePreferredLanguage as persistPreferredLanguage } from "@/lib/preferred-language";
 import type { Lang } from "@/lib/i18n-config";
@@ -54,7 +54,7 @@ function ParentSettingsPage() {
       const parent = await isParentAccount(auth.user.id);
       if (!parent) {
         const role = await getAccountRole(auth.user.id);
-        navigate({ to: postAuthPathForRole(role) });
+        navigate(navigateTargetForAccountRole(role));
         return;
       }
       const [{ data: profile }, childrenResult] = await Promise.all([

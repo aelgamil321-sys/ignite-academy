@@ -16,7 +16,6 @@ import { uploadProfilePhoto } from "@/lib/profile-photo";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 import {
   clearAuthCallbackUrl,
-  hasSupabaseAuthHash,
   isEmailNotConfirmedError,
   isEmailRateLimitError,
   parseEmailConfirmedParam,
@@ -31,6 +30,14 @@ import { applyLanguageForUser, persistLanguage, resolveGuestLanguage } from "@/l
 import { isLang, type Lang } from "@/lib/i18n-config";
 import { pageHeadTitle } from "@/lib/page-head";
 import { ensureSessionPersisted } from "@/lib/supabase-auth-storage";
+import {
+  hasSignupAuthHash,
+  isPasswordRecoveryPending,
+  isRecoveryAuthHash,
+  markPasswordRecoveryPending,
+  requestPasswordResetEmail,
+  shouldDeferToPasswordReset,
+} from "@/lib/password-recovery";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -76,6 +83,8 @@ function AuthPage() {
   const [invalidLinkAlert, setInvalidLinkAlert] = useState<string | null>(null);
   const [teacherPendingAlert, setTeacherPendingAlert] = useState<string | null>(null);
   const [teacherRejectedAlert, setTeacherRejectedAlert] = useState<string | null>(null);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
   const authInitDone = useRef(false);
   const signupInFlight = useRef(false);
   const signUpCallCount = useRef(0);
@@ -91,12 +100,27 @@ function AuthPage() {
     let cancelled = false;
 
     void (async () => {
+      if (isRecoveryAuthHash()) {
+        markPasswordRecoveryPending();
+        window.location.replace(`/reset-password${window.location.hash}`);
+        return;
+      }
+      if (isPasswordRecoveryPending()) {
+        window.location.replace("/reset-password");
+        return;
+      }
+
       if (!ENABLE_EMAIL_VERIFICATION) {
         const { data } = await supabase.auth.getSession();
         if (cancelled) return;
 
         const user = data.session?.user;
         if (!user) return;
+
+        if (shouldDeferToPasswordReset()) {
+          window.location.replace("/reset-password");
+          return;
+        }
 
         const role = await getAccountRole(user.id);
         if (cancelled) return;
@@ -129,7 +153,7 @@ function AuthPage() {
       }
 
       const confirmedParam = emailConfirmedSearch;
-      const hashPresent = hasSupabaseAuthHash();
+      const hashPresent = hasSignupAuthHash();
 
       if (confirmedParam === false) {
         await waitForSupabaseHashSession();
@@ -163,6 +187,11 @@ function AuthPage() {
       const { data } = await supabase.auth.getSession();
       if (cancelled) return;
 
+      if (shouldDeferToPasswordReset()) {
+        window.location.replace("/reset-password");
+        return;
+      }
+
       const user = data.session?.user;
       if (user && shouldRequireEmailConfirmation(user)) {
         await supabase.auth.signOut();
@@ -195,6 +224,26 @@ function AuthPage() {
       cancelled = true;
     };
   }, [emailConfirmedSearch, initialAccountType, tr]);
+
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!trimmed) {
+      toast.error(tr("auth_forgot_email_required"));
+      return;
+    }
+    setBusy(true);
+    try {
+      await requestPasswordResetEmail(trimmed);
+      setForgotSent(true);
+      toast.success(tr("auth_reset_email_sent"));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   function isDuplicateEmailError(err: unknown): boolean {
     if (err && typeof err === "object" && "code" in err) {
@@ -740,10 +789,52 @@ function AuthPage() {
 
           <form
             noValidate
-            onSubmit={(e) => void handleSubmit(e)}
+            onSubmit={(e) => {
+              if (forgotMode) void handleForgotPassword(e);
+              else void handleSubmit(e);
+            }}
             className={`space-y-4${busy ? " pointer-events-none" : ""}`}
           >
-            {mode === "signup" && (
+            {forgotMode ? (
+              <>
+                <p className="text-sm text-muted-foreground">{tr("auth_forgot_password_lead")}</p>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("auth_email")}</label>
+                  <input
+                    type="email"
+                    name="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    maxLength={255}
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
+                  />
+                </div>
+                {forgotSent ? (
+                  <p className="text-sm text-emerald-700 dark:text-emerald-300">{tr("auth_reset_email_sent")}</p>
+                ) : null}
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-60"
+                >
+                  {busy ? tr("auth_submitting") : tr("auth_send_reset_link")}
+                </button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotMode(false);
+                      setForgotSent(false);
+                    }}
+                    className="text-xs text-muted-foreground underline hover:text-primary"
+                  >
+                    {tr("auth_to_login")}
+                  </button>
+                </div>
+              </>
+            ) : null}
+            {!forgotMode && mode === "signup" && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground">{tr("auth_account_type")}</label>
                 <div className="mt-2 grid grid-cols-1 gap-1 rounded-full border border-border p-1 sm:grid-cols-3">
@@ -771,7 +862,7 @@ function AuthPage() {
                 </div>
               </div>
             )}
-            {mode === "signup" && accountType === "student" && (
+            {!forgotMode && mode === "signup" && accountType === "student" && (
               <>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">{tr("auth_arabic_name_hint")} *</label>
@@ -824,7 +915,7 @@ function AuthPage() {
                 />
               </>
             )}
-            {mode === "signup" && accountType === "parent" && (
+            {!forgotMode && mode === "signup" && accountType === "parent" && (
               <>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">{tr("auth_parent_full_name")}</label>
@@ -854,7 +945,7 @@ function AuthPage() {
                 </div>
               </>
             )}
-            {mode === "signup" && accountType === "teacher" && (
+            {!forgotMode && mode === "signup" && accountType === "teacher" && (
               <>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">{tr("auth_teacher_full_name")} *</label>
@@ -882,13 +973,15 @@ function AuthPage() {
                 </div>
               </>
             )}
-            {mode === "signup" && (
+            {!forgotMode && mode === "signup" && (
               <PreferredLanguageField
                 value={preferredLanguage}
                 onChange={setPreferredLanguage}
                 required
               />
             )}
+            {!forgotMode ? (
+              <>
             <div>
               <label className="text-xs font-medium text-muted-foreground">{tr("auth_email")}</label>
               <input
@@ -911,6 +1004,21 @@ function AuthPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
               />
+              {mode === "login" ? (
+                <div className="mt-2 text-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotMode(true);
+                      setForgotSent(false);
+                      setSignupAlert(null);
+                    }}
+                    className="text-xs text-primary underline hover:text-primary-hover"
+                  >
+                    {tr("auth_forgot_password")}
+                  </button>
+                </div>
+              ) : null}
             </div>
             {mode === "signup" && accountType === "teacher" && (
               <div>
@@ -941,8 +1049,11 @@ function AuthPage() {
                       : tr("auth_submit_signup")
                   : tr("auth_submit_login")}
             </button>
+              </>
+            ) : null}
           </form>
 
+          {!forgotMode ? (
           <div className="mt-5 text-center text-xs text-muted-foreground">
             <button
               type="button"
@@ -956,6 +1067,7 @@ function AuthPage() {
               {mode === "login" ? tr("auth_to_signup") : tr("auth_to_login")}
             </button>
           </div>
+          ) : null}
         </div>
 
         {/* Side panel */}

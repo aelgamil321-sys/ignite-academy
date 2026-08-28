@@ -1,5 +1,5 @@
 import { redirect } from "@tanstack/react-router";
-import { destinationForAccountRole } from "@/lib/account-role";
+import { navigateTargetForAccountRole } from "@/lib/account-role";
 import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
 import { supabase } from "@/integrations/supabase/client";
 import { requiresEmailVerification } from "@/lib/email-verification";
@@ -28,5 +28,5 @@ export async function blockParentFromStudentRoutes(): Promise<void> {
     throw redirect({ to: "/" });
   }
 
-  throw redirect({ to: destinationForAccountRole(resolved.role) });
+  throw redirect(navigateTargetForAccountRole(resolved.role));
 }

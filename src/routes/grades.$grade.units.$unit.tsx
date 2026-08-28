@@ -48,10 +48,15 @@ export const Route = createFileRoute("/grades/$grade/units/$unit")({
       { rel: "canonical", href: `https://ignite-faith-learn.lovable.app/grades/${params.grade}/units/${params.unit}` },
     ],
   }),
-  component: UnitPage,
+  component: GradeUnitRoutePage,
   notFoundComponent: () => <div className="container-page py-20">Unit not found.</div>,
   errorComponent: ({ error }) => <div className="container-page py-20">Error: {error.message}</div>,
 });
+
+function GradeUnitRoutePage() {
+  const { grade, unitSlug } = Route.useLoaderData();
+  return <UnitPage grade={grade} unitSlug={unitSlug} />;
+}
 
 type Tab = "overview" | "lessons" | "information" | "articles" | "files" | "videos" | "quizzes";
 
@@ -71,8 +76,15 @@ interface UnitQuiz {
   published: boolean;
 }
 
-function UnitPage() {
-  const { grade, unitSlug } = Route.useLoaderData() as { grade: Grade; unitSlug: string };
+export function UnitPage({
+  grade,
+  unitSlug,
+  gradesBasePath = "/grades",
+}: {
+  grade: Grade;
+  unitSlug: string;
+  gradesBasePath?: "/grades" | "/admin/grades";
+}) {
   const { tr, lang, dir, bi } = useI18n();
   const { lessons, files, videos, articles, refresh } = useCMS();
   const [tab, setTab] = useState<Tab>("overview");
@@ -153,13 +165,17 @@ function UnitPage() {
       eyebrow={`${bi(grade.name)} · ${tr("nav_stages")}`}
       title={bi(unitName) || unitName.ar || unitName.en}
       crumbs={[
-        { label: tr("nav_stages"), to: "/grades" },
-        { label: bi(grade.name), to: "/grades/$grade", params: { grade: grade.slug } },
+        { label: tr("nav_stages"), to: gradesBasePath },
+        {
+          label: bi(grade.name),
+          to: gradesBasePath === "/admin/grades" ? "/admin/grades/$grade" : "/grades/$grade",
+          params: { grade: grade.slug },
+        },
         { label: bi(unitName) },
       ]}
     >
       <Link
-        to="/grades/$grade"
+        to={gradesBasePath === "/admin/grades" ? "/admin/grades/$grade" : "/grades/$grade"}
         params={{ grade: grade.slug }}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-5"
       >
@@ -209,6 +225,7 @@ function UnitPage() {
           builtIn={unitLessonsStatic}
           custom={unitLessonsCustom}
           onRefresh={refresh}
+          gradesBasePath={gradesBasePath}
         />
       )}
 
@@ -392,12 +409,13 @@ function OverviewTab({
 
 // ============== Lessons tab (read-only list of existing) ==============
 function LessonsTab({
-  gradeSlug, unitSlug, unitName, lang, builtIn, custom, onRefresh,
+  gradeSlug, unitSlug, unitName, lang, builtIn, custom, onRefresh, gradesBasePath = "/grades",
 }: {
   gradeSlug: string; unitSlug: string; unitName: Bi; lang: "en" | "ar";
   builtIn: Lesson[];
   custom: ReturnType<typeof useCMS>["lessons"];
   onRefresh: () => Promise<void>;
+  gradesBasePath?: "/grades" | "/admin/grades";
 }) {
   const { bi } = useI18n();
   const allItems = [
@@ -438,7 +456,7 @@ function LessonsTab({
           <div key={l.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
             <div className="flex-1 min-w-0">
               <Link
-                to="/grades/$grade/$lesson"
+                to={gradesBasePath === "/admin/grades" ? "/admin/grades/$grade/$lesson" : "/grades/$grade/$lesson"}
                 params={{ grade: gradeSlug, lesson: l.id }}
                 className="font-medium text-foreground hover:text-primary"
               >

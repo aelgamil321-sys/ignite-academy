@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BookOpen, Video, FileUp, Newspaper, Folder, GraduationCap,
-  Layers, ClipboardCheck, Megaphone, LogOut, Users, BarChart3, FileText, School,
+  Layers, ClipboardCheck, Megaphone, LogOut, Users, BarChart3, FileText, School, CalendarDays,
 } from "lucide-react";
 import {useI18n, L } from "@/lib/i18n";
 
@@ -29,7 +29,7 @@ const manageTabItems: Array<{ key: AdminTab; label: ReturnType<typeof L>; icon: 
 ];
 
 function sideClass(active: boolean) {
-  return `w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+  return `w-full flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
     active ? "bg-primary text-primary-foreground" : "text-foreground/80 hover:bg-muted"
   }`;
 }
@@ -54,7 +54,10 @@ export function AdminSidebar({
     pathname === "/admin/analytics" || pathname.startsWith("/admin/analytics/");
   const onTeachersRoute =
     pathname === "/admin/teachers" || pathname.startsWith("/admin/teachers/");
-  const onDedicatedRoute = onLessonsRoute || onQuizSubmissionsRoute || onAssignmentsRoute || onAnalyticsRoute || onTeachersRoute;
+  const onWeeklyPlanningDashboardRoute =
+    pathname === "/admin/weekly-planning/dashboard" ||
+    pathname.startsWith("/admin/weekly-planning/review/");
+  const onDedicatedRoute = onLessonsRoute || onQuizSubmissionsRoute || onAssignmentsRoute || onAnalyticsRoute || onTeachersRoute || onWeeklyPlanningDashboardRoute;
 
   return (
     <aside className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] h-fit">
@@ -104,6 +107,11 @@ export function AdminSidebar({
       <Link to="/admin/teachers" search={{}} className={sideClass(onTeachersRoute)}>
         <School className="h-4 w-4 shrink-0" />
         <span className="text-start">{L("Teachers", "المعلمون")[lang]}</span>
+      </Link>
+
+      <Link to="/admin/weekly-planning/dashboard" className={sideClass(onWeeklyPlanningDashboardRoute)}>
+        <CalendarDays className="h-4 w-4 shrink-0" />
+        <span className="text-start">{L("Weekly Planning", "التخطيط الأسبوعي")[lang]}</span>
       </Link>
 
       {manageTabItems.map((s) => {

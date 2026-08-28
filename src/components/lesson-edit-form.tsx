@@ -40,11 +40,13 @@ export function LessonEditForm({
   onSaved,
   onCancel,
   allowedGrades,
+  readOnly = false,
 }: {
   lesson: CustomLesson;
   onSaved: () => void;
   onCancel: () => void;
   allowedGrades?: string[];
+  readOnly?: boolean;
 }) {
   const { lang, bi } = useI18n();
   const { updateLesson } = useCMS();
@@ -162,6 +164,16 @@ export function LessonEditForm({
         </button>
       </div>
 
+      {readOnly ? (
+        <p className="text-sm text-muted-foreground">
+          {L(
+            "This lesson is open in view mode.",
+            "هذا الدرس مفتوح في وضع العرض.",
+          )[lang]}
+        </p>
+      ) : null}
+
+      <fieldset disabled={readOnly} className={readOnly ? "opacity-80 space-y-5 border-0 p-0 m-0 min-w-0" : "space-y-5 border-0 p-0 m-0 min-w-0"}>
       <Row>
         <Field label={L("Grade", "الصف")[lang]}>
           <select value={grade} onChange={(e) => setGrade(e.target.value)} className="lesson-input">
@@ -235,6 +247,8 @@ export function LessonEditForm({
       <LessonQuizBuilder questions={quiz} onChange={setQuiz} />
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
+        {!readOnly ? (
+          <>
         <label className="inline-flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
           {L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[lang]}
@@ -248,7 +262,18 @@ export function LessonEditForm({
           <Save className="h-4 w-4" />
           {saving ? L("Saving…", "جارٍ الحفظ…")[lang] : L("Save Changes", "حفظ التغييرات")[lang]}
         </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-2.5 text-sm font-semibold hover:bg-muted"
+          >
+            <X className="h-4 w-4" /> {L("Back", "رجوع")[lang]}
+          </button>
+        )}
       </div>
+      </fieldset>
 
       <style>{`.lesson-input{display:block;width:100%;border-radius:.5rem;border:1px solid var(--border);background:var(--background);padding:.55rem .75rem;font-size:.875rem;color:var(--foreground);}.lesson-input:focus{outline:none;border-color:var(--primary)}`}</style>
     </div>

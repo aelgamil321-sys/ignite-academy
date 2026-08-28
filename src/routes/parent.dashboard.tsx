@@ -22,6 +22,7 @@ import { isParentAccount } from "@/lib/account-role";
 import { resolveVerifiedSession } from "@/lib/email-verification";
 import { EmailVerificationRequired } from "@/components/email-verification-required";
 import { supabase } from "@/integrations/supabase/client";
+import { shouldDeferToPasswordReset } from "@/lib/password-recovery";
 
 export const Route = createFileRoute("/parent/dashboard")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -54,6 +55,10 @@ function ParentDashboardGate() {
     if (import.meta.env.DEV && uiPreview === "1") return;
     let active = true;
     void (async () => {
+      if (shouldDeferToPasswordReset()) {
+        window.location.replace("/reset-password");
+        return;
+      }
       const session = await resolveVerifiedSession();
       if (!active) return;
       if (session.status === "none") {

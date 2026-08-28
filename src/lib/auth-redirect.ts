@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { isEmailVerificationRequired } from "@/lib/auth-config";
+import { hasSignupAuthHash, isRecoveryAuthHash } from "@/lib/password-recovery";
 
 /** Where Supabase sends users after confirming signup email (must be allowlisted in Supabase Auth). */
 export const SIGNUP_EMAIL_REDIRECT_URL =
@@ -46,18 +47,7 @@ export function parseSupabaseAuthHashError(): SupabaseAuthHashError | null {
 }
 
 export function hasSupabaseAuthHash(): boolean {
-  if (typeof window === "undefined") return false;
-  const hash = window.location.hash.replace(/^#/, "");
-  if (!hash) return false;
-  const params = new URLSearchParams(hash);
-  if (params.get("error") || params.get("error_code")) return false;
-  return (
-    params.has("access_token") ||
-    params.has("refresh_token") ||
-    params.get("type") === "signup" ||
-    params.get("type") === "email_change" ||
-    params.get("type") === "recovery"
-  );
+  return hasSignupAuthHash() || isRecoveryAuthHash();
 }
 
 /** Wait once for the Supabase client to consume hash tokens from the URL. */

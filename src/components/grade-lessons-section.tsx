@@ -168,10 +168,14 @@ function ActionButton({
 export function GradeLessonsSection({
   gradeSlug,
   lessons,
+  gradesBasePath = "/grades",
 }: {
   gradeSlug: string;
   lessons: CustomLesson[];
+  gradesBasePath?: "/grades" | "/admin/grades";
 }) {
+  const lessonRoute =
+    gradesBasePath === "/admin/grades" ? "/admin/grades/$grade/$lesson" : "/grades/$grade/$lesson";
   const { lang, tr, trf, bi } = useI18n();
   const [submissions, setSubmissions] = useState<Record<string, SubmissionMeta>>({});
   const [touchVersion, setTouchVersion] = useState(0);
@@ -307,7 +311,7 @@ export function GradeLessonsSection({
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                   <ActionButton
-                    to="/grades/$grade/$lesson"
+                    to={lessonRoute}
                     params={{ grade: gradeSlug, lesson: custom.id }}
                     hash="lesson-video"
                     onClick={() => touchLesson(custom.id)}
@@ -334,7 +338,7 @@ export function GradeLessonsSection({
                     external
                   />
                   <ActionButton
-                    to="/grades/$grade/$lesson"
+                    to={lessonRoute}
                     params={{ grade: gradeSlug, lesson: custom.id }}
                     hash="lesson-quiz"
                     onClick={() => touchLesson(custom.id)}
@@ -343,7 +347,7 @@ export function GradeLessonsSection({
                     disabled={!hasQuiz}
                   />
                   <ActionButton
-                    to="/grades/$grade/$lesson"
+                    to={lessonRoute}
                     params={{ grade: gradeSlug, lesson: custom.id }}
                     hash="lesson-result"
                     onClick={() => touchLesson(custom.id)}

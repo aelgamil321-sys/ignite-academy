@@ -16,6 +16,17 @@ dist-ssr
 .nitro
 *.local
 
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Supabase CLI cache
+supabase/.temp/
+
+# Office temporary lock files
+~$*.xlsx
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

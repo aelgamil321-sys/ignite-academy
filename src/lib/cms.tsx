@@ -17,7 +17,14 @@ import { L } from "@/lib/i18n-config";
 import {
   announcementTopicLabel,
   inferAnnouncementTopic,
+  type AnnouncementTopic,
 } from "./announcement-topics";
+import {
+  normalizeAnnouncementAudience,
+  normalizeAnnouncementTopic,
+  type AnnouncementAudience,
+} from "./announcement-audience";
+import { normalizeStudentSection, type StudentSection } from "./student-academics";
 
 // ---------- Types ----------
 export interface CustomLesson {
@@ -41,6 +48,7 @@ export interface CustomLesson {
   subjectCategory: SubjectCategory;
   published: boolean;
   createdAt: number;
+  createdBy?: string | null;
 }
 export type VideoCategory = SubjectCategory;
 export interface CustomVideo {
@@ -54,6 +62,7 @@ export interface CustomVideo {
   thumbnailUrl?: string;
   published: boolean;
   createdAt: number;
+  createdBy?: string | null;
 }
 export type FileType = "pdf" | "ppt" | "worksheet" | "image";
 export interface CustomFile {
@@ -69,6 +78,7 @@ export interface CustomFile {
   subjectCategory: SubjectCategory;
   published: boolean;
   createdAt: number;
+  createdBy?: string | null;
 }
 export type ArticleCategory = "announcement" | "parent";
 export interface CustomArticle {
@@ -80,6 +90,10 @@ export interface CustomArticle {
   imageUrl?: string;
   grade?: string;
   unitSlug?: string;
+  createdBy?: string | null;
+  targetSection?: StudentSection | null;
+  audience?: AnnouncementAudience | null;
+  announcementTopic?: AnnouncementTopic | null;
   published: boolean;
   createdAt: number;
 }
@@ -150,6 +164,7 @@ type LessonRow = {
   quiz: QuizQuestion[]; published: boolean; created_at: string;
   subject_category?: string | null;
   is_deleted?: boolean;
+  created_by?: string | null;
 };
 
 function splitLessonRows(rows: LessonRow[]): { active: CustomLesson[]; deleted: CustomLesson[] } {
@@ -183,6 +198,7 @@ const lessonFromRow = (r: LessonRow): CustomLesson => ({
   subjectCategory: ((r.subject_category ?? "quran") as SubjectCategory),
   published: r.published,
   createdAt: new Date(r.created_at).getTime(),
+  createdBy: r.created_by ?? null,
 });
 const lessonToRow = (l: Partial<CustomLesson>) => {
   const o: Record<string, unknown> = {};
@@ -217,6 +233,7 @@ type VideoRow = {
   id: string; title: Bi; description: Bi; grade: string; unit: Bi;
   category: string | null;
   youtube_url: string; thumbnail_url: string | null; published: boolean; created_at: string;
+  created_by?: string | null;
 };
 const videoFromRow = (r: VideoRow): CustomVideo => ({
   id: r.id,
@@ -229,6 +246,7 @@ const videoFromRow = (r: VideoRow): CustomVideo => ({
   thumbnailUrl: r.thumbnail_url ?? undefined,
   published: r.published,
   createdAt: new Date(r.created_at).getTime(),
+  createdBy: r.created_by ?? null,
 });
 const videoToRow = (v: Partial<CustomVideo>) => {
   const o: Record<string, unknown> = {};
@@ -247,6 +265,7 @@ type FileRow = {
   id: string; title: Bi; grade: string; unit: Bi; lesson: string; type: string;
   file_url: string; file_name: string; size: string; published: boolean; created_at: string;
   subject_category?: string | null;
+  created_by?: string | null;
 };
 const fileFromRow = (r: FileRow): CustomFile => ({
   id: r.id,
@@ -261,6 +280,7 @@ const fileFromRow = (r: FileRow): CustomFile => ({
   subjectCategory: ((r.subject_category ?? "quran") as SubjectCategory),
   published: r.published,
   createdAt: new Date(r.created_at).getTime(),
+  createdBy: r.created_by ?? null,
 });
 const fileToRow = (f: Partial<CustomFile>) => {
   const o: Record<string, unknown> = {};
@@ -281,6 +301,10 @@ type ArticleRow = {
   id: string; title: Bi; content: Bi; category: string; image_url: string | null;
   grade: string | null; unit_slug: string | null;
   subject_category?: string | null;
+  created_by?: string | null;
+  target_section?: string | null;
+  audience?: string | null;
+  announcement_topic?: string | null;
   published: boolean; created_at: string;
 };
 const articleFromRow = (r: ArticleRow): CustomArticle => ({
@@ -292,6 +316,10 @@ const articleFromRow = (r: ArticleRow): CustomArticle => ({
   imageUrl: r.image_url ?? undefined,
   grade: r.grade ? normalizeGradeSlug(r.grade) : undefined,
   unitSlug: r.unit_slug ?? undefined,
+  createdBy: r.created_by ?? null,
+  targetSection: normalizeStudentSection(r.target_section),
+  audience: normalizeAnnouncementAudience(r.audience),
+  announcementTopic: normalizeAnnouncementTopic(r.announcement_topic),
   published: r.published,
   createdAt: new Date(r.created_at).getTime(),
 });
@@ -304,6 +332,9 @@ const articleToRow = (a: Partial<CustomArticle>) => {
   if (a.imageUrl !== undefined) o.image_url = a.imageUrl ?? null;
   if (a.grade !== undefined) o.grade = a.grade ? normalizeGradeSlug(a.grade) : "";
   if (a.unitSlug !== undefined) o.unit_slug = a.unitSlug ?? "";
+  if (a.targetSection !== undefined) o.target_section = a.targetSection ?? null;
+  if (a.audience !== undefined) o.audience = a.audience ?? null;
+  if (a.announcementTopic !== undefined) o.announcement_topic = a.announcementTopic ?? null;
   if (a.published !== undefined) o.published = a.published;
   return o;
 };

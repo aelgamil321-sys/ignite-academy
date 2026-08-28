@@ -71,9 +71,22 @@ export async function isParentAccount(userId: string): Promise<boolean> {
 export function destinationForAccountRole(role: AccountRole | null): string {
   if (role === "parent") return "/parent/dashboard";
   if (role === "teacher") return "/";
-  if (role === "admin") return "/admin";
+  if (role === "admin") return "/admin?tab=overview";
   if (role === "student") return "/student";
   return "/auth";
+}
+
+export const ADMIN_HOME_SEARCH = { tab: "overview" as const };
+
+export function adminHomeNavigateTarget(): { to: "/admin"; search: typeof ADMIN_HOME_SEARCH } {
+  return { to: "/admin", search: ADMIN_HOME_SEARCH };
+}
+
+export function navigateTargetForAccountRole(
+  role: AccountRole | null,
+): { to: string; search?: Record<string, string> } {
+  if (role === "admin") return adminHomeNavigateTarget();
+  return { to: destinationForAccountRole(role) };
 }
 
 export function postAuthPathForRole(role: AccountRole | null): string {

@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   BookOpen,
   ChartBar,
@@ -114,6 +115,15 @@ const ASSESSMENT: NavItem[] = [
   { to: "/teacher/performance", icon: ChartBar, labelKey: "teacher_nav_performance" },
 ];
 
+const LEAD_WEEKLY: NavItem[] = [
+  {
+    to: "/teacher/weekly-planning/dashboard",
+    icon: ChartBar,
+    labelKey: "wp_dept_dashboard_nav",
+    activeMatch: (p) => p.startsWith("/teacher/weekly-planning/dashboard") || p.includes("/weekly-planning/review/"),
+  },
+];
+
 const ACADEMIC: NavItem[] = [
   {
     to: "/teacher/weekly-planning/new",
@@ -128,6 +138,8 @@ const ACADEMIC: NavItem[] = [
     activeMatch: (p) =>
       p.startsWith("/teacher/weekly-planning") &&
       p !== "/teacher/weekly-planning/new" &&
+      !p.includes("/dashboard") &&
+      !p.includes("/review/") &&
       !p.endsWith("/print"),
   },
   { to: "/teacher/units", icon: Layers, labelKey: "teacher_nav_manage_units" },
@@ -194,6 +206,20 @@ export function TeacherSidebar({
 }) {
   const { tr } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [isLeadTeacher, setIsLeadTeacher] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return;
+      const { data: profile } = await supabase
+        .from("teacher_profiles")
+        .select("is_lead_teacher")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
+      setIsLeadTeacher(profile?.is_lead_teacher ?? false);
+    })();
+  }, []);
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -212,6 +238,9 @@ export function TeacherSidebar({
         <NavSection title={tr("teacher_sidebar_content")} items={CONTENT} pathname={pathname} tr={tr} />
         <NavSection title={tr("teacher_sidebar_assessment")} items={ASSESSMENT} pathname={pathname} tr={tr} />
         <NavSection title={tr("teacher_sidebar_academic")} items={ACADEMIC} pathname={pathname} tr={tr} />
+        {isLeadTeacher ? (
+          <NavSection title={tr("wp_dept_nav_section")} items={LEAD_WEEKLY} pathname={pathname} tr={tr} />
+        ) : null}
       </nav>
       <button
         type="button"

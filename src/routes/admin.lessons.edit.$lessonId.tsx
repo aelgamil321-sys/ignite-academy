@@ -6,6 +6,11 @@ import { LessonEditForm } from "@/components/lesson-edit-form";
 import { parseVocabFromStorage } from "@/lib/lesson-vocab";
 import { useCMS, type CustomLesson } from "@/lib/cms";
 import { useI18n, L } from "@/lib/i18n";
+import { normalizeQuizList } from "@/lib/lesson-quiz";
+import {
+  adminContentIsReadOnly,
+  useAdminContentActor,
+} from "@/lib/admin-content-ownership";
 
 export const Route = createFileRoute("/admin/lessons/edit/$lessonId")({
   head: () => ({
@@ -22,15 +27,9 @@ function AdminLessonEditPage() {
   const { lessonId } = Route.useParams();
   const { lang, locale } = useI18n();
   const { lessons, deletedLessons, loading, refresh } = useCMS();
+  const actorId = useAdminContentActor();
   const [lesson, setLesson] = useState<CustomLesson | null>(null);
   const [fetching, setFetching] = useState(true);
-  const [email, setEmail] = useState("");
-
-  useEffect(() => {
-    void supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? "");
-    });
-  }, []);
 
   useEffect(() => {
     void refresh();
@@ -89,6 +88,7 @@ function AdminLessonEditPage() {
         subjectCategory: (row.subject_category as CustomLesson["subjectCategory"]) ?? "quran",
         published: Boolean(row.published),
         createdAt: new Date(String(row.created_at)).getTime(),
+        createdBy: typeof row.created_by === "string" ? row.created_by : null,
       });
       setFetching(false);
     };
@@ -112,12 +112,6 @@ function AdminLessonEditPage() {
         {L("Back to Manage Lessons", "العودة إلى إدارة الدروس")[lang]}
       </Link>
 
-      <div className="rounded-xl border border-border bg-card p-4 text-xs font-mono space-y-1">
-        <div className="font-sans text-sm font-semibold mb-2">Debug</div>
-        <div>Current lesson id: <span className="text-primary break-all">{lessonId}</span></div>
-        <div>Current user email: <span className="break-all">{email || "—"}</span></div>
-      </div>
-
       {!lesson && (fetching || loading) ? (
         <div className="text-sm text-muted-foreground">
           {L("Loading lesson…", "جارٍ تحميل الدرس…")[lang]}
@@ -130,6 +124,7 @@ function AdminLessonEditPage() {
         <LessonEditForm
           key={lesson.id}
           lesson={lesson}
+          readOnly={adminContentIsReadOnly("lesson", lesson.createdBy, actorId)}
           onSaved={() => {
             void refresh();
             backToManage();

@@ -1,6 +1,6 @@
 import { redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { destinationForAccountRole, getAccountRole } from "@/lib/account-role";
+import { getAccountRole, navigateTargetForAccountRole } from "@/lib/account-role";
 import { requiresEmailVerification } from "@/lib/email-verification";
 import { isBrowser } from "@/lib/runtime";
 
@@ -17,6 +17,6 @@ export async function requireTeacherRole(): Promise<void> {
   }
   const role = await getAccountRole(data.user.id);
   if (role !== "teacher") {
-    throw redirect({ to: destinationForAccountRole(role) });
+    throw redirect(navigateTargetForAccountRole(role));
   }
 }
