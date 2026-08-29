@@ -5,8 +5,8 @@ export type PageHeadKey = "auth" | "parent_corner" | "announcements" | "lesson";
 
 const TITLES: Record<PageHeadKey, Record<Lang, string>> = {
   auth: L(
-    "Student Sign In — Ignite Islamic Academy",
-    "تسجيل الدخول — أكاديمية اجنايت الإسلامية",
+    "Account — Ignite Islamic Academy",
+    "الحساب — أكاديمية اجنايت الإسلامية",
   ),
   parent_corner: L(
     "Parent Corner — Ignite Islamic Academy",

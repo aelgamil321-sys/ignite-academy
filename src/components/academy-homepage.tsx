@@ -132,18 +132,20 @@ export function AcademyHomepage({
                 </a>
               ) : (
                 <>
-                  <a
-                    href="/auth?mode=signup"
+                  <Link
+                    to="/auth"
+                    search={{ mode: "signup" }}
                     className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-foreground shadow-[0_10px_30px_-10px_rgba(242,178,27,0.45)] hover:translate-y-[-2px] transition-transform"
                   >
                     {tr("cta_signup")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-                  </a>
-                  <a
-                    href="/auth?mode=login"
+                  </Link>
+                  <Link
+                    to="/auth"
+                    search={{ mode: "login" }}
                     className="inline-flex items-center gap-2 rounded-full bg-white text-foreground px-7 py-3.5 font-semibold hover:bg-white/90 transition-colors"
                   >
                     {tr("cta_login")}
-                  </a>
+                  </Link>
                 </>
               )}
               <Link to="/grades" className="inline-flex items-center gap-2 rounded-full border border-white/35 px-7 py-3.5 font-semibold text-white hover:bg-white/10 transition-colors">

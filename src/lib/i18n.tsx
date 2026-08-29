@@ -97,7 +97,7 @@ export const t = {
   },
   cta_start: { en: "Start Learning", ar: "ابدأ التعلّم" },
   cta_watch: { en: "Watch Intro", ar: "شاهد المقدمة" },
-  cta_signup: { en: "Create Student Account", ar: "إنشاء حساب طالب" },
+  cta_signup: { en: "Create Account", ar: "إنشاء حساب" },
   cta_login: { en: "Login", ar: "تسجيل الدخول" },
   cta_explore: { en: "Explore Academy", ar: "استكشف الأكاديمية" },
 
@@ -754,7 +754,50 @@ export const t = {
   },
   auth_create_student: { en: "Create Student Account", ar: "إنشاء حساب طالب" },
   auth_create_parent: { en: "Create Parent Account", ar: "إنشاء حساب ولي أمر" },
-  auth_login: { en: "Login", ar: "تسجيل الدخول" },
+  auth_login: { en: "Sign In", ar: "تسجيل الدخول" },
+  auth_create_account: { en: "Create Account", ar: "إنشاء حساب" },
+  auth_gateway_lead: {
+    en: "Sign in or create an account to access the academy.",
+    ar: "سجّل الدخول أو أنشئ حسابًا للوصول إلى الأكاديمية.",
+  },
+  auth_choose_account_type: { en: "Choose account type", ar: "اختر نوع الحساب" },
+  auth_choose_account_type_lead: {
+    en: "Select the type of account you want to create.",
+    ar: "اختر نوع الحساب الذي تريد إنشاءه.",
+  },
+  auth_role_student: { en: "Student", ar: "طالب" },
+  auth_role_teacher: { en: "Teacher", ar: "معلم" },
+  auth_role_parent: { en: "Parent", ar: "ولي أمر" },
+  auth_role_admin: { en: "Admin", ar: "إداري" },
+  auth_role_student_desc: {
+    en: "Access lessons, quizzes, and track your progress.",
+    ar: "الوصول إلى الدروس والاختبارات ومتابعة التقدّم.",
+  },
+  auth_role_teacher_desc: {
+    en: "Request a teacher account for review by the school.",
+    ar: "طلب حساب معلم لمراجعته من قبل المدرسة.",
+  },
+  auth_role_parent_desc: {
+    en: "Follow your child's learning and achievements.",
+    ar: "متابعة تعلّم طفلك وإنجازاته.",
+  },
+  auth_role_admin_desc: {
+    en: "School administration access.",
+    ar: "وصول إدارة المدرسة.",
+  },
+  auth_back_to_auth_choice: {
+    en: "Back to Sign In / Create Account",
+    ar: "العودة إلى تسجيل الدخول / إنشاء حساب",
+  },
+  auth_back_to_role_chooser: {
+    en: "Back to account type selection",
+    ar: "العودة إلى اختيار نوع الحساب",
+  },
+  auth_admin_requires_authorization: {
+    en: "Admin accounts require authorization from an existing school administrator. New admin access cannot be created from this page.",
+    ar: "حسابات الإدارة تتطلب تفويضًا من مسؤول مدرسة قائم. لا يمكن إنشاء وصول إداري جديد من هذه الصفحة.",
+  },
+  auth_admin_sign_in_link: { en: "Go to admin sign in", ar: "الانتقال إلى دخول الإدارة" },
   auth_account_type: { en: "Account type", ar: "نوع الحساب" },
   auth_student_account: { en: "Student Account", ar: "حساب طالب" },
   auth_parent_account: { en: "Parent Account", ar: "حساب ولي أمر" },

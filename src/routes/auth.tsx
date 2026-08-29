@@ -1,13 +1,24 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { PageShell } from "@/components/page-shell";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { useI18n } from "@/lib/i18n";
 import { getAccountRole, getPostAuthPath, postAuthPathForRole } from "@/lib/account-role";
-import { parseAuthAccountType } from "@/lib/parent-corner-access";
 import { fetchTeacherRequestForUser } from "@/lib/teacher-requests";
 import { toast } from "sonner";
-import { GraduationCap, LogIn, UserPlus, AlertCircle, Users, CheckCircle, School } from "lucide-react";
+import {
+  ArrowLeft,
+  GraduationCap,
+  LogIn,
+  UserPlus,
+  AlertCircle,
+  Users,
+  CheckCircle,
+  School,
+  Shield,
+} from "lucide-react";
 import { grades } from "@/lib/curriculum";
 import { StudentAcademicFields } from "@/components/student-academic-fields";
 import { ProfilePhotoField } from "@/components/profile-photo-field";
@@ -39,16 +50,45 @@ import {
   shouldDeferToPasswordReset,
 } from "@/lib/password-recovery";
 
-export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    mode: s.mode === "signup" ? "signup" : "login",
-    accountType: parseAuthAccountType(s),
+type AuthSearchMode = "landing" | "login" | "signup";
+type AuthStep = "landing" | "role-chooser" | "admin-notice" | "form";
+
+type AuthSearch = {
+  mode: AuthSearchMode;
+  accountType?: "student" | "parent" | "teacher" | "admin";
+  email_confirmed: ReturnType<typeof parseEmailConfirmedParam>;
+};
+
+function parseAuthSearch(s: Record<string, unknown>): AuthSearch {
+  const rawAccountType = s.accountType ?? s.role ?? s.type;
+  const rawType = typeof rawAccountType === "string" ? rawAccountType.trim() : "";
+  const mode: AuthSearchMode =
+    s.mode === "signup" ? "signup" : s.mode === "login" ? "login" : "landing";
+  const accountType =
+    rawType === "parent" || rawType === "teacher" || rawType === "student" || rawType === "admin"
+      ? rawType
+      : undefined;
+  return {
+    mode,
+    ...(accountType ? { accountType } : {}),
     email_confirmed: parseEmailConfirmedParam(s.email_confirmed),
-  }),
+  };
+}
+
+function resolveAuthStep(search: AuthSearch): AuthStep {
+  if (search.mode === "landing") return "landing";
+  if (search.mode === "login") return "form";
+  if (search.accountType === "admin") return "admin-notice";
+  if (search.mode === "signup" && !search.accountType) return "role-chooser";
+  return "form";
+}
+
+export const Route = createFileRoute("/auth")({
+  validateSearch: parseAuthSearch,
   head: () => ({
     meta: [
       { title: pageHeadTitle("auth") },
-      { name: "description", content: "Sign in or create a student account to access lessons, videos, quizzes and progress tracking." },
+      { name: "description", content: "Sign in or create an account to access Ignite Islamic Academy." },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
@@ -56,11 +96,17 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { mode: initialMode, accountType: initialAccountType, email_confirmed: emailConfirmedSearch } =
-    Route.useSearch();
-  const { lang, bi, tr } = useI18n();
-  const [mode, setMode] = useState<"login" | "signup">(initialMode);
-  const [accountType, setAccountType] = useState<"student" | "parent" | "teacher">(initialAccountType);
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const authStep = resolveAuthStep(search);
+  const formMode: "login" | "signup" = search.mode === "signup" ? "signup" : "login";
+  const { accountType: searchAccountType, email_confirmed: emailConfirmedSearch } = search;
+  const { lang, bi, tr, dir } = useI18n();
+  const [accountType, setAccountType] = useState<"student" | "parent" | "teacher">(
+    searchAccountType === "parent" || searchAccountType === "teacher"
+      ? searchAccountType
+      : "student",
+  );
   const [arabicName, setArabicName] = useState("");
   const [englishName, setEnglishName] = useState("");
   const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
@@ -89,8 +135,35 @@ function AuthPage() {
   const signupInFlight = useRef(false);
   const signUpCallCount = useRef(0);
 
-  useEffect(() => { setMode(initialMode); }, [initialMode]);
-  useEffect(() => { setAccountType(initialAccountType); }, [initialAccountType]);
+  useEffect(() => {
+    if (
+      searchAccountType === "student" ||
+      searchAccountType === "parent" ||
+      searchAccountType === "teacher"
+    ) {
+      setAccountType(searchAccountType);
+    }
+  }, [searchAccountType]);
+
+  function goAuthLanding() {
+    void navigate({ to: "/auth", search: {}, replace: true });
+  }
+
+  function goLogin() {
+    void navigate({ to: "/auth", search: { mode: "login" }, replace: true });
+  }
+
+  function goRoleChooser() {
+    void navigate({ to: "/auth", search: { mode: "signup" }, replace: true });
+  }
+
+  function goSignupRole(role: "student" | "parent" | "teacher") {
+    void navigate({ to: "/auth", search: { mode: "signup", accountType: role }, replace: true });
+  }
+
+  function goAdminNotice() {
+    void navigate({ to: "/auth", search: { mode: "signup", accountType: "admin" }, replace: true });
+  }
 
   // Run once on mount: handle email-confirmation callback OR redirect already-signed-in users.
   useEffect(() => {
@@ -124,9 +197,9 @@ function AuthPage() {
 
         const role = await getAccountRole(user.id);
         if (cancelled) return;
-        if (initialAccountType === "parent" && role === "student") return;
-        if (initialAccountType === "student" && role === "parent") return;
-        if (initialAccountType === "teacher" && role && role !== "teacher") return;
+        if (searchAccountType === "parent" && role === "student") return;
+        if (searchAccountType === "student" && role === "parent") return;
+        if (searchAccountType === "teacher" && role && role !== "teacher") return;
         if (role === "teacher") {
           await applyLanguageForUser(user.id);
           if (cancelled) return;
@@ -147,7 +220,7 @@ function AuthPage() {
         await supabase.auth.signOut();
         if (cancelled) return;
         setInvalidLinkAlert(tr("auth_verification_link_invalid"));
-        setMode("login");
+        goLogin();
         clearAuthCallbackUrl();
         return;
       }
@@ -160,7 +233,7 @@ function AuthPage() {
         await supabase.auth.signOut();
         if (cancelled) return;
         setInvalidLinkAlert(tr("auth_verification_link_invalid"));
-        setMode("login");
+        goLogin();
         clearAuthCallbackUrl();
         return;
       }
@@ -172,14 +245,14 @@ function AuthPage() {
         if (hashSession.session?.user && !isEmailVerified(hashSession.session.user)) {
           await supabase.auth.signOut();
           setInvalidLinkAlert(tr("auth_verification_link_invalid"));
-          setMode("login");
+          goLogin();
           clearAuthCallbackUrl();
           return;
         }
         await supabase.auth.signOut();
         if (cancelled) return;
         setEmailConfirmedAlert(tr("auth_email_confirmed"));
-        setMode("login");
+        goLogin();
         clearAuthCallbackUrl();
         return;
       }
@@ -202,9 +275,9 @@ function AuthPage() {
 
       const role = await getAccountRole(user.id);
       if (cancelled) return;
-      if (initialAccountType === "parent" && role === "student") return;
-      if (initialAccountType === "student" && role === "parent") return;
-      if (initialAccountType === "teacher" && role && role !== "teacher") return;
+      if (searchAccountType === "parent" && role === "student") return;
+      if (searchAccountType === "student" && role === "parent") return;
+      if (searchAccountType === "teacher" && role && role !== "teacher") return;
       if (role === "teacher") {
         await applyLanguageForUser(user.id);
         if (cancelled) return;
@@ -223,7 +296,7 @@ function AuthPage() {
     return () => {
       cancelled = true;
     };
-  }, [emailConfirmedSearch, initialAccountType, tr]);
+  }, [emailConfirmedSearch, searchAccountType, tr]);
 
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault();
@@ -317,7 +390,7 @@ function AuthPage() {
         toast.success(tr("auth_success_teacher_pending"));
         await supabase.auth.signOut();
         setSignupSuccessAlert(tr("auth_success_teacher_pending"));
-        setMode("login");
+        goLogin();
         return;
       }
       toast.success(tr("auth_success_login"));
@@ -340,7 +413,7 @@ function AuthPage() {
         account === "teacher" ? tr("auth_success_teacher_pending") : tr("auth_signup_complete"),
       );
     }
-    setMode("login");
+    goLogin();
   }
 
   async function callSignUpOnce(
@@ -368,7 +441,7 @@ function AuthPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const isSignup = mode === "signup";
+    const isSignup = formMode === "signup";
 
     if (busy || (isSignup && signupInFlight.current)) {
       console.warn("[auth signup] submit blocked — request already in progress", {
@@ -406,7 +479,7 @@ function AuthPage() {
       const submitIslamicGroup = String(fd.get("islamic_group") ?? islamicGroup).trim();
       const submitPreferredLanguage = String(fd.get("preferred_language") ?? preferredLanguage).trim();
 
-      if (mode === "signup") {
+      if (formMode === "signup") {
         if (!isLang(submitPreferredLanguage)) {
           showSignupError(tr("auth_preferred_language_hint"), { step: "validation" });
           return;
@@ -630,20 +703,20 @@ function AuthPage() {
 
       window.location.assign(redirectPath);
     } catch (err) {
-      if (mode === "signup" && isEmailRateLimitError(err)) {
+      if (formMode === "signup" && isEmailRateLimitError(err)) {
         showSignupError(tr("auth_err_rate_limit"), err);
         return;
       }
-      if (mode === "signup" && isDuplicateEmailError(err)) {
+      if (formMode === "signup" && isDuplicateEmailError(err)) {
         showSignupError(tr("auth_duplicate_email"), err);
         return;
       }
-      if (mode === "login" && ENABLE_EMAIL_VERIFICATION && isEmailNotConfirmedError(err)) {
+      if (formMode === "login" && ENABLE_EMAIL_VERIFICATION && isEmailNotConfirmedError(err)) {
         setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
         await supabase.auth.signOut();
         return;
       }
-      if (mode === "signup") {
+      if (formMode === "signup") {
         const message = err instanceof Error ? err.message : String(err);
         showSignupError(message, err);
         return;
@@ -656,39 +729,179 @@ function AuthPage() {
   }
 
 
+  function signupHeading() {
+    if (accountType === "parent") return tr("auth_create_parent");
+    if (accountType === "teacher") return tr("auth_create_teacher");
+    return tr("auth_create_student");
+  }
+
   return (
-    <PageShell
-      eyebrow={tr("student_title")}
-      title={tr("auth_title")}
-      lead={tr("auth_lead")}
-      crumbs={[{ label: tr("auth_title") }]}
-    >
+    <div className="min-h-screen flex flex-col">
+      <SiteHeader />
+      <main className="flex-1">
+        <section className="container-page py-10 md:py-14">
       <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2 items-start">
         {/* Form card */}
         <div className="rounded-3xl border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
-          <div className="inline-flex rounded-full border border-border p-1 mb-6">
+          {authStep === "landing" ? (
+            <div className="space-y-5">
+              <div>
+                <h2 className="font-display text-xl text-foreground">{tr("auth_welcome")}</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{tr("auth_gateway_lead")}</p>
+              </div>
+              <div className="grid gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={goLogin}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
+                >
+                  <LogIn className="h-4 w-4" />
+                  {tr("auth_login")}
+                </button>
+                <button
+                  type="button"
+                  onClick={goRoleChooser}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-background py-3.5 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  {tr("auth_create_account")}
+                </button>
+              </div>
+            </div>
+          ) : authStep === "role-chooser" ? (
+            <div className="space-y-5">
+              <button
+                type="button"
+                onClick={goAuthLanding}
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+                {tr("auth_back_to_auth_choice")}
+              </button>
+              <div>
+                <h2 className="font-display text-xl text-foreground">{tr("auth_create_account")}</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{tr("auth_choose_account_type_lead")}</p>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => goSignupRole("student")}
+                  className="rounded-2xl border border-primary/30 bg-primary/5 p-4 text-start transition-colors hover:border-primary hover:bg-primary/10"
+                >
+                  <GraduationCap className="h-6 w-6 text-primary" />
+                  <div className="mt-3 font-display text-lg font-semibold text-foreground">{tr("auth_role_student")}</div>
+                  <p className="mt-1 text-xs text-muted-foreground">{tr("auth_role_student_desc")}</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goSignupRole("teacher")}
+                  className="rounded-2xl border border-border bg-background p-4 text-start transition-colors hover:border-primary hover:bg-muted/30"
+                >
+                  <School className="h-6 w-6 text-primary" />
+                  <div className="mt-3 font-display text-lg font-semibold text-foreground">{tr("auth_role_teacher")}</div>
+                  <p className="mt-1 text-xs text-muted-foreground">{tr("auth_role_teacher_desc")}</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goSignupRole("parent")}
+                  className="rounded-2xl border border-border bg-background p-4 text-start transition-colors hover:border-primary hover:bg-muted/30"
+                >
+                  <Users className="h-6 w-6 text-primary" />
+                  <div className="mt-3 font-display text-lg font-semibold text-foreground">{tr("auth_role_parent")}</div>
+                  <p className="mt-1 text-xs text-muted-foreground">{tr("auth_role_parent_desc")}</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={goAdminNotice}
+                  className="rounded-2xl border border-gold/40 bg-gold/5 p-4 text-start transition-colors hover:border-gold hover:bg-gold/10"
+                >
+                  <Shield className="h-6 w-6 text-gold" />
+                  <div className="mt-3 font-display text-lg font-semibold text-foreground">{tr("auth_role_admin")}</div>
+                  <p className="mt-1 text-xs text-muted-foreground">{tr("auth_role_admin_desc")}</p>
+                </button>
+              </div>
+            </div>
+          ) : authStep === "admin-notice" ? (
+            <div className="space-y-5">
+              <button
+                type="button"
+                onClick={goRoleChooser}
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+                {tr("auth_back_to_role_chooser")}
+              </button>
+              <div className="rounded-2xl border border-gold/30 bg-gold/5 p-5">
+                <div className="flex gap-3">
+                  <Shield className="h-6 w-6 shrink-0 text-gold" aria-hidden />
+                  <div className="space-y-3">
+                    <h2 className="font-display text-lg font-semibold text-foreground">{tr("auth_role_admin")}</h2>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {tr("auth_admin_requires_authorization")}
+                    </p>
+                    <Link
+                      to="/admin-login"
+                      className="inline-flex rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"
+                    >
+                      {tr("auth_admin_sign_in_link")}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+          <button
+            type="button"
+            onClick={() => {
+              if (formMode === "signup") goRoleChooser();
+              else goAuthLanding();
+            }}
+            className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+          >
+            <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+            {formMode === "signup" ? tr("auth_back_to_role_chooser") : tr("auth_back_to_auth_choice")}
+          </button>
+
+          <div className="mb-5">
+            <h2 className="font-display text-xl text-foreground">
+              {formMode === "login" ? tr("auth_login") : signupHeading()}
+            </h2>
+          </div>
+
+          <div className="mb-6 inline-flex rounded-full border border-border p-1">
             <button
               type="button"
-              onClick={() => { setMode("signup"); setSignupAlert(null); setSignupSuccessAlert(null); }}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${mode === "signup" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
+              onClick={() => {
+                goRoleChooser();
+                setSignupAlert(null);
+                setSignupSuccessAlert(null);
+              }}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${formMode === "signup" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
             >
               <UserPlus className="h-4 w-4" />{" "}
-              {accountType === "parent"
-                ? tr("auth_create_parent")
-                : accountType === "teacher"
-                  ? tr("auth_create_teacher")
-                  : tr("auth_create_student")}
+              {formMode === "login"
+                ? tr("auth_create_account")
+                : accountType === "parent"
+                  ? tr("auth_create_parent")
+                  : accountType === "teacher"
+                    ? tr("auth_create_teacher")
+                    : tr("auth_create_student")}
             </button>
             <button
               type="button"
-              onClick={() => { setMode("login"); setSignupAlert(null); setSignupSuccessAlert(null); }}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${mode === "login" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
+              onClick={() => {
+                goLogin();
+                setSignupAlert(null);
+                setSignupSuccessAlert(null);
+              }}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${formMode === "login" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
             >
               <LogIn className="h-4 w-4" /> {tr("auth_login")}
             </button>
           </div>
 
-          {teacherPendingAlert && mode === "login" && (
+          {teacherPendingAlert && formMode === "login" && (
             <div
               role="alert"
               className="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-5 py-4 text-sm text-foreground"
@@ -700,7 +913,7 @@ function AuthPage() {
             </div>
           )}
 
-          {teacherRejectedAlert && mode === "login" && (
+          {teacherRejectedAlert && formMode === "login" && (
             <div
               role="alert"
               className="mb-4 rounded-2xl border border-destructive/40 bg-destructive/10 px-5 py-4 text-sm text-destructive"
@@ -712,7 +925,7 @@ function AuthPage() {
             </div>
           )}
 
-          {ENABLE_EMAIL_VERIFICATION && invalidLinkAlert && mode === "login" && (
+          {ENABLE_EMAIL_VERIFICATION && invalidLinkAlert && formMode === "login" && (
             <div className="mb-4 space-y-3">
               <div
                 role="alert"
@@ -727,7 +940,7 @@ function AuthPage() {
             </div>
           )}
 
-          {ENABLE_EMAIL_VERIFICATION && emailNotConfirmedAlert && mode === "login" && (
+          {ENABLE_EMAIL_VERIFICATION && emailNotConfirmedAlert && formMode === "login" && (
             <div className="mb-4 space-y-3">
               <div
                 role="alert"
@@ -742,7 +955,7 @@ function AuthPage() {
             </div>
           )}
 
-          {ENABLE_EMAIL_VERIFICATION && emailConfirmedAlert && mode === "login" && (
+          {ENABLE_EMAIL_VERIFICATION && emailConfirmedAlert && formMode === "login" && (
             <div
               role="status"
               className="mb-4 rounded-2xl border border-primary/40 bg-primary/10 px-5 py-4 text-sm text-foreground"
@@ -766,7 +979,7 @@ function AuthPage() {
             </div>
           )}
 
-          {signupAlert && mode === "signup" && (
+          {signupAlert && formMode === "signup" && (
             <div
               role="alert"
               className="mb-4 rounded-2xl border border-destructive/50 bg-destructive/10 px-5 py-4 text-sm text-destructive"
@@ -777,7 +990,7 @@ function AuthPage() {
                   <p className="font-medium leading-relaxed">{signupAlert}</p>
                   <button
                     type="button"
-                    onClick={() => { setMode("login"); setSignupAlert(null); }}
+                    onClick={() => { goLogin(); setSignupAlert(null); }}
                     className="inline-flex rounded-full border border-destructive/40 bg-background px-4 py-2 text-xs font-semibold text-destructive hover:bg-destructive/5 transition-colors"
                   >
                     {tr("auth_login")}
@@ -834,35 +1047,7 @@ function AuthPage() {
                 </div>
               </>
             ) : null}
-            {!forgotMode && mode === "signup" && (
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">{tr("auth_account_type")}</label>
-                <div className="mt-2 grid grid-cols-1 gap-1 rounded-full border border-border p-1 sm:grid-cols-3">
-                  <button
-                    type="button"
-                    onClick={() => setAccountType("student")}
-                    className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "student" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
-                  >
-                    <GraduationCap className="h-4 w-4 shrink-0" /> {tr("auth_student_account")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAccountType("parent")}
-                    className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "parent" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
-                  >
-                    <Users className="h-4 w-4 shrink-0" /> {tr("auth_parent_account")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAccountType("teacher")}
-                    className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors ${accountType === "teacher" ? "bg-primary text-primary-foreground" : "text-foreground/70"}`}
-                  >
-                    <School className="h-4 w-4 shrink-0" /> {tr("auth_teacher_account")}
-                  </button>
-                </div>
-              </div>
-            )}
-            {!forgotMode && mode === "signup" && accountType === "student" && (
+            {!forgotMode && formMode === "signup" && accountType === "student" && (
               <>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">{tr("auth_arabic_name_hint")} *</label>
@@ -915,7 +1100,7 @@ function AuthPage() {
                 />
               </>
             )}
-            {!forgotMode && mode === "signup" && accountType === "parent" && (
+            {!forgotMode && formMode === "signup" && accountType === "parent" && (
               <>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">{tr("auth_parent_full_name")}</label>
@@ -945,7 +1130,7 @@ function AuthPage() {
                 </div>
               </>
             )}
-            {!forgotMode && mode === "signup" && accountType === "teacher" && (
+            {!forgotMode && formMode === "signup" && accountType === "teacher" && (
               <>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">{tr("auth_teacher_full_name")} *</label>
@@ -973,7 +1158,7 @@ function AuthPage() {
                 </div>
               </>
             )}
-            {!forgotMode && mode === "signup" && (
+            {!forgotMode && formMode === "signup" && (
               <PreferredLanguageField
                 value={preferredLanguage}
                 onChange={setPreferredLanguage}
@@ -999,12 +1184,12 @@ function AuthPage() {
               <input
                 type="password"
                 name="password"
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                autoComplete={formMode === "signup" ? "new-password" : "current-password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
               />
-              {mode === "login" ? (
+              {formMode === "login" ? (
                 <div className="mt-2 text-end">
                   <button
                     type="button"
@@ -1020,7 +1205,7 @@ function AuthPage() {
                 </div>
               ) : null}
             </div>
-            {mode === "signup" && accountType === "teacher" && (
+            {formMode === "signup" && accountType === "teacher" && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground">{tr("auth_confirm_password")} *</label>
                 <input
@@ -1041,7 +1226,7 @@ function AuthPage() {
             >
               {busy
                 ? tr("auth_submitting")
-                : mode === "signup"
+                : formMode === "signup"
                   ? accountType === "parent"
                     ? tr("auth_create_parent")
                     : accountType === "teacher"
@@ -1058,16 +1243,19 @@ function AuthPage() {
             <button
               type="button"
               onClick={() => {
-                setMode(mode === "login" ? "signup" : "login");
+                if (formMode === "login") goRoleChooser();
+                else goLogin();
                 setSignupAlert(null);
                 setSignupSuccessAlert(null);
               }}
               className="underline hover:text-primary"
             >
-              {mode === "login" ? tr("auth_to_signup") : tr("auth_to_login")}
+              {formMode === "login" ? tr("auth_to_signup") : tr("auth_to_login")}
             </button>
           </div>
           ) : null}
+            </>
+          )}
         </div>
 
         {/* Side panel */}
@@ -1088,6 +1276,10 @@ function AuthPage() {
           </Link>
         </div>
       </div>
-    </PageShell>
+        </section>
+      </main>
+      <SiteFooter />
+      <AskMrAhmed />
+    </div>
   );
 }

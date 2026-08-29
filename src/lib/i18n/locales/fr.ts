@@ -23,7 +23,7 @@ export const fr: Record<string, string> = {
   hero_desc: "Une plateforme moderne pour les élèves, les parents et les enseignants — donnant vie aux études islamiques classiques grâce à de belles leçons, des vidéos, des fiches de travail et des évaluations interactives.",
   cta_start: "Commencer à apprendre",
   cta_watch: "Voir l'introduction",
-  cta_signup: "Créer un compte étudiant",
+  cta_signup: "Créer un compte",
   cta_login: "Connexion",
   cta_explore: "Explorer l'académie",
   stat_lessons: "Leçons",

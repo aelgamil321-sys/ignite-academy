@@ -23,7 +23,7 @@ export const de: Record<string, string> = {
   hero_desc: "Eine moderne Plattform für Schüler, Eltern und Lehrkräfte — klassische Islamische Studien lebendig gemacht mit schönen Lektionen, Videos, Arbeitsblättern und interaktiven Prüfungen.",
   cta_start: "Lernen beginnen",
   cta_watch: "Intro ansehen",
-  cta_signup: "Schülerkonto erstellen",
+  cta_signup: "Konto erstellen",
   cta_login: "Anmelden",
   cta_explore: "Akademie entdecken",
   stat_lessons: "Lektionen",

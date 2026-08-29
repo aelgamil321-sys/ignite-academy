@@ -23,7 +23,7 @@ export const zh: Record<string, string> = {
   hero_desc: "面向学生、家长和教师的现代平台——以精美课程、视频、练习册和互动测评，将经典伊斯兰学带入生活。",
   cta_start: "开始学习",
   cta_watch: "观看介绍",
-  cta_signup: "创建学生账户",
+  cta_signup: "创建账户",
   cta_login: "登录",
   cta_explore: "探索学院",
   stat_lessons: "课程",

@@ -20,9 +20,12 @@ export async function resolveParentCornerAccess(): Promise<ParentCornerAccess> {
   return { kind: "other", userId: data.user.id };
 }
 
-export function parseAuthAccountType(search: Record<string, unknown>): "student" | "parent" | "teacher" {
+export function parseAuthAccountType(
+  search: Record<string, unknown>,
+): "student" | "parent" | "teacher" | null {
   const raw = search.accountType ?? search.role ?? search.type;
   if (raw === "parent") return "parent";
   if (raw === "teacher") return "teacher";
-  return "student";
+  if (raw === "student") return "student";
+  return null;
 }
