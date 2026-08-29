@@ -11,6 +11,7 @@ import { SafeNotificationBell } from "@/components/notification-bell";
 import { cn } from "@/lib/utils";
 
 const STUDENT_ONLY_PATHS = new Set(["/grades", "/quizzes", "/assignments", "/student"]);
+const STUDENT_HIDDEN_PATHS = new Set(["/admin", "/parent", "/student", "/contact"]);
 
 /** Desktop (xl+) nav — must include /hall-of-fame (do not use a blind slice on allNav). */
 const DESKTOP_NAV_PATHS = [
@@ -118,7 +119,11 @@ export function SiteHeader() {
                 { label: tr("nav_contact"), to: "/contact" },
               ]
             : role === "student"
-              ? allNav.filter((item) => !isParent || !STUDENT_ONLY_PATHS.has(item.to))
+              ? allNav.filter(
+                  (item) =>
+                    !STUDENT_HIDDEN_PATHS.has(item.to) &&
+                    (!isParent || !STUDENT_ONLY_PATHS.has(item.to)),
+                )
               : [{ label: tr("nav_home"), to: "/" }];
   const desktopNav =
     !signedIn

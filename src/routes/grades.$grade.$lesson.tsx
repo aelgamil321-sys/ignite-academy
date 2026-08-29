@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
+import { enforceStudentOwnGradeLesson } from "@/lib/student-route-guard";
 import {
   ChevronLeft, Clock, Target, BookOpen,
   FileText, Video, HelpCircle, Download, ClipboardList,
@@ -25,7 +26,10 @@ import { pageHeadTitle } from "@/lib/page-head";
 import videoPlaceholder from "@/assets/video-placeholder.jpg";
 
 export const Route = createFileRoute("/grades/$grade/$lesson")({
-  beforeLoad: () => blockParentFromStudentRoutes(),
+  beforeLoad: async ({ params }) => {
+    await blockParentFromStudentRoutes();
+    await enforceStudentOwnGradeLesson(params.grade, params.lesson);
+  },
   loader: ({ params }) => {
     const grade = getGrade(params.grade);
     if (!grade) throw notFound();

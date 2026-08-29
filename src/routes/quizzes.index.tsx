@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
+import { redirectStudentQuizCatalog } from "@/lib/student-route-guard";
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/page-shell";
 import { EmptyState } from "@/components/empty-state";
@@ -10,7 +11,10 @@ import { gradeMatches } from "@/lib/grade-utils";
 import { ClipboardCheck, ArrowRight, Search } from "lucide-react";
 
 export const Route = createFileRoute("/quizzes/")({
-  beforeLoad: () => blockParentFromStudentRoutes(),
+  beforeLoad: async () => {
+    await blockParentFromStudentRoutes();
+    await redirectStudentQuizCatalog();
+  },
   head: () => ({
     meta: [
       { title: "Online Quizzes — Ignite Islamic Academy" },

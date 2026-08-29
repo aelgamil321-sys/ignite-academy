@@ -1,5 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
+import { enforceStudentOwnGradeInUrl } from "@/lib/student-route-guard";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
@@ -7,7 +8,10 @@ import { GradeDetailPanel } from "@/components/grade-detail-panel";
 import { getGrade } from "@/lib/curriculum";
 
 export const Route = createFileRoute("/grades/$grade/")({
-  beforeLoad: () => blockParentFromStudentRoutes(),
+  beforeLoad: async ({ params }) => {
+    await blockParentFromStudentRoutes();
+    await enforceStudentOwnGradeInUrl(params.grade);
+  },
   loader: ({ params }) => {
     const grade = getGrade(params.grade);
     if (!grade) throw notFound();

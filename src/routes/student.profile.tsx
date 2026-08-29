@@ -2,27 +2,26 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
-import { PageShell } from "@/components/page-shell";
 import { ParentLinkCodeCard } from "@/components/parent-link-code-card";
 import { ProfilePhotoField } from "@/components/profile-photo-field";
 import { StudentAcademicFields } from "@/components/student-academic-fields";
-import { StudentProfileAvatar } from "@/components/student-profile-avatar";
 import { PreferredLanguageField } from "@/components/preferred-language-field";
+import { StudentDashboardSection } from "@/components/student-dashboard-section";
+import { StudentProfileIdentityCard } from "@/components/student-profile-identity-card";
+import { StudentProfileProgressSummary } from "@/components/student-profile-progress-summary";
 import { useI18n } from "@/lib/i18n";
 import { fetchMyParentLinkCode } from "@/lib/parent-link-code";
 import { supabase } from "@/integrations/supabase/client";
-import { gradeDisplayName } from "@/lib/grade-utils";
 import { uploadProfilePhoto } from "@/lib/profile-photo";
+import { gradeDisplayName } from "@/lib/grade-utils";
 import {
   fetchStudentProfile,
   saveStudentProfile,
   type StudentProfileForm,
 } from "@/lib/student-profile";
-import { navigateTargetForAccountRole } from "@/lib/account-role";
-import { fetchResolvedAccountRole } from "@/hooks/use-account-role";
-import { resolveVerifiedSession } from "@/lib/email-verification";
-import { EmailVerificationRequired } from "@/components/email-verification-required";
-import { islamicGroupLabel, sectionLabel, type IslamicGroup, type StudentSection } from "@/lib/student-academics";
+import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-progress";
+import { useStudentShell } from "@/lib/student-shell-context";
+import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 import type { Lang } from "@/lib/i18n-config";
 
 export const Route = createFileRoute("/student/profile")({
@@ -36,12 +35,14 @@ export const Route = createFileRoute("/student/profile")({
   component: StudentProfilePage,
 });
 
+const inputClass =
+  "mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:border-primary focus:outline-none";
+
 function StudentProfilePage() {
   const navigate = useNavigate();
+  const { userId } = useStudentShell();
   const { lang, dir, tr, setLang } = useI18n();
   const [loading, setLoading] = useState(true);
-  const [unverified, setUnverified] = useState(false);
-  const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [email, setEmail] = useState("");
   const [grade, setGrade] = useState("");
@@ -58,41 +59,28 @@ function StudentProfilePage() {
   const [islamicGroup, setIslamicGroup] = useState<IslamicGroup | "">("");
   const [preferredLanguage, setPreferredLanguage] = useState<Lang>("ar");
   const [parentLinkCode, setParentLinkCode] = useState<string | null>(null);
+  const [progress, setProgress] = useState<StudentProgressData | null>(null);
 
   useEffect(() => {
     let active = true;
 
     void (async () => {
-      const session = await resolveVerifiedSession();
-      if (!active) return;
-
-      if (session.status === "none") {
-        navigate({ to: "/auth", search: { mode: "login" } });
-        return;
-      }
-      if (session.status === "unverified") {
-        setUnverifiedEmail(session.email);
-        setUnverified(true);
-        setLoading(false);
-        return;
-      }
-
-      const user = session.user;
-
-      const roleResult = await fetchResolvedAccountRole(user.id);
-      if (!active) return;
-      if (roleResult.error || roleResult.role === null) {
-        navigate({ to: "/" });
-        return;
-      }
-      if (roleResult.role !== "student") {
-        navigate(navigateTargetForAccountRole(roleResult.role));
-        return;
-      }
-
       try {
-        const profile = await fetchStudentProfile(user.id);
+        const { data: authData } = await supabase.auth.getUser();
+        const user = authData.user;
+        if (!user) {
+          navigate({ to: "/auth", search: { mode: "login" } });
+          return;
+        }
+
+        const [profile, progressResult, linkCode] = await Promise.all([
+          fetchStudentProfile(user.id),
+          fetchStudentProgress(user.id),
+          fetchMyParentLinkCode(),
+        ]);
         const meta = user.user_metadata ?? {};
+
+        if (!active) return;
 
         setEmail(profile?.email || user.email || "");
         setGrade(profile?.grade ?? String(meta.grade ?? ""));
@@ -114,7 +102,8 @@ function StudentProfilePage() {
         setSection(profile?.section ?? "");
         setIslamicGroup(profile?.islamic_group ?? "");
         setPreferredLanguage(profile?.preferred_language ?? lang);
-        setParentLinkCode(await fetchMyParentLinkCode());
+        setParentLinkCode(linkCode);
+        if (!progressResult.error) setProgress(progressResult.data);
       } catch (error) {
         console.error("[student profile load]", error);
         toast.error(error instanceof Error ? error.message : String(error));
@@ -123,15 +112,10 @@ function StudentProfilePage() {
       }
     })();
 
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") navigate({ to: "/auth", search: { mode: "login" } });
-    });
-
     return () => {
       active = false;
-      sub.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [lang, navigate, userId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -174,6 +158,7 @@ function StudentProfilePage() {
       setIslamicGroup(updated.islamic_group ?? "");
       setPreferredLanguage(updated.preferred_language);
       setProfilePhotoPath(updated.profile_photo_path);
+      setGrade(updated.grade ?? grade);
       setLang(updated.preferred_language);
       toast.success(tr("student_profile_updated"));
     } catch (error) {
@@ -186,150 +171,124 @@ function StudentProfilePage() {
   const gradeLabel = grade ? gradeDisplayName(grade, lang) : tr("not_set");
 
   return (
-    <PageShell
-      eyebrow={tr("nav_student")}
-      title={tr("profile_student")}
-      lead={tr("student_profile_lead")}
-      crumbs={[
-        { label: tr("nav_student"), to: "/student" },
-        { label: tr("profile_student") },
-      ]}
-    >
-      <div className="max-w-2xl">
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div>
         <Link
           to="/student"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6"
+          className="mb-3 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
         >
           <ArrowLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
           {tr("student_back_dashboard")}
         </Link>
-
-        {parentLinkCode ? <div className="mb-6"><ParentLinkCodeCard code={parentLinkCode} /></div> : null}
-
-        {loading ? (
-          <div className="flex items-center gap-2 text-muted-foreground py-12">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            {tr("loading")}
-          </div>
-        ) : unverified ? (
-          <EmailVerificationRequired email={unverifiedEmail} />
-        ) : (
-          <form
-            onSubmit={(e) => void handleSubmit(e)}
-            className="rounded-3xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] space-y-5"
-          >
-            <div className="flex flex-wrap items-center gap-4 pb-4 border-b border-border">
-              <StudentProfileAvatar
-                profilePhotoPath={profilePhotoPath}
-                alt={form.english_name || form.arabic_name}
-                className="h-20 w-20"
-              />
-              <div className="min-w-0 flex-1 space-y-1">
-                <p className="font-display text-xl text-foreground leading-tight">
-                  {form.english_name || form.arabic_name}
-                </p>
-                {form.arabic_name ? (
-                  <p className="text-sm text-muted-foreground" dir="rtl">
-                    {form.arabic_name}
-                  </p>
-                ) : null}
-                <p className="text-xs text-muted-foreground pt-1">{tr("student_cert_note")}</p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-border bg-muted/20 p-4 grid gap-3 sm:grid-cols-3 text-sm">
-              <div>
-                <div className="text-xs text-muted-foreground">{tr("auth_grade")}</div>
-                <div className="font-semibold text-foreground mt-0.5">{gradeLabel}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">{tr("auth_section")}</div>
-                <div className="font-semibold text-foreground mt-0.5">
-                  {section ? sectionLabel(section, lang) : tr("not_set")}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">
-                  {tr("auth_islamic_group")}
-                </div>
-                <div className="font-semibold text-foreground mt-0.5">
-                  {islamicGroup ? islamicGroupLabel(islamicGroup, lang) : tr("not_set")}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">{tr("auth_english_name_hint")} *</label>
-              <input
-                type="text"
-                required
-                value={form.english_name}
-                onChange={(e) => setForm((f) => ({ ...f, english_name: e.target.value }))}
-                maxLength={100}
-                className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">{tr("auth_arabic_name_hint")} *</label>
-              <input
-                type="text"
-                required
-                value={form.arabic_name}
-                onChange={(e) => setForm((f) => ({ ...f, arabic_name: e.target.value }))}
-                maxLength={100}
-                dir="rtl"
-                className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">{tr("auth_email")}</label>
-              <input
-                type="email"
-                readOnly
-                value={email}
-                className="mt-1 w-full rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground cursor-not-allowed"
-              />
-            </div>
-
-            <PreferredLanguageField
-              value={preferredLanguage}
-              onChange={setPreferredLanguage}
-            />
-
-            <ProfilePhotoField
-              file={photoFile}
-              onChange={setPhotoFile}
-            />
-
-            <StudentAcademicFields
-              section={section}
-              islamicGroup={islamicGroup}
-              onSectionChange={setSection}
-              onIslamicGroupChange={setIslamicGroup}
-            />
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center justify-center gap-2 w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-60"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {tr("student_saving")}
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  {tr("save_changes")}
-                </>
-              )}
-            </button>
-          </form>
-        )}
+        <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
+          {tr("profile_student")}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">{tr("student_profile_lead")}</p>
       </div>
-    </PageShell>
+
+      {loading ? (
+        <div className="flex items-center gap-2 py-12 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          {tr("loading")}
+        </div>
+      ) : (
+        <>
+          <StudentProfileIdentityCard
+            profilePhotoPath={profilePhotoPath}
+            arabicName={form.arabic_name}
+            englishName={form.english_name}
+            email={email}
+            grade={grade}
+            section={section}
+            islamicGroup={islamicGroup}
+          />
+
+          {progress ? <StudentProfileProgressSummary progress={progress} /> : null}
+
+          <StudentDashboardSection title={tr("student_profile_personal_details")} lead={tr("student_cert_note")}>
+            <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">
+                    {tr("auth_english_name_hint")} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={form.english_name}
+                    onChange={(e) => setForm((f) => ({ ...f, english_name: e.target.value }))}
+                    maxLength={100}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">
+                    {tr("auth_arabic_name_hint")} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={form.arabic_name}
+                    onChange={(e) => setForm((f) => ({ ...f, arabic_name: e.target.value }))}
+                    maxLength={100}
+                    dir="rtl"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">{tr("auth_email")}</label>
+                <input
+                  type="email"
+                  readOnly
+                  value={email}
+                  className={`${inputClass} cursor-not-allowed bg-muted/40 text-muted-foreground`}
+                />
+              </div>
+
+              <div className="rounded-xl border border-border/70 bg-muted/15 px-3 py-3">
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  {tr("auth_grade")}
+                </p>
+                <p className="text-sm font-semibold text-foreground">{gradeLabel}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{tr("student_profile_grade_readonly")}</p>
+              </div>
+
+              <PreferredLanguageField value={preferredLanguage} onChange={setPreferredLanguage} />
+
+              <ProfilePhotoField file={photoFile} onChange={setPhotoFile} />
+
+              <StudentAcademicFields
+                section={section}
+                islamicGroup={islamicGroup}
+                onSectionChange={setSection}
+                onIslamicGroupChange={setIslamicGroup}
+              />
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-60 sm:w-auto sm:min-w-[12rem]"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {tr("student_saving")}
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    {tr("save_changes")}
+                  </>
+                )}
+              </button>
+            </form>
+          </StudentDashboardSection>
+
+          {parentLinkCode ? <ParentLinkCodeCard code={parentLinkCode} /> : null}
+        </>
+      )}
+    </div>
   );
 }

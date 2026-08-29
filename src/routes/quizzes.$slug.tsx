@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
+import { redirectStudentLegacyQuizRoute } from "@/lib/student-route-guard";
 import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
 import { useQuizzesFromCMS } from "@/lib/cms";
@@ -7,7 +8,10 @@ import { useState } from "react";
 import { CheckCircle2, XCircle, RotateCcw, HelpCircle } from "lucide-react";
 
 export const Route = createFileRoute("/quizzes/$slug")({
-  beforeLoad: () => blockParentFromStudentRoutes(),
+  beforeLoad: async ({ params }) => {
+    await blockParentFromStudentRoutes();
+    await redirectStudentLegacyQuizRoute(params.slug);
+  },
   loader: ({ params }) => ({ slug: params.slug }),
   head: () => ({ meta: [{ title: "Quiz — Ignite Islamic Academy" }] }),
   component: QuizDetail,

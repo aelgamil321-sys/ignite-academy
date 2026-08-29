@@ -1,11 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
+import { enforceStudentOwnGradeCatalog } from "@/lib/student-route-guard";
 import { PageShell } from "@/components/page-shell";
 import { GradeCatalogPanel } from "@/components/grade-catalog-panel";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/grades/")({
-  beforeLoad: () => blockParentFromStudentRoutes(),
+  beforeLoad: async () => {
+    await blockParentFromStudentRoutes();
+    await enforceStudentOwnGradeCatalog();
+  },
   head: () => ({
     meta: [
       { title: "Academic Stages — Ignite Islamic Academy" },

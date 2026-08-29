@@ -1,4 +1,5 @@
 import type { Bi } from "@/lib/curriculum";
+import { gradeMatches } from "@/lib/grade-utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 import { normalizeIslamicGroup, normalizeStudentSection } from "@/lib/student-academics";
@@ -107,10 +108,31 @@ export function isAssignmentUpcoming(
   return !submission && new Date(assignment.due_date).getTime() >= now;
 }
 
+export function assignmentMatchesStudentProfile(
+  assignment: Pick<AssignmentRow, "grade" | "section" | "islamic_group">,
+  profile: {
+    grade: string | null;
+    section: StudentSection | null;
+    islamic_group: IslamicGroup | null;
+  },
+): boolean {
+  if (!profile.grade) return false;
+  return (
+    gradeMatches(assignment.grade, profile.grade) &&
+    (!assignment.section || assignment.section === profile.section) &&
+    (!assignment.islamic_group || assignment.islamic_group === profile.islamic_group)
+  );
+}
+
 export async function fetchStudentAssignments(
   studentUserId: string,
 ): Promise<{ data: AssignmentWithSubmission[]; error: string | null }> {
-  const [assignRes, subRes] = await Promise.all([
+  const [profileRes, assignRes, subRes] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("grade, section, islamic_group")
+      .eq("user_id", studentUserId)
+      .maybeSingle(),
     supabase
       .from("assignments")
       .select("*")
@@ -122,22 +144,34 @@ export async function fetchStudentAssignments(
       .eq("student_id", studentUserId),
   ]);
 
+  if (profileRes.error) return { data: [], error: profileRes.error.message };
   if (assignRes.error) return { data: [], error: assignRes.error.message };
   if (subRes.error) return { data: [], error: subRes.error.message };
+
+  const profile = profileRes.data;
+  if (!profile?.grade) return { data: [], error: null };
 
   const subMap = new Map(
     (subRes.data ?? []).map((s) => [s.assignment_id, s as AssignmentSubmissionRow]),
   );
 
-  const data = (assignRes.data ?? []).map((row) => {
-    const assignment = normalizeAssignmentRow(row);
-    const submission = subMap.get(assignment.id) ?? null;
-    return {
-      ...assignment,
-      submission,
-      displayStatus: resolveDisplayStatus(assignment, submission),
-    };
-  });
+  const data = (assignRes.data ?? [])
+    .map(normalizeAssignmentRow)
+    .filter((assignment) =>
+      assignmentMatchesStudentProfile(assignment, {
+        grade: profile.grade,
+        section: normalizeStudentSection(profile.section),
+        islamic_group: normalizeIslamicGroup(profile.islamic_group),
+      }),
+    )
+    .map((assignment) => {
+      const submission = subMap.get(assignment.id) ?? null;
+      return {
+        ...assignment,
+        submission,
+        displayStatus: resolveDisplayStatus(assignment, submission),
+      };
+    });
 
   return { data, error: null };
 }
@@ -169,6 +203,26 @@ export async function fetchAssignmentById(
   }
 
   const assignment = normalizeAssignmentRow(assignRes.data);
+
+  if (studentUserId) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("grade, section, islamic_group")
+      .eq("user_id", studentUserId)
+      .maybeSingle();
+
+    if (
+      !profile?.grade ||
+      !assignmentMatchesStudentProfile(assignment, {
+        grade: profile.grade,
+        section: normalizeStudentSection(profile.section),
+        islamic_group: normalizeIslamicGroup(profile.islamic_group),
+      })
+    ) {
+      return { assignment: null, error: null };
+    }
+  }
+
   return {
     assignment: {
       ...assignment,
@@ -201,49 +255,7 @@ export async function submitAssignmentWork(input: {
 export async function fetchParentChildAssignments(
   studentUserId: string,
 ): Promise<{ data: AssignmentWithSubmission[]; error: string | null }> {
-  const [profileRes, assignRes, subRes] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("grade, section, islamic_group")
-      .eq("user_id", studentUserId)
-      .maybeSingle(),
-    supabase
-      .from("assignments")
-      .select("*")
-      .eq("published", true)
-      .order("due_date", { ascending: true }),
-    supabase.from("assignment_submissions").select("*").eq("student_id", studentUserId),
-  ]);
-
-  if (profileRes.error) return { data: [], error: profileRes.error.message };
-  if (assignRes.error) return { data: [], error: assignRes.error.message };
-  if (subRes.error) return { data: [], error: subRes.error.message };
-
-  const profile = profileRes.data;
-  if (!profile?.grade) return { data: [], error: null };
-
-  const subMap = new Map(
-    (subRes.data ?? []).map((s) => [s.assignment_id, s as AssignmentSubmissionRow]),
-  );
-
-  const data = (assignRes.data ?? [])
-    .map(normalizeAssignmentRow)
-    .filter(
-      (a) =>
-        a.grade === profile.grade &&
-        (!a.section || a.section === profile.section) &&
-        (!a.islamic_group || a.islamic_group === profile.islamic_group),
-    )
-    .map((assignment) => {
-      const submission = subMap.get(assignment.id) ?? null;
-      return {
-        ...assignment,
-        submission,
-        displayStatus: resolveDisplayStatus(assignment, submission),
-      };
-    });
-
-  return { data, error: null };
+  return fetchStudentAssignments(studentUserId);
 }
 
 export async function fetchAllAssignmentsAdmin(): Promise<{

@@ -15,7 +15,7 @@ export function ParentLinkCodeCard({ code }: { code: string }) {
   }
 
   return (
-    <section className="mb-6 rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/5 to-card p-5 md:p-6 shadow-[var(--shadow-soft)]">
+    <section className="rounded-2xl border border-primary/20 bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5 md:p-6">
       <div className="flex items-start gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <KeyRound className="h-6 w-6" />
@@ -23,7 +23,8 @@ export function ParentLinkCodeCard({ code }: { code: string }) {
         <div className="min-w-0 flex-1 space-y-3">
           <div>
             <h2 className="font-display text-lg text-foreground">{tr("parent_link_code_title")}</h2>
-            <p className="text-sm text-muted-foreground mt-1">{tr("parent_link_code_note")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{tr("parent_link_code_note")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{tr("parent_link_code_purpose")}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <code className="rounded-xl border border-border bg-background px-4 py-2.5 font-mono text-lg tracking-wider text-primary">
