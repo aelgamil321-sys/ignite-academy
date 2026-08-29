@@ -1,12 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
+import {
+  buildTeacherClassEntries,
+  TeacherClassCard,
+  TeacherClassCardGrid,
+} from "@/components/teacher-class-card";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import {
+  fetchScopedStudents,
   fetchTeacherContext,
-  formatClassScopeLabel,
-  type TeacherAssignmentScope,
+  type ScopedStudentRow,
+  type TeacherContext,
 } from "@/lib/teacher-dashboard";
 
 export const Route = createFileRoute("/teacher/classes/")({
@@ -14,9 +20,10 @@ export const Route = createFileRoute("/teacher/classes/")({
 });
 
 function TeacherClassesPage() {
-  const { lang, tr } = useI18n();
+  const { tr } = useI18n();
   const [loading, setLoading] = useState(true);
-  const [assignments, setAssignments] = useState<TeacherAssignmentScope[]>([]);
+  const [context, setContext] = useState<TeacherContext | null>(null);
+  const [students, setStudents] = useState<ScopedStudentRow[]>([]);
 
   useEffect(() => {
     void (async () => {
@@ -24,10 +31,14 @@ function TeacherClassesPage() {
       const { data } = await supabase.auth.getUser();
       if (!data.user) return;
       const ctx = await fetchTeacherContext(data.user.id);
-      setAssignments(ctx.assignments);
+      const scopedStudents = await fetchScopedStudents();
+      setContext(ctx);
+      setStudents(scopedStudents);
       setLoading(false);
     })();
   }, []);
+
+  const entries = useMemo(() => (context ? buildTeacherClassEntries(context) : []), [context]);
 
   if (loading) {
     return (
@@ -41,27 +52,14 @@ function TeacherClassesPage() {
   return (
     <div className="space-y-4">
       <h2 className="font-display text-xl text-foreground">{tr("teacher_my_classes")}</h2>
-      {assignments.length === 0 ? (
-        <p className="text-sm text-muted-foreground italic">{tr("teacher_no_classes")}</p>
+      {entries.length === 0 ? (
+        <p className="text-sm italic text-muted-foreground">{tr("teacher_no_classes")}</p>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {assignments.map((a) => (
-            <li key={a.id}>
-              <Link
-                to="/teacher/students"
-                search={{
-                  grade: a.grade,
-                  section: a.section ?? "",
-                  islamic_group: a.islamic_group ?? "",
-                }}
-                className="block rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] hover:border-primary/40"
-              >
-                <p className="font-semibold text-foreground">{formatClassScopeLabel(a, lang)}</p>
-                <p className="mt-1 text-xs text-primary">{tr("teacher_view_students")}</p>
-              </Link>
-            </li>
+        <TeacherClassCardGrid>
+          {entries.map(({ key, assignment }) => (
+            <TeacherClassCard key={key} assignment={assignment} students={students} />
           ))}
-        </ul>
+        </TeacherClassCardGrid>
       )}
     </div>
   );
