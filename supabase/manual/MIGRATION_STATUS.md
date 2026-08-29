@@ -14,6 +14,7 @@ The following migration files were **manually applied to production** (not via a
 | `20260828190000` | `supabase/migrations/20260828190000_admin_content_ownership_rls.sql` |
 | `20260829120000` | `supabase/migrations/20260829120000_teacher_announcement_targeting_rls.sql` |
 | `20260829140000` | `supabase/migrations/20260829140000_teacher_timetables.sql` |
+| `20260829150000` | `supabase/migrations/20260829150000_parent_explicit_links_security.sql` |
 
 ### Articles targeting / admin Hall of Fame security (`20260827140000`)
 
@@ -55,6 +56,22 @@ The following migration files were **manually applied to production** (not via a
 - **No `db push` performed**
 - **No migration repair performed**
 
+### Parent explicit-links security (`20260829150000`)
+
+- Replaces `parent_can_read_student(uuid)` so Parent academic access requires an explicit `parent_student_links` row.
+- Removes legacy name+grade authorization from `parent_can_read_student`.
+- Drops `trg_sync_parent_student_link` and `sync_parent_student_link_from_profile()`.
+- Does **not** delete `parent_student_links` data or alter `redeem_parent_link_code`.
+- **Status:** **APPLIED TO PRODUCTION — VERIFIED**
+- **Manual apply copy:** `supabase/manual/20260829150000_parent_explicit_links_security_MANUAL.sql`
+- **Apply script (Management API):** `scripts/apply-parent-explicit-links-security.mjs`
+- **Production verification:** `supabase/manual/verify_parent_explicit_links_security_READ_ONLY.sql` or `scripts/verify-parent-explicit-links-security.mjs`
+- **Verified:** `parent_can_read_student` uses explicit `parent_student_links` only; `uses_student_name = false`; `uses_student_grade = false`; `trg_sync_parent_student_link` absent; `sync_parent_student_link_from_profile` absent; `redeem_parent_link_code` preserved
+- **Verification date:** 2026-08-29
+- **Verification type:** production catalog/policy verification (not runtime user impersonation)
+- **No `db push` performed**
+- **No migration repair performed**
+
 ## Operational rules
 
 - **DO NOT** manually re-run these migrations against production.
@@ -70,9 +87,13 @@ The following migration files were **manually applied to production** (not via a
 - Manual apply copy (admin ownership): `supabase/manual/20260828190000_admin_content_ownership_rls_MANUAL.sql`
 - Manual apply copy (teacher announcement targeting): `supabase/manual/20260829120000_teacher_announcement_targeting_rls_MANUAL.sql`
 - Manual apply copy (teacher timetables): `supabase/manual/20260829140000_teacher_timetables_MANUAL.sql`
+- Manual apply copy (parent explicit-links security): `supabase/manual/20260829150000_parent_explicit_links_security_MANUAL.sql`
 - Verification (admin summary): `supabase/manual/verify_admin_content_ownership_SUMMARY.sql`
 - Verification (admin detailed): `supabase/manual/verify_admin_content_ownership_READ_ONLY.sql`
 - Verification (teacher announcement targeting): `supabase/manual/verify_teacher_announcement_targeting_rls.sql`
 - Verification (teacher timetables): `supabase/manual/verify_teacher_timetables_security_READ_ONLY.sql`
+- Verification (parent explicit-links security): `supabase/manual/verify_parent_explicit_links_security_READ_ONLY.sql`
 - Optional script (admin read-only checks): `scripts/verify-admin-content-ownership.mjs`
 - Optional script (teacher read-only checks): `scripts/verify-teacher-announcement-targeting.mjs`
+- Optional script (parent explicit-links apply): `scripts/apply-parent-explicit-links-security.mjs`
+- Optional script (parent explicit-links verify): `scripts/verify-parent-explicit-links-security.mjs`

@@ -1,15 +1,22 @@
 import { Clock3, ClipboardCheck, Award } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { ParentDashboardHero } from "@/components/parent-dashboard-hero";
-import { ParentDashboardRecommendation } from "@/components/parent-dashboard-recommendation";
-import { ParentDashboardSummary, PARENT_SECTION_IDS } from "@/components/parent-dashboard-summary";
+import { ParentDashboardSummary } from "@/components/parent-dashboard-summary";
 import { ParentAcademicChart } from "@/components/parent-academic-chart";
 import { ParentAssignmentsSection } from "@/components/parent-assignments-section";
-import { ParentDashboardInsights } from "@/components/parent-dashboard-insights";
-import { ParentDashboardCertificates } from "@/components/parent-dashboard-certificates";
-import { ParentDashboardBadges } from "@/components/parent-dashboard-badges";
-import { useI18n, L, uiBi } from "@/lib/i18n";
+import { ParentDashboardNeedsAttention } from "@/components/parent-dashboard-needs-attention";
+import { ParentDashboardAchievements } from "@/components/parent-dashboard-achievements";
+import { useI18n, uiBi } from "@/lib/i18n";
+import { PARENT_NAV_ANCHORS } from "@/lib/parent-nav";
+import {
+  PARENT_DASH_SECTION,
+  PARENT_DASH_SECTION_LEAD,
+  PARENT_DASH_SECTION_TITLE,
+} from "@/lib/parent-dashboard-ui";
 import { localeForFormatting, type Lang } from "@/lib/i18n-config";
+import { fetchParentChildAssignments } from "@/lib/assignment";
 import type { ParentDashboardData } from "@/lib/parent-dashboard";
+import type { ParentLinkedChild } from "@/lib/parent-children";
 import type { ActivityTimelineItem } from "@/lib/student-progress";
 
 function formatDate(iso: string, lang: Lang): string {
@@ -31,77 +38,101 @@ function timelineKey(item: ActivityTimelineItem): string {
   return `badge-${item.badgeId}-${item.at}`;
 }
 
-export function ParentDashboardView({ data }: { data: ParentDashboardData }) {
+type ParentDashboardViewProps = {
+  data: ParentDashboardData;
+  linkedChildren?: ParentLinkedChild[];
+  selectedStudentUserId?: string;
+  onSelectChild?: (studentUserId: string) => void;
+};
+
+export function ParentDashboardView({
+  data,
+  linkedChildren,
+  selectedStudentUserId,
+  onSelectChild,
+}: ParentDashboardViewProps) {
   const { lang, bi, tr } = useI18n();
   const { progress, performanceReport } = data;
+  const [assignmentsLoading, setAssignmentsLoading] = useState(true);
+  const [assignments, setAssignments] = useState<Awaited<ReturnType<typeof fetchParentChildAssignments>>["data"]>([]);
+
+  useEffect(() => {
+    let active = true;
+    setAssignmentsLoading(true);
+    void (async () => {
+      const result = await fetchParentChildAssignments(data.studentUserId);
+      if (!active) return;
+      setAssignments(result.data);
+      setAssignmentsLoading(false);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [data.studentUserId]);
+
+  const assignmentsNeedingAttention = useMemo(
+    () =>
+      assignments.filter(
+        (a) => a.displayStatus === "late" || a.displayStatus === "missing",
+      ).length,
+    [assignments],
+  );
+
+  const recentActivity = progress.activityTimeline.slice(0, 4);
 
   return (
-    <div className="space-y-5 sm:space-y-6">
-      <ParentDashboardHero data={data} />
+    <div className="space-y-4 sm:space-y-5">
+      <ParentDashboardHero
+        data={data}
+        linkedChildren={linkedChildren}
+        selectedStudentUserId={selectedStudentUserId}
+        onSelectChild={onSelectChild}
+      />
 
-      <ParentDashboardRecommendation data={data} />
+      <ParentDashboardSummary
+        data={data}
+        assignmentsNeedingAttention={assignmentsNeedingAttention}
+        assignmentsLoading={assignmentsLoading}
+      />
 
-      <ParentDashboardSummary data={data} />
-
-      <div className="grid gap-5 lg:grid-cols-5 lg:gap-6">
-        <div
-          id={PARENT_SECTION_IDS.academicPerformance}
-          className="scroll-mt-24 lg:col-span-3"
-        >
-          <ParentAcademicChart report={performanceReport} />
-        </div>
-        <div
-          id={PARENT_SECTION_IDS.progressReport}
-          className="scroll-mt-24 lg:col-span-2"
-        >
-          <ParentDashboardInsights data={data} />
+      <div id={PARENT_NAV_ANCHORS.progress} className="scroll-mt-24">
+        <div className="grid gap-4 lg:grid-cols-5 lg:gap-5">
+          <div className="lg:col-span-3">
+            <ParentAcademicChart report={performanceReport} />
+          </div>
+          <div className="lg:col-span-2">
+            <ParentDashboardNeedsAttention
+              data={data}
+              assignments={assignments}
+              loading={assignmentsLoading}
+            />
+          </div>
         </div>
       </div>
 
       <ParentAssignmentsSection studentUserId={data.studentUserId} />
 
-      <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
-        <div id={PARENT_SECTION_IDS.certificates} className="scroll-mt-24">
-          <ParentDashboardCertificates
-            certificates={progress.certificates}
-            studentUserId={data.studentUserId}
-          />
-        </div>
-        <ParentDashboardBadges progress={progress} />
-      </div>
+      <ParentDashboardAchievements progress={progress} studentUserId={data.studentUserId} />
 
-      <section className="rounded-2xl border border-primary/15 bg-card p-5 shadow-[var(--shadow-soft)] sm:p-6">
-        <div className="mb-4 flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Clock3 className="h-5 w-5" />
+      {recentActivity.length > 0 ? (
+        <section className={PARENT_DASH_SECTION}>
+          <div className="mb-2 flex items-center gap-2">
+            <Clock3 className="h-4 w-4 text-primary" aria-hidden />
+            <div>
+              <h2 className={PARENT_DASH_SECTION_TITLE}>{tr("parent_recent_activity")}</h2>
+              <p className={PARENT_DASH_SECTION_LEAD}>{tr("parent_recent_activity_lead")}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-display text-xl text-foreground">
-              {tr("parent_recent_activity")}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {tr("parent_recent_activity_lead")}
-            </p>
-          </div>
-        </div>
-        {progress.activityTimeline.length === 0 ? (
-          <p className="text-sm italic text-muted-foreground">
-            {tr("parent_activity_empty")}
-          </p>
-        ) : (
-          <ul className="space-y-0">
-            {progress.activityTimeline.map((item, index) => (
-              <li key={timelineKey(item)} className="relative flex gap-4 pb-5 last:pb-0">
-                {index < progress.activityTimeline.length - 1 && (
-                  <span
-                    className="absolute start-[1.125rem] top-10 bottom-0 w-px bg-border"
-                    aria-hidden
-                  />
-                )}
+          <ul className="space-y-2">
+            {recentActivity.map((item) => (
+              <li
+                key={timelineKey(item)}
+                className="flex items-start gap-3 rounded-md border border-border/80 bg-background px-3 py-2.5 shadow-sm"
+              >
                 <div
-                  className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm ${
                     item.kind === "badge_unlocked"
-                      ? "border-primary/30 bg-primary/10 text-lg"
+                      ? "border-primary/30 bg-primary/10"
                       : item.kind === "certificate_earned"
                         ? "border-gold/30 bg-gold/10 text-gold"
                         : "border-primary/20 bg-primary/10 text-primary"
@@ -110,41 +141,38 @@ export function ParentDashboardView({ data }: { data: ParentDashboardData }) {
                   {item.kind === "badge_unlocked" ? (
                     <span aria-hidden>{item.badgeIcon}</span>
                   ) : item.kind === "certificate_earned" ? (
-                    <Award className="h-4 w-4" />
+                    <Award className="h-3.5 w-3.5" />
                   ) : (
-                    <ClipboardCheck className="h-4 w-4" />
+                    <ClipboardCheck className="h-3.5 w-3.5" />
                   )}
                 </div>
-                <div className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-3 transition-shadow hover:shadow-sm">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-primary">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-primary">
                     {item.kind === "badge_unlocked"
                       ? tr("parent_badge_unlocked")
                       : item.kind === "certificate_earned"
                         ? tr("parent_certificate_earned")
                         : tr("parent_quiz_completed")}
                   </div>
-                  <div className="mt-1 font-display text-lg leading-snug text-foreground">
+                  <div className="text-sm font-medium leading-snug text-foreground">
                     {item.kind === "badge_unlocked"
                       ? uiBi(item.badgeTitle, lang)
                       : bi(item.lessonTitle) || item.lessonTitle.en}
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                     <span>{formatDate(item.at, lang)}</span>
-                    {item.kind !== "badge_unlocked" && (
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary">
+                    {item.kind !== "badge_unlocked" ? (
+                      <span className="rounded-full bg-primary/10 px-1.5 py-0.5 font-semibold text-primary">
                         {item.scorePct}%
                       </span>
-                    )}
-                    {item.kind === "certificate_earned" && (
-                      <span className="font-mono">{item.certificateId}</span>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </li>
             ))}
           </ul>
-        )}
-      </section>
+        </section>
+      ) : null}
     </div>
   );
 }

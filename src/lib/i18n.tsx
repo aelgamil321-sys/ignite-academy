@@ -459,6 +459,52 @@ export const t = {
   parent_dashboard_cta: { en: "Open Parent Dashboard", ar: "فتح لوحة ولي الأمر" },
   parent_dashboard_loading: { en: "Loading parent dashboard…", ar: "جارٍ تحميل لوحة ولي الأمر…" },
   parent_dashboard_switching: { en: "Loading selected child…", ar: "جارٍ تحميل بيانات الطفل المحدد…" },
+  parent_nav_dashboard: { en: "Parent Dashboard", ar: "لوحة ولي الأمر" },
+  parent_nav_child_progress: { en: "Child Progress", ar: "تقدم الأبناء" },
+  parent_nav_assignments: { en: "Assignments", ar: "الواجبات" },
+  parent_nav_achievements: { en: "Certificates & Achievements", ar: "الشهادات والإنجازات" },
+  parent_nav_announcements: { en: "Announcements", ar: "الإعلانات" },
+  parent_nav_guides: { en: "Parent Guides", ar: "دليل ولي الأمر" },
+  parent_workspace_announcements_lead: {
+    en: "School updates and important notices.",
+    ar: "مستجدات المدرسة والإشعارات المهمة.",
+  },
+  parent_workspace_guides_lead: {
+    en: "Resources and tips to support your child's learning at home.",
+    ar: "مصادر ونصائح لدعم تعلّم ابنك/ابنتك في المنزل.",
+  },
+  parent_workspace_guides_empty: {
+    en: "No parent guides published yet.",
+    ar: "لا توجد أدلة لولي الأمر منشورة بعد.",
+  },
+  parent_workspace_back_announcements: {
+    en: "Back to announcements",
+    ar: "العودة إلى الإعلانات",
+  },
+  parent_workspace_back_guides: {
+    en: "Back to parent guides",
+    ar: "العودة إلى دليل ولي الأمر",
+  },
+  parent_workspace_public_announcements_link: {
+    en: "View public announcements page",
+    ar: "عرض صفحة الإعلانات العامة",
+  },
+  parent_workspace_public_guides_link: {
+    en: "View public Parent Corner",
+    ar: "عرض ركن الوالدين العام",
+  },
+  parent_nav_profile: { en: "Profile & Children", ar: "الملف الشخصي والأبناء" },
+  parent_nav_coming_soon: {
+    en: "Available in a future workspace update",
+    ar: "متاح في تحديث لاحق لمساحة العمل",
+  },
+  parent_sign_out: { en: "Sign Out", ar: "تسجيل الخروج" },
+  parent_dash_open_menu: { en: "Open menu", ar: "فتح القائمة" },
+  parent_dash_nav_brand: {
+    en: "Your family learning monitor",
+    ar: "مراقبة تعلّم أبنائك",
+  },
+  parent_dash_topbar_lead: { en: "Ignite Islamic Academy", ar: "أكاديمية اجنايت الإسلامية" },
   parent_corner_student_msg: {
     en: "Please sign in with a parent account to access Parent Corner and track your child's progress.",
     ar: "يرجى تسجيل الدخول بحساب ولي أمر للوصول إلى ركن الوالدين ومتابعة تقدّم ابنك/ابنتك.",
@@ -487,12 +533,12 @@ export const t = {
     ar: "تم العثور على أكثر من طالب مطابق. يرجى التواصل مع المدرسة لتأكيد الربط.",
   },
   parent_link_code_label: { en: "Student Link Code", ar: "كود الطالب" },
-  parent_link_code_reg_label: { en: "Student Link Code", ar: "كود الطالب / Student Link Code" },
+  parent_link_code_reg_label: { en: "Parent Link Code", ar: "رمز ربط ولي الأمر" },
   parent_link_code_hint: {
     en: "Enter the code from your child's student dashboard.",
     ar: "أدخل الرمز من لوحة الطالب.",
   },
-  parent_link_code_title: { en: "Parent Link Code", ar: "كود ربط ولي الأمر" },
+  parent_link_code_title: { en: "Parent Link Code", ar: "رمز ربط ولي الأمر" },
   parent_link_code_note: {
     en: "Share this code only with your parent so they can link your account in the parent portal.",
     ar: "شارك هذا الكود مع ولي أمرك فقط لربط حسابك في بوابة ولي الأمر.",
@@ -521,6 +567,32 @@ export const t = {
     ar: "أدخل رمز ربط ولي الأمر من لوحة الطالب.",
   },
   parent_add_child_submit: { en: "Link child", ar: "ربط الطفل" },
+  parent_settings_profile_heading: { en: "Parent Profile", ar: "ملف ولي الأمر" },
+  parent_settings_role_label: { en: "Account role", ar: "دور الحساب" },
+  parent_settings_my_children_title: { en: "My Children", ar: "أبنائي" },
+  parent_settings_children_empty: {
+    en: "No children linked yet. Use a Parent Link Code below to connect your child.",
+    ar: "لا يوجد أبناء مرتبطون بعد. استخدم رمز ربط ولي الأمر أدناه لربط طفلك.",
+  },
+  parent_settings_view_progress: { en: "View Progress", ar: "عرض التقدم" },
+  parent_settings_link_child_title: { en: "Link Another Child", ar: "ربط طفل آخر" },
+  parent_settings_link_code_instruction: {
+    en: "Enter the Parent Link Code shown in your child's student profile.",
+    ar: "أدخل رمز ربط ولي الأمر الظاهر في ملف الطالب.",
+  },
+  parent_settings_preferences_title: { en: "Preferences", ar: "التفضيلات" },
+  parent_settings_preferences_lead: {
+    en: "Choose your preferred language for the parent workspace.",
+    ar: "اختر لغتك المفضلة في مساحة عمل ولي الأمر.",
+  },
+  parent_link_code_error_generic: {
+    en: "We could not complete that request. Please check your connection and try again.",
+    ar: "تعذّر إتمام الطلب. يرجى التحقق من الاتصال والمحاولة مرة أخرى.",
+  },
+  parent_link_code_error_auth: {
+    en: "Please sign in again with your parent account to link a child.",
+    ar: "يرجى تسجيل الدخول مرة أخرى بحساب ولي الأمر لربط الطفل.",
+  },
 
   // Resources
   res_title: { en: "Resource Library", ar: "المكتبة التعليمية" },
@@ -1837,6 +1909,10 @@ export const t = {
     en: "Could not load parent dashboard:",
     ar: "تعذر تحميل لوحة ولي الأمر:",
   },
+  parent_dashboard_load_error: {
+    en: "We couldn't load your child's dashboard right now. Please try again.",
+    ar: "تعذّر تحميل لوحة تقدّم طفلك الآن. يرجى المحاولة مرة أخرى.",
+  },
   content_translating: { en: "Translating…", ar: "جارٍ الترجمة…" },
   content_translation_unavailable: {
     en: "Translation is not available yet.",
@@ -1873,6 +1949,10 @@ export const t = {
   parent_assignments_lead: {
     en: "Track upcoming, submitted, missing, and late assignments.",
     ar: "تابع الواجبات القادمة والمُرسلة والناقصة والمتأخرة.",
+  },
+  parent_assignments_empty: {
+    en: "No assignments to show yet.",
+    ar: "لا توجد واجبات لعرضها بعد.",
   },
   assignment_no_upcoming: { en: "No upcoming assignments.", ar: "لا توجد واجبات قادمة." },
   assignment_no_submitted: { en: "No submitted assignments yet.", ar: "لا توجد واجبات مُرسلة بعد." },
@@ -1977,6 +2057,47 @@ export const t = {
     ar: "توصية ذكية لولي الأمر",
   },
   parent_academic_performance: { en: "Academic Performance", ar: "الأداء الأكاديمي" },
+  parent_kpi_attention: {
+    en: "Assignments Needing Attention",
+    ar: "واجبات تحتاج انتباهك",
+  },
+  parent_kpi_no_quiz_yet: { en: "No quiz results yet", ar: "لا نتائج اختبارات بعد" },
+  parent_kpi_no_lessons_yet: { en: "No lessons completed yet", ar: "لم يُكمل أي درس بعد" },
+  parent_kpi_no_lessons_completed: { en: "No lessons completed yet", ar: "لم يُكمل أي درس بعد" },
+  parent_kpi_lessons_count: {
+    en: "{n} lessons completed",
+    ar: "أكمل {n} درسًا",
+  },
+  parent_kpi_lessons_available: {
+    en: "{n} lessons available in grade",
+    ar: "{n} دروس متاحة في الصف",
+  },
+  parent_kpi_nothing_attention: { en: "Nothing needs attention", ar: "لا شيء يحتاج انتباهك" },
+  parent_kpi_no_certs_yet: { en: "No certificates yet", ar: "لا شهادات بعد" },
+  parent_needs_attention_title: { en: "Needs Your Attention", ar: "يحتاج انتباهك" },
+  parent_needs_attention_lead: {
+    en: "Assignments and academic follow-ups for your child.",
+    ar: "الواجبات والمتابعة الأكاديمية لابنك/ابنتك.",
+  },
+  parent_everything_good: { en: "Everything looks good", ar: "كل شيء يبدو جيدًا" },
+  parent_rank_section: { en: "Section Rank", ar: "الترتيب في الشعبة" },
+  parent_rankings_title: { en: "Peer rankings", ar: "الترتيب بين الأقران" },
+  parent_rankings_not_enough: {
+    en: "Not enough data yet",
+    ar: "لا توجد بيانات كافية بعد",
+  },
+  parent_achievements_section_title: {
+    en: "Achievements & Certificates",
+    ar: "الإنجازات والشهادات",
+  },
+  parent_achievements_section_lead: {
+    en: "Certificates earned and badge milestones.",
+    ar: "الشهادات المكتسبة وإنجازات الشارات.",
+  },
+  parent_badges_empty: {
+    en: "Badges unlock as your child progresses.",
+    ar: "تُفتح الشارات مع تقدّم ابنك/ابنتك.",
+  },
   parent_quiz_trend_lead: {
     en: "Quiz score trend over time.",
     ar: "اتجاه درجات الاختبارات عبر الزمن.",

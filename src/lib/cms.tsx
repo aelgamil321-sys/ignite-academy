@@ -556,7 +556,7 @@ function getGradeFromSlug(gradeSlug: string) {
 export type UnifiedVideo = VideoItem & { category?: VideoCategory; _custom?: { thumbnailUrl?: string } };
 export type UnifiedResource = Resource & { _url?: string; _fileName?: string; subjectCategory?: SubjectCategory };
 export type UnifiedAnnouncement = Announcement;
-export type UnifiedParentGuide = ParentGuide;
+export type UnifiedParentGuide = ParentGuide & { createdAt?: number; imageUrl?: string };
 
 export function useAllVideos(): UnifiedVideo[] {
   const { videos } = useCMS();
@@ -631,8 +631,10 @@ export function useAllParentGuides(): UnifiedParentGuide[] {
     .map((a) => ({
       slug: a.id,
       title: a.title,
-      excerpt: { en: a.content.en.slice(0, 160), ar: a.content.ar.slice(0, 160) },
+      excerpt: excerptFromContent(a.content),
       body: a.content,
+      createdAt: a.createdAt,
+      imageUrl: a.imageUrl,
     }));
 }
 

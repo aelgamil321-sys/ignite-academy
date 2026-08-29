@@ -1,18 +1,18 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { GraduationCap, Loader2, LogOut, Save, UserRound } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PageShell } from "@/components/page-shell";
 import { ParentLinkChildForm } from "@/components/parent-link-child-form";
-import { PreferredLanguageField } from "@/components/preferred-language-field";
+import { ParentSettingsChildrenSection } from "@/components/parent-settings-children-section";
+import { ParentSettingsPreferences } from "@/components/parent-settings-preferences";
+import { ParentSettingsProfileCard } from "@/components/parent-settings-profile-card";
+import { ParentWorkspacePageHeader } from "@/components/parent-workspace-page-header";
+import { ParentGate } from "@/lib/parent-layout";
 import { useI18n } from "@/lib/i18n";
-import { getAccountRole, isParentAccount, navigateTargetForAccountRole } from "@/lib/account-role";
 import { fetchParentLinkedChildren, type ParentLinkedChild } from "@/lib/parent-children";
 import { normalizePreferredLang, savePreferredLanguage as persistPreferredLanguage } from "@/lib/preferred-language";
 import type { Lang } from "@/lib/i18n-config";
 import { supabase } from "@/integrations/supabase/client";
-import { gradeDisplayName } from "@/lib/grade-utils";
-import { grades } from "@/lib/curriculum";
+import { useParentShell } from "@/lib/parent-shell-context";
 
 export const Route = createFileRoute("/parent/settings")({
   head: () => ({
@@ -21,55 +21,49 @@ export const Route = createFileRoute("/parent/settings")({
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
-  component: ParentSettingsPage,
+  component: ParentSettingsRoute,
 });
 
+function ParentSettingsRoute() {
+  return (
+    <ParentGate>
+      <ParentSettingsPage />
+    </ParentGate>
+  );
+}
+
 function ParentSettingsPage() {
-  const navigate = useNavigate();
-  const { tr, lang, bi, biMaybe, setLang } = useI18n();
+  const { userId } = useParentShell();
+  const { tr, lang, setLang } = useI18n();
   const [loading, setLoading] = useState(true);
   const [savingLang, setSavingLang] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [preferredLanguage, setPreferredLanguage] = useState<Lang>("ar");
   const [children, setChildren] = useState<ParentLinkedChild[]>([]);
-  const [linkError, setLinkError] = useState<"none" | "multiple" | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState<"none" | null>(null);
 
-  const loadChildren = async (parentUserId: string) => {
+  const loadChildren = useCallback(async (parentUserId: string) => {
     const childrenResult = await fetchParentLinkedChildren(parentUserId);
     setChildren(childrenResult.children);
     setLinkError(childrenResult.linkError);
-  };
+  }, []);
 
   useEffect(() => {
     let active = true;
     void (async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!active) return;
-      if (!auth.user) {
-        navigate({ to: "/auth", search: { mode: "login", accountType: "parent" } });
-        return;
-      }
-      const parent = await isParentAccount(auth.user.id);
-      if (!parent) {
-        const role = await getAccountRole(auth.user.id);
-        navigate(navigateTargetForAccountRole(role));
-        return;
-      }
       const [{ data: profile }, childrenResult] = await Promise.all([
         supabase
           .from("parent_profiles")
           .select("full_name, email, preferred_language")
-          .eq("user_id", auth.user.id)
+          .eq("user_id", userId)
           .maybeSingle(),
-        fetchParentLinkedChildren(auth.user.id),
+        fetchParentLinkedChildren(userId),
       ]);
       if (!active) return;
       setFullName(profile?.full_name ?? "");
-      setEmail(profile?.email ?? auth.user.email ?? "");
+      setEmail(profile?.email ?? "");
       setPreferredLanguage(normalizePreferredLang(profile?.preferred_language) ?? lang);
-      setUserId(auth.user.id);
       setChildren(childrenResult.children);
       setLinkError(childrenResult.linkError);
       setLoading(false);
@@ -77,161 +71,50 @@ function ParentSettingsPage() {
     return () => {
       active = false;
     };
-  }, [navigate, lang]);
+  }, [userId, lang]);
 
   async function handleSavePreferredLanguage() {
-    if (!userId) return;
     setSavingLang(true);
     try {
       await persistPreferredLanguage(userId, preferredLanguage, "parent");
       setLang(preferredLanguage);
       toast.success(tr("profile_preferred_language_saved"));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : String(error));
+    } catch {
+      toast.error(tr("parent_link_code_error_generic"));
     } finally {
       setSavingLang(false);
     }
   }
 
-  async function signOut() {
-    await supabase.auth.signOut();
-    toast.success(tr("signed_out"));
-    navigate({ to: "/auth", search: { mode: "login", accountType: "parent" } });
+  if (loading) {
+    return (
+      <div className="max-w-3xl">
+        <ParentWorkspacePageHeader title={tr("parent_nav_profile")} lead={tr("parent_profile_lead")} />
+        <p className="text-sm text-foreground/60">{tr("parent_profile_loading")}</p>
+      </div>
+    );
   }
 
   return (
-    <PageShell
-      eyebrow={tr("nav_parent")}
-      title={tr("parent_profile_title")}
-      lead={tr("parent_profile_lead")}
-      crumbs={[
-        { label: tr("nav_parent"), to: "/parent" },
-        { label: tr("parent_dashboard_title"), to: "/parent/dashboard" },
-        { label: tr("parent_profile_title") },
-      ]}
-    >
-      {loading ? (
-        <p className="text-sm text-muted-foreground">{tr("parent_profile_loading")}</p>
-      ) : (
-        <div className="max-w-2xl space-y-6">
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <UserRound className="h-6 w-6" />
-              </div>
-              <div className="space-y-4 flex-1">
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {tr("parent_name_label")}
-                  </div>
-                  <div className="font-display text-xl text-foreground mt-1">{fullName || "—"}</div>
-                </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">{tr("your_email")}</div>
-                  <div className="text-sm mt-1">{email || "—"}</div>
-                </div>
-                <PreferredLanguageField
-                  value={preferredLanguage}
-                  onChange={setPreferredLanguage}
-                />
-                <button
-                  type="button"
-                  disabled={savingLang}
-                  onClick={() => void handleSavePreferredLanguage()}
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-60"
-                >
-                  {savingLang ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {tr("student_saving")}
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4" />
-                      {tr("save_changes")}
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
+    <div className="max-w-3xl space-y-5">
+      <ParentWorkspacePageHeader title={tr("parent_nav_profile")} lead={tr("parent_profile_lead")} />
 
-          <section className="space-y-3">
-            <div>
-              <h2 className="font-display text-lg text-foreground">{tr("parent_linked_children_title")}</h2>
-              <p className="text-sm text-muted-foreground mt-1">{tr("parent_linked_children_lead")}</p>
-            </div>
+      <ParentSettingsProfileCard fullName={fullName} email={email} />
 
-            {linkError === "multiple" ? (
-              <div className="rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900">
-                {tr("parent_link_multiple_error")}
-              </div>
-            ) : linkError === "none" || children.length === 0 ? (
-              <div className="rounded-2xl border border-amber-300/60 bg-amber-50 px-5 py-4 text-sm text-amber-900">
-                {tr("parent_link_none_error")}
-              </div>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {children.map((child) => {
-                  const gradeName =
-                    gradeDisplayName(child.gradeSlug, lang) ||
-                    biMaybe(grades.find((g) => g.slug === child.gradeSlug)?.name) ||
-                    child.gradeSlug;
-                  return (
-                    <article
-                      key={child.studentUserId}
-                      className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                          <UserRound className="h-5 w-5" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                            {tr("parent_child_name_label")}
-                          </div>
-                          <div className="font-display text-lg text-foreground mt-1 leading-snug">
-                            {bi(child.studentName) || child.studentName.en}
-                          </div>
-                          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-primary">
-                            <GraduationCap className="h-3.5 w-3.5" />
-                            {gradeName}
-                          </div>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </section>
+      <ParentSettingsChildrenSection parentUserId={userId} children={children} linkError={linkError} />
 
-          <ParentLinkChildForm
-            onLinked={() => {
-              if (userId) void loadChildren(userId);
-            }}
-          />
+      <ParentLinkChildForm
+        onLinked={() => {
+          void loadChildren(userId);
+        }}
+      />
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/parent/dashboard"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
-            >
-              {tr("parent_dashboard_cta")}
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                void signOut();
-              }}
-              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              {tr("sign_out")}
-            </button>
-          </div>
-        </div>
-      )}
-    </PageShell>
+      <ParentSettingsPreferences
+        preferredLanguage={preferredLanguage}
+        onPreferredLanguageChange={setPreferredLanguage}
+        saving={savingLang}
+        onSave={() => void handleSavePreferredLanguage()}
+      />
+    </div>
   );
 }

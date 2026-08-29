@@ -40,9 +40,11 @@ function CategoryBadge({
 export function AnnouncementCard({
   announcement,
   variant = "dark",
+  detailTo = "/announcements/$slug",
 }: {
   announcement: Announcement;
   variant?: "dark" | "light";
+  detailTo?: "/announcements/$slug" | "/parent/announcements/$slug";
 }) {
   const { bi, tr, dir, lang } = useI18n();
   const dateLabel = new Date(announcement.createdAt).toLocaleDateString(
@@ -142,7 +144,7 @@ export function AnnouncementCard({
         </p>
 
         <Link
-          to="/announcements/$slug"
+          to={detailTo}
           params={{ slug: announcement.slug }}
           className={[
             "mt-4 inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300",

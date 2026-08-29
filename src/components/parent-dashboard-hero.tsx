@@ -1,18 +1,19 @@
 import { StudentProfileAvatar } from "@/components/student-profile-avatar";
+import { ParentChildSelector } from "@/components/parent-child-selector";
 import { useI18n, L } from "@/lib/i18n";
-import { heroStatusLabel } from "@/lib/parent-dashboard-insights";
 import type { ParentDashboardData } from "@/lib/parent-dashboard";
+import type { ParentLinkedChild } from "@/lib/parent-children";
 import { islamicGroupLabel, sectionLabel } from "@/lib/student-academics";
 
 function ProgressRing({ value, label }: { value: number; label: string }) {
-  const size = 88;
-  const stroke = 7;
+  const size = 68;
+  const stroke = 6;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (value / 100) * circumference;
 
   return (
-    <div className="relative flex h-[88px] w-[88px] shrink-0 items-center justify-center">
+    <div className="relative flex h-[68px] w-[68px] shrink-0 items-center justify-center">
       <svg width={size} height={size} className="-rotate-90" aria-hidden>
         <circle
           cx={size / 2}
@@ -36,88 +37,89 @@ function ProgressRing({ value, label }: { value: number; label: string }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="font-display text-lg leading-none text-primary">{value}%</span>
-        <span className="mt-0.5 text-[9px] uppercase tracking-wider text-white/55">{label}</span>
+        <span className="font-display text-base leading-none text-primary">{value}%</span>
+        <span className="mt-0.5 text-[8px] uppercase tracking-wider text-white/55">{label}</span>
       </div>
     </div>
   );
 }
 
-function statusBadgeClass(status: ParentDashboardData["performanceReport"]["status"]): string {
-  if (status === "excellent") return "bg-primary/20 text-primary border-primary/40";
-  if (status === "good") return "bg-primary/12 text-primary border-primary/30";
-  if (status === "needs_support") return "bg-white/10 text-white/90 border-white/20";
-  return "bg-white/5 text-white/60 border-white/15";
-}
+type ParentDashboardHeroProps = {
+  data: ParentDashboardData;
+  linkedChildren?: ParentLinkedChild[];
+  selectedStudentUserId?: string;
+  onSelectChild?: (studentUserId: string) => void;
+};
 
-export function ParentDashboardHero({ data }: { data: ParentDashboardData }) {
+export function ParentDashboardHero({
+  data,
+  linkedChildren,
+  selectedStudentUserId,
+  onSelectChild,
+}: ParentDashboardHeroProps) {
   const { tr, lang } = useI18n();
   const { performanceReport: report, progress } = data;
-  const status = heroStatusLabel(report.status, tr);
+  const showChildSelector =
+    linkedChildren &&
+    selectedStudentUserId &&
+    onSelectChild &&
+    linkedChildren.length > 1;
 
   return (
-    <section className="parent-dash-enter relative overflow-hidden rounded-2xl border border-primary/20 bg-brand-dark text-white shadow-[var(--shadow-gold)]">
+    <section className="parent-dash-enter relative overflow-hidden rounded-xl border border-primary/25 bg-brand-dark text-white shadow-[var(--shadow-soft)]">
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.14]"
+        className="pointer-events-none absolute inset-0 opacity-[0.1]"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 8% 12%, var(--primary) 0%, transparent 36%), radial-gradient(circle at 92% 88%, var(--primary) 0%, transparent 32%)",
+            "radial-gradient(circle at 10% 20%, var(--primary) 0%, transparent 40%)",
         }}
         aria-hidden
       />
 
-      <div className="relative flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5 lg:flex-1">
-          <StudentProfileAvatar
-            profilePhotoPath={report.profilePhotoPath}
-            alt={report.arabicName}
-            className="h-20 w-20 ring-2 ring-primary/40 shadow-[0_0_24px_rgba(242,178,27,0.25)]"
-            fallbackClassName="bg-primary/15 text-primary"
-          />
+      <div className="relative p-4 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <StudentProfileAvatar
+              profilePhotoPath={report.profilePhotoPath}
+              alt={report.arabicName}
+              className="h-14 w-14 shrink-0 ring-2 ring-primary/35 sm:h-16 sm:w-16"
+              fallbackClassName="bg-primary/15 text-primary text-sm"
+            />
 
-          <div className="min-w-0 flex-1 text-center sm:text-start">
-            <div className="inline-flex items-center gap-2 text-primary">
-              <span className="text-lg" aria-hidden>
-                👨‍👩‍👧
-              </span>
-              <span className="text-xs font-semibold uppercase tracking-[0.22em]">
-                {tr("parent_dashboard_title")}
-              </span>
-            </div>
-
-            <p className="mt-2 text-sm leading-relaxed text-white/75 sm:text-base">
-              {tr("parent_hero_instant_lead")}
-            </p>
-
-            <div className="mt-3">
-              <div className="font-display text-2xl leading-tight text-white" dir="rtl">
+            <div className="min-w-0 flex-1">
+              <div className="font-display text-lg leading-tight text-white sm:text-xl" dir="rtl">
                 {report.arabicName}
               </div>
-              <div className="mt-0.5 text-sm font-medium text-white/80">{report.englishName}</div>
+              <div className="text-sm font-medium text-white/75">{report.englishName}</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <span className="rounded-full border border-white/20 bg-white/8 px-2.5 py-0.5 text-[11px] font-semibold text-white/90">
+                  {L(report.gradeLabelEn, report.gradeLabelAr)[lang]}
+                </span>
+                <span className="rounded-full border border-white/20 bg-white/8 px-2.5 py-0.5 text-[11px] font-semibold text-white/90">
+                  {sectionLabel(report.section, lang)}
+                </span>
+                <span className="rounded-full border border-white/20 bg-white/8 px-2.5 py-0.5 text-[11px] font-semibold text-white/90">
+                  {islamicGroupLabel(report.islamicGroup, lang)}
+                </span>
+              </div>
             </div>
+          </div>
 
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold">
-                {L(report.gradeLabelEn, report.gradeLabelAr)[lang]}
-              </span>
-              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold">
-                {sectionLabel(report.section, lang)}
-              </span>
-              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold">
-                {islamicGroupLabel(report.islamicGroup, lang)}
-              </span>
-              <span
-                className={`rounded-full border px-3 py-1 text-xs font-bold ${statusBadgeClass(report.status)}`}
-              >
-                {status}
-              </span>
-            </div>
+          <div className="flex shrink-0 justify-end sm:justify-center">
+            <ProgressRing value={progress.overallProgressPct} label={tr("parent_progress_label")} />
           </div>
         </div>
 
-        <div className="flex justify-center lg:justify-end">
-          <ProgressRing value={progress.overallProgressPct} label={tr("parent_progress_label")} />
-        </div>
+        {showChildSelector ? (
+          <div className="mt-3 border-t border-white/10 pt-3">
+            <ParentChildSelector
+              variant="compact"
+              linkedChildren={linkedChildren}
+              selectedStudentUserId={selectedStudentUserId}
+              onSelect={onSelectChild}
+            />
+          </div>
+        ) : null}
       </div>
     </section>
   );

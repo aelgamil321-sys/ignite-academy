@@ -54,6 +54,8 @@ function Home() {
     content = <AdminHomeRedirect />;
   } else if (homeVariant === "student") {
     content = <StudentHomeRedirect />;
+  } else if (homeVariant === "parent") {
+    content = <ParentHomeRedirect />;
   } else {
     content = <PublicHome signedIn={sessionExists} />;
   }
@@ -87,6 +89,26 @@ function StudentHomeRedirect() {
 
   useEffect(() => {
     navigate({ to: "/student", replace: true });
+  }, [navigate]);
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
+      <main className="container-page flex items-center gap-2 py-24 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {tr("verifying_access")}
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+function ParentHomeRedirect() {
+  const navigate = useNavigate();
+  const { tr } = useI18n();
+
+  useEffect(() => {
+    navigate({ to: "/parent/dashboard", replace: true });
   }, [navigate]);
 
   return (

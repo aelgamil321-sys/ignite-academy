@@ -1,6 +1,7 @@
 import type { Bi } from "@/lib/curriculum";
 import {
   fetchParentLinkedChildren,
+  resolveSelectedChild,
   type ParentChildrenResult,
   type ParentLinkedChild,
 } from "@/lib/parent-children";
@@ -22,7 +23,7 @@ export type ParentDashboardData = {
   performanceReport: ParentPerformanceReport;
 };
 
-export type ParentDashboardLinkError = "none" | "multiple";
+export type ParentDashboardLinkError = "none";
 
 export type ParentDashboardResult = {
   data: ParentDashboardData | null;
@@ -119,9 +120,18 @@ export async function fetchParentDashboardBundle(
     };
   }
 
-  const selectedChild =
-    childrenResult.children.find((child) => child.studentUserId === selectedStudentUserId) ??
-    childrenResult.children[0];
+  const selectedChild = resolveSelectedChild(
+    childrenResult.children,
+    parentUserId,
+    selectedStudentUserId,
+  );
+  if (!selectedChild) {
+    return {
+      ...childrenResult,
+      dashboard: null,
+      dashboardError: null,
+    };
+  }
 
   const dashboardResult = await fetchParentDashboardForStudent(
     selectedChild.studentUserId,
