@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Download, Loader2, Paperclip, Send } from "lucide-react";
 import { toast } from "sonner";
-import { PageShell } from "@/components/page-shell";
+import { StudentOrPublicPage } from "@/components/student-or-public-page";
 import { useI18n } from "@/lib/i18n";
 import { localeForFormatting } from "@/lib/i18n-config";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,7 +136,7 @@ function AssignmentDetailPage() {
 
   if (loading) {
     return (
-      <PageShell
+      <StudentOrPublicPage
         eyebrow={tr("nav_assignments")}
         title={tr("loading")}
         crumbs={[
@@ -144,25 +144,25 @@ function AssignmentDetailPage() {
           { label: "…" },
         ]}
       >
-        <div className="flex items-center gap-2 text-sm text-muted-foreground py-12">
+        <div className="flex items-center gap-2 py-12 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           {tr("loading")}
         </div>
-      </PageShell>
+      </StudentOrPublicPage>
     );
   }
 
   if (!item) {
     return (
-      <PageShell
+      <StudentOrPublicPage
         eyebrow={tr("nav_assignments")}
         title={tr("assignment_not_found")}
         crumbs={[{ label: tr("nav_assignments"), to: "/assignments" }]}
       >
-        <Link to="/assignments" className="text-sm text-primary font-semibold hover:underline">
+        <Link to="/assignments" className="text-sm font-semibold text-primary hover:underline">
           ← {tr("nav_assignments")}
         </Link>
-      </PageShell>
+      </StudentOrPublicPage>
     );
   }
 
@@ -172,7 +172,7 @@ function AssignmentDetailPage() {
   });
 
   return (
-    <PageShell
+    <StudentOrPublicPage
       eyebrow={tr("nav_assignments")}
       title={bi(assignmentTitle(item))}
       crumbs={[
@@ -291,6 +291,6 @@ function AssignmentDetailPage() {
           </form>
         )}
       </div>
-    </PageShell>
+    </StudentOrPublicPage>
   );
 }

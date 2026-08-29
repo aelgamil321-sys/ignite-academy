@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Award, Loader2, Medal, Star, Trophy } from "lucide-react";
-import { PageShell } from "@/components/page-shell";
+import { StudentOrPublicPage } from "@/components/student-or-public-page";
 import { EmptyState } from "@/components/empty-state";
 import { StudentProfileAvatar } from "@/components/student-profile-avatar";
 import { grades } from "@/lib/curriculum";
@@ -418,13 +418,13 @@ export function HallOfFamePage() {
   const { tr } = useI18n();
 
   return (
-    <PageShell
+    <StudentOrPublicPage
       eyebrow={tr("nav_hall_of_fame")}
       title={tr("hof_title")}
       lead={tr("hof_lead")}
       crumbs={[{ label: tr("nav_hall_of_fame") }]}
     >
       <HallOfFameContent variant="public" />
-    </PageShell>
+    </StudentOrPublicPage>
   );
 }

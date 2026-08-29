@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PageShell } from "@/components/page-shell";
+import { StudentOrPublicPage } from "@/components/student-or-public-page";
 import { EmptyState } from "@/components/empty-state";
 import { Megaphone } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
@@ -28,7 +28,7 @@ function AnnouncementsIndex() {
   useAnnouncementsContentPrefetch(announcements);
 
   return (
-    <PageShell
+    <StudentOrPublicPage
       eyebrow={tr("nav_announcements")}
       title={tr("ann_page_title")}
       lead={tr("ann_page_lead")}
@@ -43,6 +43,6 @@ function AnnouncementsIndex() {
           ))}
         </div>
       )}
-    </PageShell>
+    </StudentOrPublicPage>
   );
 }

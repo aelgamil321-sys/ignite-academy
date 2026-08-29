@@ -34,3 +34,7 @@ export function useStudentShell(): StudentShellContextValue {
   }
   return value;
 }
+
+export function useOptionalStudentShell(): StudentShellContextValue | null {
+  return useContext(StudentShellContext);
+}

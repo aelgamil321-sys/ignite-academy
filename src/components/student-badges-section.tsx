@@ -11,7 +11,6 @@ export function StudentBadgesSection({ progress }: { progress: StudentProgressDa
 
   return (
     <StudentDashboardSection
-      id="student-achievements"
       title={tr("student_dash_badges_title")}
       lead={tr("student_dash_badges_lead")}
       icon={<span className="text-base leading-none" aria-hidden>🏅</span>}

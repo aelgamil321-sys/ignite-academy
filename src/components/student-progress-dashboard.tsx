@@ -14,7 +14,7 @@ export function StudentProgressDashboard({
   gradeSlug: string;
 }) {
   return (
-    <div className="space-y-6">
+    <div id="student-achievements" className="scroll-mt-24 space-y-6">
       <StudentAcademicProgress progress={progress} gradeName={gradeName} gradeSlug={gradeSlug} />
 
       <StudentBadgesSection progress={progress} />

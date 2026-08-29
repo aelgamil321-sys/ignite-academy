@@ -1,13 +1,13 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import { enforceStudentOwnGradeInUrl } from "@/lib/student-route-guard";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { AskMrAhmed } from "@/components/ask-mr-ahmed";
+import { StudentOrPublicSiteLayout } from "@/components/student-or-public-site-layout";
 import { GradeDetailPanel } from "@/components/grade-detail-panel";
 import { getGrade } from "@/lib/curriculum";
+import { studentGradeSearch } from "@/lib/student-grade-nav";
 
 export const Route = createFileRoute("/grades/$grade/")({
+  validateSearch: studentGradeSearch,
   beforeLoad: async ({ params }) => {
     await blockParentFromStudentRoutes();
     await enforceStudentOwnGradeInUrl(params.grade);
@@ -37,15 +37,11 @@ export const Route = createFileRoute("/grades/$grade/")({
 
 function GradePage() {
   const { grade } = Route.useLoaderData();
+  const { view } = Route.useSearch();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <SiteHeader />
-      <main className="flex-1 container-page">
-        <GradeDetailPanel grade={grade} gradesBasePath="/grades" />
-      </main>
-      <SiteFooter />
-      <AskMrAhmed />
-    </div>
+    <StudentOrPublicSiteLayout>
+      <GradeDetailPanel grade={grade} gradesBasePath="/grades" view={view} />
+    </StudentOrPublicSiteLayout>
   );
 }

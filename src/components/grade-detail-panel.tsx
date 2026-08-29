@@ -16,7 +16,10 @@ import { useI18n, L } from "@/lib/i18n";
 import type { Grade } from "@/lib/curriculum";
 import { useLessonsForGrade, useAllVideos, useAllResources, useCMS } from "@/lib/cms";
 import { gradeMatches } from "@/lib/grade-utils";
+import { normalizeQuizList } from "@/lib/lesson-quiz";
+import type { StudentGradeSearch } from "@/lib/student-grade-nav";
 import { useGradeContentPrefetch } from "@/hooks/use-cms-content-prefetch";
+import { useOptionalStudentShell } from "@/lib/student-shell-context";
 import { slugifyUnit } from "@/routes/grades.$grade.units.$unit";
 import { cn } from "@/lib/utils";
 
@@ -25,11 +28,16 @@ type GradesBasePath = "/grades" | "/admin/grades";
 export function GradeDetailPanel({
   grade,
   gradesBasePath = "/grades",
+  view,
 }: {
   grade: Grade;
   gradesBasePath?: GradesBasePath;
+  view?: StudentGradeSearch["view"];
 }) {
   const { tr, lang, dir, bi } = useI18n();
+  const studentShell = useOptionalStudentShell();
+  const isStudentWorkspace = Boolean(studentShell);
+  const isQuizzesView = view === "quizzes";
   const isAdminGrades = gradesBasePath === "/admin/grades";
   const { lessons: cmsLessons } = useCMS();
   const lessons = useLessonsForGrade(grade.slug);
@@ -64,13 +72,17 @@ export function GradeDetailPanel({
 
   const filteredLessons = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return gradeCustomLessons;
-    return gradeCustomLessons.filter((l) =>
+    let list = gradeCustomLessons;
+    if (isQuizzesView) {
+      list = list.filter((lesson) => normalizeQuizList(lesson.quiz ?? []).length > 0);
+    }
+    if (!needle) return list;
+    return list.filter((l) =>
       `${l.title.en} ${l.title.ar} ${l.unit.en} ${l.unit.ar} ${l.outcome.en} ${l.outcome.ar}`
         .toLowerCase()
         .includes(needle),
     );
-  }, [gradeCustomLessons, q]);
+  }, [gradeCustomLessons, q, isQuizzesView]);
 
   const gradesIndexTo = gradesBasePath;
   const unitTo =
@@ -82,21 +94,25 @@ export function GradeDetailPanel({
     <>
       <section className="bg-gradient-to-b from-cream to-background border-b border-border -mt-2">
         <div className="py-8 md:py-10">
-          <div className="mb-5">
-            <Breadcrumbs
-              items={[
-                { label: tr("nav_stages"), to: gradesIndexTo },
-                { label: bi(grade.name) },
-              ]}
-            />
-          </div>
-          <Link
-            to={gradesIndexTo}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-5"
-          >
-            <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-            {tr("back_to_grades")}
-          </Link>
+          {!isStudentWorkspace ? (
+            <>
+              <div className="mb-5">
+                <Breadcrumbs
+                  items={[
+                    { label: tr("nav_stages"), to: gradesIndexTo },
+                    { label: bi(grade.name) },
+                  ]}
+                />
+              </div>
+              <Link
+                to={gradesIndexTo}
+                className="mb-5 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
+              >
+                <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+                {tr("back_to_grades")}
+              </Link>
+            </>
+          ) : null}
           <div className="text-xs uppercase tracking-[0.22em] text-primary mb-2">{bi(grade.stage)}</div>
           <h1
             className={cn(
@@ -104,18 +120,29 @@ export function GradeDetailPanel({
               isAdminGrades ? "text-3xl sm:text-4xl md:text-5xl" : "text-4xl md:text-5xl",
             )}
           >
-            {bi(grade.name)}
+            {isQuizzesView ? tr("student_nav_quizzes") : bi(grade.name)}
           </h1>
+          {isQuizzesView ? (
+            <p className="mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
+              {L(
+                "Lesson quizzes for your grade — start, continue, or review your results.",
+                "اختبارات دروس صفك — ابدأ أو تابع أو راجع نتائجك.",
+              )[lang]}
+            </p>
+          ) : null}
 
+          {!isQuizzesView ? (
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl">
             <Stat icon={BookOpen} value={lessons.length} label={tr("stat_lessons")} />
             <Stat icon={Layers} value={units.length} label={L("Units", "الوحدات")[lang]} />
             <Stat icon={VideoIcon} value={gradeVideos.length} label={L("Videos", "الفيديوهات")[lang]} />
             <Stat icon={FileText} value={gradeResources.length} label={L("Resources", "الموارد")[lang]} />
           </div>
+          ) : null}
         </div>
       </section>
 
+      {!isQuizzesView ? (
       <section className="pt-10 pb-6">
         <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
           <h2 className="font-display text-2xl text-foreground">{L("Units", "الوحدات")[lang]}</h2>
@@ -148,10 +175,13 @@ export function GradeDetailPanel({
           </div>
         )}
       </section>
+      ) : null}
 
-      <section className="py-10">
+      <section className={isQuizzesView ? "pt-6 pb-6" : "py-10"}>
         <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
-          <h2 className="font-display text-2xl text-foreground">{L("Lessons", "الدروس")[lang]}</h2>
+          <h2 className="font-display text-2xl text-foreground">
+            {isQuizzesView ? tr("student_nav_quizzes") : L("Lessons", "الدروس")[lang]}
+          </h2>
           <div className="relative w-full sm:w-72">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
@@ -174,7 +204,18 @@ export function GradeDetailPanel({
             )[lang]}
           />
         ) : filteredLessons.length === 0 ? (
-          <EmptyState icon={Search} title={tr("empty_results")} />
+          <EmptyState
+            icon={BookOpen}
+            title={isQuizzesView ? tr("empty_results") : tr("empty_results")}
+            description={
+              isQuizzesView
+                ? L(
+                    "No lesson quizzes are available for this grade yet.",
+                    "لا توجد اختبارات دروس متاحة لهذا الصف بعد.",
+                  )[lang]
+                : undefined
+            }
+          />
         ) : (
           <GradeLessonsSection
             gradeSlug={grade.slug}
@@ -184,7 +225,7 @@ export function GradeDetailPanel({
         )}
       </section>
 
-      {(gradeVideos.length > 0 || gradeResources.length > 0) && (
+      {!isQuizzesView && (gradeVideos.length > 0 || gradeResources.length > 0) && (
         <section className="pb-10 grid gap-8 lg:grid-cols-2">
           <div>
             <div className="flex items-center justify-between mb-3">

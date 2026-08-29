@@ -14,6 +14,11 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
+import {
+  isStudentLessonsNav,
+  isStudentQuizzesNav,
+  type StudentGradeSearch,
+} from "@/lib/student-grade-nav";
 import { useStudentShell } from "@/lib/student-shell-context";
 import { cn } from "@/lib/utils";
 
@@ -23,29 +28,38 @@ type NavItem = {
   icon: typeof LayoutDashboard;
   to?: string;
   hash?: string;
+  search?: StudentGradeSearch;
+  params?: Record<string, string>;
   exact?: boolean;
   disabled?: boolean;
   disabledTitleKey?: string;
-  activeMatch?: (pathname: string, hash: string) => boolean;
+  activeMatch?: (
+    pathname: string,
+    hash: string,
+    search: StudentGradeSearch,
+  ) => boolean;
+  onNavigateClick?: (pathname: string, hash: string) => void;
 };
 
 function NavLinkItem({
   item,
   pathname,
   hash,
+  search,
   tr,
   onNavigate,
 }: {
   item: NavItem;
   pathname: string;
   hash: string;
+  search: StudentGradeSearch;
   tr: (key: string) => string;
   onNavigate?: () => void;
 }) {
   const normalizedHash = hash.replace(/^#/, "");
 
   const active = item.activeMatch
-    ? item.activeMatch(pathname, normalizedHash)
+    ? item.activeMatch(pathname, normalizedHash, search)
     : item.to
       ? item.exact
         ? pathname === item.to && (!item.hash || normalizedHash === item.hash)
@@ -85,8 +99,13 @@ function NavLinkItem({
   return (
     <Link
       to={item.to}
+      params={item.params}
+      search={item.search}
       hash={item.hash}
-      onClick={onNavigate}
+      onClick={() => {
+        item.onNavigateClick?.(pathname, normalizedHash);
+        onNavigate?.();
+      }}
       className={className}
       title={item.disabledTitleKey ? tr(item.disabledTitleKey) : undefined}
     >
@@ -115,6 +134,9 @@ function SidebarNav({
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const hash = useRouterState({ select: (s) => s.location.hash });
+  const search = useRouterState({
+    select: (s) => (s.location.search ?? {}) as StudentGradeSearch,
+  });
 
   return (
     <nav className="space-y-0.5 px-1 py-1.5">
@@ -124,6 +146,7 @@ function SidebarNav({
           item={item}
           pathname={pathname}
           hash={hash}
+          search={search}
           tr={tr}
           onNavigate={onNavigate}
         />
@@ -164,6 +187,13 @@ function SidebarFooter({
   );
 }
 
+function scrollToStudentAchievements() {
+  document.getElementById("student-achievements")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
 export function StudentSidebar({
   mobileOpen = false,
   onMobileOpenChange,
@@ -175,8 +205,10 @@ export function StudentSidebar({
   const { displayName, email, gradeSlug, hasGrade } = useStudentShell();
   const closeMobile = () => onMobileOpenChange?.(false);
 
-  const myLessonsTo = hasGrade ? `/grades/${gradeSlug}` : "/student/profile";
+  const myLessonsTo = hasGrade ? "/grades/$grade" : "/student/profile";
+  const myLessonsParams = hasGrade ? { grade: gradeSlug } : undefined;
   const myQuizzesTo = myLessonsTo;
+  const myQuizzesParams = myLessonsParams;
 
   const navItems: NavItem[] = [
     {
@@ -193,8 +225,11 @@ export function StudentSidebar({
       labelKey: "student_nav_my_lessons",
       icon: BookOpen,
       to: myLessonsTo,
+      params: myLessonsParams,
+      search: {},
       disabledTitleKey: !hasGrade ? "student_my_lessons_complete_profile" : undefined,
-      activeMatch: (pathname) => hasGrade && pathname.startsWith(`/grades/${gradeSlug}`),
+      activeMatch: (pathname, hash, search) =>
+        hasGrade ? isStudentLessonsNav(pathname, hash, search, gradeSlug) : false,
     },
     {
       key: "assignments",
@@ -207,8 +242,11 @@ export function StudentSidebar({
       labelKey: "student_nav_quizzes",
       icon: FileText,
       to: myQuizzesTo,
+      params: myQuizzesParams,
+      search: { view: "quizzes" },
       disabledTitleKey: !hasGrade ? "student_my_lessons_complete_profile" : undefined,
-      activeMatch: (pathname) => hasGrade && pathname.startsWith(`/grades/${gradeSlug}`),
+      activeMatch: (pathname, hash, search) =>
+        hasGrade ? isStudentQuizzesNav(pathname, hash, search, gradeSlug) : false,
     },
     {
       key: "resources",
@@ -228,7 +266,16 @@ export function StudentSidebar({
       icon: Award,
       to: "/student",
       hash: "student-achievements",
-      activeMatch: (_pathname, hash) => hash === "student-achievements",
+      activeMatch: (pathname, hash) =>
+        (pathname === "/student" || pathname === "/student/") && hash === "student-achievements",
+      onNavigateClick: (pathname, hash) => {
+        if (
+          (pathname === "/student" || pathname === "/student/") &&
+          hash === "student-achievements"
+        ) {
+          scrollToStudentAchievements();
+        }
+      },
     },
     {
       key: "honor",

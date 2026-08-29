@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { PageShell } from "@/components/page-shell";
+import { StudentOrPublicPage } from "@/components/student-or-public-page";
 import { useI18n } from "@/lib/i18n";
 import { getAnnouncement } from "@/lib/extras";
 import { useCMS } from "@/lib/cms";
@@ -42,15 +42,18 @@ function AnnouncementDetail() {
   const image = ann.imageUrl;
 
   return (
-    <PageShell eyebrow={bi(ann.tag)} title={bi(ann.title)}
-      crumbs={[{ label: tr("nav_announcements"), to: "/announcements" }, { label: bi(ann.title) }]}>
-      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+    <StudentOrPublicPage
+      eyebrow={bi(ann.tag)}
+      title={bi(ann.title)}
+      crumbs={[{ label: tr("nav_announcements"), to: "/announcements" }, { label: bi(ann.title) }]}
+    >
+      <div className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
         <Calendar className="h-4 w-4 text-primary" /> {ann.date}
       </div>
-      {image && <img src={image} alt={bi(ann.title)} className="w-full max-w-3xl rounded-2xl mb-6 border border-border" />}
+      {image && <img src={image} alt={bi(ann.title)} className="mb-6 w-full max-w-3xl rounded-2xl border border-border" />}
       <article className="max-w-3xl">
-        <p className="text-foreground/85 leading-relaxed text-lg whitespace-pre-line">{bi(ann.body)}</p>
+        <p className="whitespace-pre-line text-lg leading-relaxed text-foreground/85">{bi(ann.body)}</p>
       </article>
-    </PageShell>
+    </StudentOrPublicPage>
   );
 }

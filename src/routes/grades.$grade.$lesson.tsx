@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { blockParentFromStudentRoutes } from "@/lib/parent-route-guard";
 import { enforceStudentOwnGradeLesson } from "@/lib/student-route-guard";
+import { useStudentWorkspaceChrome } from "@/hooks/use-student-workspace-chrome";
+import { StudentDashboardShell } from "@/components/student-dashboard-shell";
 import {
   ChevronLeft, Clock, Target, BookOpen,
   FileText, Video, HelpCircle, Download, ClipboardList,
@@ -43,7 +45,20 @@ export const Route = createFileRoute("/grades/$grade/$lesson")({
 
 function LessonRoutePage() {
   const { gradeSlug, lessonSlug } = Route.useLoaderData();
-  return <LessonPageBody gradeSlug={gradeSlug} lessonSlug={lessonSlug} />;
+  const chrome = useStudentWorkspaceChrome();
+  const body = (
+    <LessonPageBody
+      gradeSlug={gradeSlug}
+      lessonSlug={lessonSlug}
+      shell={chrome.status === "student" ? "student" : "public"}
+    />
+  );
+
+  if (chrome.status === "student") {
+    return <StudentDashboardShell value={chrome.shell}>{body}</StudentDashboardShell>;
+  }
+
+  return body;
 }
 
 export function LessonPageBody({
@@ -55,7 +70,7 @@ export function LessonPageBody({
   gradeSlug: string;
   lessonSlug: string;
   gradesBasePath?: "/grades" | "/admin/grades";
-  shell?: "public" | "admin";
+  shell?: "public" | "admin" | "student";
 }) {
   const { loading: cmsLoading } = useCMS();
   const resolved = useResolveLesson(gradeSlug, lessonSlug);
@@ -64,6 +79,7 @@ export function LessonPageBody({
     gradesBasePath === "/admin/grades" ? "/admin/grades/$grade" : "/grades/$grade";
   const gradesIndexRoute = gradesBasePath;
   const showPublicChrome = shell === "public";
+  const isStudentShell = shell === "student";
   const lessonReady = !cmsLoading && Boolean(resolved?.lesson);
   useLessonTranslationScope(lessonSlug);
 
@@ -185,16 +201,27 @@ export function LessonPageBody({
       <main className={`${showPublicChrome ? "flex-1 " : ""}overflow-x-hidden`}>
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
           <div className={`${showPublicChrome ? "container-page" : ""} pt-3 pb-4 md:py-10`}>
-            <div className="hidden md:block mb-5">
-              <Breadcrumbs items={[
-                { label: tr("nav_stages"), to: gradesIndexRoute },
-                {
-                  label: bi(grade.name, { ...lessonMeta, fieldName: "grade", contentType: "general" }),
-                  to: gradeRoute,
-                  params: { grade: grade.slug },
-                },
-                { label: bi(lesson.title, { ...lessonMeta, fieldName: "title", contentType: "title" }) },
-              ]} />
+            <div className="mb-5 hidden md:block">
+              <Breadcrumbs items={
+                isStudentShell
+                  ? [
+                      {
+                        label: bi(grade.name, { ...lessonMeta, fieldName: "grade", contentType: "general" }),
+                        to: gradeRoute,
+                        params: { grade: grade.slug },
+                      },
+                      { label: bi(lesson.title, { ...lessonMeta, fieldName: "title", contentType: "title" }) },
+                    ]
+                  : [
+                      { label: tr("nav_stages"), to: gradesIndexRoute },
+                      {
+                        label: bi(grade.name, { ...lessonMeta, fieldName: "grade", contentType: "general" }),
+                        to: gradeRoute,
+                        params: { grade: grade.slug },
+                      },
+                      { label: bi(lesson.title, { ...lessonMeta, fieldName: "title", contentType: "title" }) },
+                    ]
+              } />
             </div>
             <Link
               to={gradeRoute}

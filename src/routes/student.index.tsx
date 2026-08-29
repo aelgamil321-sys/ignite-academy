@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { StudentContinueLearning } from "@/components/student-continue-learning";
 import { StudentDashboardHero } from "@/components/student-dashboard-hero";
@@ -66,6 +66,29 @@ function StudentDashboardPage() {
     () => (progress ? buildStudentAttentionItems(assignments, progress) : []),
     [assignments, progress],
   );
+
+  const achievementsHash = useRouterState({
+    select: (s) => s.location.hash.replace(/^#/, ""),
+  });
+
+  useEffect(() => {
+    if (achievementsHash !== "student-achievements" || loading) return;
+
+    const scrollToAchievements = () => {
+      const target = document.getElementById("student-achievements");
+      if (!target) return false;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    };
+
+    if (scrollToAchievements()) return;
+
+    const retryId = window.setInterval(() => {
+      if (scrollToAchievements()) window.clearInterval(retryId);
+    }, 100);
+
+    return () => window.clearInterval(retryId);
+  }, [achievementsHash, loading, progress]);
 
   return (
     <div className="space-y-6">

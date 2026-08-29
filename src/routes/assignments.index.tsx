@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { FileText, ArrowRight, Loader2 } from "lucide-react";
-import { PageShell } from "@/components/page-shell";
+import { StudentOrPublicPage } from "@/components/student-or-public-page";
 import { EmptyState } from "@/components/empty-state";
 import { useI18n } from "@/lib/i18n";
 import { localeForFormatting } from "@/lib/i18n-config";
@@ -47,7 +47,6 @@ function AssignmentsIndexPage() {
   const navigate = useNavigate();
   const { tr, lang, dir, bi } = useI18n();
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
   const [items, setItems] = useState<AssignmentWithSubmission[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | AssignmentWithSubmission["displayStatus"]>("all");
@@ -61,7 +60,6 @@ function AssignmentsIndexPage() {
         navigate({ to: "/auth", search: { mode: "login" } });
         return;
       }
-      setUserId(auth.user.id);
       const result = await fetchStudentAssignments(auth.user.id);
       if (!active) return;
       if (result.error) setError(result.error);
@@ -85,13 +83,13 @@ function AssignmentsIndexPage() {
     });
 
   return (
-    <PageShell
+    <StudentOrPublicPage
       eyebrow={tr("nav_assignments")}
       title={tr("assignments_title")}
       lead={tr("assignments_lead")}
       crumbs={[{ label: tr("nav_assignments") }]}
     >
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="mb-6 flex flex-wrap gap-2">
         {(["all", "missing", "submitted", "late", "graded"] as const).map((key) => (
           <button
             key={key}
@@ -128,19 +126,19 @@ function AssignmentsIndexPage() {
               key={item.id}
               to="/assignments/$assignmentId"
               params={{ assignmentId: item.id }}
-              className="group rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] hover:border-primary hover:shadow-[var(--shadow-elegant)] transition-all flex flex-col"
+              className="group flex flex-col rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] transition-all hover:border-primary hover:shadow-[var(--shadow-elegant)]"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="text-xs uppercase tracking-wider text-primary font-semibold">
+                <div className="text-xs font-semibold uppercase tracking-wider text-primary">
                   {gradeDisplayName(item.grade, lang)}
                 </div>
                 <span
-                  className={`text-xs rounded-full px-2.5 py-1 font-semibold ${statusBadgeClass(item.displayStatus)}`}
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass(item.displayStatus)}`}
                 >
                   {statusLabel(item.displayStatus, tr)}
                 </span>
               </div>
-              <h3 className="mt-2 font-display text-lg text-foreground leading-snug">
+              <h3 className="mt-2 font-display text-lg leading-snug text-foreground">
                 {bi(assignmentTitle(item))}
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -160,7 +158,6 @@ function AssignmentsIndexPage() {
           ))}
         </div>
       )}
-      {userId ? null : null}
-    </PageShell>
+    </StudentOrPublicPage>
   );
 }
