@@ -712,6 +712,106 @@ export function TeacherCurriculumLinks({ titleKey }: { titleKey?: string }) {
   );
 }
 
+export function TeacherQuizCreate() {
+  const { bi, tr } = useI18n();
+  const { lessons, refresh } = useCMS();
+  const { assignedGrades, loading } = useTeacherGrades();
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const scopedLessons = lessons.filter((l) =>
+    assignedGrades.includes(normalizeGradeSlug(l.grade) || l.grade),
+  );
+  const withoutQuiz = scopedLessons.filter((l) => l.quiz.length === 0);
+  const withQuiz = scopedLessons.filter((l) => l.quiz.length > 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {tr("teacher_loading")}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="font-display text-xl text-foreground">{tr("teacher_nav_add_quiz")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{tr("teacher_add_quiz_desc")}</p>
+      </div>
+
+      {scopedLessons.length === 0 ? (
+        <div className="rounded-xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground">{tr("teacher_no_lessons")}</p>
+          <a
+            href="/teacher/lessons/new"
+            className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground"
+          >
+            {tr("teacher_nav_add_lesson")}
+          </a>
+        </div>
+      ) : (
+        <>
+          {withoutQuiz.length > 0 ? (
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">{tr("teacher_add_quiz_no_quiz")}</h3>
+              <ul className="space-y-2">
+                {withoutQuiz.map((lesson) => (
+                  <li
+                    key={lesson.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium">{bi(lesson.title)}</p>
+                      <p className="text-xs text-muted-foreground">{lesson.grade}</p>
+                    </div>
+                    <a
+                      href={`/teacher/lessons/edit/${lesson.id}`}
+                      className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
+                    >
+                      {tr("teacher_nav_add_quiz")}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {withQuiz.length > 0 ? (
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">{tr("teacher_add_quiz_has_quiz")}</h3>
+              <ul className="space-y-2">
+                {withQuiz.map((lesson) => (
+                  <li
+                    key={lesson.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium">{bi(lesson.title)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {lesson.grade} · {lesson.quiz.length} {tr("teacher_quiz_questions")}
+                      </p>
+                    </div>
+                    <a
+                      href={`/teacher/lessons/edit/${lesson.id}`}
+                      className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
+                    >
+                      {tr("teacher_edit_quiz")}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+}
+
 export function TeacherQuizzesManage() {
   const { bi, tr } = useI18n();
   const { lessons, refresh } = useCMS();

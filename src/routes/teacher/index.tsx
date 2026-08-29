@@ -16,7 +16,7 @@ import { TeacherDashboardKpis } from "@/components/teacher-dashboard-kpis";
 import { TeacherNeedsAttention } from "@/components/teacher-needs-attention";
 import { TeacherQuickActions } from "@/components/teacher-quick-actions";
 import { TeacherRecentActivity } from "@/components/teacher-recent-activity";
-import { TeacherSchedulePlaceholder } from "@/components/teacher-schedule-placeholder";
+import { TeacherTimetableWidget } from "@/components/teacher-timetable-ui";
 import { TeacherScopeNotice } from "@/components/teacher-scope-notice";
 import { TeacherStudentOverview } from "@/components/teacher-student-overview";
 import { useI18n } from "@/lib/i18n";
@@ -150,10 +150,16 @@ function TeacherOverviewPage() {
         <TeacherDashboardKpis stats={stats} />
       )}
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-3">
-        <TeacherNeedsAttention context={context} students={students} />
-        <TeacherAnnouncementsPanel teacherUserId={context.userId} />
-        <TeacherQuickActions />
+      <div className="grid min-w-0 gap-4 xl:grid-cols-12">
+        <div className="min-w-0 xl:col-span-3">
+          <TeacherNeedsAttention context={context} students={students} />
+        </div>
+        <div className="min-w-0 xl:col-span-5">
+          <TeacherAnnouncementsPanel teacherUserId={context.userId} />
+        </div>
+        <div className="min-w-0 xl:col-span-4">
+          <TeacherQuickActions variant="navy" />
+        </div>
       </div>
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-3">
@@ -164,7 +170,7 @@ function TeacherOverviewPage() {
           error={analyticsError}
         />
         <TeacherRecentActivity context={context} students={students} />
-        <TeacherSchedulePlaceholder />
+        <TeacherTimetableWidget />
       </div>
 
       <TeacherStudentOverview

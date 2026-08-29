@@ -15,16 +15,27 @@ import {
 } from "@/components/teacher-assignment-form";
 
 export const Route = createFileRoute("/teacher/assignments/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    mode: search.mode === "create" ? ("create" as const) : undefined,
+  }),
   component: TeacherAssignmentsPage,
 });
 
 function TeacherAssignmentsPage() {
   const { bi, tr } = useI18n();
+  const { mode } = Route.useSearch();
   const { context, loading: contextLoading } = useTeacherAssignmentContext();
   const [loading, setLoading] = useState(true);
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(mode === "create");
   const [editing, setEditing] = useState<AssignmentRow | null>(null);
+
+  useEffect(() => {
+    if (mode === "create") {
+      setEditing(null);
+      setShowForm(true);
+    }
+  }, [mode]);
 
   async function reloadAssignments() {
     const aRes = await fetchAllAssignmentsAdmin();

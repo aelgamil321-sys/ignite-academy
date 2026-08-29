@@ -240,3 +240,25 @@
     animation: none;
   }
 }
+
+.teacher-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.teacher-sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.teacher-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.teacher-sidebar-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.teacher-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}

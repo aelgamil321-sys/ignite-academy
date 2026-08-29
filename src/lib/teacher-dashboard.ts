@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { grades } from "@/lib/curriculum";
-import { normalizeGradeSlug } from "@/lib/grade-utils";
+import { gradeMatches, normalizeGradeSlug } from "@/lib/grade-utils";
 import { fetchStudentProgress } from "@/lib/student-progress";
 import {
   formatStudentAcademics,
@@ -84,6 +84,83 @@ export function studentMatchesClassFilter(
   if (filter.section && student.section !== filter.section) return false;
   if (filter.islamic_group && student.islamic_group !== filter.islamic_group) return false;
   return true;
+}
+
+/** Whether a student falls within the teacher's assigned grade/section/group scope. */
+export function studentMatchesTeacherAssignmentScope(
+  student: Pick<ScopedStudentRow, "grade" | "section" | "islamic_group">,
+  context: Pick<TeacherContext, "isLeadTeacher" | "assignments">,
+): boolean {
+  if (context.isLeadTeacher) return true;
+  if (context.assignments.length === 0) return false;
+  return context.assignments.some((assignment) => {
+    if (normalizeGradeSlug(assignment.grade) !== normalizeGradeSlug(student.grade)) return false;
+    if (assignment.section !== null && student.section !== assignment.section) return false;
+    if (assignment.islamic_group !== null && student.islamic_group !== assignment.islamic_group) {
+      return false;
+    }
+    return true;
+  });
+}
+
+export function filterStudentsByTeacherScope(
+  students: ScopedStudentRow[],
+  context: TeacherContext,
+): ScopedStudentRow[] {
+  return students.filter((student) => studentMatchesTeacherAssignmentScope(student, context));
+}
+
+/** Grade slugs the teacher may report on — derived from assignments (or full catalog for lead teachers). */
+export function teacherReportGradeOptions(context: TeacherContext): string[] {
+  const slugs = context.isLeadTeacher
+    ? context.assignedGrades
+    : [
+        ...new Set(
+          context.assignments.map((a) => normalizeGradeSlug(a.grade) || a.grade).filter(Boolean),
+        ),
+      ];
+  return slugs.sort((a, b) => {
+    const ai = grades.findIndex((g) => g.slug === a);
+    const bi = grades.findIndex((g) => g.slug === b);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+}
+
+/**
+ * Section options for reports — derived from teacher assignments for the grade.
+ * Sections remain available even when no students or analytics exist yet.
+ */
+export function teacherReportSectionOptions(
+  context: TeacherContext,
+  grade: string,
+): StudentSection[] {
+  if (!grade) return [];
+
+  if (context.isLeadTeacher) {
+    return [...STUDENT_SECTIONS];
+  }
+
+  const matching = context.assignments.filter((assignment) => gradeMatches(assignment.grade, grade));
+  if (matching.length === 0) return [];
+
+  const sectionSet = new Set<StudentSection>();
+  let wholeGrade = false;
+
+  for (const assignment of matching) {
+    if (assignment.section === null) {
+      wholeGrade = true;
+    } else {
+      sectionSet.add(assignment.section);
+    }
+  }
+
+  if (wholeGrade) {
+    return [...STUDENT_SECTIONS];
+  }
+
+  return [...sectionSet].sort(
+    (a, b) => STUDENT_SECTIONS.indexOf(a) - STUDENT_SECTIONS.indexOf(b),
+  );
 }
 
 export async function fetchTeacherContext(userId: string): Promise<TeacherContext> {
@@ -344,7 +421,6 @@ export function assignmentScopeOptionsForGrade(
   sections: Array<StudentSection | null>;
   groups: Array<IslamicGroup | null>;
 } {
-  const gradeNorm = normalizeGradeSlug(grade) || grade;
   if (context.isLeadTeacher) {
     return {
       sections: [null, ...STUDENT_SECTIONS],
@@ -352,9 +428,7 @@ export function assignmentScopeOptionsForGrade(
     };
   }
 
-  const matching = context.assignments.filter(
-    (a) => normalizeGradeSlug(a.grade) === gradeNorm || a.grade === gradeNorm,
-  );
+  const matching = context.assignments.filter((a) => gradeMatches(a.grade, grade));
   if (matching.length === 0) {
     return { sections: [], groups: [] };
   }

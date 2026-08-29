@@ -1,8 +1,5 @@
 import { useMemo } from "react";
-import { Sparkles } from "lucide-react";
-import heroImg from "@/assets/hero.jpg";
-import patternImg from "@/assets/pattern.jpg";
-import { BrandLogo, DepartmentLogoCard } from "@/components/brand-logo";
+import { BrandLogo } from "@/components/brand-logo";
 import { certificateIslamicLogoUrl, certificateSchoolLogoUrl } from "@/lib/certificate-branding";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { useI18n } from "@/lib/i18n";
@@ -11,7 +8,7 @@ import type { TeacherContext } from "@/lib/teacher-dashboard";
 import { islamicGroupLabel, sectionLabel } from "@/lib/student-academics";
 import type { StageCardKey } from "@/lib/stage-images";
 
-const MAX_CHIPS = 4;
+const MAX_CHIPS = 3;
 
 function stageLabelKey(stage: StageCardKey): "stage_kg" | "stage_elem" | "stage_mid" | "stage_high" {
   if (stage === "kg") return "stage_kg";
@@ -89,64 +86,50 @@ export function TeacherDashboardHero({ context }: TeacherDashboardHeroProps) {
   ];
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-brand-dark text-white shadow-[var(--shadow-elegant)]">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-luminosity"
-        style={{ backgroundImage: `url(${patternImg})`, backgroundSize: "320px" }}
-        aria-hidden
-      />
-      <div className="relative grid gap-8 p-5 sm:p-6 md:p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-10">
-        <div className="min-w-0">
-          <div className="mb-5 flex flex-wrap items-center gap-3">
+    <section className="relative overflow-hidden rounded-2xl bg-brand-dark text-white shadow-[var(--shadow-soft)]">
+      <div className="relative border-b border-white/10 px-4 py-3 sm:px-5">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 sm:gap-6">
+          <div className="flex justify-start">
+            <BrandLogo src={certificateSchoolLogoUrl()} alt={tr("school_logo_alt")} size="headerCompact" />
+          </div>
+          <h2 className="px-2 text-center font-display text-sm font-semibold text-[#F4B400] sm:text-base md:text-lg">
+            {tr("teacher_title")}
+          </h2>
+          <div className="flex justify-end">
             <BrandLogo
-              src={certificateSchoolLogoUrl()}
-              alt={tr("school_logo_alt")}
-              size="headerCompact"
-              className="rounded-lg bg-white/95 p-1"
-            />
-            <DepartmentLogoCard
               src={certificateIslamicLogoUrl()}
               alt={tr("teacher_dash_islamic_logo_alt")}
-              className="max-w-[140px] rounded-xl p-2 sm:max-w-[160px]"
+              size="headerCompact"
             />
           </div>
-
-          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/50 bg-primary/15 px-3 py-1.5 text-xs font-medium tracking-wide text-primary sm:text-sm">
-            <Sparkles className="h-3.5 w-3.5 shrink-0" />
-            <span>{tr("teacher_title")}</span>
-          </div>
-
-          <h1 className="mt-4 font-display text-2xl font-semibold leading-tight text-[#F4B400] sm:text-3xl md:text-4xl">
-            {tr("teacher_home_welcome")}
-          </h1>
-          <p className="mt-2 text-sm text-white/85 sm:text-base">{tr("teacher_dash_hero_lead")}</p>
-          <p className="mt-1 text-sm text-white/70">{trf("teacher_welcome_name", { name: context.fullName })}</p>
-
-          <div className="mt-6 space-y-3">
-            {chipGroups.map((group) => (
-              <div key={group.label} className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55 sm:text-xs">
-                  {group.label}
-                </p>
-                <div className="mt-1.5 flex flex-wrap gap-2">
-                  {group.values.map((value) => (
-                    <span
-                      key={`${group.label}-${value}`}
-                      className="inline-flex max-w-full items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/95 backdrop-blur-sm"
-                    >
-                      <span className="truncate">{value}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
+      </div>
 
-        <div className="hidden min-w-0 lg:block lg:max-w-md xl:max-w-lg">
-          <div className="overflow-hidden rounded-2xl border border-primary/25 shadow-[var(--shadow-elegant)]">
-            <img src={heroImg} alt="" width={1600} height={1100} className="h-auto w-full" />
-          </div>
+      <div className="relative p-4 sm:p-5">
+        <h1 className="font-display text-xl font-semibold leading-tight text-white sm:text-2xl">
+          {tr("teacher_home_welcome")}
+        </h1>
+        <p className="mt-1 text-sm text-white/80">{trf("teacher_welcome_name", { name: context.fullName })}</p>
+        <p className="mt-0.5 line-clamp-2 text-xs text-white/65 sm:text-sm">{tr("teacher_dash_hero_lead")}</p>
+
+        <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+          {chipGroups.map((group) => (
+            <div key={group.label} className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/50">
+                {group.label}
+              </p>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {group.values.map((value) => (
+                  <span
+                    key={`${group.label}-${value}`}
+                    className="inline-flex max-w-full items-center rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/90"
+                  >
+                    <span className="truncate">{value}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

@@ -48,7 +48,7 @@ export function TeacherDashboardKpis({ stats }: TeacherDashboardKpisProps) {
         return (
           <div
             key={item.labelKey}
-            className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5"
+            className="min-w-0 rounded-xl border border-border bg-card p-3.5 shadow-[var(--shadow-soft)] sm:p-4"
           >
             <div className="mb-2 flex items-center gap-2 text-muted-foreground">
               <Icon className="h-4 w-4 shrink-0 text-primary" />
@@ -56,7 +56,7 @@ export function TeacherDashboardKpis({ stats }: TeacherDashboardKpisProps) {
                 {tr(item.labelKey)}
               </span>
             </div>
-            <p className="font-display text-2xl text-foreground sm:text-[1.65rem]">{item.value}</p>
+            <p className="font-display text-xl text-foreground sm:text-2xl">{item.value}</p>
             {item.subtitleKey ? (
               <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-muted-foreground sm:text-xs">
                 {tr(item.subtitleKey)}

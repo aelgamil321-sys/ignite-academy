@@ -1,11 +1,11 @@
 import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageShell } from "@/components/page-shell";
-import { TeacherSidebar } from "@/components/teacher-sidebar";
+import { TeacherDashboardShell } from "@/components/teacher-dashboard-shell";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { getAccountRole, navigateTargetForAccountRole } from "@/lib/account-role";
-import { fetchTeacherContext } from "@/lib/teacher-dashboard";
+import { fetchTeacherContext, type TeacherContext } from "@/lib/teacher-dashboard";
 import { resolveVerifiedSession } from "@/lib/email-verification";
 import { EmailVerificationRequired } from "@/components/email-verification-required";
 import { shouldDeferToPasswordReset } from "@/lib/password-recovery";
@@ -27,6 +27,8 @@ export function TeacherGate() {
   const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const [email, setEmail] = useState("");
   const [teacherName, setTeacherName] = useState("");
+  const [teacherContext, setTeacherContext] = useState<TeacherContext | null>(null);
+  const [profilePhotoPath, setProfilePhotoPath] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -55,8 +57,16 @@ export function TeacherGate() {
       }
       const ctx = await fetchTeacherContext(user.id);
       if (!active) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("profile_photo_path")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!active) return;
+      setTeacherContext(ctx);
       setEmail(ctx.email || user.email || "");
       setTeacherName(ctx.fullName);
+      setProfilePhotoPath(profile?.profile_photo_path ?? null);
       setState("ok");
     };
     void check();
@@ -100,18 +110,13 @@ export function TeacherGate() {
   }
 
   return (
-    <PageShell
-      eyebrow={tr("teacher_title")}
-      title={tr("teacher_welcome")}
-      lead={tr("teacher_lead")}
-      crumbs={[{ label: tr("teacher_title") }]}
+    <TeacherDashboardShell
+      email={email}
+      teacherName={teacherName}
+      context={teacherContext}
+      profilePhotoPath={profilePhotoPath}
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(280px,300px)_1fr] items-start">
-        <TeacherSidebar email={email} teacherName={teacherName} />
-        <div className="min-w-0">
-          <Outlet />
-        </div>
-      </div>
-    </PageShell>
+      <Outlet />
+    </TeacherDashboardShell>
   );
 }

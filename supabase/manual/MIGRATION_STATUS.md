@@ -13,6 +13,7 @@ The following migration files were **manually applied to production** (not via a
 | `20260827140000` | `supabase/migrations/20260827140000_articles_targeting_admin_hof_security.sql` |
 | `20260828190000` | `supabase/migrations/20260828190000_admin_content_ownership_rls.sql` |
 | `20260829120000` | `supabase/migrations/20260829120000_teacher_announcement_targeting_rls.sql` |
+| `20260829140000` | `supabase/migrations/20260829140000_teacher_timetables.sql` |
 
 ### Articles targeting / admin Hall of Fame security (`20260827140000`)
 
@@ -39,6 +40,21 @@ The following migration files were **manually applied to production** (not via a
 - **No `db push` performed**
 - **No migration repair performed**
 
+### Teacher timetables (`20260829140000`)
+
+- Adds `teacher_timetables` table (one row per teacher), private `teacher-timetables` storage bucket, and ownership RLS.
+- Teachers may upload/view/replace/delete **only their own** timetable file (PDF/PNG/JPEG/WebP, 10 MB max).
+- `parsed_schedule` JSONB reserved for future server-side AI extraction; **not teacher-writable** (RLS + trigger guard).
+- No Lead/HOD peer timetable access. Admin may read timetable metadata via existing `has_role` convention on table SELECT only.
+- **Status:** **MANUALLY APPLIED TO PRODUCTION — VERIFIED**
+- **Applied via:** Supabase SQL Editor (`supabase/manual/20260829140000_teacher_timetables_MANUAL.sql`)
+- **Production verification:** `supabase/manual/verify_teacher_timetables_security_READ_ONLY.sql` — **executed successfully**
+- **Verified:** timetable table + RLS; storage bucket + own-folder policies; MIME/size constraints; `parsed_schedule` protection
+- **Verification date:** 2026-08-29
+- **Verification type:** production catalog/policy verification (not runtime user impersonation)
+- **No `db push` performed**
+- **No migration repair performed**
+
 ## Operational rules
 
 - **DO NOT** manually re-run these migrations against production.
@@ -53,8 +69,10 @@ The following migration files were **manually applied to production** (not via a
 
 - Manual apply copy (admin ownership): `supabase/manual/20260828190000_admin_content_ownership_rls_MANUAL.sql`
 - Manual apply copy (teacher announcement targeting): `supabase/manual/20260829120000_teacher_announcement_targeting_rls_MANUAL.sql`
+- Manual apply copy (teacher timetables): `supabase/manual/20260829140000_teacher_timetables_MANUAL.sql`
 - Verification (admin summary): `supabase/manual/verify_admin_content_ownership_SUMMARY.sql`
 - Verification (admin detailed): `supabase/manual/verify_admin_content_ownership_READ_ONLY.sql`
 - Verification (teacher announcement targeting): `supabase/manual/verify_teacher_announcement_targeting_rls.sql`
+- Verification (teacher timetables): `supabase/manual/verify_teacher_timetables_security_READ_ONLY.sql`
 - Optional script (admin read-only checks): `scripts/verify-admin-content-ownership.mjs`
 - Optional script (teacher read-only checks): `scripts/verify-teacher-announcement-targeting.mjs`

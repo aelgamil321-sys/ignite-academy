@@ -1081,6 +1081,146 @@ export const t = {
     ar: "لا يوجد نشاط حديث لعرضه",
   },
   teacher_sidebar_overview: { en: "Overview", ar: "نظرة عامة" },
+  teacher_sidebar_dashboard: { en: "Dashboard", ar: "لوحة التحكم" },
+  teacher_sidebar_teaching: { en: "Teaching", ar: "التدريس" },
+  teacher_sidebar_students: { en: "Students", ar: "الطلاب" },
+  teacher_sidebar_communication: { en: "Communication", ar: "التواصل" },
+  teacher_sidebar_other: { en: "Other", ar: "أخرى" },
+  teacher_dash_open_menu: { en: "Open menu", ar: "فتح القائمة" },
+  teacher_dash_topbar_lead: {
+    en: "Your teaching workspace",
+    ar: "مساحة عملك التعليمية",
+  },
+  teacher_dash_nav_brand: {
+    en: "Teacher Portal",
+    ar: "بوابة المعلم",
+  },
+  teacher_profile_title: { en: "My Profile", ar: "ملفي الشخصي" },
+  teacher_profile_role: { en: "Teacher", ar: "معلم" },
+  teacher_profile_teaching_info: { en: "Teaching Information", ar: "المعلومات التعليمية" },
+  teacher_profile_class_count: {
+    en: "{count} assigned classes",
+    ar: "{count} صفوف مكلّفة",
+  },
+  teacher_sidebar_profile: { en: "Profile", ar: "الملف الشخصي" },
+  teacher_nav_add_quiz: { en: "Add Quiz", ar: "إضافة اختبار" },
+  teacher_nav_add_assignment: { en: "Add Assignment", ar: "إضافة واجب" },
+  teacher_nav_add_timetable: { en: "Add Timetable", ar: "إضافة الجدول" },
+  teacher_nav_edit_timetable: { en: "Edit Timetable", ar: "تعديل الجدول" },
+  teacher_nav_reports: { en: "Reports", ar: "التقارير" },
+  teacher_add_quiz_desc: {
+    en: "Choose a lesson to add or edit its quiz questions.",
+    ar: "اختر درسًا لإضافة أو تعديل أسئلة اختباره.",
+  },
+  teacher_add_quiz_no_quiz: {
+    en: "Lessons without a quiz",
+    ar: "دروس بدون اختبار",
+  },
+  teacher_add_quiz_has_quiz: {
+    en: "Lessons with an existing quiz",
+    ar: "دروس لها اختبار",
+  },
+  teacher_timetable_empty: {
+    en: "No timetable uploaded yet.",
+    ar: "لم يتم رفع الجدول بعد.",
+  },
+  teacher_timetable_upload: { en: "Upload timetable", ar: "رفع الجدول" },
+  teacher_timetable_replace: { en: "Replace timetable", ar: "استبدال الجدول" },
+  teacher_timetable_remove: { en: "Remove timetable", ar: "حذف الجدول" },
+  teacher_timetable_open: { en: "Open timetable", ar: "فتح الجدول" },
+  teacher_timetable_uploaded: { en: "Uploaded", ar: "تاريخ الرفع" },
+  teacher_timetable_invalid_type: {
+    en: "Please upload a PDF or image (JPEG, PNG, WebP).",
+    ar: "يرجى رفع ملف PDF أو صورة (JPEG أو PNG أو WebP).",
+  },
+  teacher_timetable_too_large: {
+    en: "Timetable file must be 10 MB or smaller.",
+    ar: "يجب ألا يتجاوز ملف الجدول 10 ميجابايت.",
+  },
+  teacher_timetable_upload_error: {
+    en: "Could not upload timetable. Please try again.",
+    ar: "تعذر رفع الجدول. يرجى المحاولة مرة أخرى.",
+  },
+  teacher_timetable_load_error: {
+    en: "Could not load timetable.",
+    ar: "تعذر تحميل الجدول.",
+  },
+  teacher_timetable_remove_error: {
+    en: "Could not remove timetable.",
+    ar: "تعذر حذف الجدول.",
+  },
+  teacher_timetable_none_to_edit: {
+    en: "No timetable has been uploaded yet.",
+    ar: "لم يتم رفع أي جدول بعد.",
+  },
+  teacher_reports_lead: {
+    en: "Evidence-based reports for your assigned teaching scope.",
+    ar: "تقارير مبنية على بيانات حقيقية ضمن نطاق تدريسك.",
+  },
+  teacher_reports_load_error: {
+    en: "Reports are temporarily unavailable. Please try again.",
+    ar: "التقارير غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى.",
+  },
+  teacher_reports_retry: { en: "Try again", ar: "إعادة المحاولة" },
+  teacher_report_no_data: {
+    en: "No measurable data for this selection yet.",
+    ar: "لا توجد بيانات قابلة للقياس لهذا الاختيار بعد.",
+  },
+  teacher_report_no_sections: {
+    en: "No sections available in your teaching scope for this grade.",
+    ar: "لا توجد شُعب متاحة في نطاق تدريسك لهذا الصف.",
+  },
+  teacher_report_no_section_students: {
+    en: "No student or report data available for this section yet.",
+    ar: "لا توجد بيانات طلاب أو تقارير لهذه الشعبة بعد.",
+  },
+  teacher_report_select_student: {
+    en: "Select a student to view their report.",
+    ar: "اختر طالبًا لعرض تقريره.",
+  },
+  teacher_report_class: { en: "Class Report", ar: "تقرير الصف" },
+  teacher_report_section: { en: "Section Report", ar: "تقرير الشعبة" },
+  teacher_report_student: { en: "Student Report", ar: "تقرير الطالب" },
+  teacher_report_strengths: { en: "Measured strengths", ar: "نقاط القوة المقاسة" },
+  teacher_report_needs_support: { en: "Areas needing support", ar: "مجالات تحتاج دعمًا" },
+  teacher_report_print: { en: "Print report", ar: "طباعة التقرير" },
+  teacher_report_metric_avg_score: { en: "Average quiz score", ar: "متوسط درجة الاختبار" },
+  teacher_report_metric_quiz_activity: {
+    en: "Students with quiz activity",
+    ar: "طلاب لديهم نشاط اختبارات",
+  },
+  teacher_report_strength_top_score: {
+    en: "Highest quiz performance",
+    ar: "أعلى أداء في الاختبارات",
+  },
+  teacher_report_strength_lessons_completed: {
+    en: "Completed lessons",
+    ar: "الدروس المكتملة",
+  },
+  teacher_report_strength_certificates: {
+    en: "Certificates earned",
+    ar: "الشهادات المكتسبة",
+  },
+  teacher_report_support_at_risk_count: {
+    en: "Students needing follow-up",
+    ar: "طلاب يحتاجون متابعة",
+  },
+  teacher_report_support_below_threshold: {
+    en: "Below follow-up threshold",
+    ar: "أقل من حد المتابعة",
+  },
+  teacher_report_support_no_quiz_data: {
+    en: "Without measured quiz data",
+    ar: "بدون بيانات اختبار مقاسة",
+  },
+  teacher_report_support_low_progress: {
+    en: "Low lesson progress",
+    ar: "تقدم منخفض في الدروس",
+  },
+  teacher_overview_without_scores: {
+    en: "Without quiz activity",
+    ar: "بدون نشاط اختبارات",
+  },
   teacher_sidebar_content: { en: "Content", ar: "المحتوى" },
   teacher_sidebar_assessment: { en: "Assessment", ar: "التقييم" },
   teacher_sidebar_scope: { en: "My School Scope", ar: "نطاق مدرستي" },
