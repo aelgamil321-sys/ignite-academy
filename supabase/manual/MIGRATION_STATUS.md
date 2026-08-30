@@ -15,6 +15,7 @@ The following migration files were **manually applied to production** (not via a
 | `20260829120000` | `supabase/migrations/20260829120000_teacher_announcement_targeting_rls.sql` |
 | `20260829140000` | `supabase/migrations/20260829140000_teacher_timetables.sql` |
 | `20260829150000` | `supabase/migrations/20260829150000_parent_explicit_links_security.sql` |
+| `20260830140000` | `supabase/migrations/20260830140000_teacher_display_name_identity.sql` |
 
 ### Articles targeting / admin Hall of Fame security (`20260827140000`)
 
@@ -72,6 +73,28 @@ The following migration files were **manually applied to production** (not via a
 - **No `db push` performed**
 - **No migration repair performed**
 
+### Teacher display-name identity (`20260830140000`)
+
+- Backfills `public.profiles` for approved teachers from `auth.users.raw_user_meta_data` (display identity only).
+- Adds `resolve_staff_display_name`, `get_teacher_display_names`, and `sync_teacher_profile_identity` RPCs.
+- Updates `get_announcement_creator_display_names` to use the shared staff display-name resolver.
+- Updates `handle_new_user()` so teacher signup also persists identity in `public.profiles` (not only `teacher_requests`).
+- Does **not** delete or recreate teacher accounts.
+- Does **not** modify `teacher_assignments`.
+- Does **not** modify existing `user_roles` rows.
+- Does **not** modify `teacher_profiles.is_lead_teacher`.
+- **Status:** **MANUALLY APPLIED TO PRODUCTION — VERIFIED**
+- **Applied via:** Supabase SQL Editor
+- **Production project:** `aijukbdxyawxzekwhrdo`
+- **Verified:** real `@igniteschool.ae` teacher names present in `public.profiles`; UUIDs are no longer the intended display-name source; migration executed successfully; no manual name `UPDATE` required beyond the migration backfill
+- **Verification date:** 2026-08-30
+- **Verification type:** production manual verification (SQL Editor apply + profile name spot-check)
+- **Application release:** commit `7effc5e` (`fix: restore teacher display names`); Worker version `0a6d0ebc-f7c3-438b-a309-84f27c1f739c`
+- **Apply script (Management API, optional):** `scripts/apply-teacher-display-name-migration.mjs`
+- **No `db push` performed**
+- **No migration repair performed**
+- **DO NOT** re-run this migration blindly against production.
+
 ## Operational rules
 
 - **DO NOT** manually re-run these migrations against production.
@@ -88,6 +111,7 @@ The following migration files were **manually applied to production** (not via a
 - Manual apply copy (teacher announcement targeting): `supabase/manual/20260829120000_teacher_announcement_targeting_rls_MANUAL.sql`
 - Manual apply copy (teacher timetables): `supabase/manual/20260829140000_teacher_timetables_MANUAL.sql`
 - Manual apply copy (parent explicit-links security): `supabase/manual/20260829150000_parent_explicit_links_security_MANUAL.sql`
+- Migration file (teacher display-name identity): `supabase/migrations/20260830140000_teacher_display_name_identity.sql`
 - Verification (admin summary): `supabase/manual/verify_admin_content_ownership_SUMMARY.sql`
 - Verification (admin detailed): `supabase/manual/verify_admin_content_ownership_READ_ONLY.sql`
 - Verification (teacher announcement targeting): `supabase/manual/verify_teacher_announcement_targeting_rls.sql`
@@ -97,3 +121,4 @@ The following migration files were **manually applied to production** (not via a
 - Optional script (teacher read-only checks): `scripts/verify-teacher-announcement-targeting.mjs`
 - Optional script (parent explicit-links apply): `scripts/apply-parent-explicit-links-security.mjs`
 - Optional script (parent explicit-links verify): `scripts/verify-parent-explicit-links-security.mjs`
+- Optional script (teacher display-name apply): `scripts/apply-teacher-display-name-migration.mjs`
