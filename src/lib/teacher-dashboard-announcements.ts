@@ -174,3 +174,32 @@ export async function fetchTeacherReadableAnnouncement(articleId: string): Promi
 
   return { announcement: null, error: null };
 }
+
+/** Read-only announcement detail for admin workspace — RLS enforces admin access. */
+export async function fetchAdminReadableAnnouncement(articleId: string): Promise<{
+  announcement: Announcement | null;
+  createdBy: string | null;
+  error: string | null;
+}> {
+  const { data, error } = await supabase
+    .from("articles")
+    .select(ARTICLE_DETAIL_SELECT)
+    .eq("id", articleId)
+    .eq("category", "announcement")
+    .maybeSingle();
+
+  if (error) return { announcement: null, createdBy: null, error: error.message };
+  if (!data) return { announcement: null, createdBy: null, error: null };
+
+  const custom = articleRowToCustomArticle(data as ArticleRow);
+  const publishedAnnouncement = resolveAnnouncementBySlug(articleId, [custom]);
+  const announcement =
+    publishedAnnouncement ??
+    customArticleToAnnouncement(custom);
+
+  return {
+    announcement,
+    createdBy: custom.createdBy,
+    error: null,
+  };
+}
