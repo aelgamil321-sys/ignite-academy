@@ -25,19 +25,18 @@ export function buildUserRoleIndex(
     if (row.role === "admin") adminIds.add(row.user_id);
     else if (row.role === "teacher") teacherIds.add(row.user_id);
     else if (row.role === "parent") parentIds.add(row.user_id);
-    else if (row.role === "student" || row.role === "user") studentIds.add(row.user_id);
+    else if (row.role === "student") studentIds.add(row.user_id);
   }
 
   return { roleByUser, adminIds, teacherIds, parentIds, studentIds };
 }
 
-/** Canonical student check: explicit student role, excluding staff roles. */
+/** Canonical student check: user_roles.role = 'student', excluding any staff role rows. */
 export function isStudentAccount(userId: string, index: UserRoleIndex): boolean {
   if (index.adminIds.has(userId) || index.teacherIds.has(userId) || index.parentIds.has(userId)) {
     return false;
   }
-  const role = index.roleByUser.get(userId);
-  return role === "student" || role === "user";
+  return index.roleByUser.get(userId) === "student";
 }
 
 export function filterProfilesToStudents<T extends { user_id: string }>(

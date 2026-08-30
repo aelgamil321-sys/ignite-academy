@@ -16,6 +16,7 @@ The following migration files were **manually applied to production** (not via a
 | `20260829140000` | `supabase/migrations/20260829140000_teacher_timetables.sql` |
 | `20260829150000` | `supabase/migrations/20260829150000_parent_explicit_links_security.sql` |
 | `20260830140000` | `supabase/migrations/20260830140000_teacher_display_name_identity.sql` |
+| `20260830150000` | `supabase/migrations/20260830150000_role_aware_students_lead_teacher_rls.sql` |
 
 ### Articles targeting / admin Hall of Fame security (`20260827140000`)
 
@@ -95,6 +96,26 @@ The following migration files were **manually applied to production** (not via a
 - **No migration repair performed**
 - **DO NOT** re-run this migration blindly against production.
 
+### Role-aware students + Lead Teacher RLS (`20260830150000`)
+
+- Adds `is_admin_or_lead_teacher()` and Lead Teacher SELECT/operational RLS on school-management tables.
+- Updates `get_admin_hall_of_fame()` to authorize Lead Teacher and count only `user_roles.role = 'student'`.
+- Updates `get_announcement_creator_display_names()` to authorize Lead Teacher via `is_admin_or_lead_teacher()`.
+- Application layer uses `user_roles.role = 'student'` for student population (not `profiles` row presence).
+- Does **not** delete teacher profiles or change `teacher_profiles.is_lead_teacher`.
+- Does **not** change Ahmed's `user_roles` row (remains `teacher`).
+- **Status:** **MANUALLY APPLIED TO PRODUCTION — VERIFIED**
+- **Applied via:** Supabase SQL Editor
+- **Production project:** `aijukbdxyawxzekwhrdo`
+- **Production verification:** `supabase/manual/verify_role_aware_students_lead_teacher_rls.sql`
+- **Verified:** `creator_names_allows_lead_teacher = true`; Lead Teacher RLS policies present; `get_admin_hall_of_fame` student-role filter active
+- **Verification date:** 2026-08-30
+- **Verification type:** production manual verification (SQL Editor)
+- **Application release:** commit pending (`feat: finalize lead teacher administration`)
+- **No `db push` performed**
+- **No migration repair performed**
+- **DO NOT** re-run this migration blindly against production.
+
 ## Operational rules
 
 - **DO NOT** manually re-run these migrations against production.
@@ -112,11 +133,13 @@ The following migration files were **manually applied to production** (not via a
 - Manual apply copy (teacher timetables): `supabase/manual/20260829140000_teacher_timetables_MANUAL.sql`
 - Manual apply copy (parent explicit-links security): `supabase/manual/20260829150000_parent_explicit_links_security_MANUAL.sql`
 - Migration file (teacher display-name identity): `supabase/migrations/20260830140000_teacher_display_name_identity.sql`
+- Migration file (role-aware students + Lead Teacher RLS): `supabase/migrations/20260830150000_role_aware_students_lead_teacher_rls.sql`
 - Verification (admin summary): `supabase/manual/verify_admin_content_ownership_SUMMARY.sql`
 - Verification (admin detailed): `supabase/manual/verify_admin_content_ownership_READ_ONLY.sql`
 - Verification (teacher announcement targeting): `supabase/manual/verify_teacher_announcement_targeting_rls.sql`
 - Verification (teacher timetables): `supabase/manual/verify_teacher_timetables_security_READ_ONLY.sql`
 - Verification (parent explicit-links security): `supabase/manual/verify_parent_explicit_links_security_READ_ONLY.sql`
+- Verification (role-aware students + Lead Teacher RLS): `supabase/manual/verify_role_aware_students_lead_teacher_rls.sql`
 - Optional script (admin read-only checks): `scripts/verify-admin-content-ownership.mjs`
 - Optional script (teacher read-only checks): `scripts/verify-teacher-announcement-targeting.mjs`
 - Optional script (parent explicit-links apply): `scripts/apply-parent-explicit-links-security.mjs`
