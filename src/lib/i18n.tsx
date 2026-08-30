@@ -684,6 +684,10 @@ export const t = {
   admin_home_analytics_islamic_b: { en: "Islamic B average", ar: "متوسط المجموعة الإسلامية ب" },
   admin_home_analytics_grade_chart: { en: "Grade comparison (avg. quiz score)", ar: "مقارنة الصفوف (متوسط الاختبارات)" },
   admin_home_analytics_empty: { en: "No analytics data available yet.", ar: "لا تتوفر بيانات تحليلات بعد." },
+  admin_home_analytics_load_error: {
+    en: "Could not load analytics preview.",
+    ar: "تعذّر تحميل معاينة التحليلات.",
+  },
   admin_home_add_announcement: { en: "Add Announcement", ar: "إضافة إعلان" },
   admin_ann_target_grade: { en: "Target grade", ar: "الصف المستهدف" },
   admin_ann_audience: { en: "Audience", ar: "الجمهور" },
@@ -738,6 +742,11 @@ export const t = {
   },
   admin_students_loading: { en: "Loading students…", ar: "جارٍ تحميل الطلاب…" },
   admin_students_empty: { en: "No students match your filters.", ar: "لا يوجد طلاب مطابقون للفلاتر." },
+  admin_students_none_yet: { en: "No students yet", ar: "لا يوجد طلاب بعد" },
+  admin_students_load_error: {
+    en: "Could not load students.",
+    ar: "تعذّر تحميل الطلاب.",
+  },
   admin_students_search_placeholder: {
     en: "Search by name, email, student ID, or link code…",
     ar: "ابحث بالاسم أو البريد أو معرف الطالب أو رمز الربط…",
@@ -1545,6 +1554,10 @@ export const t = {
     ar: "أدوات تشغيلية لإدارة القسم — الطلاب والمعلمين وأولياء الأمور والتحليلات والمحتوى.",
   },
   lead_teacher_back_overview: { en: "Back to management overview", ar: "العودة إلى النظرة الإدارية" },
+  lead_teacher_access_denied: {
+    en: "You do not have lead teacher access to this area.",
+    ar: "ليس لديك صلاحية معلم القسم للوصول إلى هذه المنطقة.",
+  },
   wp_dept_total_teachers: { en: "Total teachers", ar: "إجمالي المعلمين" },
   wp_dept_total_plans: { en: "Submitted plans", ar: "الخطط المقدمة" },
   wp_dept_overall_completion: { en: "Overall completion", ar: "نسبة الإكمال الإجمالية" },

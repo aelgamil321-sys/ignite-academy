@@ -1,6 +1,7 @@
 import { redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { getAccountRole } from "@/lib/account-role";
+import { isBrowser } from "@/lib/runtime";
 
 export async function fetchIsLeadTeacher(userId: string): Promise<boolean> {
   const { data, error } = await supabase
@@ -38,6 +39,8 @@ export async function requireSchoolManagementAccess(): Promise<void> {
 
 /** Lead Teacher school-management routes — teacher role + is_lead_teacher only (not platform admin). */
 export async function requireLeadTeacherAccess(): Promise<void> {
+  if (!isBrowser()) return;
+
   const { data } = await supabase.auth.getUser();
   const userId = data.user?.id;
   if (!userId) {

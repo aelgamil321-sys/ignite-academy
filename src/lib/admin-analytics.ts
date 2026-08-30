@@ -509,7 +509,7 @@ export async function fetchAdminAnalytics(filters: AnalyticsFilters): Promise<{
   if (certificatesRes.error) return { data: null, error: certificatesRes.error.message };
 
   const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
-  const students = filterProfilesToStudents(profilesRes.data ?? []);
+  const students = filterProfilesToStudents(profilesRes.data ?? [], roleIndex);
 
   return {
     data: buildAdminAnalytics(

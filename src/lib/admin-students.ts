@@ -119,7 +119,10 @@ export async function fetchAdminStudentDirectory(): Promise<{
 
   const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
 
-  const studentProfiles = filterProfilesToStudents(profilesRes.data ?? []) as ProfileRow[];
+  const studentProfiles = filterProfilesToStudents(
+    profilesRes.data ?? [],
+    roleIndex,
+  ) as ProfileRow[];
 
   const submissions = submissionsRes.data ?? [];
   const certificates = certificatesRes.data ?? [];

@@ -40,24 +40,35 @@ export function AdminStudentsPage() {
   const [gradeFilter, setGradeFilter] = useState("");
   const [sectionFilter, setSectionFilter] = useState<StudentSection | "">("");
   const [islamicFilter, setIslamicFilter] = useState<IslamicGroup | "">("");
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let active = true;
-    void fetchAdminStudentDirectory().then((result) => {
-      if (!active) return;
-      if (result.error) {
-        setError(result.error);
+    setLoading(true);
+    setError(null);
+    void fetchAdminStudentDirectory()
+      .then((result) => {
+        if (!active) return;
+        if (result.error) {
+          setError(result.error);
+          setRows([]);
+        } else {
+          setRows(result.rows);
+          setError(null);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        setError(err instanceof Error ? err.message : tr("admin_students_load_error"));
         setRows([]);
-      } else {
-        setRows(result.rows);
-        setError(null);
-      }
-      setLoading(false);
-    });
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     return () => {
       active = false;
     };
-  }, []);
+  }, [reloadKey, tr]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -80,8 +91,21 @@ export function AdminStudentsPage() {
   }
 
   if (error) {
-    return <p className="text-sm text-destructive">{error}</p>;
+    return (
+      <div className="space-y-3 py-10">
+        <p className="text-sm text-destructive">{error}</p>
+        <button
+          type="button"
+          onClick={() => setReloadKey((key) => key + 1)}
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          {tr("teacher_perf_retry")}
+        </button>
+      </div>
+    );
   }
+
+  const hasActiveFilters = Boolean(query.trim() || gradeFilter || sectionFilter || islamicFilter);
 
   return (
     <div className="space-y-6">
@@ -148,7 +172,11 @@ export function AdminStudentsPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-10 text-center">{tr("admin_students_empty")}</p>
+        <p className="text-sm text-muted-foreground py-10 text-center">
+          {rows.length === 0 && !hasActiveFilters
+            ? tr("admin_students_none_yet")
+            : tr("admin_students_empty")}
+        </p>
       ) : (
         <>
           <div className="hidden lg:block overflow-x-auto rounded-2xl border border-border bg-card shadow-[var(--shadow-soft)]">

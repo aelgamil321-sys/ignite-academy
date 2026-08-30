@@ -18,6 +18,8 @@ export function AdminHomeAnalyticsPreview() {
   const { tr, dir, lang } = useI18n();
   const paths = useSchoolManagementPaths();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [summary, setSummary] = useState<{
     studentCount: number;
     submissionCount: number;
@@ -30,38 +32,52 @@ export function AdminHomeAnalyticsPreview() {
 
   useEffect(() => {
     let active = true;
-    void fetchAdminAnalytics({ grade: "", section: "", islamicGroup: "" }).then((result) => {
-      if (!active) return;
-      if (!result.data) {
+    setLoading(true);
+    setError(null);
+    void fetchAdminAnalytics({ grade: "", section: "", islamicGroup: "" })
+      .then((result) => {
+        if (!active) return;
+        if (result.error) {
+          setSummary(null);
+          setError(result.error);
+          return;
+        }
+        if (!result.data) {
+          setSummary(null);
+          return;
+        }
+        const data = result.data;
+        const gradeBars = data.byGrade
+          .filter((row) => row.averageScorePct !== null)
+          .slice(0, 8)
+          .map((row) => ({
+            label: L(row.labelEn, row.labelAr)[lang],
+            score: row.averageScorePct ?? 0,
+          }));
+        const groupA = data.islamicGroupCards.find((c) => c.group === "A");
+        const groupB = data.islamicGroupCards.find((c) => c.group === "B");
+        setSummary({
+          studentCount: data.summary.studentCount,
+          submissionCount: data.summary.submissionCount,
+          certificateCount: data.summary.certificateCount,
+          averageScorePct: data.summary.averageScorePct,
+          gradeBars,
+          islamicA: groupA?.averageScorePct ?? null,
+          islamicB: groupB?.averageScorePct ?? null,
+        });
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
         setSummary(null);
-        setLoading(false);
-        return;
-      }
-      const data = result.data;
-      const gradeBars = data.byGrade
-        .filter((row) => row.averageScorePct !== null)
-        .slice(0, 8)
-        .map((row) => ({
-          label: L(row.labelEn, row.labelAr)[lang],
-          score: row.averageScorePct ?? 0,
-        }));
-      const groupA = data.islamicGroupCards.find((c) => c.group === "A");
-      const groupB = data.islamicGroupCards.find((c) => c.group === "B");
-      setSummary({
-        studentCount: data.summary.studentCount,
-        submissionCount: data.summary.submissionCount,
-        certificateCount: data.summary.certificateCount,
-        averageScorePct: data.summary.averageScorePct,
-        gradeBars,
-        islamicA: groupA?.averageScorePct ?? null,
-        islamicB: groupB?.averageScorePct ?? null,
+        setError(err instanceof Error ? err.message : tr("admin_home_analytics_load_error"));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
-      setLoading(false);
-    });
     return () => {
       active = false;
     };
-  }, [lang]);
+  }, [lang, reloadKey, tr]);
 
   return (
     <section className="container-page min-w-0 py-20">
@@ -79,6 +95,17 @@ export function AdminHomeAnalyticsPreview() {
         <div className="mt-10 flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" />
           {tr("admin_home_analytics_loading")}
+        </div>
+      ) : error ? (
+        <div className="mt-10 space-y-3">
+          <p className="text-sm text-destructive">{error}</p>
+          <button
+            type="button"
+            onClick={() => setReloadKey((key) => key + 1)}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {tr("teacher_perf_retry")}
+          </button>
         </div>
       ) : summary ? (
         <div className="mt-10 space-y-6">

@@ -118,7 +118,7 @@ export async function fetchTeacherAnalytics(
   if (certificatesRes.error) return { data: null, error: certificatesRes.error.message };
 
   const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
-  let students = filterProfilesToStudents(profilesRes.data ?? []);
+  let students = filterProfilesToStudents(profilesRes.data ?? [], roleIndex);
 
   if (!scope.isLeadTeacher) {
     students = students.filter((profile) => {

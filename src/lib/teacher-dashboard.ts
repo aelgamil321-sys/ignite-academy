@@ -227,7 +227,7 @@ export async function fetchScopedStudents(): Promise<ScopedStudentRow[]> {
   if (rolesRes.error) throw rolesRes.error;
 
   const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
-  const studentProfiles = filterProfilesToStudents(profilesRes.data ?? []);
+  const studentProfiles = filterProfilesToStudents(profilesRes.data ?? [], roleIndex);
 
   const students = studentProfiles.map((p) => ({
     userId: p.user_id,
