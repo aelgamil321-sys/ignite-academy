@@ -4,7 +4,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
-import { getAccountRole } from "@/lib/account-role";
 import type { TeacherAssignmentRow } from "@/lib/admin-teachers";
 import { fetchAdminTeachers } from "@/lib/admin-teachers";
 import {
@@ -507,17 +506,10 @@ export function filterDepartmentTrackerRows(
   });
 }
 
+import { isAdminOrLeadTeacher } from "@/lib/school-management-access";
+
 export async function canAccessWeeklyPlanningDepartmentDashboard(userId: string): Promise<boolean> {
-  const role = await getAccountRole(userId);
-  if (role === "admin") return true;
-  if (role !== "teacher") return false;
-  const { data, error } = await supabase
-    .from("teacher_profiles")
-    .select("is_lead_teacher")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (error) throw error;
-  return data?.is_lead_teacher ?? false;
+  return isAdminOrLeadTeacher(userId);
 }
 
 export async function fetchDepartmentWeeklyPlanningSnapshot(): Promise<DepartmentWeeklyPlanningSnapshot> {

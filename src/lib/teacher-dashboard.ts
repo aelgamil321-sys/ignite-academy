@@ -1,5 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import { fetchTeacherDisplayName, resolveTeacherDisplayName } from "@/lib/teacher-identity";
+import {
+  buildUserRoleIndex,
+  filterProfilesToStudents,
+} from "@/lib/student-account";
 import { grades } from "@/lib/curriculum";
 import { gradeMatches, normalizeGradeSlug } from "@/lib/grade-utils";
 import { fetchStudentProgress } from "@/lib/student-progress";
@@ -212,16 +216,23 @@ export async function fetchTeacherContext(userId: string): Promise<TeacherContex
 }
 
 export async function fetchScopedStudents(): Promise<ScopedStudentRow[]> {
-  const { data: profiles, error } = await supabase
-    .from("profiles")
-    .select("user_id, full_name, arabic_name, english_name, grade, section, islamic_group");
+  const [profilesRes, rolesRes] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("user_id, full_name, arabic_name, english_name, grade, section, islamic_group"),
+    supabase.from("user_roles").select("user_id, role"),
+  ]);
 
-  if (error) throw error;
+  if (profilesRes.error) throw profilesRes.error;
+  if (rolesRes.error) throw rolesRes.error;
 
-  const students = (profiles ?? []).map((p) => ({
+  const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
+  const studentProfiles = filterProfilesToStudents(profilesRes.data ?? []);
+
+  const students = studentProfiles.map((p) => ({
     userId: p.user_id,
     displayName:
-      (p.english_name?.trim() || p.arabic_name?.trim() || p.full_name?.trim() || p.user_id) ?? p.user_id,
+      (p.english_name?.trim() || p.arabic_name?.trim() || p.full_name?.trim() || "—") ?? "—",
     grade: normalizeGradeSlug(p.grade ?? "") || String(p.grade ?? ""),
     section: normalizeStudentSection(p.section),
     islamic_group: normalizeIslamicGroup(p.islamic_group),

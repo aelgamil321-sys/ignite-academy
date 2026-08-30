@@ -1,9 +1,9 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { GradeDetailPanel } from "@/components/grade-detail-panel";
+import { LeadTeacherPageHeader } from "@/components/lead-teacher-page-header";
 import { getGrade } from "@/lib/curriculum";
-import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 
-export const Route = createFileRoute("/admin/grades/$grade/")({
+export const Route = createFileRoute("/teacher/lead/grades/$grade/")({
   loader: ({ params }) => {
     const grade = getGrade(params.grade);
     if (!grade) throw notFound();
@@ -13,17 +13,21 @@ export const Route = createFileRoute("/admin/grades/$grade/")({
     const name = loaderData?.grade.name.en ?? "Grade";
     return {
       meta: [
-        { title: `${name} — Admin` },
+        { title: `${name} — Lead Teacher` },
         { name: "robots", content: "noindex,nofollow" },
       ],
     };
   },
-  component: AdminGradePage,
+  component: LeadTeacherGradeDetailPage,
   notFoundComponent: () => <div className="text-sm text-muted-foreground">Grade not found.</div>,
 });
 
-function AdminGradePage() {
+function LeadTeacherGradeDetailPage() {
   const { grade } = Route.useLoaderData();
-  const paths = useSchoolManagementPaths();
-  return <GradeDetailPanel grade={grade} gradesBasePath={paths.grades} />;
+  return (
+    <>
+      <LeadTeacherPageHeader title={grade.name.en} />
+      <GradeDetailPanel grade={grade} gradesBasePath="/teacher/lead/grades" />
+    </>
+  );
 }

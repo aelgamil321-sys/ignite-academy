@@ -42,6 +42,7 @@ import { Route as CategoriesCategoryRouteImport } from './routes/categories.$cat
 import { Route as AssignmentsAssignmentIdRouteImport } from './routes/assignments.$assignmentId'
 import { Route as AnnouncementsSlugRouteImport } from './routes/announcements.$slug'
 import { Route as AdminUploadTestRouteImport } from './routes/admin/upload-test'
+import { Route as TeacherLeadRouteRouteImport } from './routes/teacher/lead/route'
 import { Route as TeacherWeeklyPlanningIndexRouteImport } from './routes/teacher/weekly-planning.index'
 import { Route as TeacherVideosIndexRouteImport } from './routes/teacher/videos.index'
 import { Route as TeacherUsersIndexRouteImport } from './routes/teacher/users.index'
@@ -54,6 +55,7 @@ import { Route as TeacherQuizzesIndexRouteImport } from './routes/teacher/quizze
 import { Route as TeacherProfileIndexRouteImport } from './routes/teacher/profile.index'
 import { Route as TeacherPerformanceIndexRouteImport } from './routes/teacher/performance.index'
 import { Route as TeacherLessonsIndexRouteImport } from './routes/teacher/lessons.index'
+import { Route as TeacherLeadIndexRouteImport } from './routes/teacher/lead/index'
 import { Route as TeacherCurriculumIndexRouteImport } from './routes/teacher/curriculum.index'
 import { Route as TeacherClassesIndexRouteImport } from './routes/teacher/classes.index'
 import { Route as TeacherAssignmentsIndexRouteImport } from './routes/teacher/assignments.index'
@@ -97,16 +99,30 @@ import { Route as TeacherWeeklyPlanningPlanIdIndexRouteImport } from './routes/t
 import { Route as TeacherTimetableEditIndexRouteImport } from './routes/teacher/timetable.edit.index'
 import { Route as TeacherQuizzesNewIndexRouteImport } from './routes/teacher/quizzes.new.index'
 import { Route as TeacherQuizzesManageIndexRouteImport } from './routes/teacher/quizzes.manage.index'
+import { Route as TeacherLeadTeachersIndexRouteImport } from './routes/teacher/lead/teachers.index'
+import { Route as TeacherLeadStudentsIndexRouteImport } from './routes/teacher/lead/students.index'
+import { Route as TeacherLeadQuizSubmissionsIndexRouteImport } from './routes/teacher/lead/quiz-submissions.index'
+import { Route as TeacherLeadParentsIndexRouteImport } from './routes/teacher/lead/parents.index'
+import { Route as TeacherLeadLessonsIndexRouteImport } from './routes/teacher/lead/lessons.index'
+import { Route as TeacherLeadHonorBoardIndexRouteImport } from './routes/teacher/lead/honor-board.index'
+import { Route as TeacherLeadGradesIndexRouteImport } from './routes/teacher/lead/grades.index'
+import { Route as TeacherLeadContentIndexRouteImport } from './routes/teacher/lead/content.index'
+import { Route as TeacherLeadAssignmentsIndexRouteImport } from './routes/teacher/lead/assignments.index'
+import { Route as TeacherLeadAnalyticsIndexRouteImport } from './routes/teacher/lead/analytics.index'
 import { Route as TeacherAssignmentsSubmissionsIndexRouteImport } from './routes/teacher/assignments.submissions.index'
 import { Route as AdminGradesGradeIndexRouteImport } from './routes/admin/grades.$grade.index'
 import { Route as TeacherWeeklyPlanningReviewPlanIdRouteImport } from './routes/teacher/weekly-planning.review.$planId'
 import { Route as TeacherWeeklyPlanningPlanIdPrintRouteImport } from './routes/teacher/weekly-planning.$planId.print'
 import { Route as TeacherWeeklyPlanningPlanIdEditRouteImport } from './routes/teacher/weekly-planning.$planId.edit'
 import { Route as TeacherLessonsEditLessonIdRouteImport } from './routes/teacher.lessons.edit.$lessonId'
+import { Route as TeacherLeadTeachersManageRouteImport } from './routes/teacher/lead/teachers.manage'
+import { Route as TeacherLeadTeachersTeacherIdRouteImport } from './routes/teacher/lead/teachers.$teacherId'
+import { Route as TeacherLeadStudentsStudentIdRouteImport } from './routes/teacher/lead/students.$studentId'
 import { Route as GradesGradeUnitsUnitRouteImport } from './routes/grades.$grade.units.$unit'
 import { Route as AdminWeeklyPlanningReviewPlanIdRouteImport } from './routes/admin/weekly-planning.review.$planId'
 import { Route as AdminLessonsEditLessonIdRouteImport } from './routes/admin.lessons.edit.$lessonId'
 import { Route as AdminGradesGradeLessonRouteImport } from './routes/admin/grades.$grade.$lesson'
+import { Route as TeacherLeadGradesGradeIndexRouteImport } from './routes/teacher/lead/grades.$grade.index'
 import { Route as AdminGradesGradeUnitsUnitRouteImport } from './routes/admin/grades.$grade.units.$unit'
 
 const VideoLessonsRoute = VideoLessonsRouteImport.update({
@@ -274,6 +290,11 @@ const AdminUploadTestRoute = AdminUploadTestRouteImport.update({
   path: '/upload-test',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const TeacherLeadRouteRoute = TeacherLeadRouteRouteImport.update({
+  id: '/lead',
+  path: '/lead',
+  getParentRoute: () => TeacherRouteRoute,
+} as any)
 const TeacherWeeklyPlanningIndexRoute =
   TeacherWeeklyPlanningIndexRouteImport.update({
     id: '/weekly-planning/',
@@ -334,6 +355,11 @@ const TeacherLessonsIndexRoute = TeacherLessonsIndexRouteImport.update({
   id: '/lessons/',
   path: '/lessons/',
   getParentRoute: () => TeacherRouteRoute,
+} as any)
+const TeacherLeadIndexRoute = TeacherLeadIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeacherLeadRouteRoute,
 } as any)
 const TeacherCurriculumIndexRoute = TeacherCurriculumIndexRouteImport.update({
   id: '/curriculum/',
@@ -563,6 +589,62 @@ const TeacherQuizzesManageIndexRoute =
     path: '/quizzes/manage/',
     getParentRoute: () => TeacherRouteRoute,
   } as any)
+const TeacherLeadTeachersIndexRoute =
+  TeacherLeadTeachersIndexRouteImport.update({
+    id: '/teachers/',
+    path: '/teachers/',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
+const TeacherLeadStudentsIndexRoute =
+  TeacherLeadStudentsIndexRouteImport.update({
+    id: '/students/',
+    path: '/students/',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
+const TeacherLeadQuizSubmissionsIndexRoute =
+  TeacherLeadQuizSubmissionsIndexRouteImport.update({
+    id: '/quiz-submissions/',
+    path: '/quiz-submissions/',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
+const TeacherLeadParentsIndexRoute = TeacherLeadParentsIndexRouteImport.update({
+  id: '/parents/',
+  path: '/parents/',
+  getParentRoute: () => TeacherLeadRouteRoute,
+} as any)
+const TeacherLeadLessonsIndexRoute = TeacherLeadLessonsIndexRouteImport.update({
+  id: '/lessons/',
+  path: '/lessons/',
+  getParentRoute: () => TeacherLeadRouteRoute,
+} as any)
+const TeacherLeadHonorBoardIndexRoute =
+  TeacherLeadHonorBoardIndexRouteImport.update({
+    id: '/honor-board/',
+    path: '/honor-board/',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
+const TeacherLeadGradesIndexRoute = TeacherLeadGradesIndexRouteImport.update({
+  id: '/grades/',
+  path: '/grades/',
+  getParentRoute: () => TeacherLeadRouteRoute,
+} as any)
+const TeacherLeadContentIndexRoute = TeacherLeadContentIndexRouteImport.update({
+  id: '/content/',
+  path: '/content/',
+  getParentRoute: () => TeacherLeadRouteRoute,
+} as any)
+const TeacherLeadAssignmentsIndexRoute =
+  TeacherLeadAssignmentsIndexRouteImport.update({
+    id: '/assignments/',
+    path: '/assignments/',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
+const TeacherLeadAnalyticsIndexRoute =
+  TeacherLeadAnalyticsIndexRouteImport.update({
+    id: '/analytics/',
+    path: '/analytics/',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
 const TeacherAssignmentsSubmissionsIndexRoute =
   TeacherAssignmentsSubmissionsIndexRouteImport.update({
     id: '/assignments/submissions/',
@@ -598,6 +680,24 @@ const TeacherLessonsEditLessonIdRoute =
     path: '/lessons/edit/$lessonId',
     getParentRoute: () => TeacherRouteRoute,
   } as any)
+const TeacherLeadTeachersManageRoute =
+  TeacherLeadTeachersManageRouteImport.update({
+    id: '/teachers/manage',
+    path: '/teachers/manage',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
+const TeacherLeadTeachersTeacherIdRoute =
+  TeacherLeadTeachersTeacherIdRouteImport.update({
+    id: '/teachers/$teacherId',
+    path: '/teachers/$teacherId',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
+const TeacherLeadStudentsStudentIdRoute =
+  TeacherLeadStudentsStudentIdRouteImport.update({
+    id: '/students/$studentId',
+    path: '/students/$studentId',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
 const GradesGradeUnitsUnitRoute = GradesGradeUnitsUnitRouteImport.update({
   id: '/grades/$grade/units/$unit',
   path: '/grades/$grade/units/$unit',
@@ -620,6 +720,12 @@ const AdminGradesGradeLessonRoute = AdminGradesGradeLessonRouteImport.update({
   path: '/grades/$grade/$lesson',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const TeacherLeadGradesGradeIndexRoute =
+  TeacherLeadGradesGradeIndexRouteImport.update({
+    id: '/grades/$grade/',
+    path: '/grades/$grade/',
+    getParentRoute: () => TeacherLeadRouteRoute,
+  } as any)
 const AdminGradesGradeUnitsUnitRoute =
   AdminGradesGradeUnitsUnitRouteImport.update({
     id: '/grades/$grade/units/$unit',
@@ -642,6 +748,7 @@ export interface FileRoutesByFullPath {
   '/student': typeof StudentRouteWithChildren
   '/student-dashboard': typeof StudentDashboardRoute
   '/video-lessons': typeof VideoLessonsRoute
+  '/teacher/lead': typeof TeacherLeadRouteRouteWithChildren
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
@@ -700,6 +807,7 @@ export interface FileRoutesByFullPath {
   '/teacher/assignments/': typeof TeacherAssignmentsIndexRoute
   '/teacher/classes/': typeof TeacherClassesIndexRoute
   '/teacher/curriculum/': typeof TeacherCurriculumIndexRoute
+  '/teacher/lead/': typeof TeacherLeadIndexRoute
   '/teacher/lessons/': typeof TeacherLessonsIndexRoute
   '/teacher/performance/': typeof TeacherPerformanceIndexRoute
   '/teacher/profile/': typeof TeacherProfileIndexRoute
@@ -716,17 +824,31 @@ export interface FileRoutesByFullPath {
   '/admin/lessons/edit/$lessonId': typeof AdminLessonsEditLessonIdRoute
   '/admin/weekly-planning/review/$planId': typeof AdminWeeklyPlanningReviewPlanIdRoute
   '/grades/$grade/units/$unit': typeof GradesGradeUnitsUnitRoute
+  '/teacher/lead/students/$studentId': typeof TeacherLeadStudentsStudentIdRoute
+  '/teacher/lead/teachers/$teacherId': typeof TeacherLeadTeachersTeacherIdRoute
+  '/teacher/lead/teachers/manage': typeof TeacherLeadTeachersManageRoute
   '/teacher/lessons/edit/$lessonId': typeof TeacherLessonsEditLessonIdRoute
   '/teacher/weekly-planning/$planId/edit': typeof TeacherWeeklyPlanningPlanIdEditRoute
   '/teacher/weekly-planning/$planId/print': typeof TeacherWeeklyPlanningPlanIdPrintRoute
   '/teacher/weekly-planning/review/$planId': typeof TeacherWeeklyPlanningReviewPlanIdRoute
   '/admin/grades/$grade/': typeof AdminGradesGradeIndexRoute
   '/teacher/assignments/submissions/': typeof TeacherAssignmentsSubmissionsIndexRoute
+  '/teacher/lead/analytics/': typeof TeacherLeadAnalyticsIndexRoute
+  '/teacher/lead/assignments/': typeof TeacherLeadAssignmentsIndexRoute
+  '/teacher/lead/content/': typeof TeacherLeadContentIndexRoute
+  '/teacher/lead/grades/': typeof TeacherLeadGradesIndexRoute
+  '/teacher/lead/honor-board/': typeof TeacherLeadHonorBoardIndexRoute
+  '/teacher/lead/lessons/': typeof TeacherLeadLessonsIndexRoute
+  '/teacher/lead/parents/': typeof TeacherLeadParentsIndexRoute
+  '/teacher/lead/quiz-submissions/': typeof TeacherLeadQuizSubmissionsIndexRoute
+  '/teacher/lead/students/': typeof TeacherLeadStudentsIndexRoute
+  '/teacher/lead/teachers/': typeof TeacherLeadTeachersIndexRoute
   '/teacher/quizzes/manage/': typeof TeacherQuizzesManageIndexRoute
   '/teacher/quizzes/new/': typeof TeacherQuizzesNewIndexRoute
   '/teacher/timetable/edit/': typeof TeacherTimetableEditIndexRoute
   '/teacher/weekly-planning/$planId/': typeof TeacherWeeklyPlanningPlanIdIndexRoute
   '/admin/grades/$grade/units/$unit': typeof AdminGradesGradeUnitsUnitRoute
+  '/teacher/lead/grades/$grade/': typeof TeacherLeadGradesGradeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -797,6 +919,7 @@ export interface FileRoutesByTo {
   '/teacher/assignments': typeof TeacherAssignmentsIndexRoute
   '/teacher/classes': typeof TeacherClassesIndexRoute
   '/teacher/curriculum': typeof TeacherCurriculumIndexRoute
+  '/teacher/lead': typeof TeacherLeadIndexRoute
   '/teacher/lessons': typeof TeacherLessonsIndexRoute
   '/teacher/performance': typeof TeacherPerformanceIndexRoute
   '/teacher/profile': typeof TeacherProfileIndexRoute
@@ -813,17 +936,31 @@ export interface FileRoutesByTo {
   '/admin/lessons/edit/$lessonId': typeof AdminLessonsEditLessonIdRoute
   '/admin/weekly-planning/review/$planId': typeof AdminWeeklyPlanningReviewPlanIdRoute
   '/grades/$grade/units/$unit': typeof GradesGradeUnitsUnitRoute
+  '/teacher/lead/students/$studentId': typeof TeacherLeadStudentsStudentIdRoute
+  '/teacher/lead/teachers/$teacherId': typeof TeacherLeadTeachersTeacherIdRoute
+  '/teacher/lead/teachers/manage': typeof TeacherLeadTeachersManageRoute
   '/teacher/lessons/edit/$lessonId': typeof TeacherLessonsEditLessonIdRoute
   '/teacher/weekly-planning/$planId/edit': typeof TeacherWeeklyPlanningPlanIdEditRoute
   '/teacher/weekly-planning/$planId/print': typeof TeacherWeeklyPlanningPlanIdPrintRoute
   '/teacher/weekly-planning/review/$planId': typeof TeacherWeeklyPlanningReviewPlanIdRoute
   '/admin/grades/$grade': typeof AdminGradesGradeIndexRoute
   '/teacher/assignments/submissions': typeof TeacherAssignmentsSubmissionsIndexRoute
+  '/teacher/lead/analytics': typeof TeacherLeadAnalyticsIndexRoute
+  '/teacher/lead/assignments': typeof TeacherLeadAssignmentsIndexRoute
+  '/teacher/lead/content': typeof TeacherLeadContentIndexRoute
+  '/teacher/lead/grades': typeof TeacherLeadGradesIndexRoute
+  '/teacher/lead/honor-board': typeof TeacherLeadHonorBoardIndexRoute
+  '/teacher/lead/lessons': typeof TeacherLeadLessonsIndexRoute
+  '/teacher/lead/parents': typeof TeacherLeadParentsIndexRoute
+  '/teacher/lead/quiz-submissions': typeof TeacherLeadQuizSubmissionsIndexRoute
+  '/teacher/lead/students': typeof TeacherLeadStudentsIndexRoute
+  '/teacher/lead/teachers': typeof TeacherLeadTeachersIndexRoute
   '/teacher/quizzes/manage': typeof TeacherQuizzesManageIndexRoute
   '/teacher/quizzes/new': typeof TeacherQuizzesNewIndexRoute
   '/teacher/timetable/edit': typeof TeacherTimetableEditIndexRoute
   '/teacher/weekly-planning/$planId': typeof TeacherWeeklyPlanningPlanIdIndexRoute
   '/admin/grades/$grade/units/$unit': typeof AdminGradesGradeUnitsUnitRoute
+  '/teacher/lead/grades/$grade': typeof TeacherLeadGradesGradeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -841,6 +978,7 @@ export interface FileRoutesById {
   '/student': typeof StudentRouteWithChildren
   '/student-dashboard': typeof StudentDashboardRoute
   '/video-lessons': typeof VideoLessonsRoute
+  '/teacher/lead': typeof TeacherLeadRouteRouteWithChildren
   '/admin/upload-test': typeof AdminUploadTestRoute
   '/announcements/$slug': typeof AnnouncementsSlugRoute
   '/assignments/$assignmentId': typeof AssignmentsAssignmentIdRoute
@@ -899,6 +1037,7 @@ export interface FileRoutesById {
   '/teacher/assignments/': typeof TeacherAssignmentsIndexRoute
   '/teacher/classes/': typeof TeacherClassesIndexRoute
   '/teacher/curriculum/': typeof TeacherCurriculumIndexRoute
+  '/teacher/lead/': typeof TeacherLeadIndexRoute
   '/teacher/lessons/': typeof TeacherLessonsIndexRoute
   '/teacher/performance/': typeof TeacherPerformanceIndexRoute
   '/teacher/profile/': typeof TeacherProfileIndexRoute
@@ -915,17 +1054,31 @@ export interface FileRoutesById {
   '/admin/lessons/edit/$lessonId': typeof AdminLessonsEditLessonIdRoute
   '/admin/weekly-planning/review/$planId': typeof AdminWeeklyPlanningReviewPlanIdRoute
   '/grades/$grade/units/$unit': typeof GradesGradeUnitsUnitRoute
+  '/teacher/lead/students/$studentId': typeof TeacherLeadStudentsStudentIdRoute
+  '/teacher/lead/teachers/$teacherId': typeof TeacherLeadTeachersTeacherIdRoute
+  '/teacher/lead/teachers/manage': typeof TeacherLeadTeachersManageRoute
   '/teacher/lessons/edit/$lessonId': typeof TeacherLessonsEditLessonIdRoute
   '/teacher/weekly-planning/$planId/edit': typeof TeacherWeeklyPlanningPlanIdEditRoute
   '/teacher/weekly-planning/$planId/print': typeof TeacherWeeklyPlanningPlanIdPrintRoute
   '/teacher/weekly-planning/review/$planId': typeof TeacherWeeklyPlanningReviewPlanIdRoute
   '/admin/grades/$grade/': typeof AdminGradesGradeIndexRoute
   '/teacher/assignments/submissions/': typeof TeacherAssignmentsSubmissionsIndexRoute
+  '/teacher/lead/analytics/': typeof TeacherLeadAnalyticsIndexRoute
+  '/teacher/lead/assignments/': typeof TeacherLeadAssignmentsIndexRoute
+  '/teacher/lead/content/': typeof TeacherLeadContentIndexRoute
+  '/teacher/lead/grades/': typeof TeacherLeadGradesIndexRoute
+  '/teacher/lead/honor-board/': typeof TeacherLeadHonorBoardIndexRoute
+  '/teacher/lead/lessons/': typeof TeacherLeadLessonsIndexRoute
+  '/teacher/lead/parents/': typeof TeacherLeadParentsIndexRoute
+  '/teacher/lead/quiz-submissions/': typeof TeacherLeadQuizSubmissionsIndexRoute
+  '/teacher/lead/students/': typeof TeacherLeadStudentsIndexRoute
+  '/teacher/lead/teachers/': typeof TeacherLeadTeachersIndexRoute
   '/teacher/quizzes/manage/': typeof TeacherQuizzesManageIndexRoute
   '/teacher/quizzes/new/': typeof TeacherQuizzesNewIndexRoute
   '/teacher/timetable/edit/': typeof TeacherTimetableEditIndexRoute
   '/teacher/weekly-planning/$planId/': typeof TeacherWeeklyPlanningPlanIdIndexRoute
   '/admin/grades/$grade/units/$unit': typeof AdminGradesGradeUnitsUnitRoute
+  '/teacher/lead/grades/$grade/': typeof TeacherLeadGradesGradeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -944,6 +1097,7 @@ export interface FileRouteTypes {
     | '/student'
     | '/student-dashboard'
     | '/video-lessons'
+    | '/teacher/lead'
     | '/admin/upload-test'
     | '/announcements/$slug'
     | '/assignments/$assignmentId'
@@ -1002,6 +1156,7 @@ export interface FileRouteTypes {
     | '/teacher/assignments/'
     | '/teacher/classes/'
     | '/teacher/curriculum/'
+    | '/teacher/lead/'
     | '/teacher/lessons/'
     | '/teacher/performance/'
     | '/teacher/profile/'
@@ -1018,17 +1173,31 @@ export interface FileRouteTypes {
     | '/admin/lessons/edit/$lessonId'
     | '/admin/weekly-planning/review/$planId'
     | '/grades/$grade/units/$unit'
+    | '/teacher/lead/students/$studentId'
+    | '/teacher/lead/teachers/$teacherId'
+    | '/teacher/lead/teachers/manage'
     | '/teacher/lessons/edit/$lessonId'
     | '/teacher/weekly-planning/$planId/edit'
     | '/teacher/weekly-planning/$planId/print'
     | '/teacher/weekly-planning/review/$planId'
     | '/admin/grades/$grade/'
     | '/teacher/assignments/submissions/'
+    | '/teacher/lead/analytics/'
+    | '/teacher/lead/assignments/'
+    | '/teacher/lead/content/'
+    | '/teacher/lead/grades/'
+    | '/teacher/lead/honor-board/'
+    | '/teacher/lead/lessons/'
+    | '/teacher/lead/parents/'
+    | '/teacher/lead/quiz-submissions/'
+    | '/teacher/lead/students/'
+    | '/teacher/lead/teachers/'
     | '/teacher/quizzes/manage/'
     | '/teacher/quizzes/new/'
     | '/teacher/timetable/edit/'
     | '/teacher/weekly-planning/$planId/'
     | '/admin/grades/$grade/units/$unit'
+    | '/teacher/lead/grades/$grade/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1099,6 +1268,7 @@ export interface FileRouteTypes {
     | '/teacher/assignments'
     | '/teacher/classes'
     | '/teacher/curriculum'
+    | '/teacher/lead'
     | '/teacher/lessons'
     | '/teacher/performance'
     | '/teacher/profile'
@@ -1115,17 +1285,31 @@ export interface FileRouteTypes {
     | '/admin/lessons/edit/$lessonId'
     | '/admin/weekly-planning/review/$planId'
     | '/grades/$grade/units/$unit'
+    | '/teacher/lead/students/$studentId'
+    | '/teacher/lead/teachers/$teacherId'
+    | '/teacher/lead/teachers/manage'
     | '/teacher/lessons/edit/$lessonId'
     | '/teacher/weekly-planning/$planId/edit'
     | '/teacher/weekly-planning/$planId/print'
     | '/teacher/weekly-planning/review/$planId'
     | '/admin/grades/$grade'
     | '/teacher/assignments/submissions'
+    | '/teacher/lead/analytics'
+    | '/teacher/lead/assignments'
+    | '/teacher/lead/content'
+    | '/teacher/lead/grades'
+    | '/teacher/lead/honor-board'
+    | '/teacher/lead/lessons'
+    | '/teacher/lead/parents'
+    | '/teacher/lead/quiz-submissions'
+    | '/teacher/lead/students'
+    | '/teacher/lead/teachers'
     | '/teacher/quizzes/manage'
     | '/teacher/quizzes/new'
     | '/teacher/timetable/edit'
     | '/teacher/weekly-planning/$planId'
     | '/admin/grades/$grade/units/$unit'
+    | '/teacher/lead/grades/$grade'
   id:
     | '__root__'
     | '/'
@@ -1142,6 +1326,7 @@ export interface FileRouteTypes {
     | '/student'
     | '/student-dashboard'
     | '/video-lessons'
+    | '/teacher/lead'
     | '/admin/upload-test'
     | '/announcements/$slug'
     | '/assignments/$assignmentId'
@@ -1200,6 +1385,7 @@ export interface FileRouteTypes {
     | '/teacher/assignments/'
     | '/teacher/classes/'
     | '/teacher/curriculum/'
+    | '/teacher/lead/'
     | '/teacher/lessons/'
     | '/teacher/performance/'
     | '/teacher/profile/'
@@ -1216,17 +1402,31 @@ export interface FileRouteTypes {
     | '/admin/lessons/edit/$lessonId'
     | '/admin/weekly-planning/review/$planId'
     | '/grades/$grade/units/$unit'
+    | '/teacher/lead/students/$studentId'
+    | '/teacher/lead/teachers/$teacherId'
+    | '/teacher/lead/teachers/manage'
     | '/teacher/lessons/edit/$lessonId'
     | '/teacher/weekly-planning/$planId/edit'
     | '/teacher/weekly-planning/$planId/print'
     | '/teacher/weekly-planning/review/$planId'
     | '/admin/grades/$grade/'
     | '/teacher/assignments/submissions/'
+    | '/teacher/lead/analytics/'
+    | '/teacher/lead/assignments/'
+    | '/teacher/lead/content/'
+    | '/teacher/lead/grades/'
+    | '/teacher/lead/honor-board/'
+    | '/teacher/lead/lessons/'
+    | '/teacher/lead/parents/'
+    | '/teacher/lead/quiz-submissions/'
+    | '/teacher/lead/students/'
+    | '/teacher/lead/teachers/'
     | '/teacher/quizzes/manage/'
     | '/teacher/quizzes/new/'
     | '/teacher/timetable/edit/'
     | '/teacher/weekly-planning/$planId/'
     | '/admin/grades/$grade/units/$unit'
+    | '/teacher/lead/grades/$grade/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1500,6 +1700,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUploadTestRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/teacher/lead': {
+      id: '/teacher/lead'
+      path: '/lead'
+      fullPath: '/teacher/lead'
+      preLoaderRoute: typeof TeacherLeadRouteRouteImport
+      parentRoute: typeof TeacherRouteRoute
+    }
     '/teacher/weekly-planning/': {
       id: '/teacher/weekly-planning/'
       path: '/weekly-planning'
@@ -1583,6 +1790,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/teacher/lessons/'
       preLoaderRoute: typeof TeacherLessonsIndexRouteImport
       parentRoute: typeof TeacherRouteRoute
+    }
+    '/teacher/lead/': {
+      id: '/teacher/lead/'
+      path: '/'
+      fullPath: '/teacher/lead/'
+      preLoaderRoute: typeof TeacherLeadIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
     }
     '/teacher/curriculum/': {
       id: '/teacher/curriculum/'
@@ -1885,6 +2099,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherQuizzesManageIndexRouteImport
       parentRoute: typeof TeacherRouteRoute
     }
+    '/teacher/lead/teachers/': {
+      id: '/teacher/lead/teachers/'
+      path: '/teachers'
+      fullPath: '/teacher/lead/teachers/'
+      preLoaderRoute: typeof TeacherLeadTeachersIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/students/': {
+      id: '/teacher/lead/students/'
+      path: '/students'
+      fullPath: '/teacher/lead/students/'
+      preLoaderRoute: typeof TeacherLeadStudentsIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/quiz-submissions/': {
+      id: '/teacher/lead/quiz-submissions/'
+      path: '/quiz-submissions'
+      fullPath: '/teacher/lead/quiz-submissions/'
+      preLoaderRoute: typeof TeacherLeadQuizSubmissionsIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/parents/': {
+      id: '/teacher/lead/parents/'
+      path: '/parents'
+      fullPath: '/teacher/lead/parents/'
+      preLoaderRoute: typeof TeacherLeadParentsIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/lessons/': {
+      id: '/teacher/lead/lessons/'
+      path: '/lessons'
+      fullPath: '/teacher/lead/lessons/'
+      preLoaderRoute: typeof TeacherLeadLessonsIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/honor-board/': {
+      id: '/teacher/lead/honor-board/'
+      path: '/honor-board'
+      fullPath: '/teacher/lead/honor-board/'
+      preLoaderRoute: typeof TeacherLeadHonorBoardIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/grades/': {
+      id: '/teacher/lead/grades/'
+      path: '/grades'
+      fullPath: '/teacher/lead/grades/'
+      preLoaderRoute: typeof TeacherLeadGradesIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/content/': {
+      id: '/teacher/lead/content/'
+      path: '/content'
+      fullPath: '/teacher/lead/content/'
+      preLoaderRoute: typeof TeacherLeadContentIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/assignments/': {
+      id: '/teacher/lead/assignments/'
+      path: '/assignments'
+      fullPath: '/teacher/lead/assignments/'
+      preLoaderRoute: typeof TeacherLeadAssignmentsIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/analytics/': {
+      id: '/teacher/lead/analytics/'
+      path: '/analytics'
+      fullPath: '/teacher/lead/analytics/'
+      preLoaderRoute: typeof TeacherLeadAnalyticsIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
     '/teacher/assignments/submissions/': {
       id: '/teacher/assignments/submissions/'
       path: '/assignments/submissions'
@@ -1927,6 +2211,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherLessonsEditLessonIdRouteImport
       parentRoute: typeof TeacherRouteRoute
     }
+    '/teacher/lead/teachers/manage': {
+      id: '/teacher/lead/teachers/manage'
+      path: '/teachers/manage'
+      fullPath: '/teacher/lead/teachers/manage'
+      preLoaderRoute: typeof TeacherLeadTeachersManageRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/teachers/$teacherId': {
+      id: '/teacher/lead/teachers/$teacherId'
+      path: '/teachers/$teacherId'
+      fullPath: '/teacher/lead/teachers/$teacherId'
+      preLoaderRoute: typeof TeacherLeadTeachersTeacherIdRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
+    '/teacher/lead/students/$studentId': {
+      id: '/teacher/lead/students/$studentId'
+      path: '/students/$studentId'
+      fullPath: '/teacher/lead/students/$studentId'
+      preLoaderRoute: typeof TeacherLeadStudentsStudentIdRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
+    }
     '/grades/$grade/units/$unit': {
       id: '/grades/$grade/units/$unit'
       path: '/grades/$grade/units/$unit'
@@ -1954,6 +2259,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/grades/$grade/$lesson'
       preLoaderRoute: typeof AdminGradesGradeLessonRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/teacher/lead/grades/$grade/': {
+      id: '/teacher/lead/grades/$grade/'
+      path: '/grades/$grade'
+      fullPath: '/teacher/lead/grades/$grade/'
+      preLoaderRoute: typeof TeacherLeadGradesGradeIndexRouteImport
+      parentRoute: typeof TeacherLeadRouteRoute
     }
     '/admin/grades/$grade/units/$unit': {
       id: '/admin/grades/$grade/units/$unit'
@@ -2027,6 +2339,45 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface TeacherLeadRouteRouteChildren {
+  TeacherLeadIndexRoute: typeof TeacherLeadIndexRoute
+  TeacherLeadStudentsStudentIdRoute: typeof TeacherLeadStudentsStudentIdRoute
+  TeacherLeadTeachersTeacherIdRoute: typeof TeacherLeadTeachersTeacherIdRoute
+  TeacherLeadTeachersManageRoute: typeof TeacherLeadTeachersManageRoute
+  TeacherLeadAnalyticsIndexRoute: typeof TeacherLeadAnalyticsIndexRoute
+  TeacherLeadAssignmentsIndexRoute: typeof TeacherLeadAssignmentsIndexRoute
+  TeacherLeadContentIndexRoute: typeof TeacherLeadContentIndexRoute
+  TeacherLeadGradesIndexRoute: typeof TeacherLeadGradesIndexRoute
+  TeacherLeadHonorBoardIndexRoute: typeof TeacherLeadHonorBoardIndexRoute
+  TeacherLeadLessonsIndexRoute: typeof TeacherLeadLessonsIndexRoute
+  TeacherLeadParentsIndexRoute: typeof TeacherLeadParentsIndexRoute
+  TeacherLeadQuizSubmissionsIndexRoute: typeof TeacherLeadQuizSubmissionsIndexRoute
+  TeacherLeadStudentsIndexRoute: typeof TeacherLeadStudentsIndexRoute
+  TeacherLeadTeachersIndexRoute: typeof TeacherLeadTeachersIndexRoute
+  TeacherLeadGradesGradeIndexRoute: typeof TeacherLeadGradesGradeIndexRoute
+}
+
+const TeacherLeadRouteRouteChildren: TeacherLeadRouteRouteChildren = {
+  TeacherLeadIndexRoute: TeacherLeadIndexRoute,
+  TeacherLeadStudentsStudentIdRoute: TeacherLeadStudentsStudentIdRoute,
+  TeacherLeadTeachersTeacherIdRoute: TeacherLeadTeachersTeacherIdRoute,
+  TeacherLeadTeachersManageRoute: TeacherLeadTeachersManageRoute,
+  TeacherLeadAnalyticsIndexRoute: TeacherLeadAnalyticsIndexRoute,
+  TeacherLeadAssignmentsIndexRoute: TeacherLeadAssignmentsIndexRoute,
+  TeacherLeadContentIndexRoute: TeacherLeadContentIndexRoute,
+  TeacherLeadGradesIndexRoute: TeacherLeadGradesIndexRoute,
+  TeacherLeadHonorBoardIndexRoute: TeacherLeadHonorBoardIndexRoute,
+  TeacherLeadLessonsIndexRoute: TeacherLeadLessonsIndexRoute,
+  TeacherLeadParentsIndexRoute: TeacherLeadParentsIndexRoute,
+  TeacherLeadQuizSubmissionsIndexRoute: TeacherLeadQuizSubmissionsIndexRoute,
+  TeacherLeadStudentsIndexRoute: TeacherLeadStudentsIndexRoute,
+  TeacherLeadTeachersIndexRoute: TeacherLeadTeachersIndexRoute,
+  TeacherLeadGradesGradeIndexRoute: TeacherLeadGradesGradeIndexRoute,
+}
+
+const TeacherLeadRouteRouteWithChildren =
+  TeacherLeadRouteRoute._addFileChildren(TeacherLeadRouteRouteChildren)
+
 interface TeacherWeeklyPlanningPlanIdRouteChildren {
   TeacherWeeklyPlanningPlanIdEditRoute: typeof TeacherWeeklyPlanningPlanIdEditRoute
   TeacherWeeklyPlanningPlanIdPrintRoute: typeof TeacherWeeklyPlanningPlanIdPrintRoute
@@ -2048,6 +2399,7 @@ const TeacherWeeklyPlanningPlanIdRouteWithChildren =
   )
 
 interface TeacherRouteRouteChildren {
+  TeacherLeadRouteRoute: typeof TeacherLeadRouteRouteWithChildren
   TeacherIndexRoute: typeof TeacherIndexRoute
   TeacherAnnouncementsNewRoute: typeof TeacherAnnouncementsNewRoute
   TeacherArticlesNewRoute: typeof TeacherArticlesNewRoute
@@ -2084,6 +2436,7 @@ interface TeacherRouteRouteChildren {
 }
 
 const TeacherRouteRouteChildren: TeacherRouteRouteChildren = {
+  TeacherLeadRouteRoute: TeacherLeadRouteRouteWithChildren,
   TeacherIndexRoute: TeacherIndexRoute,
   TeacherAnnouncementsNewRoute: TeacherAnnouncementsNewRoute,
   TeacherArticlesNewRoute: TeacherArticlesNewRoute,

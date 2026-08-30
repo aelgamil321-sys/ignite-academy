@@ -13,6 +13,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useCMS } from "@/lib/cms";
 import { useI18n } from "@/lib/i18n";
+import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/content/")({
@@ -99,8 +100,9 @@ function ContentSectionCard({ section }: { section: ContentSection }) {
   );
 }
 
-function AdminContentCenterPage() {
+export function AdminContentCenterPage() {
   const { tr } = useI18n();
+  const paths = useSchoolManagementPaths();
   const { lessons, articles, files, videos, loading: cmsLoading } = useCMS();
   const [extraCounts, setExtraCounts] = useState<ExtraCounts>({
     quizSubmissions: null,
@@ -163,8 +165,10 @@ function AdminContentCenterPage() {
           { label: tr("admin_content_published_lessons"), value: String(summary.publishedLessons) },
         ],
         actions: [
-          { label: tr("admin_content_manage_lessons"), to: "/admin/lessons" },
-          { label: tr("admin_content_add_lesson"), to: "/admin", search: { tab: "new-lesson" }, primary: true },
+          { label: tr("admin_content_manage_lessons"), to: `${paths.base}/lessons` },
+          paths.lead
+            ? { label: tr("admin_content_add_lesson"), to: "/teacher/lessons/new", primary: true }
+            : { label: tr("admin_content_add_lesson"), to: "/admin", search: { tab: "new-lesson" }, primary: true },
         ],
       },
       {
@@ -179,8 +183,10 @@ function AdminContentCenterPage() {
             : []),
         ],
         actions: [
-          { label: tr("admin_content_manage_quizzes"), to: "/admin", search: { tab: "manage-quizzes" } },
-          { label: tr("admin_content_quiz_submissions"), to: "/admin/quiz-submissions" },
+          paths.lead
+            ? { label: tr("admin_content_manage_quizzes"), to: "/teacher/quizzes/manage" }
+            : { label: tr("admin_content_manage_quizzes"), to: "/admin", search: { tab: "manage-quizzes" } },
+          { label: tr("admin_content_quiz_submissions"), to: `${paths.base}/quiz-submissions` },
         ],
       },
       {
@@ -192,7 +198,7 @@ function AdminContentCenterPage() {
           extraCounts.assignments !== null
             ? [{ label: tr("admin_content_total_assignments"), value: String(extraCounts.assignments) }]
             : [],
-        actions: [{ label: tr("admin_content_manage_assignments"), to: "/admin/assignments", primary: true }],
+        actions: [{ label: tr("admin_content_manage_assignments"), to: `${paths.base}/assignments`, primary: true }],
       },
       {
         key: "announcements",
@@ -204,8 +210,12 @@ function AdminContentCenterPage() {
           { label: tr("admin_content_published_announcements"), value: String(summary.publishedAnnouncements) },
         ],
         actions: [
-          { label: tr("admin_content_manage_announcements"), to: "/admin", search: { tab: "manage-announcements" } },
-          { label: tr("admin_content_add_announcement"), to: "/admin", search: { tab: "new-article" }, primary: true },
+          paths.lead
+            ? { label: tr("admin_content_manage_announcements"), to: "/teacher/announcements" }
+            : { label: tr("admin_content_manage_announcements"), to: "/admin", search: { tab: "manage-announcements" } },
+          paths.lead
+            ? { label: tr("admin_content_add_announcement"), to: "/teacher/articles/new", primary: true }
+            : { label: tr("admin_content_add_announcement"), to: "/admin", search: { tab: "new-article" }, primary: true },
         ],
       },
       {
@@ -214,18 +224,23 @@ function AdminContentCenterPage() {
         description: tr("admin_content_resources_desc"),
         icon: FolderOpen,
         stats: [
-          { label: tr("admin_content_files"), value: String(summary.files) },
           { label: tr("admin_content_videos"), value: String(summary.videos) },
-          { label: tr("admin_content_published_resources"), value: String(summary.publishedFiles + summary.publishedVideos) },
+          { label: tr("admin_content_files"), value: String(summary.files) },
         ],
         actions: [
-          { label: tr("admin_content_manage_resources"), to: "/admin", search: { tab: "manage-resources" } },
-          { label: tr("admin_content_upload_file"), to: "/admin", search: { tab: "new-file" } },
-          { label: tr("admin_content_add_video"), to: "/admin", search: { tab: "new-video" }, primary: true },
+          paths.lead
+            ? { label: tr("admin_content_manage_resources"), to: "/teacher/resources" }
+            : { label: tr("admin_content_manage_resources"), to: "/admin", search: { tab: "manage-resources" } },
+          paths.lead
+            ? { label: tr("admin_content_upload_file"), to: "/teacher/resources/new" }
+            : { label: tr("admin_content_upload_file"), to: "/admin", search: { tab: "new-file" } },
+          paths.lead
+            ? { label: tr("admin_content_add_video"), to: "/teacher/videos/new", primary: true }
+            : { label: tr("admin_content_add_video"), to: "/admin", search: { tab: "new-video" }, primary: true },
         ],
       },
     ],
-    [tr, summary, extraCounts],
+    [tr, summary, extraCounts, paths],
   );
 
   if (cmsLoading || extraLoading) {

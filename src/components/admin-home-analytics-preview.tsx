@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { fetchAdminAnalytics } from "@/lib/admin-analytics";
 import { useI18n, L } from "@/lib/i18n";
+import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 
 const chartConfig = {
   score: {
@@ -15,6 +16,7 @@ const chartConfig = {
 
 export function AdminHomeAnalyticsPreview() {
   const { tr, dir, lang } = useI18n();
+  const paths = useSchoolManagementPaths();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<{
     studentCount: number;
@@ -168,7 +170,7 @@ export function AdminHomeAnalyticsPreview() {
 
       <div className="mt-8">
         <Link
-          to="/admin/analytics"
+          to={paths.analytics}
           className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           {tr("admin_home_analytics_cta")}

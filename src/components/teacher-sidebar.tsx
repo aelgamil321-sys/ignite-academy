@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  Award,
   BarChart3,
   BookOpen,
   CalendarDays,
@@ -157,10 +158,18 @@ const ACADEMIC: NavItem[] = [
   { to: "/teacher/reports", icon: BarChart3, labelKey: "teacher_nav_reports" },
 ];
 
-const LEAD_WEEKLY: NavItem[] = [
+const LEAD_ADMIN: NavItem[] = [
+  { to: "/teacher/lead", icon: LayoutDashboard, labelKey: "lead_teacher_nav_overview", exact: true },
+  { to: "/teacher/lead/students", icon: GraduationCap, labelKey: "lead_teacher_nav_students", activeMatch: (p) => p.startsWith("/teacher/lead/students") },
+  { to: "/teacher/lead/teachers", icon: School, labelKey: "lead_teacher_nav_teachers", activeMatch: (p) => p.startsWith("/teacher/lead/teachers") },
+  { to: "/teacher/lead/parents", icon: Users, labelKey: "lead_teacher_nav_parents" },
+  { to: "/teacher/lead/analytics", icon: BarChart3, labelKey: "lead_teacher_nav_analytics" },
+  { to: "/teacher/lead/content", icon: BookOpen, labelKey: "lead_teacher_nav_content" },
+  { to: "/teacher/lead/honor-board", icon: Award, labelKey: "lead_teacher_nav_honor_board" },
+  { to: "/teacher/lead/grades", icon: Layers, labelKey: "lead_teacher_nav_grades", activeMatch: (p) => p.startsWith("/teacher/lead/grades") },
   {
     to: "/teacher/weekly-planning/dashboard",
-    icon: ChartBar,
+    icon: CalendarDays,
     labelKey: "wp_dept_dashboard_nav",
     activeMatch: (p) =>
       p.startsWith("/teacher/weekly-planning/dashboard") || p.includes("/weekly-planning/review/"),
@@ -282,8 +291,8 @@ function SidebarNav({
       ))}
       {isLeadTeacher ? (
         <NavSection
-          titleKey="wp_dept_nav_section"
-          items={LEAD_WEEKLY}
+          titleKey="lead_teacher_nav_section"
+          items={LEAD_ADMIN}
           pathname={pathname}
           tr={tr}
           onNavigate={onNavigate}

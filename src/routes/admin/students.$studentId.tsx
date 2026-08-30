@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Award,
@@ -13,6 +13,7 @@ import { StudentBadgesSection } from "@/components/student-badges-section";
 import { fetchAdminStudentDetail, type AdminStudentDetail } from "@/lib/admin-students";
 import type { ActivityTimelineItem } from "@/lib/student-progress";
 import { useI18n, L } from "@/lib/i18n";
+import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 import { localeForFormatting } from "@/lib/i18n-config";
 import {
   islamicGroupLabel,
@@ -48,9 +49,11 @@ function timelineKey(item: ActivityTimelineItem): string {
   return `quiz-${item.submissionId}`;
 }
 
-function AdminStudentDetailPage() {
-  const { studentId } = Route.useParams();
+export function AdminStudentDetailPage() {
+  const { studentId } = useParams({ strict: false });
+  if (!studentId) return null;
   const { tr, lang, bi, dir } = useI18n();
+  const paths = useSchoolManagementPaths();
   const [detail, setDetail] = useState<AdminStudentDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,7 +89,7 @@ function AdminStudentDetailPage() {
     return (
       <div className="space-y-4">
         <p className="text-sm text-destructive">{error ?? tr("admin_students_not_found")}</p>
-        <Link to="/admin/students" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
+        <Link to={paths.students} className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
           <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
           {tr("admin_students_back")}
         </Link>
@@ -99,7 +102,7 @@ function AdminStudentDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Link to="/admin/students" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
+      <Link to={paths.students} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
         <ChevronLeft className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
         {tr("admin_students_back")}
       </Link>

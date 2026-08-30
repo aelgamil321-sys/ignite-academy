@@ -10,6 +10,11 @@ import {
   type IslamicGroup,
   type StudentSection,
 } from "@/lib/student-academics";
+import {
+  buildUserRoleIndex,
+  filterProfilesToStudents,
+  isStudentAccount,
+} from "@/lib/student-account";
 
 export type AdminStudentDirectoryRow = {
   userId: string;
@@ -91,18 +96,6 @@ function mapProfileRow(row: ProfileRow, role: string): Omit<AdminStudentDirector
   };
 }
 
-function isStudentAccount(
-  userId: string,
-  roleByUser: Map<string, string>,
-  adminIds: Set<string>,
-  teacherIds: Set<string>,
-  parentIds: Set<string>,
-): boolean {
-  if (adminIds.has(userId) || teacherIds.has(userId) || parentIds.has(userId)) return false;
-  const role = roleByUser.get(userId);
-  return role === "student" || role === "user" || role === undefined;
-}
-
 export async function fetchAdminStudentDirectory(): Promise<{
   rows: AdminStudentDirectoryRow[];
   error: string | null;
@@ -124,21 +117,9 @@ export async function fetchAdminStudentDirectory(): Promise<{
   if (submissionsRes.error) return { rows: [], error: submissionsRes.error.message };
   if (certificatesRes.error) return { rows: [], error: certificatesRes.error.message };
 
-  const roleByUser = new Map<string, string>();
-  const adminIds = new Set<string>();
-  const teacherIds = new Set<string>();
-  const parentIds = new Set<string>();
+  const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
 
-  for (const row of rolesRes.data ?? []) {
-    roleByUser.set(row.user_id, row.role);
-    if (row.role === "admin") adminIds.add(row.user_id);
-    if (row.role === "teacher") teacherIds.add(row.user_id);
-    if (row.role === "parent") parentIds.add(row.user_id);
-  }
-
-  const studentProfiles = (profilesRes.data ?? []).filter((row) =>
-    isStudentAccount(row.user_id, roleByUser, adminIds, teacherIds, parentIds),
-  ) as ProfileRow[];
+  const studentProfiles = filterProfilesToStudents(profilesRes.data ?? []) as ProfileRow[];
 
   const submissions = submissionsRes.data ?? [];
   const certificates = certificatesRes.data ?? [];
@@ -158,7 +139,7 @@ export async function fetchAdminStudentDirectory(): Promise<{
   }
 
   const rows: AdminStudentDirectoryRow[] = studentProfiles.map((profile) => {
-    const base = mapProfileRow(profile, roleByUser.get(profile.user_id) ?? "student");
+    const base = mapProfileRow(profile, roleIndex.roleByUser.get(profile.user_id) ?? "student");
     const studentSubs = submissions.filter((s) => s.student_id === profile.user_id);
     const reviewed = studentSubs.filter((s) => s.status !== "pending_review");
     const completedLessons = new Set(studentSubs.map((s) => s.lesson_id)).size;

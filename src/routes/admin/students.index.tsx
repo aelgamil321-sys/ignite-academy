@@ -18,6 +18,7 @@ import {
   type StudentSection,
 } from "@/lib/student-academics";
 import { useI18n, L } from "@/lib/i18n";
+import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 
 export const Route = createFileRoute("/admin/students/")({
   head: () => ({
@@ -29,8 +30,9 @@ export const Route = createFileRoute("/admin/students/")({
   component: AdminStudentsPage,
 });
 
-function AdminStudentsPage() {
+export function AdminStudentsPage() {
   const { tr, lang } = useI18n();
+  const paths = useSchoolManagementPaths();
   const [rows, setRows] = useState<AdminStudentDirectoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -169,8 +171,7 @@ function AdminStudentsPage() {
                   <tr key={row.userId} className="border-b border-border/70 last:border-0 hover:bg-muted/20">
                     <td className="px-4 py-3">
                       <Link
-                        to="/admin/students/$studentId"
-                        params={{ studentId: row.userId }}
+                        to={paths.studentDetail(row.userId)}
                         className="flex items-center gap-3 min-w-0 group"
                       >
                         <StudentProfileAvatar
@@ -210,8 +211,7 @@ function AdminStudentsPage() {
             {filtered.map((row) => (
               <Link
                 key={row.userId}
-                to="/admin/students/$studentId"
-                params={{ studentId: row.userId }}
+                to={paths.studentDetail(row.userId)}
                 className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)] hover:border-primary/40 transition-colors"
               >
                 <div className="flex items-start gap-3">

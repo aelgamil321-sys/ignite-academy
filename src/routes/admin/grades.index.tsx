@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GradeCatalogPanel } from "@/components/grade-catalog-panel";
 import type { StageSlug } from "@/lib/stage-images";
+import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 
 const STAGE_SLUGS = new Set<StageSlug>(["kindergarten", "elementary", "middle", "high"]);
 
@@ -24,5 +25,6 @@ export const Route = createFileRoute("/admin/grades/")({
 
 function AdminGradesIndex() {
   const { stage } = Route.useSearch();
-  return <GradeCatalogPanel gradesBasePath="/admin/grades" stageFilter={stage} />;
+  const paths = useSchoolManagementPaths();
+  return <GradeCatalogPanel gradesBasePath={paths.grades} stageFilter={stage} />;
 }

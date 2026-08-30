@@ -9,6 +9,7 @@ import {
   type IslamicGroup,
   type StudentSection,
 } from "@/lib/student-academics";
+import { buildUserRoleIndex, isStudentAccount } from "@/lib/student-account";
 
 export type AdminParentDirectoryChild = {
   studentUserId: string;
@@ -90,9 +91,7 @@ export async function fetchAdminParentDirectory(): Promise<{
   const parentIds = new Set(
     (rolesRes.data ?? []).filter((row) => row.role === "parent").map((row) => row.user_id),
   );
-  const adminIds = new Set(
-    (rolesRes.data ?? []).filter((row) => row.role === "admin").map((row) => row.user_id),
-  );
+  const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
 
   const profileById = new Map(
     (profilesRes.data ?? []).map((row) => [row.user_id, row as ProfileRow]),
@@ -111,7 +110,10 @@ export async function fetchAdminParentDirectory(): Promise<{
       const childIds = childrenByParent.get(parent.user_id) ?? [];
       const children = childIds
         .map((id) => profileById.get(id))
-        .filter((profile): profile is ProfileRow => Boolean(profile) && !adminIds.has(profile.user_id))
+        .filter(
+          (profile): profile is ProfileRow =>
+            Boolean(profile) && isStudentAccount(profile.user_id, roleIndex),
+        )
         .map((profile) => mapChild(profile));
 
       return {

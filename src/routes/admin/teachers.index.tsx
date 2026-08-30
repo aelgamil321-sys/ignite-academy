@@ -19,6 +19,7 @@ import {
   type StudentSection,
 } from "@/lib/student-academics";
 import { useI18n, L } from "@/lib/i18n";
+import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 
 export const Route = createFileRoute("/admin/teachers/")({
   head: () => ({
@@ -51,8 +52,9 @@ function accountStatusLabel(status: AdminTeacherAccountStatus, lang: "en" | "ar"
     : L("No assignments", "بدون تكليفات")[lang];
 }
 
-function AdminTeacherDirectoryPage() {
+export function AdminTeacherDirectoryPage() {
   const { tr, lang } = useI18n();
+  const paths = useSchoolManagementPaths();
   const [rows, setRows] = useState<AdminTeacherDirectoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +112,7 @@ function AdminTeacherDirectoryPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">{tr("admin_teachers_lead")}</p>
         <Link
-          to="/admin/teachers/manage"
+          to={paths.teachersManage}
           className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
         >
           <Settings2 className="h-4 w-4" />
@@ -216,8 +218,7 @@ function AdminTeacherDirectoryPage() {
                   <tr key={row.userId} className="border-b border-border/70 last:border-0 hover:bg-muted/20">
                     <td className="px-4 py-3">
                       <Link
-                        to="/admin/teachers/$teacherId"
-                        params={{ teacherId: row.userId }}
+                        to={paths.teacherDetail(row.userId)}
                         className="flex items-center gap-3 min-w-0 group"
                       >
                         <StudentProfileAvatar
@@ -260,8 +261,7 @@ function AdminTeacherDirectoryPage() {
             {filtered.map((row) => (
               <Link
                 key={row.userId}
-                to="/admin/teachers/$teacherId"
-                params={{ teacherId: row.userId }}
+                to={paths.teacherDetail(row.userId)}
                 className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)] hover:border-primary/40 transition-colors"
               >
                 <div className="flex items-start gap-3">

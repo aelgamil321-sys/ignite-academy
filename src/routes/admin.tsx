@@ -9,6 +9,7 @@ import { useCMS, type CustomLesson, type CustomVideo, type CustomFile, type Cust
 import { SUBJECT_CATEGORIES, type SubjectCategory } from "@/lib/categories";
 import { gradeDisplayName, normalizeGradeSlug } from "@/lib/grade-utils";
 import { formatStudentAcademics, normalizeIslamicGroup, normalizeStudentSection, type StudentSection } from "@/lib/student-academics";
+import { buildUserRoleIndex, filterProfilesToStudents, isStudentAccount } from "@/lib/student-account";
 import type { AnnouncementAudience } from "@/lib/announcement-audience";
 import type { AnnouncementTopic } from "@/lib/announcement-topics";
 import { StudentProfileAvatar } from "@/components/student-profile-avatar";
@@ -1631,10 +1632,8 @@ function ManageParentLinks() {
         (rolesRes.data ?? []).filter((row) => row.role === "parent").map((row) => row.user_id),
       );
       const parentRows = (parentProfilesRes.data ?? []).filter((row) => parentIds.has(row.user_id));
-      const adminIds = new Set(
-        (rolesRes.data ?? []).filter((row) => row.role === "admin").map((row) => row.user_id),
-      );
-      const studentRows = (profilesRes.data ?? []).filter((row) => !adminIds.has(row.user_id));
+      const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
+      const studentRows = filterProfilesToStudents(profilesRes.data ?? [], roleIndex);
 
       setParents(parentRows);
       setStudents(studentRows);

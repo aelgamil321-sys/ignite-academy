@@ -8,15 +8,15 @@ import type { StageSlug } from "@/lib/stage-images";
 import { cn } from "@/lib/utils";
 
 type GradeCatalogPanelProps = {
-  /** Base path for grade detail routes, e.g. `/grades` or `/admin/grades`. */
-  gradesBasePath: "/grades" | "/admin/grades";
+  /** Base path for grade detail routes, e.g. `/grades`, `/admin/grades`, or `/teacher/lead/grades`. */
+  gradesBasePath: string;
   /** Optional stage slug — show only that stage section (kindergarten, elementary, middle, high). */
   stageFilter?: StageSlug;
 };
 
 export function GradeCatalogPanel({ gradesBasePath, stageFilter }: GradeCatalogPanelProps) {
   const { tr, dir, bi } = useI18n();
-  const isAdminGrades = gradesBasePath === "/admin/grades";
+  const isAdminGrades = gradesBasePath.endsWith("/admin/grades") || gradesBasePath.endsWith("/lead/grades");
   const [q, setQ] = useState("");
 
   const filteredGrades = useMemo(() => {
@@ -31,10 +31,7 @@ export function GradeCatalogPanel({ gradesBasePath, stageFilter }: GradeCatalogP
     ? stages.filter((s) => s.slug === stageFilter)
     : stages;
 
-  const gradeTo =
-    gradesBasePath === "/admin/grades"
-      ? "/admin/grades/$grade"
-      : "/grades/$grade";
+  const gradeLink = (slug: string) => `${gradesBasePath}/${slug}`;
 
   return (
     <>
@@ -75,8 +72,7 @@ export function GradeCatalogPanel({ gradesBasePath, stageFilter }: GradeCatalogP
                 {stageGrades.map((g) => (
                   <Link
                     key={g.slug}
-                    to={gradeTo}
-                    params={{ grade: g.slug }}
+                    to={gradeLink(g.slug)}
                     className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] hover:border-primary transition-all"
                   >
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-dark to-primary text-primary-foreground mb-4">

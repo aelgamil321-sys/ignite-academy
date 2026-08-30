@@ -8,6 +8,7 @@ import {
   type AdminParentDirectoryRow,
 } from "@/lib/admin-parent-directory";
 import { useI18n, L } from "@/lib/i18n";
+import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 
 export const Route = createFileRoute("/admin/parents/")({
   head: () => ({
@@ -19,8 +20,9 @@ export const Route = createFileRoute("/admin/parents/")({
   component: AdminParentsPage,
 });
 
-function AdminParentsPage() {
+export function AdminParentsPage() {
   const { tr, lang } = useI18n();
+  const paths = useSchoolManagementPaths();
   const [rows, setRows] = useState<AdminParentDirectoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -113,8 +115,7 @@ function AdminParentsPage() {
                     </div>
                   </div>
                   <Link
-                    to="/admin/students/$studentId"
-                    params={{ studentId: child.studentUserId }}
+                    to={paths.studentDetail(child.studentUserId)}
                     className="text-sm font-semibold text-primary hover:underline shrink-0"
                   >
                     {L("View students", "عرض الطلاب")[lang]}

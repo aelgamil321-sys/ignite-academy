@@ -13,6 +13,10 @@ import {
   type IslamicGroup,
   type StudentSection,
 } from "@/lib/student-academics";
+import {
+  buildUserRoleIndex,
+  filterProfilesToStudents,
+} from "@/lib/student-account";
 import type { TeacherAssignmentScope } from "@/lib/teacher-dashboard";
 
 export type TeacherAnalyticsScope = {
@@ -113,11 +117,8 @@ export async function fetchTeacherAnalytics(
   if (submissionsRes.error) return { data: null, error: submissionsRes.error.message };
   if (certificatesRes.error) return { data: null, error: certificatesRes.error.message };
 
-  const adminIds = new Set(
-    (rolesRes.data ?? []).filter((row) => row.role === "admin").map((row) => row.user_id),
-  );
-
-  let students = (profilesRes.data ?? []).filter((profile) => !adminIds.has(profile.user_id));
+  const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
+  let students = filterProfilesToStudents(profilesRes.data ?? []);
 
   if (!scope.isLeadTeacher) {
     students = students.filter((profile) => {

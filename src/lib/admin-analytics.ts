@@ -11,6 +11,10 @@ import {
   type IslamicGroup,
   type StudentSection,
 } from "@/lib/student-academics";
+import {
+  buildUserRoleIndex,
+  filterProfilesToStudents,
+} from "@/lib/student-account";
 
 export const ANALYTICS_UNSET_KEY = "__unset__";
 export const AT_RISK_SCORE_THRESHOLD = 60;
@@ -504,11 +508,8 @@ export async function fetchAdminAnalytics(filters: AnalyticsFilters): Promise<{
   if (submissionsRes.error) return { data: null, error: submissionsRes.error.message };
   if (certificatesRes.error) return { data: null, error: certificatesRes.error.message };
 
-  const adminIds = new Set(
-    (rolesRes.data ?? []).filter((row) => row.role === "admin").map((row) => row.user_id),
-  );
-
-  const students = (profilesRes.data ?? []).filter((profile) => !adminIds.has(profile.user_id));
+  const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
+  const students = filterProfilesToStudents(profilesRes.data ?? []);
 
   return {
     data: buildAdminAnalytics(

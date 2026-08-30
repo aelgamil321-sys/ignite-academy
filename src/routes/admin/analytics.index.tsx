@@ -466,7 +466,7 @@ function AtRiskStudentsTable({
   );
 }
 
-function AdminAnalyticsPage() {
+export function AdminAnalyticsPage() {
   const { lang, bi } = useI18n();
   const [filters, setFilters] = useState<AnalyticsFilters>({
     grade: "",

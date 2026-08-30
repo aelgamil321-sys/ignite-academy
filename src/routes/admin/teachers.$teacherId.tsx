@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   CalendarDays,
@@ -16,6 +16,7 @@ import {
 } from "@/lib/admin-teacher-directory";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { useI18n, L } from "@/lib/i18n";
+import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 import { localeForFormatting } from "@/lib/i18n-config";
 import {
   islamicGroupLabel,
@@ -75,8 +76,10 @@ function activityKey(item: AdminTeacherActivityItem): string {
   return `${item.kind}-${item.id}-${item.at}`;
 }
 
-function AdminTeacherDetailPage() {
-  const { teacherId } = Route.useParams();
+export function AdminTeacherDetailPage() {
+  const { teacherId } = useParams({ strict: false });
+  if (!teacherId) return null;
+  const paths = useSchoolManagementPaths();
   const { tr, lang } = useI18n();
   const [detail, setDetail] = useState<AdminTeacherDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -116,7 +119,7 @@ function AdminTeacherDetailPage() {
     return (
       <div className="space-y-4">
         <p className="text-sm text-destructive">{error ?? tr("admin_teachers_not_found")}</p>
-        <Link to="/admin/teachers" className="text-sm font-medium text-primary hover:underline">
+        <Link to={paths.teachers} className="text-sm font-medium text-primary hover:underline">
           {tr("admin_teachers_back")}
         </Link>
       </div>
@@ -142,7 +145,7 @@ function AdminTeacherDetailPage() {
   return (
     <div className="space-y-6">
       <Link
-        to="/admin/teachers"
+        to={paths.teachers}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
       >
         <ChevronLeft className="h-4 w-4" />

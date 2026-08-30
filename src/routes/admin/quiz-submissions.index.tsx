@@ -15,7 +15,7 @@ import {
 } from "@/lib/lesson-quiz";
 import type { QuizQuestion, Bi } from "@/lib/curriculum";
 import { formatStudentAcademics, normalizeIslamicGroup, normalizeStudentSection } from "@/lib/student-academics";
-
+import { buildUserRoleIndex, filterProfilesToStudents } from "@/lib/student-account";
 
 type SubmissionRow = {
   id: string;
@@ -73,12 +73,13 @@ function AdminQuizSubmissionsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [subRes, profRes] = await Promise.all([
+    const [subRes, profRes, rolesRes] = await Promise.all([
       supabase
         .from("lesson_quiz_submissions")
         .select("*")
         .order("submitted_at", { ascending: false }),
       supabase.from("profiles").select("user_id, email, full_name, grade, section, islamic_group"),
+      supabase.from("user_roles").select("user_id, role"),
     ]);
 
     if (subRes.error) {
@@ -88,8 +89,10 @@ function AdminQuizSubmissionsPage() {
       setRows((subRes.data ?? []) as SubmissionRow[]);
     }
 
-    if (!profRes.error && profRes.data) {
-      setProfiles(new Map(profRes.data.map((p) => [p.user_id, p as ProfileRow])));
+    if (!profRes.error && profRes.data && !rolesRes.error) {
+      const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
+      const students = filterProfilesToStudents(profRes.data, roleIndex);
+      setProfiles(new Map(students.map((p) => [p.user_id, p as ProfileRow])));
     }
     setLoading(false);
   }, []);

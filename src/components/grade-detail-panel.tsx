@@ -23,7 +23,7 @@ import { useOptionalStudentShell } from "@/lib/student-shell-context";
 import { slugifyUnit } from "@/routes/grades.$grade.units.$unit";
 import { cn } from "@/lib/utils";
 
-type GradesBasePath = "/grades" | "/admin/grades";
+type GradesBasePath = "/grades" | "/admin/grades" | `/teacher/lead/grades` | string;
 
 export function GradeDetailPanel({
   grade,
@@ -38,7 +38,8 @@ export function GradeDetailPanel({
   const studentShell = useOptionalStudentShell();
   const isStudentWorkspace = Boolean(studentShell);
   const isQuizzesView = view === "quizzes";
-  const isAdminGrades = gradesBasePath === "/admin/grades";
+  const isAdminGrades =
+    gradesBasePath === "/admin/grades" || gradesBasePath === "/teacher/lead/grades";
   const { lessons: cmsLessons } = useCMS();
   const lessons = useLessonsForGrade(grade.slug);
   const gradeCustomLessons = useMemo(

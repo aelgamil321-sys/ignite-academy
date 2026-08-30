@@ -46,6 +46,7 @@ import {
 } from "@/lib/student-academics";
 import { formatError } from "@/lib/upload";
 import { syncAssignmentPublishNotifications } from "@/lib/notifications";
+import { buildUserRoleIndex, filterProfilesToStudents } from "@/lib/student-account";
 import {
   adminContentIsReadOnly,
   useAdminContentActor,
@@ -126,17 +127,20 @@ function AdminAssignmentsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [aRes, sRes, pRes] = await Promise.all([
+    const [aRes, sRes, pRes, rolesRes] = await Promise.all([
       fetchAllAssignmentsAdmin(),
       fetchAllSubmissionsAdmin(),
       supabase.from("profiles").select("user_id, email, full_name, grade, section, islamic_group"),
+      supabase.from("user_roles").select("user_id, role"),
     ]);
     if (aRes.error) toast.error(aRes.error);
     else setAssignments(aRes.data);
     if (sRes.error) toast.error(sRes.error);
     else setSubmissions(sRes.data);
-    if (!pRes.error && pRes.data) {
-      setProfiles(new Map(pRes.data.map((p) => [p.user_id, p as ProfileRow])));
+    if (!pRes.error && pRes.data && !rolesRes.error) {
+      const roleIndex = buildUserRoleIndex(rolesRes.data ?? []);
+      const students = filterProfilesToStudents(pRes.data, roleIndex);
+      setProfiles(new Map(students.map((p) => [p.user_id, p as ProfileRow])));
     }
     setLoading(false);
   }, []);
