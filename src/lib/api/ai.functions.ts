@@ -7,6 +7,7 @@ import {
   igniteTranslateText,
   isIgniteAiConfigured,
 } from "@/lib/ai/ignite-ai.server";
+import { generateLessonFromFile } from "@/lib/ai/generate-lesson-from-file.server";
 import {
   buildTranslationCacheKey,
   getDbCachedTranslations,
@@ -46,6 +47,20 @@ const lessonFieldSchema = z.object({
 const pregenerateSchema = z.object({
   lessonId: z.string(),
   fields: z.array(lessonFieldSchema).max(200),
+});
+
+const generateLessonFromFileSchema = z.object({
+  lessonId: z.string().uuid(),
+  fileUrl: z.string().max(4000),
+  fileName: z.string().max(500),
+  fileType: z.enum(["pdf", "pptx", "ppt"]).optional(),
+  sourceLanguage: z.enum(["en", "ar"]).optional(),
+  lessonTitle: z.string().max(2000),
+  unitNumber: z.string().max(500),
+  learningOutcome: z.string().max(8000),
+  translateOnly: z.boolean().optional(),
+  sourceOnly: z.boolean().optional(),
+  sourceLesson: z.any().optional(),
 });
 
 function sourceLangForText(text: string, preferred?: "en" | "ar"): "en" | "ar" {
@@ -169,6 +184,10 @@ export const ignitePregenerateLesson = createServerFn({ method: "POST" })
       })),
     }),
   );
+
+export const igniteGenerateLessonFromFile = createServerFn({ method: "POST" })
+  .inputValidator(generateLessonFromFileSchema)
+  .handler(async ({ data }) => generateLessonFromFile(data));
 
 const cacheWarmSchema = z.object({
   entries: z.array(

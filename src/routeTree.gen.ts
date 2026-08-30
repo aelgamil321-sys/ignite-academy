@@ -49,6 +49,7 @@ import { Route as TeacherUsersIndexRouteImport } from './routes/teacher/users.in
 import { Route as TeacherUnitsIndexRouteImport } from './routes/teacher/units.index'
 import { Route as TeacherTimetableIndexRouteImport } from './routes/teacher/timetable.index'
 import { Route as TeacherStudentsIndexRouteImport } from './routes/teacher/students.index'
+import { Route as TeacherScheduleIndexRouteImport } from './routes/teacher/schedule.index'
 import { Route as TeacherResourcesIndexRouteImport } from './routes/teacher/resources.index'
 import { Route as TeacherReportsIndexRouteImport } from './routes/teacher/reports.index'
 import { Route as TeacherQuizzesIndexRouteImport } from './routes/teacher/quizzes.index'
@@ -325,6 +326,11 @@ const TeacherTimetableIndexRoute = TeacherTimetableIndexRouteImport.update({
 const TeacherStudentsIndexRoute = TeacherStudentsIndexRouteImport.update({
   id: '/students/',
   path: '/students/',
+  getParentRoute: () => TeacherRouteRoute,
+} as any)
+const TeacherScheduleIndexRoute = TeacherScheduleIndexRouteImport.update({
+  id: '/schedule/',
+  path: '/schedule/',
   getParentRoute: () => TeacherRouteRoute,
 } as any)
 const TeacherResourcesIndexRoute = TeacherResourcesIndexRouteImport.update({
@@ -822,6 +828,7 @@ export interface FileRoutesByFullPath {
   '/teacher/quizzes/': typeof TeacherQuizzesIndexRoute
   '/teacher/reports/': typeof TeacherReportsIndexRoute
   '/teacher/resources/': typeof TeacherResourcesIndexRoute
+  '/teacher/schedule/': typeof TeacherScheduleIndexRoute
   '/teacher/students/': typeof TeacherStudentsIndexRoute
   '/teacher/timetable/': typeof TeacherTimetableIndexRoute
   '/teacher/units/': typeof TeacherUnitsIndexRoute
@@ -935,6 +942,7 @@ export interface FileRoutesByTo {
   '/teacher/quizzes': typeof TeacherQuizzesIndexRoute
   '/teacher/reports': typeof TeacherReportsIndexRoute
   '/teacher/resources': typeof TeacherResourcesIndexRoute
+  '/teacher/schedule': typeof TeacherScheduleIndexRoute
   '/teacher/students': typeof TeacherStudentsIndexRoute
   '/teacher/timetable': typeof TeacherTimetableIndexRoute
   '/teacher/units': typeof TeacherUnitsIndexRoute
@@ -1054,6 +1062,7 @@ export interface FileRoutesById {
   '/teacher/quizzes/': typeof TeacherQuizzesIndexRoute
   '/teacher/reports/': typeof TeacherReportsIndexRoute
   '/teacher/resources/': typeof TeacherResourcesIndexRoute
+  '/teacher/schedule/': typeof TeacherScheduleIndexRoute
   '/teacher/students/': typeof TeacherStudentsIndexRoute
   '/teacher/timetable/': typeof TeacherTimetableIndexRoute
   '/teacher/units/': typeof TeacherUnitsIndexRoute
@@ -1174,6 +1183,7 @@ export interface FileRouteTypes {
     | '/teacher/quizzes/'
     | '/teacher/reports/'
     | '/teacher/resources/'
+    | '/teacher/schedule/'
     | '/teacher/students/'
     | '/teacher/timetable/'
     | '/teacher/units/'
@@ -1287,6 +1297,7 @@ export interface FileRouteTypes {
     | '/teacher/quizzes'
     | '/teacher/reports'
     | '/teacher/resources'
+    | '/teacher/schedule'
     | '/teacher/students'
     | '/teacher/timetable'
     | '/teacher/units'
@@ -1405,6 +1416,7 @@ export interface FileRouteTypes {
     | '/teacher/quizzes/'
     | '/teacher/reports/'
     | '/teacher/resources/'
+    | '/teacher/schedule/'
     | '/teacher/students/'
     | '/teacher/timetable/'
     | '/teacher/units/'
@@ -1760,6 +1772,13 @@ declare module '@tanstack/react-router' {
       path: '/students'
       fullPath: '/teacher/students/'
       preLoaderRoute: typeof TeacherStudentsIndexRouteImport
+      parentRoute: typeof TeacherRouteRoute
+    }
+    '/teacher/schedule/': {
+      id: '/teacher/schedule/'
+      path: '/schedule'
+      fullPath: '/teacher/schedule/'
+      preLoaderRoute: typeof TeacherScheduleIndexRouteImport
       parentRoute: typeof TeacherRouteRoute
     }
     '/teacher/resources/': {
@@ -2442,6 +2461,7 @@ interface TeacherRouteRouteChildren {
   TeacherQuizzesIndexRoute: typeof TeacherQuizzesIndexRoute
   TeacherReportsIndexRoute: typeof TeacherReportsIndexRoute
   TeacherResourcesIndexRoute: typeof TeacherResourcesIndexRoute
+  TeacherScheduleIndexRoute: typeof TeacherScheduleIndexRoute
   TeacherStudentsIndexRoute: typeof TeacherStudentsIndexRoute
   TeacherTimetableIndexRoute: typeof TeacherTimetableIndexRoute
   TeacherUnitsIndexRoute: typeof TeacherUnitsIndexRoute
@@ -2481,6 +2501,7 @@ const TeacherRouteRouteChildren: TeacherRouteRouteChildren = {
   TeacherQuizzesIndexRoute: TeacherQuizzesIndexRoute,
   TeacherReportsIndexRoute: TeacherReportsIndexRoute,
   TeacherResourcesIndexRoute: TeacherResourcesIndexRoute,
+  TeacherScheduleIndexRoute: TeacherScheduleIndexRoute,
   TeacherStudentsIndexRoute: TeacherStudentsIndexRoute,
   TeacherTimetableIndexRoute: TeacherTimetableIndexRoute,
   TeacherUnitsIndexRoute: TeacherUnitsIndexRoute,

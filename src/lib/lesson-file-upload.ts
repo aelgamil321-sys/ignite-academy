@@ -77,7 +77,37 @@ export function validateLessonUploadFile(file: File): LessonFileValidationMessag
 }
 
 export function buildLessonStorageKey(lessonId: string, originalFileName: string): string {
-  const safeLessonId = lessonId.trim().replace(/[^a-zA-Z0-9-]/g, "");
+  const safeLessonId = parseLessonUuid(lessonId);
+  if (!safeLessonId) {
+    throw new Error(`Invalid lesson ID for storage upload: ${String(lessonId)}`);
+  }
   const safeName = sanitizeLessonStorageFileName(originalFileName);
-  return `lessons/${safeLessonId}/${Date.now()}-${safeName}`;
+  // Teacher storage RLS expects {lesson_uuid}/... as the first path segment (see migration 20260701120000).
+  return `${safeLessonId}/${Date.now()}-${safeName}`;
+}
+
+export const LESSON_UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Validate a lesson primary-key UUID string. */
+export function parseLessonUuid(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return LESSON_UUID_RE.test(trimmed) ? trimmed.toLowerCase() : null;
+}
+
+/** Parse lesson id from lesson-files object paths (legacy {uuid}/... or lessons/{uuid}/...). */
+export function parseLessonIdFromStoragePath(path: string): string | null {
+  const parts = path.split("/").filter(Boolean);
+  if (parts.length === 0) return null;
+  if (parts[0] === "lessons" && parts.length >= 2) {
+    return parseLessonUuid(parts[1]);
+  }
+  return parseLessonUuid(parts[0]);
+}
+
+export function lessonStoragePathOwnedByLesson(path: string, lessonId: string): boolean {
+  const pathLessonId = parseLessonIdFromStoragePath(path);
+  const expected = parseLessonUuid(lessonId);
+  return pathLessonId !== null && expected !== null && pathLessonId === expected;
 }

@@ -1,4 +1,5 @@
 import type { Bi } from "./curriculum";
+import { parseLocalizedText, serializeLocalizedText } from "./lesson-localized";
 
 export interface VocabularyItem {
   word: Bi;
@@ -15,12 +16,7 @@ export function splitLegacyVocabText(text: string): string[] {
 }
 
 function parseBiField(raw: unknown): Bi {
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    const o = raw as Record<string, unknown>;
-    return { en: String(o.en ?? ""), ar: String(o.ar ?? "") };
-  }
-  if (typeof raw === "string") return { en: raw, ar: "" };
-  return { en: "", ar: "" };
+  return parseLocalizedText(raw);
 }
 
 function normalizeItem(raw: unknown): VocabularyItem {
@@ -70,8 +66,8 @@ export function serializeVocabForStorage(items: VocabularyItem[]): { items: Voca
   return {
     items: items
       .map((item) => ({
-        word: { en: item.word.en.trim(), ar: item.word.ar.trim() },
-        meaning: { en: item.meaning.en.trim(), ar: item.meaning.ar.trim() },
+        word: serializeLocalizedText(parseLocalizedText(item.word)),
+        meaning: serializeLocalizedText(parseLocalizedText(item.meaning)),
       }))
       .filter(hasVocabWord),
   };

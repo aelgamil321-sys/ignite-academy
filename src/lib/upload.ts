@@ -6,6 +6,9 @@ import {
 } from "@/lib/lesson-bilingual-files";
 import {
   buildLessonStorageKey,
+  lessonStoragePathOwnedByLesson,
+  parseLessonIdFromStoragePath,
+  parseLessonUuid,
   resolveLessonFileContentType,
   validateLessonUploadFile,
   type LessonFileValidationMessage,
@@ -17,6 +20,9 @@ export const LESSON_FILES_BUCKET = "lesson-files";
 export type { LessonFileValidationMessage };
 export {
   buildLessonStorageKey,
+  lessonStoragePathOwnedByLesson,
+  parseLessonIdFromStoragePath,
+  parseLessonUuid,
   resolveLessonFileContentType,
   validateLessonUploadFile,
 } from "@/lib/lesson-file-upload";
@@ -67,12 +73,17 @@ export type LessonFileUploadResult = {
 
 /** Upload a lesson file to the lesson-files bucket and return its public URL. */
 export async function uploadLessonFile(file: File, lessonId: string): Promise<LessonFileUploadResult> {
+  const safeLessonId = parseLessonUuid(lessonId);
+  if (!safeLessonId) {
+    throw new Error(`Invalid lesson ID for upload: ${String(lessonId)}`);
+  }
+
   const validation = validateLessonUploadFile(file);
   if (validation) {
     throw new Error(validation.en);
   }
 
-  const filePath = buildLessonStorageKey(lessonId, file.name);
+  const filePath = buildLessonStorageKey(safeLessonId, file.name);
   const contentType = resolveLessonFileContentType(file) ?? undefined;
 
   console.log("[lesson upload] storage target", {

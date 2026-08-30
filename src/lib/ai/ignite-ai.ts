@@ -1,4 +1,5 @@
 import {
+  igniteGenerateLessonFromFile,
   ignitePregenerateLesson,
   igniteTranslateBatch,
   igniteVocabSuggest,
@@ -140,6 +141,32 @@ export async function callIgnitePregenerateLesson(
     "/api/ignite/pregenerate-lesson",
     payload,
     () => ignitePregenerateLesson({ data: payload }),
+  );
+}
+
+export type GenerateLessonFromFileRequest = {
+  lessonId: string;
+  fileUrl: string;
+  fileName: string;
+  fileType?: "pdf" | "pptx" | "ppt";
+  sourceLanguage?: "en" | "ar";
+  lessonTitle: string;
+  unitNumber: string;
+  learningOutcome: string;
+  translateOnly?: boolean;
+  sourceOnly?: boolean;
+  sourceLesson?: import("@/lib/ai/lesson-generation-types").LessonAiOutput;
+};
+
+export type GenerateLessonFromFileResponse = import("@/lib/ai/lesson-generation-types").GenerateLessonFromFileResult;
+
+export async function callIgniteGenerateLessonFromFile(
+  payload: GenerateLessonFromFileRequest,
+): Promise<GenerateLessonFromFileResponse> {
+  return callIgniteRpc(
+    "/api/ignite/generate-lesson-from-file",
+    payload,
+    () => igniteGenerateLessonFromFile({ data: payload }),
   );
 }
 

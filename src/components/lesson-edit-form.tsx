@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { Save, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import {useI18n, L } from "@/lib/i18n";
+import { useI18n, L } from "@/lib/i18n";
 import { grades } from "@/lib/curriculum";
 import { useCMS, type CustomLesson } from "@/lib/cms";
-import { normalizeGradeSlug } from "@/lib/grade-utils";
+import { normalizeGradeSlug, gradeMatches } from "@/lib/grade-utils";
 import { LessonBilingualFileFields } from "@/components/lesson-bilingual-file-fields";
+import { LessonMainFileField } from "@/components/lesson-main-file-field";
 import { LessonQuizBuilder } from "@/components/lesson-quiz-builder";
 import { LessonVocabBuilder } from "@/components/lesson-vocab-builder";
+import { LessonAiGeneratePanel, type LessonAiGeneratedPayload } from "@/components/lesson-ai-generate-panel";
 import { LessonAiTranslationButton } from "@/components/lesson-ai-translation-button";
 import type { VocabularyItem } from "@/lib/lesson-vocab";
 import {
@@ -16,9 +18,14 @@ import {
   mergeBilingualFiles,
   type BilingualLessonFiles,
 } from "@/lib/lesson-bilingual-files";
+import { hasMainLessonFile, resolveMainLessonFile } from "@/lib/lesson-main-file";
 import { quizQuestionsForForm, serializeQuizForSave } from "@/lib/lesson-quiz";
-import type { QuizQuestion } from "@/lib/curriculum";
-
+import type { Bi, QuizQuestion } from "@/lib/curriculum";
+import { mergeLocalizedTexts, parseLocalizedText } from "@/lib/lesson-localized";
+import {
+  buildLessonAiReviewBundleFromLesson,
+  lessonHasSavedAiGeneratedContent,
+} from "@/lib/lesson-ai-saved-content";
 
 function Row({ children }: { children: React.ReactNode }) {
   return <div className="grid gap-4 md:grid-cols-2">{children}</div>;
@@ -41,15 +48,19 @@ export function LessonEditForm({
   onCancel,
   allowedGrades,
   readOnly = false,
+  formMode = "full",
 }: {
   lesson: CustomLesson;
   onSaved: () => void;
   onCancel: () => void;
   allowedGrades?: string[];
   readOnly?: boolean;
+  /** Teacher workflow: compact core fields + collapsed advanced section. */
+  formMode?: "full" | "simplified";
 }) {
   const { lang, bi } = useI18n();
   const { updateLesson } = useCMS();
+  const simplified = formMode === "simplified";
 
   const [grade, setGrade] = useState(lesson.grade);
   const [unitEn, setUnitEn] = useState(lesson.unit.en);
@@ -71,6 +82,8 @@ export function LessonEditForm({
   );
   const [quiz, setQuiz] = useState<QuizQuestion[]>(() => quizQuestionsForForm(lesson.quiz));
   const [saving, setSaving] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const advancedDetailsRef = useRef<HTMLDetailsElement>(null);
   const bilingualLessonId = useRef<string | null>(null);
   const quizLessonId = useRef<string | null>(null);
 
@@ -85,6 +98,12 @@ export function LessonEditForm({
     setExpEn(lesson.explanation.en);
     setExpAr(lesson.explanation.ar);
     setVocab(lesson.vocab);
+    localizedSnapshotRef.current = {
+      title: parseLocalizedText(lesson.title),
+      unit: parseLocalizedText(lesson.unit),
+      outcome: parseLocalizedText(lesson.outcome),
+      explanation: parseLocalizedText(lesson.explanation),
+    };
     setYtAr((lesson.youtubeArUrl ?? "").trim());
     setYtEn(
       (lesson.youtubeEnUrl ?? "").trim() || (!(lesson.youtubeArUrl ?? "").trim() ? (lesson.youtubeUrl ?? "").trim() : ""),
@@ -104,11 +123,95 @@ export function LessonEditForm({
     setQuiz(quizQuestionsForForm(lesson.quiz));
   }, [lesson.id]);
 
+  const unitValue = lang === "ar" ? unitAr : unitEn;
+  const setUnitValue = (value: string) => {
+    if (simplified) {
+      setUnitEn(value);
+      setUnitAr(value);
+      return;
+    }
+    if (lang === "ar") setUnitAr(value);
+    else setUnitEn(value);
+  };
+  const titleValue = lang === "ar" ? titleAr : titleEn;
+  const setTitleValue = (value: string) => {
+    if (lang === "ar") setTitleAr(value);
+    else setTitleEn(value);
+  };
+  const outcomeValue = lang === "ar" ? outAr : outEn;
+  const setOutcomeValue = (value: string) => {
+    if (lang === "ar") setOutAr(value);
+    else setOutEn(value);
+  };
+
+  const mainFile = resolveMainLessonFile(bilingualFiles, lesson, lang);
+  const coreFieldsValid =
+    Boolean(unitValue.trim()) &&
+    Boolean(titleValue.trim()) &&
+    Boolean(outcomeValue.trim()) &&
+    hasMainLessonFile(bilingualFiles, lesson);
+
+  const savedAiReviewBundle = useMemo(() => {
+    if (!lessonHasSavedAiGeneratedContent(lesson)) return null;
+    return buildLessonAiReviewBundleFromLesson(lesson);
+  }, [lesson]);
+
+  const localizedSnapshotRef = useRef<{
+    title?: Bi;
+    unit?: Bi;
+    outcome?: Bi;
+    explanation?: Bi;
+  }>({
+    title: parseLocalizedText(lesson.title),
+    unit: parseLocalizedText(lesson.unit),
+    outcome: parseLocalizedText(lesson.outcome),
+    explanation: parseLocalizedText(lesson.explanation),
+  });
+
+  const handleAiGenerated = (payload: LessonAiGeneratedPayload) => {
+    const title = parseLocalizedText(payload.title);
+    const unit = parseLocalizedText(payload.unit);
+    const outcome = parseLocalizedText(payload.outcome);
+    const explanation = parseLocalizedText(payload.explanation);
+    localizedSnapshotRef.current = { title, unit, outcome, explanation };
+    setTitleEn(title.en);
+    setTitleAr(title.ar);
+    const unitCanonical = unit.en?.trim() || unit.ar?.trim() || "";
+    setUnitEn(unitCanonical);
+    setUnitAr(unitCanonical);
+    setOutEn(outcome.en);
+    setOutAr(outcome.ar);
+    setExpEn(explanation.en);
+    setExpAr(explanation.ar);
+    setVocab(payload.vocab);
+    setQuiz(quizQuestionsForForm(payload.quiz));
+    setAdvancedOpen(true);
+    if (advancedDetailsRef.current) advancedDetailsRef.current.open = true;
+  };
+
   const submit = async () => {
-    if (!titleEn.trim() || !titleAr.trim()) {
+    if (simplified) {
+      if (!unitValue.trim()) {
+        toast.error(L("Unit number is required", "رقم الوحدة مطلوب")[lang]);
+        return;
+      }
+      if (!titleValue.trim()) {
+        toast.error(L("Lesson name is required", "اسم الدرس مطلوب")[lang]);
+        return;
+      }
+      if (!outcomeValue.trim()) {
+        toast.error(L("Learning outcome is required", "نواتج التعلّم مطلوبة")[lang]);
+        return;
+      }
+      if (!hasMainLessonFile(bilingualFiles, lesson)) {
+        toast.error(L("Main lesson file is required", "ملف الدرس الرئيسي مطلوب")[lang]);
+        return;
+      }
+    } else if (!titleEn.trim() || !titleAr.trim()) {
       toast.error(L("Title (English) and Title (Arabic) are required", "العنوان (إنجليزي) والعنوان (عربي) مطلوبان")[lang]);
       return;
     }
+
     if (!grade) {
       toast.error(L("Grade is required", "الصف مطلوب")[lang]);
       return;
@@ -123,13 +226,23 @@ export function LessonEditForm({
     const baselineFiles = bilingualFilesFromLesson(lesson);
     const mergedFiles = mergeBilingualFiles(bilingualFiles, baselineFiles);
 
+    const localized = localizedSnapshotRef.current;
+    const titlePayload: Bi = mergeLocalizedTexts(localized.title ?? {}, { en: titleEn, ar: titleAr });
+    const unitCanonical = (unitEn.trim() || unitAr.trim());
+    const unitPayload: Bi = mergeLocalizedTexts(localized.unit ?? {}, {
+      en: unitCanonical,
+      ar: unitCanonical,
+    });
+    const outcomePayload: Bi = mergeLocalizedTexts(localized.outcome ?? {}, { en: outEn, ar: outAr });
+    const explanationPayload: Bi = mergeLocalizedTexts(localized.explanation ?? {}, { en: expEn, ar: expAr });
+
     try {
       await updateLesson(lesson.id, {
         grade: gradeSlug,
-        unit: { en: unitEn, ar: unitAr },
-        title: { en: titleEn, ar: titleAr },
-        outcome: { en: outEn, ar: outAr },
-        explanation: { en: expEn, ar: expAr },
+        unit: unitPayload,
+        title: titlePayload,
+        outcome: outcomePayload,
+        explanation: explanationPayload,
         vocab,
         youtubeUrl: legacyYoutube,
         youtubeArUrl: ytArTrim,
@@ -138,7 +251,11 @@ export function LessonEditForm({
         quiz: serializeQuizForSave(quiz),
         ...bilingualFilesSavePayload(mergedFiles, baselineFiles),
       });
-      toast.success(L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!")[lang]);
+      toast.success(
+        (simplified && !pub
+          ? L("Draft saved successfully!", "تم حفظ المسودة بنجاح!")
+          : L("Lesson updated successfully!", "تم تحديث الدرس بنجاح!"))[lang],
+      );
       onSaved();
     } catch {
       // CMS layer already shows the error toast
@@ -148,63 +265,49 @@ export function LessonEditForm({
   };
 
   const gradeOptions = allowedGrades
-    ? grades.filter((g) => allowedGrades.includes(g.slug))
+    ? grades.filter((g) => allowedGrades.some((assigned) => gradeMatches(g.slug, assigned)))
     : grades;
 
-  return (
-    <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-2xl text-foreground">{L("Edit Lesson", "تعديل الدرس")[lang]}</h2>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
-        >
-          <X className="h-4 w-4" /> {L("Cancel", "إلغاء")[lang]}
-        </button>
-      </div>
+  const isNewStub =
+    (titleEn.trim() === "New lesson" && titleAr.trim() === "درس جديد") ||
+    (!titleEn.trim() && !titleAr.trim() && !outEn.trim() && !outAr.trim());
 
-      {readOnly ? (
-        <p className="text-sm text-muted-foreground">
-          {L(
-            "This lesson is open in view mode.",
-            "هذا الدرس مفتوح في وضع العرض.",
-          )[lang]}
-        </p>
+  const pageTitle = simplified
+    ? (isNewStub ? L("Create Lesson", "إنشاء درس") : L("Edit Lesson", "تعديل الدرس"))[lang]
+    : L("Edit Lesson", "تعديل الدرس")[lang];
+
+  const advancedFields = (
+    <>
+      {simplified ? (
+        <Row>
+          <Field label={L("Unit (English)", "الوحدة (إنجليزي)")[lang]}>
+            <input className="lesson-input" value={unitEn} onChange={(e) => setUnitEn(e.target.value)} />
+          </Field>
+          <Field label={L("Unit (Arabic)", "الوحدة (عربي)")[lang]}>
+            <input className="lesson-input" dir="rtl" value={unitAr} onChange={(e) => setUnitAr(e.target.value)} />
+          </Field>
+        </Row>
       ) : null}
-
-      <fieldset disabled={readOnly} className={readOnly ? "opacity-80 space-y-5 border-0 p-0 m-0 min-w-0" : "space-y-5 border-0 p-0 m-0 min-w-0"}>
-      <Row>
-        <Field label={L("Grade", "الصف")[lang]}>
-          <select value={grade} onChange={(e) => setGrade(e.target.value)} className="lesson-input">
-            {gradeOptions.map((g) => <option key={g.slug} value={g.slug}>{bi(g.name)}</option>)}
-          </select>
-        </Field>
-      </Row>
-      <Row>
-        <Field label={L("Unit (English)", "الوحدة (إنجليزي)")[lang]}>
-          <input className="lesson-input" value={unitEn} onChange={(e) => setUnitEn(e.target.value)} />
-        </Field>
-        <Field label={L("Unit (Arabic)", "الوحدة (عربي)")[lang]}>
-          <input className="lesson-input" dir="rtl" value={unitAr} onChange={(e) => setUnitAr(e.target.value)} />
-        </Field>
-      </Row>
-      <Row>
-        <Field label={L("Title (English)", "العنوان (إنجليزي)")[lang]} required>
-          <input className="lesson-input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
-        </Field>
-        <Field label={L("Title (Arabic)", "العنوان (عربي)")[lang]} required>
-          <input className="lesson-input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} />
-        </Field>
-      </Row>
-      <Row>
-        <Field label={L("Learning Outcome (EN)", "نواتج التعلّم (إنجليزي)")[lang]}>
-          <textarea className="lesson-input" rows={3} value={outEn} onChange={(e) => setOutEn(e.target.value)} />
-        </Field>
-        <Field label={L("Learning Outcome (AR)", "نواتج التعلّم (عربي)")[lang]}>
-          <textarea className="lesson-input" dir="rtl" rows={3} value={outAr} onChange={(e) => setOutAr(e.target.value)} />
-        </Field>
-      </Row>
+      {simplified ? (
+        <Row>
+          <Field label={L("Title (English)", "العنوان (إنجليزي)")[lang]}>
+            <input className="lesson-input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
+          </Field>
+          <Field label={L("Title (Arabic)", "العنوان (عربي)")[lang]}>
+            <input className="lesson-input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} />
+          </Field>
+        </Row>
+      ) : null}
+      {simplified ? (
+        <Row>
+          <Field label={L("Learning Outcome (EN)", "نواتج التعلّم (إنجليزي)")[lang]}>
+            <textarea className="lesson-input" rows={3} value={outEn} onChange={(e) => setOutEn(e.target.value)} />
+          </Field>
+          <Field label={L("Learning Outcome (AR)", "نواتج التعلّم (عربي)")[lang]}>
+            <textarea className="lesson-input" dir="rtl" rows={3} value={outAr} onChange={(e) => setOutAr(e.target.value)} />
+          </Field>
+        </Row>
+      ) : null}
       <Row>
         <Field label={L("Lesson Content (EN)", "محتوى الدرس (إنجليزي)")[lang]}>
           <textarea className="lesson-input" rows={5} value={expEn} onChange={(e) => setExpEn(e.target.value)} />
@@ -236,43 +339,178 @@ export function LessonEditForm({
           <input className="lesson-input" placeholder="https://www.youtube.com/watch?v=..." value={ytEn} onChange={(e) => setYtEn(e.target.value)} />
         </Field>
       </Row>
-
       <LessonBilingualFileFields
         files={bilingualFiles}
         onChange={setBilingualFiles}
         lessonId={lesson.id}
         savedFiles={bilingualFilesFromLesson(lesson)}
       />
-
       <LessonQuizBuilder questions={quiz} onChange={setQuiz} />
-
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
-        {!readOnly ? (
-          <>
+      {simplified ? (
         <label className="inline-flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
           {L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[lang]}
         </label>
+      ) : null}
+    </>
+  );
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)] space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-xl sm:text-2xl text-foreground">{pageTitle}</h2>
         <button
           type="button"
-          disabled={saving}
-          onClick={() => { void submit(); }}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
+          onClick={onCancel}
+          className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
         >
-          <Save className="h-4 w-4" />
-          {saving ? L("Saving…", "جارٍ الحفظ…")[lang] : L("Save Changes", "حفظ التغييرات")[lang]}
+          <X className="h-4 w-4" /> {L("Cancel", "إلغاء")[lang]}
         </button>
+      </div>
+
+      {readOnly ? (
+        <p className="text-sm text-muted-foreground">
+          {L("This lesson is open in view mode.", "هذا الدرس مفتوح في وضع العرض.")[lang]}
+        </p>
+      ) : null}
+
+      <fieldset disabled={readOnly} className={readOnly ? "opacity-80 space-y-5 border-0 p-0 m-0 min-w-0" : "space-y-5 border-0 p-0 m-0 min-w-0"}>
+        <Row>
+          <Field label={L("Grade", "الصف")[lang]} required>
+            <select value={grade} onChange={(e) => setGrade(e.target.value)} className="lesson-input">
+              {gradeOptions.map((g) => <option key={g.slug} value={g.slug}>{bi(g.name)}</option>)}
+            </select>
+          </Field>
+        </Row>
+
+        {simplified ? (
+          <>
+            <Field label={L("Unit Number", "رقم الوحدة")[lang]} required>
+              <input
+                className="lesson-input"
+                dir={lang === "ar" ? "rtl" : "ltr"}
+                value={unitValue}
+                onChange={(e) => setUnitValue(e.target.value)}
+              />
+            </Field>
+            <Field label={L("Lesson Name", "اسم الدرس")[lang]} required>
+              <input
+                className="lesson-input"
+                dir={lang === "ar" ? "rtl" : "ltr"}
+                value={titleValue}
+                onChange={(e) => setTitleValue(e.target.value)}
+              />
+            </Field>
+            <Field label={L("Learning Outcome", "نواتج التعلّم")[lang]} required>
+              <textarea
+                className="lesson-input"
+                dir={lang === "ar" ? "rtl" : "ltr"}
+                rows={3}
+                value={outcomeValue}
+                onChange={(e) => setOutcomeValue(e.target.value)}
+              />
+            </Field>
+            <LessonMainFileField
+              files={bilingualFiles}
+              onChange={setBilingualFiles}
+              lessonId={lesson.id}
+              lesson={lesson}
+            />
+            <LessonAiGeneratePanel
+              lessonId={lesson.id}
+              sourceLanguage={lang === "ar" ? "ar" : "en"}
+              lessonTitle={titleValue}
+              unitNumber={unitValue}
+              learningOutcome={outcomeValue}
+              mainFile={mainFile}
+              coreFieldsValid={coreFieldsValid}
+              savedReviewBundle={savedAiReviewBundle}
+              onGenerated={handleAiGenerated}
+            />
+            <details
+              ref={advancedDetailsRef}
+              open={advancedOpen}
+              onToggle={(e) => setAdvancedOpen((e.currentTarget as HTMLDetailsElement).open)}
+              className="group rounded-xl border border-border bg-background"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+                <span>{L("Advanced / Manual Editing", "تحرير يدوي متقدم")[lang]}</span>
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="space-y-5 border-t border-border px-4 py-4">
+                {advancedFields}
+              </div>
+            </details>
           </>
         ) : (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-2.5 text-sm font-semibold hover:bg-muted"
-          >
-            <X className="h-4 w-4" /> {L("Back", "رجوع")[lang]}
-          </button>
+          <>
+            <Row>
+              <Field label={L("Unit (English)", "الوحدة (إنجليزي)")[lang]}>
+                <input className="lesson-input" value={unitEn} onChange={(e) => setUnitEn(e.target.value)} />
+              </Field>
+              <Field label={L("Unit (Arabic)", "الوحدة (عربي)")[lang]}>
+                <input className="lesson-input" dir="rtl" value={unitAr} onChange={(e) => setUnitAr(e.target.value)} />
+              </Field>
+            </Row>
+            <Row>
+              <Field label={L("Title (English)", "العنوان (إنجليزي)")[lang]} required>
+                <input className="lesson-input" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
+              </Field>
+              <Field label={L("Title (Arabic)", "العنوان (عربي)")[lang]} required>
+                <input className="lesson-input" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} />
+              </Field>
+            </Row>
+            <Row>
+              <Field label={L("Learning Outcome (EN)", "نواتج التعلّم (إنجليزي)")[lang]}>
+                <textarea className="lesson-input" rows={3} value={outEn} onChange={(e) => setOutEn(e.target.value)} />
+              </Field>
+              <Field label={L("Learning Outcome (AR)", "نواتج التعلّم (عربي)")[lang]}>
+                <textarea className="lesson-input" dir="rtl" rows={3} value={outAr} onChange={(e) => setOutAr(e.target.value)} />
+              </Field>
+            </Row>
+            {advancedFields}
+          </>
         )}
-      </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
+          {!readOnly ? (
+            <>
+              {!simplified ? (
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={pub} onChange={(e) => setPub(e.target.checked)} className="accent-primary h-4 w-4" />
+                  {L("Published (uncheck to save as draft)", "منشور (ألغِ التحديد للحفظ كمسودة)")[lang]}
+                </label>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {pub
+                    ? L("This lesson is published. Unpublish from Advanced editing.", "هذا الدرس منشور. يمكنك إلغاء النشر من التحرير المتقدم.")
+                    : L("Saving keeps this lesson as a draft.", "الحفظ يبقي الدرس كمسودة.")[lang]}
+                </p>
+              )}
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => { void submit(); }}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <Save className="h-4 w-4" />
+                {saving
+                  ? L("Saving…", "جارٍ الحفظ…")[lang]
+                  : simplified && !pub
+                    ? L("Save Draft", "حفظ كمسودة")[lang]
+                    : L("Save Changes", "حفظ التغييرات")[lang]}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-2.5 text-sm font-semibold hover:bg-muted"
+            >
+              <X className="h-4 w-4" /> {L("Back", "رجوع")[lang]}
+            </button>
+          )}
+        </div>
       </fieldset>
 
       <style>{`.lesson-input{display:block;width:100%;border-radius:.5rem;border:1px solid var(--border);background:var(--background);padding:.55rem .75rem;font-size:.875rem;color:var(--foreground);}.lesson-input:focus{outline:none;border-color:var(--primary)}`}</style>

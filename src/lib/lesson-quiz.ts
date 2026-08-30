@@ -2,6 +2,7 @@ import type { Bi, QuizQuestion, QuizQuestionType } from "@/lib/curriculum";
 import { supabase } from "@/integrations/supabase/client";
 import type { Lang } from "./i18n-config";
 import { contentLocale, L } from "./i18n-config";
+import { LESSON_LANGS, parseLocalizedText, serializeLocalizedText } from "./lesson-localized";
 
 export const TRUE_FALSE_OPTIONS: Bi[] = [
   { en: "True", ar: "صح" },
@@ -67,8 +68,7 @@ export function emptyEssayQuestion(): QuizQuestion {
 }
 
 function parseBi(raw: unknown): Bi {
-  const o = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
-  return { en: String(o.en ?? ""), ar: String(o.ar ?? "") };
+  return parseLocalizedText(raw);
 }
 
 export function normalizeQuizQuestion(raw: unknown): QuizQuestion {
@@ -124,35 +124,41 @@ export function quizQuestionsForForm(lessonQuiz: QuizQuestion[] | undefined): Qu
   return normalized.length > 0 ? normalized : [emptyMultipleChoiceQuestion()];
 }
 
+function hasAnyLocalizedText(text: Bi): boolean {
+  const parsed = parseLocalizedText(text);
+  return LESSON_LANGS.some((lang) => Boolean(parsed[lang]?.trim()));
+}
+
+function serializeBiForSave(text: Bi): Bi {
+  return serializeLocalizedText(parseLocalizedText(text));
+}
+
 /** Keep questions that have at least one language of question text. */
 export function serializeQuizForSave(questions: QuizQuestion[]): QuizQuestion[] {
   return questions
     .map(normalizeQuizQuestion)
-    .filter((q) => q.q.en.trim() || q.q.ar.trim())
+    .filter((q) => hasAnyLocalizedText(q.q))
     .map((q) => {
+      const qSerialized = serializeBiForSave(q.q);
       if (q.type === "essay") {
         const model = q.modelAnswer;
-        const hasModel = model && (model.en.trim() || model.ar.trim());
+        const hasModel = model && hasAnyLocalizedText(model);
         return {
-          q: { en: q.q.en.trim(), ar: q.q.ar.trim() },
+          q: qSerialized,
           type: "essay" as const,
           options: [],
           answer: 0,
           points: q.points > 0 ? q.points : 1,
-          ...(hasModel
-            ? { modelAnswer: { en: model.en.trim(), ar: model.ar.trim() } }
-            : {}),
+          ...(hasModel ? { modelAnswer: serializeBiForSave(model) } : {}),
         };
       }
       return {
-        q: { en: q.q.en.trim(), ar: q.q.ar.trim() },
+        q: qSerialized,
         type: q.type,
         options:
           q.type === "true_false"
-            ? TRUE_FALSE_OPTIONS.map((o) => ({ ...o }))
-            : q.options
-                .filter((o) => o.en.trim() || o.ar.trim())
-                .map((o) => ({ en: o.en.trim(), ar: o.ar.trim() })),
+            ? TRUE_FALSE_OPTIONS.map((o) => serializeBiForSave(o))
+            : q.options.filter(hasAnyLocalizedText).map(serializeBiForSave),
         answer: q.answer,
         points: q.points > 0 ? q.points : 1,
       };

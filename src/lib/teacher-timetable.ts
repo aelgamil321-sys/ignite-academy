@@ -1,14 +1,37 @@
 import { supabase } from "@/integrations/supabase/client";
+import {
+  timetableScheduleSchema,
+  type TimetableSchedule,
+} from "@/lib/timetable/timetable-types";
+import { coerceScheduleToGrid, ensureFixedGridSchedule } from "@/lib/timetable/timetable-grid";
 
 export const TEACHER_TIMETABLES_BUCKET = "teacher-timetables";
-export const TEACHER_TIMETABLE_MAX_BYTES = 10 * 1024 * 1024;
+export const TEACHER_TIMETABLE_MAX_BYTES = 25 * 1024 * 1024;
 
 export const TEACHER_TIMETABLE_ACCEPT =
-  "application/pdf,image/jpeg,image/png,image/webp";
+  ".pdf,.jpg,.jpeg,.png,.xlsx,.xls,.pptx,application/pdf,image/jpeg,image/png,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
-const ALLOWED_MIME_TYPES = new Set(TEACHER_TIMETABLE_ACCEPT.split(","));
+const ALLOWED_MIME_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+]);
 
-/** Raw uploaded timetable metadata. parsedSchedule reserved for future AI extraction. */
+const EXTENSION_FALLBACK_MIME: Record<string, string> = {
+  pdf: "application/pdf",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  xls: "application/vnd.ms-excel",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+};
+
+/** Raw uploaded timetable metadata plus optional confirmed parsed schedule. */
 export type TeacherTimetableRecord = {
   id: string;
   teacherId: string;
@@ -17,22 +40,27 @@ export type TeacherTimetableRecord = {
   mimeType: string;
   fileSize: number;
   uploadedAt: string;
+  parsedSchedule: TimetableSchedule | null;
 };
 
-export type ParsedTimetableSchedule = {
-  version: number;
-  extractedAt: string;
-  periods: Array<{
-    day: string;
-    startTime: string;
-    endTime: string;
-    subject?: string;
-    room?: string;
-  }>;
-};
+export type ParsedTimetableSchedule = TimetableSchedule;
 
 function sanitizeFileName(name: string): string {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+function resolveMimeType(file: File): string {
+  if (file.type && ALLOWED_MIME_TYPES.has(file.type)) return file.type;
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+  return EXTENSION_FALLBACK_MIME[ext] ?? file.type;
+}
+
+function parseParsedSchedule(value: unknown): TimetableSchedule | null {
+  const coerced = coerceScheduleToGrid(value);
+  if (!coerced) return null;
+  const parsed = timetableScheduleSchema.safeParse(coerced);
+  if (!parsed.success) return null;
+  return ensureFixedGridSchedule(parsed.data);
 }
 
 function mapRow(row: {
@@ -43,6 +71,7 @@ function mapRow(row: {
   mime_type: string;
   file_size: number;
   uploaded_at: string;
+  parsed_schedule?: unknown;
 }): TeacherTimetableRecord {
   return {
     id: row.id,
@@ -52,6 +81,7 @@ function mapRow(row: {
     mimeType: row.mime_type,
     fileSize: row.file_size,
     uploadedAt: row.uploaded_at,
+    parsedSchedule: parseParsedSchedule(row.parsed_schedule),
   };
 }
 
@@ -64,7 +94,8 @@ async function requireCurrentTeacherId(): Promise<string> {
 }
 
 export function validateTeacherTimetableFile(file: File): string | null {
-  if (!ALLOWED_MIME_TYPES.has(file.type)) {
+  const mimeType = resolveMimeType(file);
+  if (!ALLOWED_MIME_TYPES.has(mimeType)) {
     return "invalid_type";
   }
   if (file.size > TEACHER_TIMETABLE_MAX_BYTES) {
@@ -77,7 +108,9 @@ export async function fetchTeacherTimetable(): Promise<TeacherTimetableRecord | 
   const teacherId = await requireCurrentTeacherId();
   const { data, error } = await supabase
     .from("teacher_timetables")
-    .select("id, teacher_id, storage_path, file_name, mime_type, file_size, uploaded_at")
+    .select(
+      "id, teacher_id, storage_path, file_name, mime_type, file_size, uploaded_at, parsed_schedule",
+    )
     .eq("teacher_id", teacherId)
     .maybeSingle();
 
@@ -108,6 +141,7 @@ export async function uploadTeacherTimetable(file: File): Promise<TeacherTimetab
   if (validation === "invalid_type") throw new Error("invalid_type");
   if (validation === "too_large") throw new Error("too_large");
 
+  const mimeType = resolveMimeType(file);
   const ext = file.name.split(".").pop() || "bin";
   const storagePath = `${teacherId}/timetable-${Date.now()}-${sanitizeFileName(file.name) || `file.${ext}`}`;
 
@@ -118,7 +152,7 @@ export async function uploadTeacherTimetable(file: File): Promise<TeacherTimetab
     .from(TEACHER_TIMETABLES_BUCKET)
     .upload(storagePath, file, {
       upsert: false,
-      contentType: file.type || undefined,
+      contentType: mimeType || undefined,
       cacheControl: "3600",
     });
 
@@ -128,7 +162,7 @@ export async function uploadTeacherTimetable(file: File): Promise<TeacherTimetab
     teacher_id: teacherId,
     storage_path: storagePath,
     file_name: file.name,
-    mime_type: file.type,
+    mime_type: mimeType,
     file_size: file.size,
     uploaded_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -137,7 +171,9 @@ export async function uploadTeacherTimetable(file: File): Promise<TeacherTimetab
   const { data, error } = await supabase
     .from("teacher_timetables")
     .upsert(payload, { onConflict: "teacher_id" })
-    .select("id, teacher_id, storage_path, file_name, mime_type, file_size, uploaded_at")
+    .select(
+      "id, teacher_id, storage_path, file_name, mime_type, file_size, uploaded_at, parsed_schedule",
+    )
     .single();
 
   if (error) {

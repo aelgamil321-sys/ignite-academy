@@ -68,8 +68,14 @@ export function needsDynamicTranslation(lang: Lang): boolean {
   return lang !== "en";
 }
 
-/** Stored bilingual text for a locale (no machine translation). */
+/** Stored multilingual lesson text for a locale (no machine translation). */
 export function resolveStoredBiText(bi: Bi, lang: Lang): string | null {
+  const localized = bi as Record<string, string | undefined>;
+  if (lang === "fr" || lang === "de" || lang === "ur" || lang === "zh") {
+    const direct = localized[lang]?.trim();
+    if (direct) return direct;
+    return null;
+  }
   if (lang === "en") return bi.en?.trim() || bi.ar?.trim() || null;
   if (lang === "ar") return bi.ar?.trim() || null;
   return null;
@@ -93,6 +99,9 @@ export function biSourceForTranslation(
     if (en) return { text: en, sourceLanguage: "en" };
     return null;
   }
+  const extended = bi as Record<string, string | undefined>;
+  const storedTarget = extended[targetLang]?.trim();
+  if (storedTarget) return null;
   const en = bi.en?.trim();
   if (en) return { text: en, sourceLanguage: "en" };
   const ar = bi.ar?.trim();

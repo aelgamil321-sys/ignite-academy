@@ -223,7 +223,7 @@ export function TeacherHomepage() {
             <h2 className="font-display text-2xl text-foreground md:text-3xl">{tr("teacher_home_quick_actions")}</h2>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               <Link
-                to="/teacher/lessons"
+                to="/teacher/lessons/new"
                 className="group rounded-2xl border border-foreground/10 bg-background p-5 hover:border-primary/60 hover:shadow-[var(--shadow-soft)] transition-all"
               >
                 <Plus className="h-6 w-6 text-primary" />

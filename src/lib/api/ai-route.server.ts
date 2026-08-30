@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   handleIgniteTranslateBatch,
 } from "@/lib/api/ai.functions";
+import { generateLessonFromFile } from "@/lib/ai/generate-lesson-from-file.server";
 import {
   ignitePregenerateLessonTranslations,
   igniteSuggestVocabMeanings,
@@ -34,6 +35,20 @@ const pregenerateSchema = z.object({
       sourceLang: z.enum(["en", "ar"]).optional(),
     }),
   ),
+});
+
+const generateLessonFromFileSchema = z.object({
+  lessonId: z.string().uuid(),
+  fileUrl: z.string().max(4000),
+  fileName: z.string().max(500),
+  fileType: z.enum(["pdf", "pptx", "ppt"]).optional(),
+  sourceLanguage: z.enum(["en", "ar"]).optional(),
+  lessonTitle: z.string().max(2000),
+  unitNumber: z.string().max(500),
+  learningOutcome: z.string().max(8000),
+  translateOnly: z.boolean().optional(),
+  sourceOnly: z.boolean().optional(),
+  sourceLesson: z.any().optional(),
 });
 
 /** POST /api/ignite/* — server-side AI; keys never reach the browser. */
@@ -78,6 +93,12 @@ export async function handleIgniteApi(request: Request): Promise<Response> {
         })),
       });
       return json(result);
+    }
+
+    if (subpath === "/generate-lesson-from-file") {
+      const data = generateLessonFromFileSchema.parse(body);
+      const result = await generateLessonFromFile(data);
+      return json(result, result.ok ? 200 : 400);
     }
 
     return json({ error: "Not found" }, 404);

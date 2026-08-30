@@ -1356,18 +1356,110 @@ export const t = {
     en: "No timetable uploaded yet.",
     ar: "لم يتم رفع الجدول بعد.",
   },
+  teacher_dash_schedule_import: {
+    en: "Import your timetable to see today's classes here.",
+    ar: "استورد جدولك لعرض حصص اليوم هنا.",
+  },
+  teacher_timetable_import_cta: {
+    en: "Import your timetable",
+    ar: "استيراد جدولك",
+  },
+  teacher_timetable_import_title: {
+    en: "Import your timetable",
+    ar: "استيراد جدولك",
+  },
+  teacher_timetable_import_hint: {
+    en: "Upload JPG, PNG, PDF, Excel, or PowerPoint (max 25 MB).",
+    ar: "ارفع JPG أو PNG أو PDF أو Excel أو PowerPoint (بحد أقصى 25 ميجابايت).",
+  },
+  teacher_timetable_read_ai: {
+    en: "Read timetable with AI",
+    ar: "قراءة الجدول بالذكاء الاصطناعي",
+  },
+  teacher_timetable_confirm: {
+    en: "Confirm & Save Timetable",
+    ar: "اعتماد وحفظ الجدول",
+  },
+  teacher_timetable_edit: {
+    en: "Edit timetable",
+    ar: "تعديل الجدول",
+  },
+  teacher_timetable_edit_cell: {
+    en: "Edit period",
+    ar: "تعديل الحصة",
+  },
+  teacher_timetable_manual_fill: {
+    en: "Fill grid manually",
+    ar: "تعبئة الجدول يدويًا",
+  },
+  teacher_timetable_cancel_edit: {
+    en: "Cancel editing",
+    ar: "إلغاء التعديل",
+  },
+  teacher_timetable_saved_success: {
+    en: "Timetable saved. Your dashboard now shows today's schedule.",
+    ar: "تم حفظ الجدول. تعرض لوحة التحكم جدول اليوم.",
+  },
+  teacher_timetable_upload_another: {
+    en: "Upload another file",
+    ar: "رفع ملف آخر",
+  },
+  teacher_timetable_review_warning: {
+    en: "Some timetable entries need review.",
+    ar: "بعض إدخالات الجدول تحتاج مراجعة.",
+  },
+  teacher_timetable_needs_review: {
+    en: "Needs review",
+    ar: "يحتاج مراجعة",
+  },
+  teacher_timetable_no_classes_today: {
+    en: "No classes scheduled today.",
+    ar: "لا توجد حصص مجدولة اليوم.",
+  },
+  teacher_timetable_col_day: { en: "Day", ar: "اليوم" },
+  teacher_timetable_col_period: { en: "Period", ar: "الحصة" },
+  teacher_timetable_col_start: { en: "Start", ar: "البداية" },
+  teacher_timetable_col_end: { en: "End", ar: "النهاية" },
+  teacher_timetable_col_grade: { en: "Grade", ar: "الصف" },
+  teacher_timetable_col_section: { en: "Section", ar: "الشعبة" },
+  teacher_timetable_col_subject: { en: "Subject", ar: "المادة" },
+  teacher_timetable_col_room: { en: "Room", ar: "القاعة" },
+  teacher_timetable_col_type: { en: "Type", ar: "النوع" },
+  teacher_timetable_col_class_label: { en: "Class", ar: "الصف" },
+  teacher_timetable_col_review: { en: "Needs Review", ar: "يحتاج مراجعة" },
+  teacher_timetable_slot_class: { en: "Class", ar: "حصة" },
+  teacher_timetable_slot_free: { en: "Free", ar: "فارغة" },
+  teacher_timetable_slot_break: { en: "Break", ar: "استراحة" },
+  teacher_timetable_dash_free: { en: "Free Period", ar: "حصة فارغة" },
+  teacher_timetable_dash_break: { en: "Break", ar: "استراحة" },
+  teacher_timetable_ai_disabled: {
+    en: "AI timetable reading is not enabled on the server.",
+    ar: "قراءة الجدول بالذكاء الاصطناعي غير مفعلة على الخادم.",
+  },
+  teacher_timetable_extract_error: {
+    en: "Could not read the timetable. Try another file or edit manually.",
+    ar: "تعذرت قراءة الجدول. جرّب ملفًا آخر أو عدّل يدويًا.",
+  },
+  teacher_timetable_confirm_error: {
+    en: "Could not save your confirmed schedule.",
+    ar: "تعذر حفظ الجدول المعتمد.",
+  },
+  teacher_timetable_confirmed_hint: {
+    en: "Your schedule is saved. Today's classes appear on your dashboard.",
+    ar: "تم حفظ جدولك. تظهر حصص اليوم في لوحة التحكم.",
+  },
   teacher_timetable_upload: { en: "Upload timetable", ar: "رفع الجدول" },
   teacher_timetable_replace: { en: "Replace timetable", ar: "استبدال الجدول" },
   teacher_timetable_remove: { en: "Remove timetable", ar: "حذف الجدول" },
   teacher_timetable_open: { en: "Open timetable", ar: "فتح الجدول" },
   teacher_timetable_uploaded: { en: "Uploaded", ar: "تاريخ الرفع" },
   teacher_timetable_invalid_type: {
-    en: "Please upload a PDF or image (JPEG, PNG, WebP).",
-    ar: "يرجى رفع ملف PDF أو صورة (JPEG أو PNG أو WebP).",
+    en: "Please upload JPG, PNG, PDF, Excel (.xlsx/.xls), or PowerPoint (.pptx).",
+    ar: "يرجى رفع JPG أو PNG أو PDF أو Excel (.xlsx/.xls) أو PowerPoint (.pptx).",
   },
   teacher_timetable_too_large: {
-    en: "Timetable file must be 10 MB or smaller.",
-    ar: "يجب ألا يتجاوز ملف الجدول 10 ميجابايت.",
+    en: "Timetable file must be 25 MB or smaller.",
+    ar: "يجب ألا يتجاوز ملف الجدول 25 ميجابايت.",
   },
   teacher_timetable_upload_error: {
     en: "Could not upload timetable. Please try again.",

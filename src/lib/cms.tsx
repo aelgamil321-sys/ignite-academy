@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Bi, QuizQuestion, Lesson } from "./curriculum";
 import { grades } from "./curriculum";
 import {
@@ -11,6 +11,7 @@ import { computeHomepageStats } from "./homepage-stats";
 import { ytId } from "./youtube-url";
 export { ytId };
 import { parseVocabFromStorage, serializeVocabForStorage, type VocabularyItem } from "./lesson-vocab";
+import { parseLocalizedText } from "./lesson-localized";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { L } from "@/lib/i18n-config";
@@ -135,18 +136,7 @@ interface CMSCtx extends CMSState {
 const Ctx = createContext<CMSCtx | null>(null);
 
 function parseBi(raw: unknown): Bi {
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    const o = raw as Record<string, unknown>;
-    return { en: String(o.en ?? ""), ar: String(o.ar ?? "") };
-  }
-  if (typeof raw === "string") {
-    try {
-      return parseBi(JSON.parse(raw));
-    } catch {
-      return { en: raw, ar: "" };
-    }
-  }
-  return { en: "", ar: "" };
+  return parseLocalizedText(raw);
 }
 
 // ---------- Row <-> domain mapping ----------
@@ -352,7 +342,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     lastError: "", lastId: "", lastAction: "—",
   });
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
       const [l, v, f, a] = await Promise.all([
         supabase.from("lessons").select("*").order("created_at", { ascending: false }),
@@ -379,9 +369,9 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => { void refresh(); }, [refresh]);
 
   async function run<T>(table: string, action: string, fn: () => Promise<{ data: T | null; error: { message: string } | null }>): Promise<T> {
     const { data, error } = await fn();

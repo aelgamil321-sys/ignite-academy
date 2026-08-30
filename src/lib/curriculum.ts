@@ -1,6 +1,8 @@
 import type { VocabularyItem } from "./lesson-vocab";
+import type { LessonLang } from "./lesson-localized";
 
-export type Bi = { en: string; ar: string };
+/** Bilingual + optional extended lesson locales in JSONB. */
+export type Bi = { en: string; ar: string } & Partial<Record<Exclude<LessonLang, "en" | "ar">, string>>;
 export type { VocabularyItem } from "./lesson-vocab";
 
 export type QuizQuestionType = "multiple_choice" | "true_false" | "essay";
