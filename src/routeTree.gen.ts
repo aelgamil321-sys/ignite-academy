@@ -83,6 +83,7 @@ import { Route as TeacherResourcesNewRouteImport } from './routes/teacher/resour
 import { Route as TeacherLessonsNewRouteImport } from './routes/teacher/lessons.new'
 import { Route as TeacherArticlesNewRouteImport } from './routes/teacher/articles.new'
 import { Route as TeacherAnnouncementsNewRouteImport } from './routes/teacher/announcements.new'
+import { Route as TeacherAnnouncementsSlugRouteImport } from './routes/teacher/announcements.$slug'
 import { Route as ParentGuidesSlugRouteImport } from './routes/parent.guides.$slug'
 import { Route as ParentAnnouncementsSlugRouteImport } from './routes/parent.announcements.$slug'
 import { Route as GradesGradeLessonRouteImport } from './routes/grades.$grade.$lesson'
@@ -503,6 +504,12 @@ const TeacherAnnouncementsNewRoute = TeacherAnnouncementsNewRouteImport.update({
   path: '/announcements/new',
   getParentRoute: () => TeacherRouteRoute,
 } as any)
+const TeacherAnnouncementsSlugRoute =
+  TeacherAnnouncementsSlugRouteImport.update({
+    id: '/announcements/$slug',
+    path: '/announcements/$slug',
+    getParentRoute: () => TeacherRouteRoute,
+  } as any)
 const ParentGuidesSlugRoute = ParentGuidesSlugRouteImport.update({
   id: '/parent/guides/$slug',
   path: '/parent/guides/$slug',
@@ -780,6 +787,7 @@ export interface FileRoutesByFullPath {
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
   '/parent/announcements/$slug': typeof ParentAnnouncementsSlugRoute
   '/parent/guides/$slug': typeof ParentGuidesSlugRoute
+  '/teacher/announcements/$slug': typeof TeacherAnnouncementsSlugRoute
   '/teacher/announcements/new': typeof TeacherAnnouncementsNewRoute
   '/teacher/articles/new': typeof TeacherArticlesNewRoute
   '/teacher/lessons/new': typeof TeacherLessonsNewRoute
@@ -893,6 +901,7 @@ export interface FileRoutesByTo {
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
   '/parent/announcements/$slug': typeof ParentAnnouncementsSlugRoute
   '/parent/guides/$slug': typeof ParentGuidesSlugRoute
+  '/teacher/announcements/$slug': typeof TeacherAnnouncementsSlugRoute
   '/teacher/announcements/new': typeof TeacherAnnouncementsNewRoute
   '/teacher/articles/new': typeof TeacherArticlesNewRoute
   '/teacher/lessons/new': typeof TeacherLessonsNewRoute
@@ -1010,6 +1019,7 @@ export interface FileRoutesById {
   '/grades/$grade/$lesson': typeof GradesGradeLessonRoute
   '/parent/announcements/$slug': typeof ParentAnnouncementsSlugRoute
   '/parent/guides/$slug': typeof ParentGuidesSlugRoute
+  '/teacher/announcements/$slug': typeof TeacherAnnouncementsSlugRoute
   '/teacher/announcements/new': typeof TeacherAnnouncementsNewRoute
   '/teacher/articles/new': typeof TeacherArticlesNewRoute
   '/teacher/lessons/new': typeof TeacherLessonsNewRoute
@@ -1129,6 +1139,7 @@ export interface FileRouteTypes {
     | '/grades/$grade/$lesson'
     | '/parent/announcements/$slug'
     | '/parent/guides/$slug'
+    | '/teacher/announcements/$slug'
     | '/teacher/announcements/new'
     | '/teacher/articles/new'
     | '/teacher/lessons/new'
@@ -1242,6 +1253,7 @@ export interface FileRouteTypes {
     | '/grades/$grade/$lesson'
     | '/parent/announcements/$slug'
     | '/parent/guides/$slug'
+    | '/teacher/announcements/$slug'
     | '/teacher/announcements/new'
     | '/teacher/articles/new'
     | '/teacher/lessons/new'
@@ -1358,6 +1370,7 @@ export interface FileRouteTypes {
     | '/grades/$grade/$lesson'
     | '/parent/announcements/$slug'
     | '/parent/guides/$slug'
+    | '/teacher/announcements/$slug'
     | '/teacher/announcements/new'
     | '/teacher/articles/new'
     | '/teacher/lessons/new'
@@ -1987,6 +2000,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherAnnouncementsNewRouteImport
       parentRoute: typeof TeacherRouteRoute
     }
+    '/teacher/announcements/$slug': {
+      id: '/teacher/announcements/$slug'
+      path: '/announcements/$slug'
+      fullPath: '/teacher/announcements/$slug'
+      preLoaderRoute: typeof TeacherAnnouncementsSlugRouteImport
+      parentRoute: typeof TeacherRouteRoute
+    }
     '/parent/guides/$slug': {
       id: '/parent/guides/$slug'
       path: '/parent/guides/$slug'
@@ -2401,6 +2421,7 @@ const TeacherWeeklyPlanningPlanIdRouteWithChildren =
 interface TeacherRouteRouteChildren {
   TeacherLeadRouteRoute: typeof TeacherLeadRouteRouteWithChildren
   TeacherIndexRoute: typeof TeacherIndexRoute
+  TeacherAnnouncementsSlugRoute: typeof TeacherAnnouncementsSlugRoute
   TeacherAnnouncementsNewRoute: typeof TeacherAnnouncementsNewRoute
   TeacherArticlesNewRoute: typeof TeacherArticlesNewRoute
   TeacherLessonsNewRoute: typeof TeacherLessonsNewRoute
@@ -2438,6 +2459,7 @@ interface TeacherRouteRouteChildren {
 const TeacherRouteRouteChildren: TeacherRouteRouteChildren = {
   TeacherLeadRouteRoute: TeacherLeadRouteRouteWithChildren,
   TeacherIndexRoute: TeacherIndexRoute,
+  TeacherAnnouncementsSlugRoute: TeacherAnnouncementsSlugRoute,
   TeacherAnnouncementsNewRoute: TeacherAnnouncementsNewRoute,
   TeacherArticlesNewRoute: TeacherArticlesNewRoute,
   TeacherLessonsNewRoute: TeacherLessonsNewRoute,

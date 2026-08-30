@@ -1304,6 +1304,10 @@ export const t = {
     en: "You have not created any announcements yet.",
     ar: "لم تنشئ أي إعلانات بعد.",
   },
+  teacher_workspace_back_dashboard: {
+    en: "Back to dashboard",
+    ar: "العودة إلى لوحة التحكم",
+  },
   teacher_dash_activity_empty: {
     en: "No recent activity to show.",
     ar: "لا يوجد نشاط حديث لعرضه",

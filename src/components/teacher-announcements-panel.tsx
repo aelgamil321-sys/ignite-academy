@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Loader2, Megaphone, Plus } from "lucide-react";
+import { Eye, Loader2, Megaphone, Plus } from "lucide-react";
 import { TeacherDashboardSection } from "@/components/teacher-dashboard-section";
 import {
   fetchTeacherIncomingAnnouncements,
@@ -173,6 +173,16 @@ export function TeacherAnnouncementsPanel({ teacherUserId }: TeacherAnnouncement
               {tab === "mine" && targetingSummary(announcement) ? (
                 <p className="mt-2 text-[11px] text-muted-foreground">{targetingSummary(announcement)}</p>
               ) : null}
+              <div className="mt-3">
+                <Link
+                  to="/teacher/announcements/$slug"
+                  params={{ slug: announcement.id }}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:border-primary hover:text-primary"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  {tr("admin_content_view_announcement")}
+                </Link>
+              </div>
             </li>
           ))}
         </ul>
@@ -180,10 +190,10 @@ export function TeacherAnnouncementsPanel({ teacherUserId }: TeacherAnnouncement
 
       <div className="mt-4 flex flex-wrap gap-3">
         <Link
-          to="/teacher/announcements"
+          to="/teacher"
           className="text-sm font-semibold text-primary hover:underline"
         >
-          {tr("view_all")}
+          {tr("ann_view_all")}
         </Link>
       </div>
     </TeacherDashboardSection>

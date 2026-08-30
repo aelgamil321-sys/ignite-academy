@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { Eye, EyeOff, Loader2, Trash2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -44,16 +45,28 @@ function CmsItemRow({
   published,
   onPublish,
   onDelete,
+  viewSlug,
 }: {
   children: React.ReactNode;
   published: boolean;
   onPublish: () => void;
   onDelete: () => void;
+  viewSlug?: string;
 }) {
   const { tr } = useI18n();
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
       <div className="flex-1 min-w-0">{children}</div>
+      {viewSlug ? (
+        <Link
+          to="/teacher/announcements/$slug"
+          params={{ slug: viewSlug }}
+          className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
+        >
+          <Eye className="h-3.5 w-3.5" />
+          {tr("admin_content_view_announcement")}
+        </Link>
+      ) : null}
       <button
         type="button"
         onClick={onPublish}
@@ -627,6 +640,9 @@ export function TeacherArticlesManager({
             <CmsItemRow
               key={a.id}
               published={a.published}
+              viewSlug={
+                categoryFilter === "announcement" && a.published ? a.id : undefined
+              }
               onPublish={() => void updateArticle(a.id, { published: !a.published })}
               onDelete={() => {
                 void deleteArticle(a.id).then(() => toast.success(tr("teacher_deleted")));

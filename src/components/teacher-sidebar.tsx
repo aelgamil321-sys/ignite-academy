@@ -146,7 +146,7 @@ const ACADEMIC: NavItem[] = [
     to: "/teacher/announcements",
     icon: Megaphone,
     labelKey: "teacher_nav_manage_announcements",
-    activeMatch: (p) => p.startsWith("/teacher/announcements") && p !== "/teacher/announcements/new",
+    activeMatch: (p) => p === "/teacher/announcements" || p === "/teacher/announcements/",
   },
   { to: "/teacher/timetable", icon: Plus, labelKey: "teacher_nav_add_timetable" },
   {

@@ -194,7 +194,7 @@ export async function fetchTeacherActivityFeed(
         ? pickBi({ en: "Announcement published", ar: "إعلان منشور" }, lang)
         : pickBi({ en: "Announcement draft", ar: "مسودة إعلان" }, lang),
       timestamp: article.updated_at ?? article.created_at,
-      href: "/teacher/announcements",
+      href: article.published ? `/teacher/announcements/${article.id}` : "/teacher/announcements",
       sortAt: parseTimestamp(article.updated_at ?? article.created_at),
     });
   }
