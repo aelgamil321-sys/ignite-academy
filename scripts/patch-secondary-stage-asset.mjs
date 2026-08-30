@@ -27,7 +27,7 @@ const assetFetchPatch = `if (env.ASSETS) {
 export function patchSecondaryStageAsset() {
   const publicDir = path.join("public", "images");
   const outputPublicDir = path.join(".output", "public", "images");
-  const indexPath = path.join(".output", "server", "index.mjs");
+  const indexPath = path.join("dist", "server", "index.mjs");
   const sourcePath = path.join(publicDir, unicodeFilename);
   const asciiSourcePath = path.join(publicDir, asciiFilename);
 

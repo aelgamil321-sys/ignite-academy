@@ -1,14 +1,17 @@
 /**
- * Sync Nitro client assets into dist/client for Wrangler ASSETS binding.
- * Vite/Nitro writes static files to .output/public; wrangler.jsonc serves dist/client.
+ * Sync Nitro build output into dist/ for Wrangler.
+ * - .output/public -> dist/client (ASSETS binding)
+ * - .output/server -> dist/server (Worker entry), rewriting ../public/ -> ../client/
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const sourceDir = path.join(root, ".output", "public");
-const targetDir = path.join(root, "dist", "client");
+const publicSource = path.join(root, ".output", "public");
+const serverSource = path.join(root, ".output", "server");
+const clientTarget = path.join(root, "dist", "client");
+const serverTarget = path.join(root, "dist", "server");
 
 function copyRecursive(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
@@ -23,19 +26,45 @@ function copyRecursive(src, dest) {
   }
 }
 
-if (!fs.existsSync(sourceDir)) {
-  console.error("[sync-dist-client] Missing build output:", sourceDir);
+function rewriteServerPublicPaths(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      rewriteServerPublicPaths(entryPath);
+      continue;
+    }
+    if (!entry.name.endsWith(".mjs")) continue;
+    const content = fs.readFileSync(entryPath, "utf8");
+    const next = content.replaceAll("../public/", "../client/");
+    if (next !== content) {
+      fs.writeFileSync(entryPath, next);
+    }
+  }
+}
+
+if (!fs.existsSync(publicSource)) {
+  console.error("[sync-dist-client] Missing build output:", publicSource);
   process.exit(1);
 }
 
-if (fs.existsSync(targetDir)) {
-  fs.rmSync(targetDir, { recursive: true, force: true });
+if (!fs.existsSync(serverSource)) {
+  console.error("[sync-dist-client] Missing build output:", serverSource);
+  process.exit(1);
 }
 
-copyRecursive(sourceDir, targetDir);
+if (fs.existsSync(clientTarget)) {
+  fs.rmSync(clientTarget, { recursive: true, force: true });
+}
+if (fs.existsSync(serverTarget)) {
+  fs.rmSync(serverTarget, { recursive: true, force: true });
+}
 
-const assetCount = fs.existsSync(path.join(targetDir, "assets"))
-  ? fs.readdirSync(path.join(targetDir, "assets")).length
+copyRecursive(publicSource, clientTarget);
+copyRecursive(serverSource, serverTarget);
+rewriteServerPublicPaths(serverTarget);
+
+const assetCount = fs.existsSync(path.join(clientTarget, "assets"))
+  ? fs.readdirSync(path.join(clientTarget, "assets")).length
   : 0;
 
 if (assetCount === 0) {
@@ -43,4 +72,4 @@ if (assetCount === 0) {
   process.exit(1);
 }
 
-console.log(`[sync-dist-client] Synced ${assetCount} files to dist/client/assets`);
+console.log(`[sync-dist-client] Synced ${assetCount} client assets and dist/server bundle`);
