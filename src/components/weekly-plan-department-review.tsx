@@ -7,6 +7,7 @@ import { WeeklyPlanDocumentActions } from "@/components/weekly-plan-document-act
 import { supabase } from "@/integrations/supabase/client";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { useI18n } from "@/lib/i18n";
+import { fetchTeacherDisplayName, resolveTeacherDisplayName } from "@/lib/teacher-identity";
 import {
   fetchWeeklyPlanById,
   formatWeeklyPlanSectionCodes,
@@ -36,10 +37,14 @@ export function WeeklyPlanDepartmentReview({
         if (row) {
           const { data } = await supabase
             .from("profiles")
-            .select("full_name, email")
+            .select("full_name, english_name, arabic_name, email")
             .eq("user_id", row.teacher_id)
             .maybeSingle();
-          setTeacherName(data?.full_name || data?.email || row.teacher_id);
+          let name = resolveTeacherDisplayName(row.teacher_id, data ?? {});
+          if (name === "—") {
+            name = await fetchTeacherDisplayName(row.teacher_id);
+          }
+          setTeacherName(name);
         }
       } catch (e) {
         toast.error(e instanceof Error ? e.message : String(e));

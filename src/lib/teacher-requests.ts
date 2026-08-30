@@ -39,7 +39,7 @@ export async function fetchPendingTeacherRequests(): Promise<TeacherRequestRow[]
 export async function approveTeacherRequest(requestId: string): Promise<void> {
   const { data: request, error: fetchError } = await supabase
     .from("teacher_requests")
-    .select("user_id, status")
+    .select("user_id, status, full_name, email")
     .eq("id", requestId)
     .maybeSingle();
 
@@ -66,6 +66,11 @@ export async function approveTeacherRequest(requestId: string): Promise<void> {
     });
     if (profileError) throw profileError;
   }
+
+  const { error: identityError } = await supabase.rpc("sync_teacher_profile_identity", {
+    p_user_id: request.user_id,
+  });
+  if (identityError) throw identityError;
 
   const { data: authData } = await supabase.auth.getUser();
   const { error: updateError } = await supabase

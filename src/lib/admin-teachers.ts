@@ -1,6 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
+import {
+  fetchTeacherDisplayNames,
+  resolveTeacherDisplayName,
+  type TeacherIdentitySource,
+} from "@/lib/teacher-identity";
 
 export type TeacherAssignmentRow = {
   id: string;
@@ -34,42 +39,47 @@ export type TeacherAssignmentInput = {
 
 function displayName(
   userId: string,
-  profileMap: Map<string, { full_name: string; email: string }>,
+  profileMap: Map<string, TeacherIdentitySource & { email: string }>,
   parentMap: Map<string, { full_name: string; email: string }>,
   teacherRequestMap: Map<string, { full_name: string; email: string }>,
+  rpcNameMap: Record<string, string>,
 ): { fullName: string; email: string } {
   const profile = profileMap.get(userId);
   if (profile) {
     return {
-      fullName: profile.full_name || profile.email || userId,
+      fullName: resolveTeacherDisplayName(userId, profile, rpcNameMap[userId]),
       email: profile.email,
     };
   }
   const parent = parentMap.get(userId);
   if (parent) {
     return {
-      fullName: parent.full_name || parent.email || userId,
+      fullName: resolveTeacherDisplayName(userId, parent, rpcNameMap[userId]),
       email: parent.email,
     };
   }
   const request = teacherRequestMap.get(userId);
   if (request) {
     return {
-      fullName: request.full_name || request.email || userId,
+      fullName: resolveTeacherDisplayName(userId, request, rpcNameMap[userId]),
       email: request.email,
     };
   }
-  return { fullName: userId, email: "" };
+  return {
+    fullName: resolveTeacherDisplayName(userId, {}, rpcNameMap[userId]),
+    email: "",
+  };
 }
 
 export async function fetchAdminTeachers(): Promise<AdminTeacherRow[]> {
-  const [rolesRes, assignmentsRes, profilesRes, parentProfilesRes, teacherRequestsRes] = await Promise.all([
-    supabase.from("user_roles").select("user_id, role"),
-    supabase.from("teacher_assignments").select("*").order("grade").order("section"),
-    supabase.from("profiles").select("user_id, full_name, email"),
-    supabase.from("parent_profiles").select("user_id, full_name, email"),
-    supabase.from("teacher_requests").select("user_id, full_name, email"),
-  ]);
+  const [rolesRes, assignmentsRes, profilesRes, parentProfilesRes, teacherRequestsRes] =
+    await Promise.all([
+      supabase.from("user_roles").select("user_id, role"),
+      supabase.from("teacher_assignments").select("*").order("grade").order("section"),
+      supabase.from("profiles").select("user_id, full_name, english_name, arabic_name, email"),
+      supabase.from("parent_profiles").select("user_id, full_name, email"),
+      supabase.from("teacher_requests").select("user_id, full_name, email"),
+    ]);
 
   if (rolesRes.error) throw rolesRes.error;
   if (assignmentsRes.error) throw assignmentsRes.error;
@@ -91,6 +101,14 @@ export async function fetchAdminTeachers(): Promise<AdminTeacherRow[]> {
     (teacherRequestsRes.data ?? []).map((row) => [row.user_id, row]),
   );
 
+  const needsRpc = teacherIds.filter((userId) => {
+    const profile = profileMap.get(userId);
+    const request = teacherRequestMap.get(userId);
+    const resolved = resolveTeacherDisplayName(userId, profile ?? request ?? {});
+    return resolved === "—";
+  });
+  const rpcNameMap = await fetchTeacherDisplayNames(needsRpc);
+
   const assignmentsByTeacher = new Map<string, TeacherAssignmentRow[]>();
   for (const row of assignmentsRes.data ?? []) {
     const list = assignmentsByTeacher.get(row.teacher_id) ?? [];
@@ -100,7 +118,13 @@ export async function fetchAdminTeachers(): Promise<AdminTeacherRow[]> {
 
   return teacherIds.map((userId) => {
     const assignments = assignmentsByTeacher.get(userId) ?? [];
-    const { fullName, email } = displayName(userId, profileMap, parentMap, teacherRequestMap);
+    const { fullName, email } = displayName(
+      userId,
+      profileMap,
+      parentMap,
+      teacherRequestMap,
+      rpcNameMap,
+    );
     return {
       userId,
       fullName,

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { fetchTeacherDisplayName, resolveTeacherDisplayName } from "@/lib/teacher-identity";
 import { grades } from "@/lib/curriculum";
 import { gradeMatches, normalizeGradeSlug } from "@/lib/grade-utils";
 import { fetchStudentProgress } from "@/lib/student-progress";
@@ -164,11 +165,11 @@ export function teacherReportSectionOptions(
 }
 
 export async function fetchTeacherContext(userId: string): Promise<TeacherContext> {
-  const [assignmentsRes, requestRes, teacherProfileRes] = await Promise.all([
+  const [assignmentsRes, profileRes, teacherProfileRes] = await Promise.all([
     supabase.from("teacher_assignments").select("*").eq("teacher_id", userId).order("grade"),
     supabase
-      .from("teacher_requests")
-      .select("full_name, email")
+      .from("profiles")
+      .select("full_name, english_name, arabic_name, email")
       .eq("user_id", userId)
       .maybeSingle(),
     supabase
@@ -194,19 +195,11 @@ export async function fetchTeacherContext(userId: string): Promise<TeacherContex
     ? grades.map((g) => g.slug)
     : [...new Set(assignments.map((a) => normalizeGradeSlug(a.grade) || a.grade))];
 
-  const profileRes = await supabase
-    .from("profiles")
-    .select("full_name, email")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  const fullName =
-    requestRes.data?.full_name ||
-    profileRes.data?.full_name ||
-    requestRes.data?.email ||
-    profileRes.data?.email ||
-    userId;
-  const email = requestRes.data?.email || profileRes.data?.email || "";
+  let fullName = resolveTeacherDisplayName(userId, profileRes.data ?? {});
+  if (fullName === "—") {
+    fullName = await fetchTeacherDisplayName(userId);
+  }
+  const email = profileRes.data?.email || "";
 
   return {
     userId,

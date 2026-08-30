@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { fetchTeacherDisplayName, resolveTeacherDisplayName } from "@/lib/teacher-identity";
 
 export type AdminProfileSummary = {
   userId: string;
@@ -22,14 +23,15 @@ export async function fetchAdminProfileSummary(
 
   const profile = profileRes.data;
   const request = requestRes.data;
-  const fullName =
-    profile?.full_name?.trim() ||
-    profile?.english_name?.trim() ||
-    profile?.arabic_name?.trim() ||
-    request?.full_name?.trim() ||
-    profile?.email ||
-    request?.email ||
-    emailFallback;
+  let fullName = resolveTeacherDisplayName(userId, {
+    full_name: profile?.full_name ?? request?.full_name,
+    english_name: profile?.english_name,
+    arabic_name: profile?.arabic_name,
+    email: profile?.email ?? request?.email ?? emailFallback,
+  });
+  if (fullName === "—") {
+    fullName = (await fetchTeacherDisplayName(userId)) || emailFallback;
+  }
 
   return {
     userId,

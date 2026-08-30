@@ -889,6 +889,18 @@ export type Database = {
         }
         Returns: Json
       }
+      get_teacher_display_names: {
+        Args: {
+          p_user_ids: string[]
+        }
+        Returns: Json
+      }
+      sync_teacher_profile_identity: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       get_hall_of_fame: {
         Args: Record<PropertyKey, never>
         Returns: Json

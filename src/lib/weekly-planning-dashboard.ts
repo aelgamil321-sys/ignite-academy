@@ -390,7 +390,7 @@ export function buildDepartmentWeeklyPlanningSnapshot(
       isSubmitted: true,
       week_number: plan.week_number,
       teacher_id: plan.teacher_id,
-      teacherName: teacher?.fullName ?? plan.teacher_id,
+      teacherName: teacher?.fullName ?? "—",
       grade: plan.grade,
       expectedSections: sections,
       coveredSections: sections,
