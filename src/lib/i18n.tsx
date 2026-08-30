@@ -2021,6 +2021,18 @@ export const t = {
     en: "Password must be at least 8 characters.",
     ar: "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
   },
+  auth_err_invalid_email: {
+    en: "Please enter a valid email address.",
+    ar: "يرجى إدخال بريد إلكتروني صالح.",
+  },
+  auth_err_network: {
+    en: "Network error. Please check your connection and try again.",
+    ar: "خطأ في الشبكة. يرجى التحقق من الاتصال والمحاولة مرة أخرى.",
+  },
+  auth_err_signup_failed: {
+    en: "Registration failed. Please try again.",
+    ar: "تعذّر إنشاء الحساب. يرجى المحاولة مرة أخرى.",
+  },
   auth_err_rate_limit: {
     en: "Too many emails sent. Please wait a few minutes before trying again.",
     ar: "تم إرسال عدد كبير من الرسائل. يرجى الانتظار بضع دقائق قبل المحاولة مرة أخرى.",

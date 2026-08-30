@@ -26,9 +26,9 @@ import { PreferredLanguageField } from "@/components/preferred-language-field";
 import { uploadProfilePhoto } from "@/lib/profile-photo";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 import {
+  classifySignupError,
   clearAuthCallbackUrl,
   isEmailNotConfirmedError,
-  isEmailRateLimitError,
   parseEmailConfirmedParam,
   parseSupabaseAuthHashError,
   signupAuthOptions,
@@ -318,14 +318,21 @@ function AuthPage() {
     }
   }
 
-  function isDuplicateEmailError(err: unknown): boolean {
-    if (err && typeof err === "object" && "code" in err) {
-      return (err as { code?: string }).code === "user_already_exists";
+  function signupErrorMessage(err: unknown): string {
+    switch (classifySignupError(err)) {
+      case "rate_limit":
+        return tr("auth_err_rate_limit");
+      case "duplicate_email":
+        return tr("auth_duplicate_email");
+      case "invalid_email":
+        return tr("auth_err_invalid_email");
+      case "weak_password":
+        return tr("auth_err_password_length");
+      case "network":
+        return tr("auth_err_network");
+      default:
+        return tr("auth_err_signup_failed");
     }
-    if (err instanceof Error) {
-      return err.message.toLowerCase().includes("already registered");
-    }
-    return false;
   }
 
   function showSignupError(message: string, debug?: unknown) {
@@ -703,22 +710,13 @@ function AuthPage() {
 
       window.location.assign(redirectPath);
     } catch (err) {
-      if (formMode === "signup" && isEmailRateLimitError(err)) {
-        showSignupError(tr("auth_err_rate_limit"), err);
-        return;
-      }
-      if (formMode === "signup" && isDuplicateEmailError(err)) {
-        showSignupError(tr("auth_duplicate_email"), err);
-        return;
-      }
       if (formMode === "login" && ENABLE_EMAIL_VERIFICATION && isEmailNotConfirmedError(err)) {
         setEmailNotConfirmedAlert(tr("auth_email_not_confirmed"));
         await supabase.auth.signOut();
         return;
       }
       if (formMode === "signup") {
-        const message = err instanceof Error ? err.message : String(err);
-        showSignupError(message, err);
+        showSignupError(signupErrorMessage(err), err);
         return;
       }
       toast.error(err instanceof Error ? err.message : String(err));

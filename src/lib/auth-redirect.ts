@@ -88,3 +88,55 @@ export function isEmailRateLimitError(err: unknown): boolean {
   }
   return false;
 }
+
+export function isDuplicateEmailError(err: unknown): boolean {
+  if (err && typeof err === "object" && "code" in err) {
+    const code = (err as { code?: string }).code;
+    if (code === "user_already_exists" || code === "email_exists") return true;
+  }
+  if (err instanceof Error) {
+    const msg = err.message.toLowerCase();
+    if (msg.includes("already registered")) return true;
+    if (msg.includes("user already registered")) return true;
+  }
+  return false;
+}
+
+export type SignupErrorKind =
+  | "duplicate_email"
+  | "rate_limit"
+  | "invalid_email"
+  | "weak_password"
+  | "network"
+  | "generic";
+
+export function classifySignupError(err: unknown): SignupErrorKind {
+  if (isEmailRateLimitError(err)) return "rate_limit";
+  if (isDuplicateEmailError(err)) return "duplicate_email";
+
+  if (err && typeof err === "object") {
+    const o = err as { code?: string; message?: string };
+    const code = (o.code ?? "").toLowerCase();
+    const msg = (o.message ?? "").toLowerCase();
+
+    if (code === "invalid_email" || msg.includes("invalid email")) return "invalid_email";
+    if (
+      code === "weak_password" ||
+      msg.includes("password should be") ||
+      msg.includes("password is too weak") ||
+      (msg.includes("password") && msg.includes("at least"))
+    ) {
+      return "weak_password";
+    }
+    if (
+      msg.includes("failed to fetch") ||
+      msg.includes("network") ||
+      msg.includes("networkerror") ||
+      code === "network_error"
+    ) {
+      return "network";
+    }
+  }
+
+  return "generic";
+}

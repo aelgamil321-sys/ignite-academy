@@ -8,12 +8,15 @@ function parseEnvFlag(value: string | undefined, defaultValue: boolean): boolean
 }
 
 /**
- * Email verification is REQUIRED in production builds and cannot be disabled.
- * Local development may opt out with VITE_DISABLE_EMAIL_VERIFICATION=true only.
+ * Client-side email confirmation gate. Defaults to OFF to match school Supabase Auth
+ * (mailer_autoconfirm). Set VITE_ENABLE_EMAIL_VERIFICATION=true to re-enable later
+ * without changing the signup flow.
  */
-const devBypassVerification = parseEnvFlag(import.meta.env.VITE_DISABLE_EMAIL_VERIFICATION, false);
-
-export const ENABLE_EMAIL_VERIFICATION = import.meta.env.PROD ? true : !devBypassVerification;
+export const ENABLE_EMAIL_VERIFICATION = parseEnvFlag(
+  import.meta.env.VITE_ENABLE_EMAIL_VERIFICATION ??
+    import.meta.env.ENABLE_EMAIL_VERIFICATION,
+  false,
+);
 
 export function isEmailVerificationRequired(): boolean {
   return ENABLE_EMAIL_VERIFICATION;
