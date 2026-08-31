@@ -34,9 +34,9 @@ export function TeacherLessonPublishButton({
     setBusy(true);
     try {
       await updateLesson(lesson.id, { published: true });
-      toast.success(tr("teacher_lesson_published_success"));
       setConfirmOpen(false);
       onUpdated?.(true);
+      toast.success(tr("teacher_lesson_published_success"));
     } catch {
       // CMS layer already shows the error toast
     } finally {

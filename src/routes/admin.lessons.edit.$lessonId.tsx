@@ -6,6 +6,7 @@ import { LessonEditForm } from "@/components/lesson-edit-form";
 import { lessonHasSavedAiGeneratedContent } from "@/lib/lesson-ai-saved-content";
 import { bilingualFilesFromLesson } from "@/lib/lesson-bilingual-files";
 import { hasMainLessonFile } from "@/lib/lesson-main-file";
+import { parseLocalizedText } from "@/lib/lesson-localized";
 import { parseVocabFromStorage } from "@/lib/lesson-vocab";
 import { useCMS, type CustomLesson } from "@/lib/cms";
 import { useI18n, L } from "@/lib/i18n";
@@ -14,6 +15,7 @@ import {
   adminContentIsReadOnly,
   useAdminContentActor,
 } from "@/lib/admin-content-ownership";
+import type { Bi } from "@/lib/curriculum";
 
 export const Route = createFileRoute("/admin/lessons/edit/$lessonId")({
   head: () => ({
@@ -25,11 +27,43 @@ export const Route = createFileRoute("/admin/lessons/edit/$lessonId")({
   component: AdminLessonEditPage,
 });
 
+function lessonFromRow(row: Record<string, unknown>): CustomLesson {
+  return {
+    id: String(row.id),
+    grade: String(row.grade ?? ""),
+    unit: parseLocalizedText(row.unit) as Bi,
+    title: parseLocalizedText(row.title) as Bi,
+    outcome: parseLocalizedText(row.outcome) as Bi,
+    explanation: parseLocalizedText(row.explanation) as Bi,
+    vocab: parseVocabFromStorage(row.vocab),
+    youtubeUrl: String(row.youtube_url ?? ""),
+    youtubeArUrl: row.youtube_url_ar ? String(row.youtube_url_ar) : undefined,
+    youtubeEnUrl: row.youtube_url_en ? String(row.youtube_url_en) : undefined,
+    pdfUrl: row.pdf_url ? String(row.pdf_url) : undefined,
+    pdfName: row.pdf_name ? String(row.pdf_name) : undefined,
+    pptUrl: row.ppt_url ? String(row.ppt_url) : undefined,
+    pptName: row.ppt_name ? String(row.ppt_name) : undefined,
+    worksheetUrl: row.worksheet_url ? String(row.worksheet_url) : undefined,
+    worksheetName: row.worksheet_name ? String(row.worksheet_name) : undefined,
+    pptArUrl: row.ppt_ar_url ? String(row.ppt_ar_url) : undefined,
+    pptEnUrl: row.ppt_en_url ? String(row.ppt_en_url) : undefined,
+    worksheetArUrl: row.worksheet_ar_url ? String(row.worksheet_ar_url) : undefined,
+    worksheetEnUrl: row.worksheet_en_url ? String(row.worksheet_en_url) : undefined,
+    pdfArUrl: row.pdf_ar_url ? String(row.pdf_ar_url) : undefined,
+    pdfEnUrl: row.pdf_en_url ? String(row.pdf_en_url) : undefined,
+    quiz: normalizeQuizList(Array.isArray(row.quiz) ? row.quiz : []),
+    subjectCategory: (row.subject_category as CustomLesson["subjectCategory"]) ?? "quran",
+    published: Boolean(row.published),
+    createdAt: new Date(String(row.created_at)).getTime(),
+    createdBy: typeof row.created_by === "string" ? row.created_by : null,
+  };
+}
+
 function AdminLessonEditPage() {
   const navigate = useNavigate();
   const { lessonId } = Route.useParams();
-  const { lang, locale } = useI18n();
-  const { lessons, deletedLessons, loading, refresh } = useCMS();
+  const { lang } = useI18n();
+  const { refresh } = useCMS();
   const actorId = useAdminContentActor();
   const [lesson, setLesson] = useState<CustomLesson | null>(null);
   const [fetching, setFetching] = useState(true);
@@ -38,20 +72,13 @@ function AdminLessonEditPage() {
     void refresh();
   }, [refresh]);
 
+  // Load by lesson ID only — do not resync from CMS lessons[] after publish (matches teacher edit).
   useEffect(() => {
-    const fromCms =
-      lessons.find((l) => l.id === lessonId) ??
-      deletedLessons.find((l) => l.id === lessonId);
-    if (fromCms) {
-      setLesson(fromCms);
-      setFetching(false);
-      return;
-    }
-    if (loading) return;
-
     let active = true;
+    setFetching(true);
+    setLesson(null);
+
     const load = async () => {
-      setFetching(true);
       const { data, error } = await supabase
         .from("lessons")
         .select("*")
@@ -63,46 +90,22 @@ function AdminLessonEditPage() {
         setFetching(false);
         return;
       }
-      const row = data as Record<string, unknown>;
-      setLesson({
-        id: String(row.id),
-        grade: String(row.grade ?? ""),
-        unit: parseBi(row.unit),
-        title: parseBi(row.title),
-        outcome: parseBi(row.outcome),
-        explanation: parseBi(row.explanation),
-        vocab: parseVocabFromStorage(row.vocab),
-        youtubeUrl: String(row.youtube_url ?? ""),
-        youtubeArUrl: row.youtube_url_ar ? String(row.youtube_url_ar) : undefined,
-        youtubeEnUrl: row.youtube_url_en ? String(row.youtube_url_en) : undefined,
-        pdfUrl: row.pdf_url ? String(row.pdf_url) : undefined,
-        pdfName: row.pdf_name ? String(row.pdf_name) : undefined,
-        pptUrl: row.ppt_url ? String(row.ppt_url) : undefined,
-        pptName: row.ppt_name ? String(row.ppt_name) : undefined,
-        worksheetUrl: row.worksheet_url ? String(row.worksheet_url) : undefined,
-        worksheetName: row.worksheet_name ? String(row.worksheet_name) : undefined,
-        pptArUrl: row.ppt_ar_url ? String(row.ppt_ar_url) : undefined,
-        pptEnUrl: row.ppt_en_url ? String(row.ppt_en_url) : undefined,
-        worksheetArUrl: row.worksheet_ar_url ? String(row.worksheet_ar_url) : undefined,
-        worksheetEnUrl: row.worksheet_en_url ? String(row.worksheet_en_url) : undefined,
-        pdfArUrl: row.pdf_ar_url ? String(row.pdf_ar_url) : undefined,
-        pdfEnUrl: row.pdf_en_url ? String(row.pdf_en_url) : undefined,
-        quiz: normalizeQuizList(Array.isArray(row.quiz) ? row.quiz : []),
-        subjectCategory: (row.subject_category as CustomLesson["subjectCategory"]) ?? "quran",
-        published: Boolean(row.published),
-        createdAt: new Date(String(row.created_at)).getTime(),
-        createdBy: typeof row.created_by === "string" ? row.created_by : null,
-      });
+      setLesson(lessonFromRow(data as Record<string, unknown>));
       setFetching(false);
     };
+
     void load();
     return () => {
       active = false;
     };
-  }, [lessonId, lessons, deletedLessons, loading]);
+  }, [lessonId]);
 
   const backToManage = () => {
     navigate({ to: "/admin/lessons" });
+  };
+
+  const handlePublishChange = (nextPublished: boolean) => {
+    setLesson((current) => (current ? { ...current, published: nextPublished } : current));
   };
 
   return (
@@ -115,7 +118,7 @@ function AdminLessonEditPage() {
         {L("Back to Manage Lessons", "العودة إلى إدارة الدروس")[lang]}
       </Link>
 
-      {!lesson && (fetching || loading) ? (
+      {fetching ? (
         <div className="text-sm text-muted-foreground">
           {L("Loading lesson…", "جارٍ تحميل الدرس…")[lang]}
         </div>
@@ -134,6 +137,7 @@ function AdminLessonEditPage() {
               : "full"
           }
           readOnly={adminContentIsReadOnly("lesson", lesson.createdBy, actorId)}
+          onPublishChange={handlePublishChange}
           onSaved={() => {
             void refresh();
             backToManage();
@@ -143,12 +147,4 @@ function AdminLessonEditPage() {
       )}
     </div>
   );
-}
-
-function parseBi(raw: unknown): { en: string; ar: string } {
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    const o = raw as Record<string, unknown>;
-    return { en: String(o.en ?? ""), ar: String(o.ar ?? "") };
-  }
-  return { en: "", ar: "" };
 }

@@ -48,6 +48,7 @@ export function LessonEditForm({
   lesson,
   onSaved,
   onCancel,
+  onPublishChange,
   allowedGrades,
   readOnly = false,
   formMode = "full",
@@ -55,6 +56,8 @@ export function LessonEditForm({
   lesson: CustomLesson;
   onSaved: () => void;
   onCancel: () => void;
+  /** Optional parent sync after publish/unpublish without reloading lesson row. */
+  onPublishChange?: (published: boolean) => void;
   allowedGrades?: string[];
   readOnly?: boolean;
   /** Teacher workflow: compact core fields + collapsed advanced section. */
@@ -90,6 +93,10 @@ export function LessonEditForm({
   const quizLessonId = useRef<string | null>(null);
 
   useEffect(() => {
+    setPub(lesson.published);
+  }, [lesson.id, lesson.published]);
+
+  useEffect(() => {
     setGrade(lesson.grade);
     setUnitEn(lesson.unit.en);
     setUnitAr(lesson.unit.ar);
@@ -110,8 +117,7 @@ export function LessonEditForm({
     setYtEn(
       (lesson.youtubeEnUrl ?? "").trim() || (!(lesson.youtubeArUrl ?? "").trim() ? (lesson.youtubeUrl ?? "").trim() : ""),
     );
-    setPub(lesson.published);
-  }, [lesson]);
+  }, [lesson.id]);
 
   useEffect(() => {
     if (bilingualLessonId.current === lesson.id) return;
@@ -497,7 +503,10 @@ export function LessonEditForm({
                   <TeacherLessonPublishButton
                     lesson={lesson}
                     published={pub}
-                    onUpdated={(next) => setPub(next)}
+                    onUpdated={(next) => {
+                      setPub(next);
+                      onPublishChange?.(next);
+                    }}
                   />
                 ) : null}
                 <button
