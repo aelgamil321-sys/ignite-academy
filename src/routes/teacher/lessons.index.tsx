@@ -7,6 +7,8 @@ import { useI18n } from "@/lib/i18n";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { fetchTeacherContext } from "@/lib/teacher-dashboard";
 import { TeacherDeleteLessonButton } from "@/components/teacher-delete-lesson-button";
+import { TeacherLessonPublishButton } from "@/components/teacher-lesson-publish-button";
+import { TeacherLessonStatusBadge } from "@/components/teacher-lesson-status-badge";
 
 export const Route = createFileRoute("/teacher/lessons/")({
   component: TeacherLessonsPage,
@@ -69,13 +71,21 @@ function TeacherLessonsPage() {
               className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
             >
               <div className="min-w-0">
-                <div className="font-medium text-foreground">{bi(lesson.title)}</div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="font-medium text-foreground">{bi(lesson.title)}</div>
+                  <TeacherLessonStatusBadge published={lesson.published} />
+                </div>
                 <div className="text-xs text-muted-foreground">
                   {lesson.grade} · {bi(lesson.unit) || "—"}
-                  {!lesson.published ? ` · ${tr("teacher_draft")}` : ""}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <TeacherLessonPublishButton
+                  lesson={lesson}
+                  published={lesson.published}
+                  compact
+                  onUpdated={() => void refresh()}
+                />
                 <Link
                   to="/teacher/lessons/edit/$lessonId"
                   params={{ lessonId: lesson.id }}

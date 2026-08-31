@@ -18,6 +18,7 @@
     "auth:disable-email-verification": "node scripts/configure-auth-email-verification.mjs disable",
     "auth:enable-email-verification": "node scripts/configure-auth-email-verification.mjs enable",
     "qa:student-registration": "node scripts/qa-student-registration-readiness.mjs",
+    "qa:teacher-lesson-publish": "node scripts/qa-teacher-lesson-publish.mjs",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

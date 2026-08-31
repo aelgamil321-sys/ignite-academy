@@ -1787,6 +1787,20 @@ export const t = {
   teacher_upload_resource: { en: "Upload resource", ar: "رفع مورد" },
   teacher_published: { en: "Published", ar: "منشور" },
   teacher_publish: { en: "Publish", ar: "نشر" },
+  teacher_publish_to_students: { en: "Publish to Students", ar: "نشر للطلاب" },
+  teacher_unpublish: { en: "Unpublish", ar: "إلغاء النشر" },
+  teacher_publish_lesson_confirm: {
+    en: "Do you want to publish this lesson to students?",
+    ar: "هل تريد نشر هذا الدرس للطلاب؟",
+  },
+  teacher_lesson_published_success: {
+    en: "Lesson published to students successfully.",
+    ar: "تم نشر الدرس للطلاب بنجاح",
+  },
+  teacher_lesson_unpublished_success: {
+    en: "Lesson unpublished. Students can no longer see it.",
+    ar: "تم إلغاء نشر الدرس. لم يعد الطلاب يرون الدرس.",
+  },
   teacher_save: { en: "Save", ar: "حفظ" },
   teacher_deleted: { en: "Deleted.", ar: "تم الحذف." },
   teacher_video_required: {

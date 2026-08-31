@@ -11,6 +11,8 @@ import { LessonQuizBuilder } from "@/components/lesson-quiz-builder";
 import { LessonVocabBuilder } from "@/components/lesson-vocab-builder";
 import { LessonAiGeneratePanel, type LessonAiGeneratedPayload } from "@/components/lesson-ai-generate-panel";
 import { LessonAiTranslationButton } from "@/components/lesson-ai-translation-button";
+import { TeacherLessonPublishButton } from "@/components/teacher-lesson-publish-button";
+import { TeacherLessonStatusBadge } from "@/components/teacher-lesson-status-badge";
 import type { VocabularyItem } from "@/lib/lesson-vocab";
 import {
   bilingualFilesFromLesson,
@@ -358,7 +360,10 @@ export function LessonEditForm({
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-[var(--shadow-soft)] space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-xl sm:text-2xl text-foreground">{pageTitle}</h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="font-display text-xl sm:text-2xl text-foreground">{pageTitle}</h2>
+          {simplified ? <TeacherLessonStatusBadge published={pub} /> : null}
+        </div>
         <button
           type="button"
           onClick={onCancel}
@@ -483,23 +488,32 @@ export function LessonEditForm({
               ) : (
                 <p className="text-xs text-muted-foreground">
                   {pub
-                    ? L("This lesson is published. Unpublish from Advanced editing.", "هذا الدرس منشور. يمكنك إلغاء النشر من التحرير المتقدم.")
+                    ? L("Students can see this lesson while it is published.", "يمكن للطلاب رؤية هذا الدرس طالما أنه منشور.")
                     : L("Saving keeps this lesson as a draft.", "الحفظ يبقي الدرس كمسودة.")[lang]}
                 </p>
               )}
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => { void submit(); }}
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                <Save className="h-4 w-4" />
-                {saving
-                  ? L("Saving…", "جارٍ الحفظ…")[lang]
-                  : simplified && !pub
-                    ? L("Save Draft", "حفظ كمسودة")[lang]
-                    : L("Save Changes", "حفظ التغييرات")[lang]}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                {simplified ? (
+                  <TeacherLessonPublishButton
+                    lesson={lesson}
+                    published={pub}
+                    onUpdated={(next) => setPub(next)}
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => { void submit(); }}
+                  className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors shadow-[var(--shadow-soft)] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <Save className="h-4 w-4" />
+                  {saving
+                    ? L("Saving…", "جارٍ الحفظ…")[lang]
+                    : simplified && !pub
+                      ? L("Save Draft", "حفظ كمسودة")[lang]
+                      : L("Save Changes", "حفظ التغييرات")[lang]}
+                </button>
+              </div>
             </>
           ) : (
             <button
