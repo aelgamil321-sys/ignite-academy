@@ -175,14 +175,16 @@ if (url && key) {
 }
 
 const adminEdit = readFileSync(join(root, "src/routes/admin.lessons.edit.$lessonId.tsx"), "utf8");
+const lessonEditController = readFileSync(join(root, "src/hooks/use-lesson-edit-controller.ts"), "utf8");
 assert.doesNotMatch(
   adminEdit,
   /lessons\.find\(\(l\) => l\.id === lessonId\)/,
   "admin edit must not resync lesson from CMS lessons array after publish",
 );
+assert.match(adminEdit, /useLessonEditController/);
 assert.match(adminEdit, /onPublishChange=\{handlePublishChange\}/);
-assert.match(adminEdit, /normalizeLessonForEditForm/);
-assert.match(adminEdit, /\[lessonId\]/);
+assert.match(lessonEditController, /handlePublishChange/);
+assert.match(lessonEditController, /\[lessonId, retryKey/);
 assert.doesNotMatch(adminEdit, /\[lessonId, lessons/);
 
 const lessonEditForm = readFileSync(join(root, "src/components/lesson-edit-form.tsx"), "utf8");

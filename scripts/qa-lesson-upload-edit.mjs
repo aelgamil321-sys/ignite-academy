@@ -171,9 +171,19 @@ assert.equal(multilingual.title.fr, "FR");
 assert.equal(multilingual.title.zh, "ZH");
 
 const editRouteTs = readFileSync(join(root, "src/routes/teacher.lessons.edit.$lessonId.tsx"), "utf8");
+const lessonEditRowTs = readFileSync(join(root, "src/lib/lesson-edit-row.ts"), "utf8");
+const lessonEditControllerTs = readFileSync(join(root, "src/hooks/use-lesson-edit-controller.ts"), "utf8");
 assert.ok(
-  /return parseLocalizedText\(raw\)/.test(editRouteTs),
-  "teacher edit parseBi must return full localized text",
+  /normalizeLessonForEditForm/.test(lessonEditRowTs),
+  "shared lessonFromRow must normalize via normalizeLessonForEditForm",
+);
+assert.ok(
+  /useLessonEditController/.test(editRouteTs),
+  "teacher edit must use shared lesson edit controller",
+);
+assert.ok(
+  /lessonFromRow/.test(lessonEditControllerTs),
+  "lesson edit controller must load via lessonFromRow",
 );
 assert.ok(
   !/if \(loading\) return/.test(editRouteTs),

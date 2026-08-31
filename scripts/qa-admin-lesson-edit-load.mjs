@@ -244,11 +244,17 @@ if (failures.length) {
 }
 
 const adminEdit = readFileSync(join(root, "src/routes/admin.lessons.edit.$lessonId.tsx"), "utf8");
+const teacherEdit = readFileSync(join(root, "src/routes/teacher.lessons.edit.$lessonId.tsx"), "utf8");
 const lessonEditForm = readFileSync(join(root, "src/components/lesson-edit-form.tsx"), "utf8");
 const lessonEditSafe = readFileSync(join(root, "src/lib/lesson-edit-safe.ts"), "utf8");
+const lessonEditRow = readFileSync(join(root, "src/lib/lesson-edit-row.ts"), "utf8");
+const lessonEditController = readFileSync(join(root, "src/hooks/use-lesson-edit-controller.ts"), "utf8");
 
 assert.doesNotMatch(adminEdit, /lessons\.find\(\(l\) => l\.id === lessonId\)/);
-assert.match(adminEdit, /normalizeLessonForEditForm/);
+assert.match(adminEdit, /useLessonEditController/);
+assert.match(teacherEdit, /useLessonEditController/);
+assert.match(lessonEditRow, /lessonFromRow/);
+assert.match(lessonEditController, /handlePublishChange/);
 assert.match(lessonEditSafe, /normalizeLessonForEditForm/);
 assert.match(lessonEditForm, /biForLessonForm/);
 assert.match(lessonEditForm, /saved AI review bundle hydrate failed/);
