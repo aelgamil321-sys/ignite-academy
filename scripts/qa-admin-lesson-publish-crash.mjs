@@ -181,6 +181,7 @@ assert.doesNotMatch(
   "admin edit must not resync lesson from CMS lessons array after publish",
 );
 assert.match(adminEdit, /onPublishChange=\{handlePublishChange\}/);
+assert.match(adminEdit, /normalizeLessonForEditForm/);
 assert.match(adminEdit, /\[lessonId\]/);
 assert.doesNotMatch(adminEdit, /\[lessonId, lessons/);
 
@@ -188,6 +189,7 @@ const lessonEditForm = readFileSync(join(root, "src/components/lesson-edit-form.
 assert.match(lessonEditForm, /onPublishChange\?:/);
 assert.match(lessonEditForm, /\[lesson\.id, lesson\.published\]/);
 assert.match(lessonEditForm, /\[lesson\.id\]/);
+assert.match(lessonEditForm, /biForLessonForm/);
 
 const publishBtn = readFileSync(join(root, "src/components/teacher-lesson-publish-button.tsx"), "utf8");
 assert.match(publishBtn, /setConfirmOpen\(false\);\s*\n\s*onUpdated\?\.\(true\)/);

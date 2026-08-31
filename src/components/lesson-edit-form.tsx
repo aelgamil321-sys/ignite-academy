@@ -28,6 +28,7 @@ import {
   buildLessonAiReviewBundleFromLesson,
   lessonHasSavedAiGeneratedContent,
 } from "@/lib/lesson-ai-saved-content";
+import { biForLessonForm } from "@/lib/lesson-edit-safe";
 
 function Row({ children }: { children: React.ReactNode }) {
   return <div className="grid gap-4 md:grid-cols-2">{children}</div>;
@@ -67,15 +68,20 @@ export function LessonEditForm({
   const { updateLesson } = useCMS();
   const simplified = formMode === "simplified";
 
+  const unitBi = biForLessonForm(lesson.unit);
+  const titleBi = biForLessonForm(lesson.title);
+  const outcomeBi = biForLessonForm(lesson.outcome);
+  const explanationBi = biForLessonForm(lesson.explanation);
+
   const [grade, setGrade] = useState(lesson.grade);
-  const [unitEn, setUnitEn] = useState(lesson.unit.en);
-  const [unitAr, setUnitAr] = useState(lesson.unit.ar);
-  const [titleEn, setTitleEn] = useState(lesson.title.en);
-  const [titleAr, setTitleAr] = useState(lesson.title.ar);
-  const [outEn, setOutEn] = useState(lesson.outcome.en);
-  const [outAr, setOutAr] = useState(lesson.outcome.ar);
-  const [expEn, setExpEn] = useState(lesson.explanation.en);
-  const [expAr, setExpAr] = useState(lesson.explanation.ar);
+  const [unitEn, setUnitEn] = useState(unitBi.en);
+  const [unitAr, setUnitAr] = useState(unitBi.ar);
+  const [titleEn, setTitleEn] = useState(titleBi.en);
+  const [titleAr, setTitleAr] = useState(titleBi.ar);
+  const [outEn, setOutEn] = useState(outcomeBi.en);
+  const [outAr, setOutAr] = useState(outcomeBi.ar);
+  const [expEn, setExpEn] = useState(explanationBi.en);
+  const [expAr, setExpAr] = useState(explanationBi.ar);
   const [vocab, setVocab] = useState<VocabularyItem[]>(lesson.vocab);
   const [ytAr, setYtAr] = useState((lesson.youtubeArUrl ?? "").trim());
   const [ytEn, setYtEn] = useState(
@@ -91,27 +97,42 @@ export function LessonEditForm({
   const advancedDetailsRef = useRef<HTMLDetailsElement>(null);
   const bilingualLessonId = useRef<string | null>(null);
   const quizLessonId = useRef<string | null>(null);
+  const localizedSnapshotRef = useRef<{
+    title?: Bi;
+    unit?: Bi;
+    outcome?: Bi;
+    explanation?: Bi;
+  }>({
+    title: titleBi,
+    unit: unitBi,
+    outcome: outcomeBi,
+    explanation: explanationBi,
+  });
 
   useEffect(() => {
     setPub(lesson.published);
   }, [lesson.id, lesson.published]);
 
   useEffect(() => {
+    const nextUnit = biForLessonForm(lesson.unit);
+    const nextTitle = biForLessonForm(lesson.title);
+    const nextOutcome = biForLessonForm(lesson.outcome);
+    const nextExplanation = biForLessonForm(lesson.explanation);
     setGrade(lesson.grade);
-    setUnitEn(lesson.unit.en);
-    setUnitAr(lesson.unit.ar);
-    setTitleEn(lesson.title.en);
-    setTitleAr(lesson.title.ar);
-    setOutEn(lesson.outcome.en);
-    setOutAr(lesson.outcome.ar);
-    setExpEn(lesson.explanation.en);
-    setExpAr(lesson.explanation.ar);
+    setUnitEn(nextUnit.en);
+    setUnitAr(nextUnit.ar);
+    setTitleEn(nextTitle.en);
+    setTitleAr(nextTitle.ar);
+    setOutEn(nextOutcome.en);
+    setOutAr(nextOutcome.ar);
+    setExpEn(nextExplanation.en);
+    setExpAr(nextExplanation.ar);
     setVocab(lesson.vocab);
     localizedSnapshotRef.current = {
-      title: parseLocalizedText(lesson.title),
-      unit: parseLocalizedText(lesson.unit),
-      outcome: parseLocalizedText(lesson.outcome),
-      explanation: parseLocalizedText(lesson.explanation),
+      title: nextTitle,
+      unit: nextUnit,
+      outcome: nextOutcome,
+      explanation: nextExplanation,
     };
     setYtAr((lesson.youtubeArUrl ?? "").trim());
     setYtEn(
@@ -160,21 +181,14 @@ export function LessonEditForm({
     hasMainLessonFile(bilingualFiles, lesson);
 
   const savedAiReviewBundle = useMemo(() => {
-    if (!lessonHasSavedAiGeneratedContent(lesson)) return null;
-    return buildLessonAiReviewBundleFromLesson(lesson);
+    try {
+      if (!lessonHasSavedAiGeneratedContent(lesson)) return null;
+      return buildLessonAiReviewBundleFromLesson(lesson);
+    } catch (error) {
+      console.error("[LessonEditForm] saved AI review bundle hydrate failed", error);
+      return null;
+    }
   }, [lesson]);
-
-  const localizedSnapshotRef = useRef<{
-    title?: Bi;
-    unit?: Bi;
-    outcome?: Bi;
-    explanation?: Bi;
-  }>({
-    title: parseLocalizedText(lesson.title),
-    unit: parseLocalizedText(lesson.unit),
-    outcome: parseLocalizedText(lesson.outcome),
-    explanation: parseLocalizedText(lesson.explanation),
-  });
 
   const handleAiGenerated = (payload: LessonAiGeneratedPayload) => {
     const title = parseLocalizedText(payload.title);

@@ -7,6 +7,7 @@ import { lessonHasSavedAiGeneratedContent } from "@/lib/lesson-ai-saved-content"
 import { bilingualFilesFromLesson } from "@/lib/lesson-bilingual-files";
 import { hasMainLessonFile } from "@/lib/lesson-main-file";
 import { parseLocalizedText } from "@/lib/lesson-localized";
+import { normalizeLessonForEditForm } from "@/lib/lesson-edit-safe";
 import { parseVocabFromStorage } from "@/lib/lesson-vocab";
 import { useCMS, type CustomLesson } from "@/lib/cms";
 import { useI18n, L } from "@/lib/i18n";
@@ -90,7 +91,7 @@ function AdminLessonEditPage() {
         setFetching(false);
         return;
       }
-      setLesson(lessonFromRow(data as Record<string, unknown>));
+      setLesson(normalizeLessonForEditForm(lessonFromRow(data as Record<string, unknown>)));
       setFetching(false);
     };
 
