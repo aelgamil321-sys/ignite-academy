@@ -115,9 +115,12 @@ assert.match(
   "uploadLessonFile must validate lessonId before storage upload",
 );
 
-const createTs = readFileSync(join(root, "src/routes/teacher/lessons.new.tsx"), "utf8");
+const createTs = readFileSync(join(root, "src/components/lesson-create-draft-form.tsx"), "utf8");
 assert.match(createTs, /parseLessonUuid\(data\.id\)/, "create flow must validate draft id from insert");
 assert.match(createTs, /uploadLessonFile\(file,\s*safeLessonId\)/, "create upload must pass validated UUID");
+
+const teacherCreateRoute = readFileSync(join(root, "src/routes/teacher/lessons.new.tsx"), "utf8");
+assert.match(teacherCreateRoute, /LessonCreateDraftForm/, "teacher create route must use shared draft form");
 
 // --- Edit init: missing main file must not throw ---
 const emptyFiles = {

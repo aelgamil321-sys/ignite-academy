@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LessonEditForm } from "@/components/lesson-edit-form";
+import { lessonHasSavedAiGeneratedContent } from "@/lib/lesson-ai-saved-content";
+import { bilingualFilesFromLesson } from "@/lib/lesson-bilingual-files";
+import { hasMainLessonFile } from "@/lib/lesson-main-file";
 import { parseVocabFromStorage } from "@/lib/lesson-vocab";
 import { useCMS, type CustomLesson } from "@/lib/cms";
 import { useI18n, L } from "@/lib/i18n";
@@ -124,6 +127,12 @@ function AdminLessonEditPage() {
         <LessonEditForm
           key={lesson.id}
           lesson={lesson}
+          formMode={
+            lessonHasSavedAiGeneratedContent(lesson) ||
+            hasMainLessonFile(bilingualFilesFromLesson(lesson), lesson)
+              ? "simplified"
+              : "full"
+          }
           readOnly={adminContentIsReadOnly("lesson", lesson.createdBy, actorId)}
           onSaved={() => {
             void refresh();
