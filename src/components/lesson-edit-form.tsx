@@ -508,7 +508,7 @@ export function LessonEditForm({
               ) : (
                 <p className="text-xs text-muted-foreground">
                   {pub
-                    ? L("Students can see this lesson while it is published.", "يمكن للطلاب رؤية هذا الدرس طالما أنه منشور.")
+                    ? L("Students can see this lesson while it is published.", "يمكن للطلاب رؤية هذا الدرس طالما أنه منشور.")[lang]
                     : L("Saving keeps this lesson as a draft.", "الحفظ يبقي الدرس كمسودة.")[lang]}
                 </p>
               )}
