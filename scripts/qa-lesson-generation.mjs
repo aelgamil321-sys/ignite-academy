@@ -277,8 +277,35 @@ const translationOutputSchema = z.object({
   ur: translatedLanguageLessonSchema,
   zh: translatedLanguageLessonSchema,
 });
+const translationChunkSchema = z.object({
+  ar: translatedLanguageLessonSchema,
+  fr: translatedLanguageLessonSchema,
+  de: translatedLanguageLessonSchema,
+});
+const translationChunkSchema2 = z.object({
+  ur: translatedLanguageLessonSchema,
+  zh: translatedLanguageLessonSchema,
+});
 const translationFormat = zodTextFormat(translationOutputSchema, "ignite_lesson_translation_output");
+const chunkFormat1 = zodTextFormat(translationChunkSchema, "ignite_lesson_translation_ar_fr_de");
+const chunkFormat2 = zodTextFormat(translationChunkSchema2, "ignite_lesson_translation_ur_zh");
 assert.ok(translationFormat, "translation zodTextFormat must succeed for en source targets");
+assert.ok(chunkFormat1, "translation chunk 1 zodTextFormat must succeed");
+assert.ok(chunkFormat2, "translation chunk 2 zodTextFormat must succeed");
+
+const translateServer = readFileSync(join(root, "src/lib/ai/translate-lesson-content.server.ts"), "utf8");
+const providerServer = readFileSync(join(root, "src/lib/ai/providers/openai-lesson-generation-provider.server.ts"), "utf8");
+const translationTypes = readFileSync(join(root, "src/lib/ai/lesson-translation-types.ts"), "utf8");
+const genTypes = readFileSync(join(root, "src/lib/ai/lesson-generation-types.ts"), "utf8");
+assert.match(translateServer, /translationLangChunks/);
+assert.match(translateServer, /LESSON_AI_TRANSLATION_MAX_OUTPUT_TOKENS/);
+assert.match(translationTypes, /translationLangChunks/);
+assert.match(providerServer, /max_output_tokens/);
+const translationMaxMatch = genTypes.match(/LESSON_AI_TRANSLATION_MAX_OUTPUT_TOKENS = ([\d_]+)/);
+const sourceMaxMatch = genTypes.match(/LESSON_AI_SOURCE_MAX_OUTPUT_TOKENS = ([\d_]+)/);
+const parseTokenConst = (raw) => Number(String(raw).replace(/_/g, ""));
+assert.ok(translationMaxMatch && parseTokenConst(translationMaxMatch[1]) >= 16000);
+assert.ok(sourceMaxMatch && parseTokenConst(sourceMaxMatch[1]) >= 8000);
 
 const secretHits = auditBundleForSecrets();
 assert.equal(secretHits.length, 0, `Possible secret/provider leakage in server bundle: ${secretHits.join(", ")}`);

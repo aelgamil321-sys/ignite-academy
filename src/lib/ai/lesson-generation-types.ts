@@ -7,6 +7,9 @@ import type { LessonAiCostEstimate, LessonAiUsage } from "@/lib/ai/lesson-genera
 export const LESSON_AI_DEFAULT_MODEL = "gpt-5.6-terra";
 export const LESSON_AI_REQUEST_TIMEOUT_MS = 120_000;
 export const LESSON_AI_TRANSIENT_RETRY_DELAY_MS = 1_500;
+/** Structured translation output for one language chunk (ar/fr/de or ur/zh). */
+export const LESSON_AI_TRANSLATION_MAX_OUTPUT_TOKENS = 24_000;
+export const LESSON_AI_SOURCE_MAX_OUTPUT_TOKENS = 12_000;
 
 export const LESSON_AI_MAX_FILE_BYTES = 104_857_600;
 export const LESSON_AI_MAX_EXTRACTED_CHARS = 100_000;

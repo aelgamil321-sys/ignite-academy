@@ -4,6 +4,8 @@ import {
   tfQuestionSchema,
   essayQuestionSchema,
 } from "@/lib/ai/lesson-generation-types";
+import type { LessonLang } from "@/lib/lesson-localized";
+import { LESSON_LANGS } from "@/lib/lesson-localized";
 
 const translatedLanguageLessonSchema = z.object({
   lesson_title: z.string().min(1),
@@ -27,17 +29,36 @@ const translatedLanguageLessonSchema = z.object({
 
 export type TranslatedLanguageLesson = z.infer<typeof translatedLanguageLessonSchema>;
 
-export function buildLessonTranslationOutputSchema(sourceLanguage: "en" | "ar") {
-  const shape: Record<string, z.ZodTypeAny> = {
-    fr: translatedLanguageLessonSchema,
-    de: translatedLanguageLessonSchema,
-    ur: translatedLanguageLessonSchema,
-    zh: translatedLanguageLessonSchema,
-  };
+export function translationTargetLangs(sourceLanguage: "en" | "ar"): LessonLang[] {
+  return LESSON_LANGS.filter((lang) => lang !== sourceLanguage);
+}
+
+/** Two bounded translation chunks — avoids single-call structured output truncation. */
+export function translationLangChunks(sourceLanguage: "en" | "ar"): LessonLang[][] {
   if (sourceLanguage === "en") {
-    shape.ar = translatedLanguageLessonSchema;
-  } else {
-    shape.en = translatedLanguageLessonSchema;
+    return [
+      ["ar", "fr", "de"],
+      ["ur", "zh"],
+    ];
+  }
+  return [
+    ["en", "fr", "de"],
+    ["ur", "zh"],
+  ];
+}
+
+export function buildLessonTranslationOutputSchema(sourceLanguage: "en" | "ar") {
+  return buildPartialLessonTranslationOutputSchema(sourceLanguage, translationTargetLangs(sourceLanguage));
+}
+
+export function buildPartialLessonTranslationOutputSchema(
+  sourceLanguage: "en" | "ar",
+  targetLangs: LessonLang[],
+) {
+  const shape: Record<string, z.ZodTypeAny> = {};
+  for (const lang of targetLangs) {
+    if (lang === sourceLanguage) continue;
+    shape[lang] = translatedLanguageLessonSchema;
   }
   return z.object(shape);
 }

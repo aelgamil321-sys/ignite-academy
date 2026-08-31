@@ -289,6 +289,18 @@ assert.match(reviewSrc, /Vocabulary/);
 assert.match(reviewSrc, /modelAnswer/);
 assert.match(reviewSrc, /isQaFixtureLessonFields/);
 
+const translationTypes = readFileSync(join(root, "src/lib/ai/lesson-translation-types.ts"), "utf8");
+const translateServer = readFileSync(join(root, "src/lib/ai/translate-lesson-content.server.ts"), "utf8");
+const savedContent = readFileSync(join(root, "src/lib/lesson-ai-saved-content.ts"), "utf8");
+const genTypes = readFileSync(join(root, "src/lib/ai/lesson-generation-types.ts"), "utf8");
+assert.match(translationTypes, /translationLangChunks/);
+assert.match(translateServer, /LESSON_AI_TRANSLATION_MAX_OUTPUT_TOKENS/);
+assert.match(translateServer, /buildPartialLessonTranslationOutputSchema/);
+assert.match(savedContent, /reconstructSourceLessonOutput/);
+assert.match(genTypes, /LESSON_AI_TRANSLATION_MAX_OUTPUT_TOKENS = 24_000/);
+assert.match(panelSrc, /reconstructSourceLessonOutput/);
+assert.match(panelSrc, /translationError/);
+
 const editRouteSrc = readFileSync(join(root, "src/routes/teacher.lessons.edit.$lessonId.tsx"), "utf8");
 assert.ok(
   !/return \{ en: localized\.en, ar: localized\.ar \}/.test(editRouteSrc),

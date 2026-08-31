@@ -6,6 +6,8 @@ import {
   LESSON_AI_REQUEST_TIMEOUT_MS,
   LESSON_AI_TRANSIENT_RETRY_DELAY_MS,
   lessonAiOutputSchema,
+  LESSON_AI_TRANSLATION_MAX_OUTPUT_TOKENS,
+  LESSON_AI_SOURCE_MAX_OUTPUT_TOKENS,
 } from "@/lib/ai/lesson-generation-types";
 import { logLessonGenerationProviderDiagnostic } from "@/lib/ai/lesson-generation-logger.server";
 import {
@@ -111,6 +113,7 @@ export class OpenAiLessonGenerationProvider implements LessonGenerationProvider 
         text: {
           format: textFormat,
         },
+        ...(request.maxOutputTokens ? { max_output_tokens: request.maxOutputTokens } : {}),
         metadata: {
           lesson_id: request.lessonId,
           feature: request.feature,
@@ -129,10 +132,16 @@ export class OpenAiLessonGenerationProvider implements LessonGenerationProvider 
         attempt,
         phase: "response_status",
       });
+      const incompleteSuffix =
+        diagnostic.incompleteReason === "max_output_tokens"
+          ? " (output token limit reached)"
+          : diagnostic.incompleteReason
+            ? ` (${diagnostic.incompleteReason})`
+            : "";
       return {
         ok: false,
         errorCode: "provider_error",
-        message: "AI could not complete lesson generation.",
+        message: `AI could not complete structured ${request.feature} output${incompleteSuffix}.`,
         usage,
       };
     }
@@ -228,6 +237,7 @@ export class OpenAiLessonGenerationProvider implements LessonGenerationProvider 
       schema: lessonAiOutputSchema,
       schemaName: "ignite_lesson_generation_output",
       feature: "lesson_generation",
+      maxOutputTokens: LESSON_AI_SOURCE_MAX_OUTPUT_TOKENS,
     });
   }
 }

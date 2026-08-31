@@ -25,6 +25,7 @@ export type StructuredProviderRequest = LessonGenerationProviderRequest & {
   schema: z.ZodTypeAny;
   schemaName: string;
   feature: string;
+  maxOutputTokens?: number;
 };
 
 export type StructuredProviderResult<T> =

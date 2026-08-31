@@ -17,6 +17,7 @@ import {
   LessonAiMultilingualReview,
 } from "@/components/lesson-ai-multilingual-review";
 import type { LessonAiReviewBundle } from "@/lib/lesson-ai-saved-content";
+import { reconstructSourceLessonOutput } from "@/lib/lesson-ai-saved-content";
 
 export type LessonAiGenerationUiStatus =
   | "disabled"
@@ -143,6 +144,7 @@ export function LessonAiGeneratePanel({
 
     if (result.status === "translation_partial") {
       setStatus("translation_partial");
+      setError(result.data.metadata.translationError ?? null);
       toast.warning(
         L("Lesson generated; translation incomplete.", "تم توليد الدرس؛ الترجمة غير مكتملة.")[lang],
       );
@@ -158,6 +160,18 @@ export function LessonAiGeneratePanel({
     );
   };
 
+  const resolveSourceLessonForRetry = (): LessonAiOutput | null => {
+    if (sourceLessonRef.current) return sourceLessonRef.current;
+    if (!reviewBundle) return null;
+    return reconstructSourceLessonOutput({
+      bundle: reviewBundle,
+      lessonTitle,
+      unitNumber,
+      learningOutcome,
+      sourceLanguageHint: sourceLanguage,
+    });
+  };
+
   const runGeneration = async (translateOnly: boolean) => {
     if (inFlightRef.current) return;
     if (!translateOnly && hasSavedOrGeneratedContent && !confirmRegenerate()) return;
@@ -170,7 +184,7 @@ export function LessonAiGeneratePanel({
         toast.error(L("Complete required lesson fields first", "أكمل الحقول المطلوبة أولًا")[lang]);
         return;
       }
-    } else if (!sourceLessonRef.current) {
+    } else if (!resolveSourceLessonForRetry()) {
       toast.error(L("No source lesson available to translate", "لا يوجد درس مصدر للترجمة")[lang]);
       return;
     }
@@ -213,10 +227,11 @@ export function LessonAiGeneratePanel({
       }
 
       setStatus("translating");
+      const sourceLesson = resolveSourceLessonForRetry();
       const result = await callIgniteGenerateLessonFromFile({
         ...basePayload,
         translateOnly: true,
-        sourceLesson: sourceLessonRef.current ?? undefined,
+        sourceLesson: sourceLesson ?? undefined,
       });
       applyResult(result);
     } catch (err) {
@@ -358,7 +373,7 @@ export function LessonAiGeneratePanel({
             onGenerated({ ...next, metadata: metadata ?? undefined });
           }}
           onRetryTranslations={
-            sourceLessonRef.current && !busy && openAiConfigured !== false
+            resolveSourceLessonForRetry() && !busy && openAiConfigured !== false
               ? () => void runGeneration(true)
               : undefined
           }

@@ -116,12 +116,80 @@ function langPresence(obj) {
 // --- Source wiring ---
 const panelSrc = readFileSync(join(root, "src/components/lesson-ai-generate-panel.tsx"), "utf8");
 const formSrc = readFileSync(join(root, "src/components/lesson-edit-form.tsx"), "utf8");
+const translateServer = readFileSync(join(root, "src/lib/ai/translate-lesson-content.server.ts"), "utf8");
 assert.match(panelSrc, /savedReviewBundle/);
 assert.match(formSrc, /savedAiReviewBundle/);
 assert.match(formSrc, /lessonHasSavedAiGeneratedContent/);
 assert.match(panelSrc, /confirmRegenerate/);
 assert.match(panelSrc, /Regenerate with AI/);
+assert.match(panelSrc, /reconstructSourceLessonOutput/);
+assert.match(translateServer, /buildPartialLessonTranslationOutputSchema/);
 assert.ok(!/placeholder=\{showFallbackWarning/.test(panelSrc));
+const savedContentSrc = readFileSync(join(root, "src/lib/lesson-ai-saved-content.ts"), "utf8");
+assert.match(savedContentSrc, /true_false/);
+assert.match(savedContentSrc, /essay/);
+
+function detectLessonSourceLanguage(input) {
+  const sample = [input.lessonTitle, input.learningOutcome, input.unitNumber ?? "", input.extractedText.slice(0, 4000)]
+    .join("\n")
+    .trim();
+  if (!sample) return input.hint ?? "en";
+  const arabicChars = (sample.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g) ?? []).length;
+  const latinChars = (sample.match(/[A-Za-z]/g) ?? []).length;
+  if (arabicChars > 0 && arabicChars >= latinChars * 0.35) return "ar";
+  if (latinChars > 0) return "en";
+  return input.hint ?? "en";
+}
+
+// --- reconstruct source lesson for translation-only retry (no OpenAI) ---
+function reconstructSourceLessonOutput(bundle, lessonTitle, learningOutcome, unitNumber) {
+  const summary = bundle.explanation?.en?.trim() || bundle.explanation?.ar?.trim() || "";
+  if (!summary) return null;
+  const sourceLanguage = detectLessonSourceLanguage({
+    lessonTitle,
+    learningOutcome,
+    unitNumber,
+    extractedText: summary,
+    hint: "en",
+  });
+  const pick = (bi) => (bi?.[sourceLanguage] || bi?.en || bi?.ar || "").trim();
+  return {
+    lesson_summary: pick(bundle.explanation),
+    vocabulary: (bundle.vocab || []).map((item) => ({
+      term: pick(item.word),
+      synonym_or_simple_meaning: pick(item.meaning),
+    })).filter((v) => v.term),
+    quiz: {
+      multiple_choice: (bundle.quiz || [])
+        .filter((q) => q.type === "multiple_choice")
+        .map((q) => ({
+          question: pick(q.q),
+          options: (q.options || []).map((o) => pick(o)),
+          correctAnswer: q.answer ?? 0,
+          explanation: "",
+        })),
+      true_false: [],
+      essay: [],
+    },
+    warnings: [],
+  };
+}
+
+const partialBundle = {
+  explanation: { en: "English summary about wudu and prayer for students.", ar: "" },
+  vocab: [{ word: { en: "Wudu" }, meaning: { en: "Ablution" } }],
+  quiz: [
+    {
+      type: "multiple_choice",
+      q: { en: "What is wudu?" },
+      options: [{ en: "Ablution" }, { en: "Prayer" }, { en: "Fasting" }, { en: "Charity" }],
+      answer: 0,
+    },
+  ],
+};
+const rebuilt = reconstructSourceLessonOutput(partialBundle, "Wudu lesson", "Students learn wudu", "3");
+assert.ok(rebuilt?.lesson_summary?.includes("wudu"));
+assert.equal(rebuilt.quiz.multiple_choice[0].correctAnswer, 0);
 
 // --- Legacy empty lesson must NOT hydrate ---
 const emptyLesson = {
