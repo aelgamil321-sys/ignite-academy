@@ -7,9 +7,12 @@ import { generateLessonFromFile } from "@/lib/ai/generate-lesson-from-file.serve
 import {
   ignitePregenerateLessonTranslations,
   igniteSuggestVocabMeanings,
-  isIgniteAiConfigured,
   isOpenAiConfigured,
 } from "@/lib/ai/ignite-ai.server";
+import {
+  getSupabaseServerEnvStatus,
+  isLessonAiServerEnvConfigured,
+} from "@/lib/config.server";
 
 const translateSchema = z.object({
   texts: z.array(z.string().max(8000)),
@@ -64,10 +67,12 @@ export async function handleIgniteApi(request: Request): Promise<Response> {
     const body = request.method === "POST" ? await request.json().catch(() => ({})) : {};
 
     if (subpath === "/status") {
+      const supabaseStatus = getSupabaseServerEnvStatus();
       return json({
-        serviceAvailable: isIgniteAiConfigured(),
+        serviceAvailable: isLessonAiServerEnvConfigured(),
         openAiConfigured: isOpenAiConfigured(),
         translateApiConfigured: Boolean(process.env.GOOGLE_TRANSLATE_API_KEY),
+        ...supabaseStatus,
       });
     }
 

@@ -24,3 +24,17 @@ export function getServerConfig() {
     hasIgniteAi: Boolean(process.env.OPENAI_API_KEY || process.env.GOOGLE_TRANSLATE_API_KEY),
   };
 }
+
+export function getSupabaseServerEnvStatus() {
+  const supabaseUrl = process.env.SUPABASE_URL?.trim() || process.env.VITE_SUPABASE_URL?.trim() || "";
+  return {
+    supabaseUrlConfigured: Boolean(supabaseUrl),
+    supabaseServiceRoleConfigured: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
+  };
+}
+
+/** Lesson AI requires OpenAI plus server-side Supabase admin credentials. */
+export function isLessonAiServerEnvConfigured(): boolean {
+  const { supabaseUrlConfigured, supabaseServiceRoleConfigured } = getSupabaseServerEnvStatus();
+  return Boolean(process.env.OPENAI_API_KEY?.trim()) && supabaseUrlConfigured && supabaseServiceRoleConfigured;
+}

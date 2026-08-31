@@ -47,12 +47,18 @@ export default {
         return handleTranslateApi(request);
       }
       if (url.pathname === "/api/ignite/status" && request.method === "GET") {
-        const { isIgniteAiConfigured, isOpenAiConfigured } = await import("@/lib/ai/ignite-ai.server");
+        const { isOpenAiConfigured } = await import("@/lib/ai/ignite-ai.server");
+        const {
+          getSupabaseServerEnvStatus,
+          isLessonAiServerEnvConfigured,
+        } = await import("@/lib/config.server");
+        const supabaseStatus = getSupabaseServerEnvStatus();
         return new Response(
           JSON.stringify({
-            serviceAvailable: isIgniteAiConfigured(),
+            serviceAvailable: isLessonAiServerEnvConfigured(),
             openAiConfigured: isOpenAiConfigured(),
             translateApiConfigured: Boolean(process.env.GOOGLE_TRANSLATE_API_KEY),
+            ...supabaseStatus,
           }),
           { status: 200, headers: { "content-type": "application/json" } },
         );
