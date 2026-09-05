@@ -17,10 +17,10 @@ import {
   resolveGuestLanguage,
   savePreferredLanguage,
 } from "@/lib/preferred-language";
-import { de } from "@/lib/i18n/locales/de";
-import { fr } from "@/lib/i18n/locales/fr";
-import { ur } from "@/lib/i18n/locales/ur";
-import { zh } from "@/lib/i18n/locales/zh";
+import { de, deByEn } from "@/lib/i18n/locales/de";
+import { fr, frByEn } from "@/lib/i18n/locales/fr";
+import { ur, urByEn } from "@/lib/i18n/locales/ur";
+import { zh, zhByEn } from "@/lib/i18n/locales/zh";
 import {
   getCachedEducationalTranslation,
 } from "@/lib/translation-cache";
@@ -2388,12 +2388,22 @@ const LOCALE_OVERRIDES: Record<Lang, Record<string, string>> = {
   zh,
 };
 
+const LOCALE_BY_EN: Partial<Record<Lang, Record<string, string>>> = {
+  fr: frByEn,
+  de: deByEn,
+  ur: urByEn,
+  zh: zhByEn,
+};
+
 function translate(key: TKey, lang: Lang): string {
-  const override = LOCALE_OVERRIDES[lang]?.[key];
-  if (override) return override;
-  if (lang === "ar") return t[key].ar;
-  if (lang === "en") return t[key].en;
-  return t[key].en || t[key].ar;
+  const entry = t[key];
+  const keyOverride = LOCALE_OVERRIDES[lang]?.[key];
+  if (keyOverride) return keyOverride;
+  if (lang === "ar") return entry.ar;
+  if (lang === "en") return entry.en;
+  const byEn = LOCALE_BY_EN[lang]?.[entry.en];
+  if (byEn) return byEn;
+  return entry.en || entry.ar;
 }
 
 export function translateKey(key: TKey, lang: Lang): string {
