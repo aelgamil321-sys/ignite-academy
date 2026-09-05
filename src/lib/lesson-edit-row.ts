@@ -1,5 +1,9 @@
 import type { CustomLesson } from "@/lib/cms";
 import { normalizeLessonForEditForm } from "@/lib/lesson-edit-safe";
+import {
+  DEFAULT_TEACHING_SUBJECT,
+  normalizeTeachingSubjectType,
+} from "@/lib/teacher-assignment-subject";
 
 /** Map a Supabase `lessons` row into a normalized edit-form lesson (no DB writes). */
 export function lessonFromRow(row: Record<string, unknown>): CustomLesson {
@@ -28,6 +32,9 @@ export function lessonFromRow(row: Record<string, unknown>): CustomLesson {
     pdfEnUrl: row.pdf_en_url ? String(row.pdf_en_url) : undefined,
     quiz: Array.isArray(row.quiz) ? row.quiz : [],
     subjectCategory: (row.subject_category as CustomLesson["subjectCategory"]) ?? "quran",
+    teachingSubject: normalizeTeachingSubjectType(
+      typeof row.teaching_subject === "string" ? row.teaching_subject : DEFAULT_TEACHING_SUBJECT,
+    ),
     published: Boolean(row.published),
     createdAt: new Date(String(row.created_at)).getTime(),
     createdBy: typeof row.created_by === "string" ? row.created_by : null,

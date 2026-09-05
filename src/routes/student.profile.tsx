@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { ParentLinkCodeCard } from "@/components/parent-link-code-card";
@@ -13,13 +13,22 @@ import { useI18n } from "@/lib/i18n";
 import { fetchMyParentLinkCode } from "@/lib/parent-link-code";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadProfilePhoto } from "@/lib/profile-photo";
-import { gradeDisplayName } from "@/lib/grade-utils";
+import { grades } from "@/lib/curriculum";
+import { gradeDisplayName, normalizeGradeSlug } from "@/lib/grade-utils";
 import {
   fetchStudentProfile,
   saveStudentProfile,
   type StudentProfileForm,
 } from "@/lib/student-profile";
+import {
+  changeStudentGrade,
+  changeStudentLoginEmail,
+  validateStudentEmailChangeInput,
+  validateStudentGradeChangeInput,
+  type StudentEmailChangeErrorKey,
+} from "@/lib/student-profile-self-correction";
 import { fetchStudentProgress, type StudentProgressData } from "@/lib/student-progress";
+import { clearStudentShellCache } from "@/lib/student-workspace-session";
 import { useStudentShell } from "@/lib/student-shell-context";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 import type { Lang } from "@/lib/i18n-config";
@@ -38,13 +47,38 @@ export const Route = createFileRoute("/student/profile")({
 const inputClass =
   "mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:border-primary focus:outline-none";
 
+function emailChangeErrorMessage(tr: (key: string) => string, errorKey: StudentEmailChangeErrorKey): string {
+  switch (errorKey) {
+    case "empty":
+      return tr("student_profile_email_empty");
+    case "invalid_email":
+      return tr("auth_err_invalid_email");
+    case "same_email":
+      return tr("student_profile_email_same");
+    case "mismatch":
+      return tr("student_profile_email_mismatch");
+    case "duplicate_email":
+      return tr("auth_duplicate_email");
+    case "rate_limit":
+      return tr("auth_err_rate_limit");
+    case "network":
+      return tr("auth_err_network");
+    default:
+      return tr("student_profile_email_change_failed");
+  }
+}
+
 function StudentProfilePage() {
   const navigate = useNavigate();
   const { userId } = useStudentShell();
-  const { lang, dir, tr, setLang } = useI18n();
+  const { lang, dir, tr, setLang, bi } = useI18n();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const submitInFlightRef = useRef(false);
   const [email, setEmail] = useState("");
+  const [originalGrade, setOriginalGrade] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState("");
   const [grade, setGrade] = useState("");
   const [profilePhotoPath, setProfilePhotoPath] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -82,8 +116,13 @@ function StudentProfilePage() {
 
         if (!active) return;
 
-        setEmail(profile?.email || user.email || "");
-        setGrade(profile?.grade ?? String(meta.grade ?? ""));
+        const resolvedEmail = profile?.email || user.email || "";
+        setEmail(resolvedEmail);
+        setNewEmail("");
+        setConfirmEmail("");
+        const resolvedGrade = normalizeGradeSlug(profile?.grade ?? String(meta.grade ?? "")) || "";
+        setGrade(resolvedGrade);
+        setOriginalGrade(resolvedGrade);
         setProfilePhotoPath(profile?.profile_photo_path ?? null);
         setForm({
           full_name:
@@ -119,6 +158,8 @@ function StudentProfilePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitInFlightRef.current || saving) return;
+
     if (!form.english_name.trim()) {
       toast.error(tr("auth_err_english_name"));
       return;
@@ -128,11 +169,60 @@ function StudentProfilePage() {
       return;
     }
 
+    const wantsEmailChange = Boolean(newEmail.trim() || confirmEmail.trim());
+    const wantsGradeChange =
+      Boolean(grade) && normalizeGradeSlug(grade) !== normalizeGradeSlug(originalGrade);
+
+    if (wantsEmailChange) {
+      const emailValidation = validateStudentEmailChangeInput(email, newEmail, confirmEmail);
+      if (!emailValidation.ok) {
+        toast.error(emailChangeErrorMessage(tr, emailValidation.errorKey));
+        return;
+      }
+    }
+
+    if (wantsGradeChange) {
+      const gradeValidation = validateStudentGradeChangeInput(originalGrade, grade);
+      if (!gradeValidation.ok) {
+        toast.error(
+          gradeValidation.errorKey === "same_grade"
+            ? tr("student_profile_grade_same")
+            : tr("student_profile_grade_invalid"),
+        );
+        return;
+      }
+    }
+
+    if (wantsEmailChange && !window.confirm(tr("student_profile_email_confirm_dialog"))) {
+      return;
+    }
+    if (wantsGradeChange && !window.confirm(tr("student_profile_grade_confirm_dialog"))) {
+      return;
+    }
+
+    submitInFlightRef.current = true;
     setSaving(true);
     try {
       const { data: authData } = await supabase.auth.getUser();
       const user = authData.user;
       if (!user) throw new Error(tr("auth_err_email_password"));
+
+      let nextEmail = email;
+      if (wantsEmailChange) {
+        const emailResult = await changeStudentLoginEmail({
+          userId: user.id,
+          currentEmail: email,
+          newEmail,
+          confirmEmail,
+        });
+        if (!emailResult.ok) {
+          toast.error(emailChangeErrorMessage(tr, emailResult.errorKey));
+          return;
+        }
+        nextEmail = emailResult.email;
+        setNewEmail("");
+        setConfirmEmail("");
+      }
 
       if (photoFile) {
         const path = await uploadProfilePhoto(user.id, photoFile);
@@ -140,13 +230,29 @@ function StudentProfilePage() {
         setPhotoFile(null);
       }
 
-      const updated = await saveStudentProfile(user.id, email, {
+      const updated = await saveStudentProfile(user.id, nextEmail, {
         ...form,
         full_name: form.english_name.trim(),
         section: section || null,
         islamic_group: islamicGroup || null,
         preferred_language: preferredLanguage,
       });
+
+      let nextGrade = updated.grade ?? grade;
+      if (wantsGradeChange) {
+        const gradeResult = await changeStudentGrade({
+          userId: user.id,
+          currentGrade: originalGrade,
+          newGrade: grade,
+        });
+        if (!gradeResult.ok) {
+          toast.error(tr("student_profile_grade_change_failed"));
+          return;
+        }
+        nextGrade = gradeResult.grade;
+        setOriginalGrade(nextGrade);
+      }
+
       setForm({
         full_name: updated.full_name,
         arabic_name: updated.arabic_name,
@@ -158,12 +264,21 @@ function StudentProfilePage() {
       setIslamicGroup(updated.islamic_group ?? "");
       setPreferredLanguage(updated.preferred_language);
       setProfilePhotoPath(updated.profile_photo_path);
-      setGrade(updated.grade ?? grade);
+      setEmail(nextEmail);
+      setGrade(normalizeGradeSlug(nextGrade) || nextGrade);
       setLang(updated.preferred_language);
+      clearStudentShellCache();
+
+      const progressResult = await fetchStudentProgress(user.id);
+      if (!progressResult.error) setProgress(progressResult.data);
+
+      if (wantsEmailChange) toast.success(tr("student_profile_email_updated"));
+      if (wantsGradeChange) toast.success(tr("student_profile_grade_updated"));
       toast.success(tr("student_profile_updated"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
     } finally {
+      submitInFlightRef.current = false;
       setSaving(false);
     }
   }
@@ -237,22 +352,60 @@ function StudentProfilePage() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">{tr("auth_email")}</label>
-                <input
-                  type="email"
-                  readOnly
-                  value={email}
-                  className={`${inputClass} cursor-not-allowed bg-muted/40 text-muted-foreground`}
-                />
+              <div className="space-y-3 rounded-xl border border-border/70 bg-muted/15 px-3 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  {tr("auth_email")}
+                </p>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("auth_email")}</label>
+                  <input
+                    type="email"
+                    readOnly
+                    value={email}
+                    className={`${inputClass} cursor-not-allowed bg-muted/40 text-muted-foreground`}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">{tr("student_profile_email_new")}</label>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    maxLength={254}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">
+                    {tr("student_profile_email_confirm")}
+                  </label>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    value={confirmEmail}
+                    onChange={(e) => setConfirmEmail(e.target.value)}
+                    maxLength={254}
+                    className={inputClass}
+                  />
+                </div>
               </div>
 
-              <div className="rounded-xl border border-border/70 bg-muted/15 px-3 py-3">
-                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                  {tr("auth_grade")}
-                </p>
-                <p className="text-sm font-semibold text-foreground">{gradeLabel}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{tr("student_profile_grade_readonly")}</p>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">{tr("auth_grade")}</label>
+                <select
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">{tr("select_placeholder")}</option>
+                  {grades.map((g) => (
+                    <option key={g.slug} value={g.slug}>
+                      {bi(g.name)}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-muted-foreground">{gradeLabel}</p>
               </div>
 
               <PreferredLanguageField value={preferredLanguage} onChange={setPreferredLanguage} />

@@ -166,6 +166,7 @@ export async function uploadTeacherTimetable(file: File): Promise<TeacherTimetab
     file_size: file.size,
     uploaded_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    parsed_schedule: null,
   };
 
   const { data, error } = await supabase

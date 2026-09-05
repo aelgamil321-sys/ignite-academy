@@ -28,7 +28,7 @@ function mockContext(
     email: "a@example.com",
     isLeadTeacher: false,
     assignments: partial.assignments ?? [
-      { id: "1", grade: "8", section: "A", islamic_group: "A" },
+      { id: "1", subject_type: "islamic_education", grade: "8", section: "A", islamic_group: "A" },
     ],
     assignedGrades: partial.assignedGrades ?? ["8"],
     ...partial,

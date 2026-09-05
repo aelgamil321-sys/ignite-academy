@@ -11,6 +11,10 @@ import {
   splitIslamicProtectedText,
   translatableSegments,
 } from "@/lib/islamic-text-protection";
+import {
+  resolveLocalizedPendingText,
+  resolveStoredLocalizedText,
+} from "@/lib/localized-content-resolve";
 
 export type EducationalContentType =
   | "title"
@@ -70,15 +74,7 @@ export function needsDynamicTranslation(lang: Lang): boolean {
 
 /** Stored multilingual lesson text for a locale (no machine translation). */
 export function resolveStoredBiText(bi: Bi, lang: Lang): string | null {
-  const localized = bi as Record<string, string | undefined>;
-  if (lang === "fr" || lang === "de" || lang === "ur" || lang === "zh") {
-    const direct = localized[lang]?.trim();
-    if (direct) return direct;
-    return null;
-  }
-  if (lang === "en") return bi.en?.trim() || bi.ar?.trim() || null;
-  if (lang === "ar") return bi.ar?.trim() || null;
-  return null;
+  return resolveStoredLocalizedText(bi, lang);
 }
 
 /** Source text to translate into `targetLang`, or null when native text already exists. */
@@ -139,12 +135,7 @@ function debugTranslate(
 
 /** Sync fallback while machine translation is pending or unavailable. */
 export function biPendingDisplayText(bi: Bi, lang: Lang): string {
-  const ar = bi.ar?.trim() || "";
-  const en = bi.en?.trim() || "";
-  if (lang === "ar") return ar || en;
-  if (lang === "en") return en || ar;
-  // fr/de/ur/zh: English first — never show Arabic while target translation loads
-  return en || ar;
+  return resolveLocalizedPendingText(bi, lang);
 }
 
 /** Sync display before async translation completes. */

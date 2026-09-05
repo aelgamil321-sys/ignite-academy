@@ -1,6 +1,16 @@
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
+import {
+  DEFAULT_TEACHING_SUBJECT,
+  normalizeTeachingSubjectType,
+  type TeachingSubjectType,
+} from "@/lib/teacher-assignment-subject";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
+import {
+  DEFAULT_TEACHING_SUBJECT,
+  normalizeTeachingSubjectType,
+  type TeachingSubjectType,
+} from "@/lib/teacher-assignment-subject";
 import {
   fetchTeacherDisplayNames,
   resolveTeacherDisplayName,
@@ -10,6 +20,7 @@ import {
 export type TeacherAssignmentRow = {
   id: string;
   teacher_id: string;
+  subject_type: TeachingSubjectType;
   grade: string;
   section: string | null;
   islamic_group: string | null;
@@ -32,6 +43,7 @@ export type AdminTeacherRow = {
 };
 
 export type TeacherAssignmentInput = {
+  subject_type: TeachingSubjectType;
   grade: string;
   section: StudentSection | null;
   islamic_group: IslamicGroup | null;
@@ -112,7 +124,10 @@ export async function fetchAdminTeachers(): Promise<AdminTeacherRow[]> {
   const assignmentsByTeacher = new Map<string, TeacherAssignmentRow[]>();
   for (const row of assignmentsRes.data ?? []) {
     const list = assignmentsByTeacher.get(row.teacher_id) ?? [];
-    list.push(row as TeacherAssignmentRow);
+    list.push({
+      ...row,
+      subject_type: normalizeTeachingSubjectType(row.subject_type),
+    } as TeacherAssignmentRow);
     assignmentsByTeacher.set(row.teacher_id, list);
   }
 
@@ -219,6 +234,7 @@ export async function addTeacherAssignment(
 ): Promise<void> {
   const { error } = await supabase.from("teacher_assignments").insert({
     teacher_id: teacherId,
+    subject_type: normalizeTeachingSubjectType(input.subject_type ?? DEFAULT_TEACHING_SUBJECT),
     grade: normalizeGradeSlug(input.grade),
     section: input.section,
     islamic_group: input.islamic_group,
@@ -233,6 +249,7 @@ export async function updateTeacherAssignment(
   const { error } = await supabase
     .from("teacher_assignments")
     .update({
+      subject_type: normalizeTeachingSubjectType(input.subject_type ?? DEFAULT_TEACHING_SUBJECT),
       grade: normalizeGradeSlug(input.grade),
       section: input.section,
       islamic_group: input.islamic_group,

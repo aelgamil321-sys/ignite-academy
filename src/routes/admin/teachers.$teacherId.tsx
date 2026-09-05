@@ -25,6 +25,7 @@ import {
   sectionLabel,
 } from "@/lib/student-academics";
 import type { TeacherAssignmentRow } from "@/lib/admin-teachers";
+import { teachingSubjectLabel } from "@/lib/teacher-assignment-subject";
 
 export const Route = createFileRoute("/admin/teachers/$teacherId")({
   head: () => ({
@@ -57,7 +58,7 @@ function formatAssignmentScope(row: TeacherAssignmentRow, lang: "en" | "ar"): st
   const groupText = row.islamic_group
     ? islamicGroupLabel(normalizeIslamicGroup(row.islamic_group), lang)
     : L("Both Islamic groups", "كلا المجموعتين الإسلامية")[lang];
-  return `${gradeLabel} · ${sectionText} · ${groupText}`;
+  return `${subjectText} · ${gradeLabel} · ${sectionText} · ${groupText}`;
 }
 
 function activityIcon(item: AdminTeacherActivityItem) {

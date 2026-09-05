@@ -26,6 +26,26 @@ import {
   type TeacherTimetableRecord,
 } from "@/lib/teacher-timetable";
 
+function timetableExtractErrorMessage(code: string, tr: (key: string) => string): string {
+  switch (code) {
+    case "unsupported_file":
+      return tr("teacher_timetable_error_unsupported_file");
+    case "unreadable_timetable":
+      return tr("teacher_timetable_error_unreadable");
+    case "file_parsing_failed":
+      return tr("teacher_timetable_error_parsing_failed");
+    case "ai_disabled":
+      return tr("teacher_timetable_ai_disabled");
+    case "ai_temporarily_unavailable":
+    case "rate_limit":
+    case "timeout":
+    case "network":
+      return tr("teacher_timetable_error_ai_unavailable");
+    default:
+      return tr("teacher_timetable_extract_error");
+  }
+}
+
 export function TeacherTimetableWidget() {
   const { tr } = useI18n();
   const { context } = useTeacherShell();
@@ -229,11 +249,7 @@ export function TeacherTimetablePage({ mode }: TeacherTimetablePageProps) {
       setImportMode(false);
     } catch (err) {
       const code = err instanceof Error ? err.message : "extract_failed";
-      if (code === "ai_disabled") {
-        setError(tr("teacher_timetable_ai_disabled"));
-      } else {
-        setError(tr("teacher_timetable_extract_error"));
-      }
+      setError(timetableExtractErrorMessage(code, tr));
     } finally {
       setExtracting(false);
     }

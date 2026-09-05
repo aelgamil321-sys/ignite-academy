@@ -3,6 +3,7 @@ import { deByEn } from "@/lib/i18n/locales/de";
 import { frByEn } from "@/lib/i18n/locales/fr";
 import { urByEn } from "@/lib/i18n/locales/ur";
 import { zhByEn } from "@/lib/i18n/locales/zh";
+import { resolveStoredLocalizedText } from "@/lib/localized-content-resolve";
 
 export const LANG_STORAGE_KEY = "iia.lang";
 
@@ -101,11 +102,15 @@ export function uiBi(text: Bi, lang: Lang): string {
 }
 
 export function pickBi(text: Bi, lang: Lang): string {
-  if (lang === "ar") return text.ar;
-  if (lang === "en") return text.en;
-  return text.en || text.ar;
+  const stored = resolveStoredLocalizedText(text, lang);
+  if (stored) return stored;
+  if (lang === "ar") return text.ar?.trim() || text.en?.trim() || "";
+  if (lang === "en") return text.en?.trim() || text.ar?.trim() || "";
+  return text.en?.trim() || text.ar?.trim() || "";
 }
 
 export function pickBiLocale(text: Bi, locale: ContentLocale): string {
-  return text[locale] || text.en || text.ar;
+  const stored = resolveStoredLocalizedText(text, locale);
+  if (stored) return stored;
+  return text[locale]?.trim() || text.en?.trim() || text.ar?.trim() || "";
 }

@@ -28,6 +28,10 @@ import {
 } from "@/components/ui/table";
 import { useI18n } from "@/lib/i18n";
 import { deriveGradeSectionFromClassLabel } from "@/lib/timetable/timetable-grid";
+import {
+  displayTimetableSubjectCode,
+  displayTimetableWeekday,
+} from "@/lib/timetable/timetable-subject-display";
 import type { TimetableSchedule, TimetableSlot, TimetableSlotType } from "@/lib/timetable/timetable-types";
 
 const GRID_HEADERS = [
@@ -48,6 +52,10 @@ const SHORT_DAYS: Record<string, string> = {
   Thursday: "Thu",
   Friday: "Fri",
 };
+
+function shortWeekdayLabel(day: string, lang: import("@/lib/i18n-config").Lang): string {
+  return displayTimetableWeekday(day, lang).slice(0, 3);
+}
 
 function patchTeachingSlot(
   slot: TimetableSlot,
@@ -116,7 +124,7 @@ export function TimetableWeeklyGrid({
   editable = false,
   onScheduleChange,
 }: TimetableWeeklyGridProps) {
-  const { tr } = useI18n();
+  const { tr, lang } = useI18n();
   const [editingCell, setEditingCell] = useState<{ day: string; slotIndex: number } | null>(null);
   const [editType, setEditType] = useState<"class" | "free">("class");
   const [editSubject, setEditSubject] = useState("");
@@ -161,7 +169,9 @@ export function TimetableWeeklyGrid({
     }
     return (
       <div className="space-y-0.5 text-left">
-        <p className="font-semibold leading-tight">{slot.subject || "—"}</p>
+        <p className="font-semibold leading-tight">
+          {displayTimetableSubjectCode(slot.subject, lang) || "—"}
+        </p>
         <p className="text-[11px] leading-tight text-muted-foreground">{slot.classLabel || "—"}</p>
       </div>
     );
@@ -186,7 +196,9 @@ export function TimetableWeeklyGrid({
           <TableBody>
             {schedule.days.map((dayRow) => (
               <TableRow key={dayRow.day}>
-                <TableCell className="font-medium">{SHORT_DAYS[dayRow.day] ?? dayRow.day}</TableCell>
+                <TableCell className="font-medium">
+                  {shortWeekdayLabel(dayRow.day, lang) || SHORT_DAYS[dayRow.day] || dayRow.day}
+                </TableCell>
                 {dayRow.slots.map((slot, slotIndex) => {
                   const isBreak = slot.type === "break";
                   const clickable = editable && !isBreak;

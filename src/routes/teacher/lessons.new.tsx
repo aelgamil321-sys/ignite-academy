@@ -1,19 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { useI18n } from "@/lib/i18n";
 import { LessonCreateDraftForm } from "@/components/lesson-create-draft-form";
-import { fetchTeacherContext } from "@/lib/teacher-dashboard";
+import {
+  fetchTeacherContext,
+  teacherAssignedGradesForSubject,
+  type TeacherContext,
+} from "@/lib/teacher-dashboard";
 
 export const Route = createFileRoute("/teacher/lessons/new")({
   component: TeacherNewLessonPage,
 });
 
 function TeacherNewLessonPage() {
-  const { lang, tr } = useI18n();
-  const [assignedGrades, setAssignedGrades] = useState<string[]>([]);
+  const { tr } = useI18n();
+  const [context, setContext] = useState<TeacherContext | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,10 +27,29 @@ function TeacherNewLessonPage() {
         return;
       }
       const ctx = await fetchTeacherContext(data.user.id);
-      setAssignedGrades(ctx.assignedGrades.map(normalizeGradeSlug));
+      setContext(ctx);
       setLoading(false);
     })();
   }, []);
+
+  const allowedGradesBySubject = useMemo(
+    () =>
+      context
+        ? {
+            islamic_education: teacherAssignedGradesForSubject(context, "islamic_education"),
+            quran: teacherAssignedGradesForSubject(context, "quran"),
+          }
+        : undefined,
+    [context],
+  );
+
+  const hasAnyAssignment = useMemo(() => {
+    if (!allowedGradesBySubject) return false;
+    return (
+      allowedGradesBySubject.islamic_education.length > 0 ||
+      allowedGradesBySubject.quran.length > 0
+    );
+  }, [allowedGradesBySubject]);
 
   if (loading) {
     return (
@@ -38,7 +60,7 @@ function TeacherNewLessonPage() {
     );
   }
 
-  if (assignedGrades.length === 0) {
+  if (!context || !hasAnyAssignment || !allowedGradesBySubject) {
     return (
       <div className="mx-auto w-full max-w-[1050px] space-y-4">
         <Link
@@ -55,9 +77,17 @@ function TeacherNewLessonPage() {
     );
   }
 
+  const unionGrades = [
+    ...new Set([
+      ...allowedGradesBySubject.islamic_education,
+      ...allowedGradesBySubject.quran,
+    ]),
+  ];
+
   return (
     <LessonCreateDraftForm
-      allowedGradeSlugs={assignedGrades}
+      allowedGradeSlugs={unionGrades}
+      allowedGradesBySubject={allowedGradesBySubject}
       backTo="/teacher/lessons"
       backLabel={tr("teacher_back_lessons")}
       editTo="/teacher/lessons/edit/$lessonId"

@@ -1,4 +1,5 @@
 import type { Lang } from "@/lib/i18n-config";
+import { resolveStoredLocalizedText } from "@/lib/localized-content-resolve";
 
 /** All lesson content languages stored in lesson JSONB. */
 export const LESSON_LANGS = ["ar", "en", "fr", "de", "ur", "zh"] as const;
@@ -63,13 +64,7 @@ export function isLessonLang(value: string): value is LessonLang {
 
 /** Read stored lesson text for a UI language (no machine translation). */
 export function resolveStoredLessonText(text: LocalizedText, lang: Lang): string | null {
-  if (isLessonLang(lang)) {
-    const direct = text[lang]?.trim();
-    if (direct) return direct;
-  }
-  if (lang === "en") return text.en?.trim() || text.ar?.trim() || null;
-  if (lang === "ar") return text.ar?.trim() || null;
-  return null;
+  return resolveStoredLocalizedText(text as import("@/lib/curriculum").Bi, lang);
 }
 
 export function serializeLocalizedText(text: LocalizedText): LocalizedText {

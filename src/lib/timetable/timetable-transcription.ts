@@ -19,6 +19,8 @@ export type TimetablePeriodKey = (typeof TIMETABLE_PERIOD_KEYS)[number];
 export type TimetableTranscriptionCell = {
   subject: string | null;
   text: string | null;
+  /** 0–1 transcription confidence; omitted = 1 for deterministic imports. */
+  confidence?: number;
 };
 
 export type TimetableDayTranscription = Record<TimetablePeriodKey, TimetableTranscriptionCell>;
@@ -28,6 +30,7 @@ export type TimetableTranscriptionMatrix = Record<TimetableSchoolDay, TimetableD
 const transcriptionCellSchema = z.object({
   subject: z.union([z.string(), z.null()]),
   text: z.union([z.string(), z.null()]),
+  confidence: z.number().min(0).max(1).optional(),
 });
 
 const dayRowSchema = z.object({
@@ -121,10 +124,12 @@ export const GOLDEN_TRANSCRIPTION_MATRIX: TimetableTranscriptionMatrix = {
 };
 
 function isCellUnreadable(cell: TimetableTranscriptionCell): boolean {
-  return cell.subject === null || cell.text === null;
+  if (cell.subject === null || cell.text === null) return true;
+  if (cell.confidence != null && cell.confidence < 0.75) return true;
+  return false;
 }
 
-function buildFreeSlot(period: number, needsReview: boolean): TimetableSlot {
+function buildFreeSlot(period: number, needsReview: boolean, confidence = 1): TimetableSlot {
   const col = periodColumn(period);
   return {
     type: "free",
@@ -137,7 +142,7 @@ function buildFreeSlot(period: number, needsReview: boolean): TimetableSlot {
     section: "",
     room: "",
     notes: "",
-    confidence: needsReview ? 0 : 1,
+    confidence: needsReview ? 0 : confidence,
     needsReview,
   };
 }
@@ -147,6 +152,7 @@ function buildClassSlot(
   subject: string,
   classLabel: string,
   needsReview: boolean,
+  confidence = 1,
 ): TimetableSlot {
   const col = periodColumn(period);
   const derived = deriveGradeSectionFromClassLabel(classLabel);
@@ -161,7 +167,7 @@ function buildClassSlot(
     section: derived.section,
     room: "",
     notes: "",
-    confidence: needsReview ? 0 : 1,
+    confidence: needsReview ? 0 : confidence,
     needsReview,
   };
 }
@@ -193,16 +199,17 @@ function convertDayTranscription(
   for (const key of TIMETABLE_PERIOD_KEYS) {
     const period = Number(key);
     const cell = row?.[key] ?? emptyTc();
+    const cellConfidence = cell.confidence ?? 1;
 
     if (isCellUnreadable(cell)) {
-      slots.push(buildFreeSlot(period, true));
+      slots.push(buildFreeSlot(period, true, 0));
     } else if (!cell.text.trim()) {
-      slots.push(buildFreeSlot(period, false));
+      slots.push(buildFreeSlot(period, false, cellConfidence));
     } else {
       const classLabel = cell.text.trim();
       const subject = (cell.subject ?? "").trim();
       const needsReview = !subject;
-      slots.push(buildClassSlot(period, subject, classLabel, needsReview));
+      slots.push(buildClassSlot(period, subject, classLabel, needsReview, cellConfidence));
     }
 
     if (period === 4) {
@@ -309,6 +316,7 @@ Do NOT transcribe Break. Do NOT return start times, end times, period numbers, g
 For EVERY cell in the 5×7 matrix return:
 - subject: abbreviation visible in the cell (e.g. ISL, QUR) or "" if the cell is empty
 - text: class label exactly as printed (e.g. G11A/G11B, G8A) or "" if the cell is empty
+- confidence: 0.0–1.0 for how certain you are about this cell (use 0.97+ for clear empty cells)
 - use null for subject or text ONLY if that field is genuinely unreadable
 
 Read each cell independently.

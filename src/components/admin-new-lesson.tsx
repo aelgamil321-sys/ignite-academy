@@ -9,6 +9,10 @@ export function AdminNewLesson() {
   return (
     <LessonCreateDraftForm
       allowedGradeSlugs={grades.map((g) => g.slug)}
+      allowedGradesBySubject={{
+        islamic_education: grades.map((g) => g.slug),
+        quran: grades.map((g) => g.slug),
+      }}
       backTo="/admin/lessons"
       backLabel={L("Back to Manage Lessons", "العودة إلى إدارة الدروس")[lang]}
       editTo="/admin/lessons/edit/$lessonId"

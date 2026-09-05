@@ -1,6 +1,7 @@
 import type { Bi, QuizQuestion } from "@/lib/curriculum";
 import { TRUE_FALSE_OPTIONS } from "@/lib/lesson-quiz";
-import { hasProtectedIslamicContent } from "@/lib/islamic-text-protection";
+import { hasProtectedIslamicContent, classifyIslamicTextContent } from "@/lib/islamic-text-protection";
+import { LESSON_GENERATION_WARNING } from "@/lib/lesson-generation-warnings";
 import type { VocabularyItem } from "@/lib/lesson-vocab";
 import {
   type LessonLang,
@@ -62,11 +63,13 @@ export function mapMultilingualLessonFields(input: {
     ...input.source.quiz.essay.map((q) => q.question),
   ];
 
-  if (sacredTexts.some((t) => hasProtectedIslamicContent(t))) {
-    warnings.push("Sacred-text verification recommended");
+  if (sacredTexts.some((t) => classifyIslamicTextContent(t) === "corrupted")) {
+    warnings.push(LESSON_GENERATION_WARNING.SACRED_TEXT_CORRUPTED);
+  } else if (sacredTexts.some((t) => hasProtectedIslamicContent(t))) {
+    warnings.push(LESSON_GENERATION_WARNING.SACRED_TEXT_REVIEW);
   }
   if (!input.translationComplete) {
-    warnings.push("Translation incomplete — some languages may be missing");
+    warnings.push(LESSON_GENERATION_WARNING.TRANSLATION_INCOMPLETE);
   }
 
   const titleByLang: Partial<Record<LessonLang, string>> = {};

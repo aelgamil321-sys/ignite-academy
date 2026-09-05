@@ -107,10 +107,12 @@ function deriveGradeSectionFromClassLabel(classLabel) {
 }
 
 function isCellUnreadable(cell) {
-  return cell.subject === null || cell.text === null;
+  if (cell.subject === null || cell.text === null) return true;
+  if (cell.confidence != null && cell.confidence < 0.75) return true;
+  return false;
 }
 
-function buildFreeSlot(period, needsReview) {
+function buildFreeSlot(period, needsReview, confidence = 1) {
   const col = periodColumn(period);
   return {
     type: "free",
@@ -123,12 +125,12 @@ function buildFreeSlot(period, needsReview) {
     section: "",
     room: "",
     notes: "",
-    confidence: needsReview ? 0 : 1,
+    confidence: needsReview ? 0 : confidence,
     needsReview,
   };
 }
 
-function buildClassSlot(period, subject, classLabel, needsReview) {
+function buildClassSlot(period, subject, classLabel, needsReview, confidence = 1) {
   const col = periodColumn(period);
   const derived = deriveGradeSectionFromClassLabel(classLabel);
   return {
@@ -142,7 +144,7 @@ function buildClassSlot(period, subject, classLabel, needsReview) {
     section: derived.section,
     room: "",
     notes: "",
-    confidence: needsReview ? 0 : 1,
+    confidence: needsReview ? 0 : confidence,
     needsReview,
   };
 }
@@ -170,14 +172,15 @@ function convertDayTranscription(day, row) {
   for (const key of TIMETABLE_PERIOD_KEYS) {
     const period = Number(key);
     const cell = row?.[key] ?? emptyTc();
+    const cellConfidence = cell.confidence ?? 1;
     if (isCellUnreadable(cell)) {
-      slots.push(buildFreeSlot(period, true));
+      slots.push(buildFreeSlot(period, true, 0));
     } else if (!cell.text.trim()) {
-      slots.push(buildFreeSlot(period, false));
+      slots.push(buildFreeSlot(period, false, cellConfidence));
     } else {
       const classLabel = cell.text.trim();
       const subject = (cell.subject ?? "").trim();
-      slots.push(buildClassSlot(period, subject, classLabel, !subject));
+      slots.push(buildClassSlot(period, subject, classLabel, !subject, cellConfidence));
     }
     if (period === 4) slots.push(buildBreakSlot());
   }

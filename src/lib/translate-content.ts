@@ -37,3 +37,14 @@ export {
   prefetchEducationalTranslations as prefetchTranslations,
   type EducationalField,
 } from "@/lib/translate-educational-content";
+
+export {
+  resolveLocalizedContent,
+  resolveStoredLocalizedText,
+  resolveLocalizedPendingText,
+  isLocalizedContentObject,
+  assertSafeReactLocalizedChild,
+  formatLocalizedForReact,
+  type LocalizedResolveMode,
+  type LocalizedResolveResult,
+} from "@/lib/localized-content-resolve";

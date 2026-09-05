@@ -4,8 +4,13 @@ import { Loader2, Pencil, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCMS } from "@/lib/cms";
 import { useI18n } from "@/lib/i18n";
-import { normalizeGradeSlug } from "@/lib/grade-utils";
-import { fetchTeacherContext } from "@/lib/teacher-dashboard";
+import { teachingSubjectLabel } from "@/lib/teacher-assignment-subject";
+import {
+  fetchTeacherContext,
+  teacherAssignedGradesForSubject,
+  teacherLessonInScope,
+  type TeacherContext,
+} from "@/lib/teacher-dashboard";
 import { TeacherDeleteLessonButton } from "@/components/teacher-delete-lesson-button";
 import { TeacherLessonPublishButton } from "@/components/teacher-lesson-publish-button";
 import { TeacherLessonStatusBadge } from "@/components/teacher-lesson-status-badge";
@@ -15,9 +20,9 @@ export const Route = createFileRoute("/teacher/lessons/")({
 });
 
 function TeacherLessonsPage() {
+  const { bi, tr, lang } = useI18n();
   const { lessons, loading, refresh } = useCMS();
-  const { bi, tr } = useI18n();
-  const [assignedGrades, setAssignedGrades] = useState<string[]>([]);
+  const [context, setContext] = useState<TeacherContext | null>(null);
   const [init, setInit] = useState(true);
 
   useEffect(() => {
@@ -26,17 +31,23 @@ function TeacherLessonsPage() {
       const { data } = await supabase.auth.getUser();
       if (!data.user) return;
       const ctx = await fetchTeacherContext(data.user.id);
-      setAssignedGrades(ctx.assignedGrades);
+      setContext(ctx);
       setInit(false);
     })();
   }, [refresh]);
 
-  const scopedLessons = useMemo(() => {
-    if (assignedGrades.length === 0) return [];
-    return lessons.filter((l) =>
-      assignedGrades.includes(normalizeGradeSlug(l.grade) || l.grade),
+  const canCreateLesson = useMemo(() => {
+    if (!context) return false;
+    return (
+      teacherAssignedGradesForSubject(context, "islamic_education").length > 0 ||
+      teacherAssignedGradesForSubject(context, "quran").length > 0
     );
-  }, [lessons, assignedGrades]);
+  }, [context]);
+
+  const scopedLessons = useMemo(() => {
+    if (!context) return [];
+    return lessons.filter((lesson) => teacherLessonInScope(context, lesson));
+  }, [lessons, context]);
 
   if (loading || init) {
     return (
@@ -51,7 +62,7 @@ function TeacherLessonsPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h2 className="font-display text-xl text-foreground">{tr("teacher_nav_lessons")}</h2>
-        {assignedGrades.length > 0 && (
+        {canCreateLesson && (
           <Link
             to="/teacher/lessons/new"
             className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
@@ -76,7 +87,8 @@ function TeacherLessonsPage() {
                   <TeacherLessonStatusBadge published={lesson.published} />
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {lesson.grade} · {bi(lesson.unit) || "—"}
+                  {teachingSubjectLabel(lesson.teachingSubject, lang)} · {lesson.grade} ·{" "}
+                  {bi(lesson.unit) || "—"}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">

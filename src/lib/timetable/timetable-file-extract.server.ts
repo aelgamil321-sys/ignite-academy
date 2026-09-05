@@ -128,11 +128,20 @@ export type TimetableExtractedContent =
   | { mode: "text"; text: string; hint?: string }
   | { mode: "image"; mimeType: string; base64: string; hint?: string };
 
+export type TimetableExtractFileErrorCode =
+  | "unsupported_file"
+  | "unreadable_timetable"
+  | "file_parsing_failed";
+
 export async function extractTimetableFileContent(
   bytes: Uint8Array,
   fileName: string,
   mimeType: string,
-): Promise<{ content: TimetableExtractedContent | null; error?: string }> {
+): Promise<{
+  content: TimetableExtractedContent | null;
+  error?: string;
+  errorCode?: TimetableExtractFileErrorCode;
+}> {
   const kind = inferTimetableFileKind(fileName, mimeType);
 
   if (kind === "image") {
@@ -145,7 +154,13 @@ export async function extractTimetableFileContent(
     try {
       const rows = await extractXlsxGrid(bytes);
       const text = trimExtractedText(xlsxGridToText(rows), 80_000);
-      if (!text) return { content: null, error: "No readable cells found in spreadsheet." };
+      if (!text) {
+        return {
+          content: null,
+          error: "No readable cells found in spreadsheet.",
+          errorCode: "unreadable_timetable",
+        };
+      }
       return {
         content: {
           mode: "text",
@@ -155,27 +170,41 @@ export async function extractTimetableFileContent(
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : "Spreadsheet extraction failed";
-      return { content: null, error: message };
+      return { content: null, error: message, errorCode: "file_parsing_failed" };
     }
   }
 
   if (kind === "pdf") {
     try {
       const text = trimExtractedText(await extractPdfText(bytes), 80_000);
-      if (!text) return { content: null, error: "No readable text found in PDF." };
+      if (!text) {
+        return {
+          content: null,
+          error: "No readable text found in PDF.",
+          errorCode: "unreadable_timetable",
+        };
+      }
       return { content: { mode: "text", text } };
     } catch (err) {
       const message = err instanceof Error ? err.message : "PDF extraction failed";
-      return { content: null, error: message };
+      return { content: null, error: message, errorCode: "file_parsing_failed" };
     }
   }
 
   if (kind === "pptx" || kind === "ppt") {
     const lessonType = kind === "pptx" ? "pptx" : "ppt";
     const result = await extractLessonFileText(bytes, lessonType);
-    if (result.error && !result.text) return { content: null, error: result.error };
+    if (result.error && !result.text) {
+      return { content: null, error: result.error, errorCode: "file_parsing_failed" };
+    }
     const text = trimExtractedText(result.text, 80_000);
-    if (!text) return { content: null, error: result.error ?? "No readable slide text found." };
+    if (!text) {
+      return {
+        content: null,
+        error: result.error ?? "No readable slide text found.",
+        errorCode: "unreadable_timetable",
+      };
+    }
     return {
       content: {
         mode: "text",
@@ -190,8 +219,9 @@ export async function extractTimetableFileContent(
       content: null,
       error:
         "Legacy .xls files are not parsed deterministically. Please upload .xlsx or a PDF/image timetable.",
+      errorCode: "unsupported_file",
     };
   }
 
-  return { content: null, error: "Unsupported timetable file type." };
+  return { content: null, error: "Unsupported timetable file type.", errorCode: "unsupported_file" };
 }

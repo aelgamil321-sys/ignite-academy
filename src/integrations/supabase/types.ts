@@ -76,6 +76,7 @@ export type Database = {
           published: boolean
           size: string
           subject_category: string
+          teaching_subject: string
           title: Json
           type: string
           unit: Json
@@ -129,6 +130,7 @@ export type Database = {
           published: boolean
           quiz: Json
           subject_category: string
+          teaching_subject: string
           title: Json
           unit: Json
           vocab: Json
@@ -423,6 +425,7 @@ export type Database = {
           id: string
           islamic_group: string | null
           section: string | null
+          subject_type: string
           teacher_id: string
         }
         Insert: {
@@ -431,6 +434,7 @@ export type Database = {
           id?: string
           islamic_group?: string | null
           section?: string | null
+          subject_type?: string
           teacher_id: string
         }
         Update: {
@@ -439,6 +443,7 @@ export type Database = {
           id?: string
           islamic_group?: string | null
           section?: string | null
+          subject_type?: string
           teacher_id?: string
         }
         Relationships: []

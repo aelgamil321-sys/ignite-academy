@@ -20,9 +20,15 @@ import {
 } from "@/lib/student-academics";
 import type { Lang } from "@/lib/i18n-config";
 import { translateKey } from "@/lib/i18n";
+import {
+  DEFAULT_TEACHING_SUBJECT,
+  normalizeTeachingSubjectType,
+  type TeachingSubjectType,
+} from "@/lib/teacher-assignment-subject";
 
 export type TeacherAssignmentScope = {
   id: string;
+  subject_type: TeachingSubjectType;
   grade: string;
   section: StudentSection | null;
   islamic_group: IslamicGroup | null;
@@ -63,6 +69,7 @@ export type ClassScopeFilter = {
   grade?: string;
   section?: StudentSection | "";
   islamic_group?: IslamicGroup | "";
+  subject_type?: TeachingSubjectType | "";
 };
 
 export function formatClassScopeLabel(
@@ -145,7 +152,9 @@ export function teacherReportSectionOptions(
     return [...STUDENT_SECTIONS];
   }
 
-  const matching = context.assignments.filter((assignment) => gradeMatches(assignment.grade, grade));
+  const matching = context.assignments.filter((assignment) =>
+    gradeMatches(assignment.grade, grade),
+  );
   if (matching.length === 0) return [];
 
   const sectionSet = new Set<StudentSection>();
@@ -190,6 +199,7 @@ export async function fetchTeacherContext(userId: string): Promise<TeacherContex
 
   const assignments: TeacherAssignmentScope[] = (assignmentsRes.data ?? []).map((row) => ({
     id: row.id,
+    subject_type: normalizeTeachingSubjectType(row.subject_type),
     grade: row.grade,
     section: normalizeStudentSection(row.section),
     islamic_group: normalizeIslamicGroup(row.islamic_group),
@@ -421,6 +431,7 @@ export async function fetchScopedParents(students: ScopedStudentRow[]): Promise<
 export function assignmentScopeOptionsForGrade(
   context: TeacherContext,
   grade: string,
+  subject?: TeachingSubjectType,
 ): {
   sections: Array<StudentSection | null>;
   groups: Array<IslamicGroup | null>;
@@ -432,7 +443,11 @@ export function assignmentScopeOptionsForGrade(
     };
   }
 
-  const matching = context.assignments.filter((a) => gradeMatches(a.grade, grade));
+  const matching = context.assignments.filter((assignment) => {
+    if (!gradeMatches(assignment.grade, grade)) return false;
+    if (subject && assignment.subject_type !== subject) return false;
+    return true;
+  });
   if (matching.length === 0) {
     return { sections: [], groups: [] };
   }
@@ -453,4 +468,60 @@ export function assignmentScopeOptionsForGrade(
 export function teacherCanManageGrade(context: TeacherContext, grade: string): boolean {
   const gradeNorm = normalizeGradeSlug(grade) || grade;
   return context.assignedGrades.includes(gradeNorm);
+}
+
+export function teacherCanManageLessonScope(
+  context: TeacherContext,
+  grade: string,
+  subject: TeachingSubjectType = DEFAULT_TEACHING_SUBJECT,
+): boolean {
+  if (context.isLeadTeacher) return true;
+  const gradeNorm = normalizeGradeSlug(grade) || grade;
+  return context.assignments.some(
+    (assignment) =>
+      assignment.subject_type === subject &&
+      (normalizeGradeSlug(assignment.grade) || assignment.grade) === gradeNorm,
+  );
+}
+
+export function teacherAssignedGradesForSubject(
+  context: TeacherContext,
+  subject: TeachingSubjectType,
+): string[] {
+  if (context.isLeadTeacher) return grades.map((g) => g.slug);
+  const slugs = [
+    ...new Set(
+      context.assignments
+        .filter((assignment) => assignment.subject_type === subject)
+        .map((assignment) => normalizeGradeSlug(assignment.grade) || assignment.grade)
+        .filter(Boolean),
+    ),
+  ];
+  return slugs.sort((a, b) => {
+    const ai = grades.findIndex((g) => g.slug === a);
+    const bi = grades.findIndex((g) => g.slug === b);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+}
+
+export function teacherLessonInScope(
+  context: TeacherContext,
+  lesson: { grade: string; teachingSubject?: TeachingSubjectType | null },
+): boolean {
+  if (context.isLeadTeacher) return true;
+  const subject = normalizeTeachingSubjectType(lesson.teachingSubject ?? DEFAULT_TEACHING_SUBJECT);
+  return context.assignments.some(
+    (assignment) =>
+      assignment.subject_type === subject &&
+      gradeMatches(assignment.grade, lesson.grade),
+  );
+}
+
+/** Student grade pages: legacy lessons without teaching_subject remain visible (Islamic default). */
+export function studentLessonVisibleForGrade(
+  lesson: { published: boolean; grade: string; teachingSubject?: TeachingSubjectType | null },
+  gradeSlug: string,
+): boolean {
+  if (!lesson.published) return false;
+  return gradeMatches(lesson.grade, gradeSlug);
 }

@@ -67,7 +67,7 @@ function emptyPlan(partial: Partial<WeeklyPlanRow> = {}): WeeklyPlanRow {
 
 export function runWeeklyPlanBoundaryTests(): WeeklyPlanScopeTestResult[] {
   const teacherAAssignments: TeacherAssignmentScope[] = [
-    { id: "1", grade: "10", section: "A", islamic_group: "B" },
+    { id: "1", subject_type: "islamic_education", grade: "10", section: "A", islamic_group: "B" },
   ];
 
   const fullCore = emptyPlan({

@@ -27,6 +27,7 @@ function assignment(
   return {
     id: partial.id ?? "a1",
     teacher_id: partial.teacher_id,
+    subject_type: partial.subject_type ?? "islamic_education",
     grade: partial.grade,
     section: partial.section ?? null,
     islamic_group: partial.islamic_group ?? "A",

@@ -26,6 +26,11 @@ import {
   type AnnouncementAudience,
 } from "./announcement-audience";
 import { normalizeStudentSection, type StudentSection } from "./student-academics";
+import {
+  DEFAULT_TEACHING_SUBJECT,
+  normalizeTeachingSubjectType,
+  type TeachingSubjectType,
+} from "./teacher-assignment-subject";
 
 // ---------- Types ----------
 export interface CustomLesson {
@@ -47,6 +52,7 @@ export interface CustomLesson {
   pdfArUrl?: string; pdfEnUrl?: string;
   quiz: QuizQuestion[];
   subjectCategory: SubjectCategory;
+  teachingSubject: TeachingSubjectType;
   published: boolean;
   createdAt: number;
   createdBy?: string | null;
@@ -153,6 +159,7 @@ type LessonRow = {
   pdf_ar_url?: string | null; pdf_en_url?: string | null;
   quiz: QuizQuestion[]; published: boolean; created_at: string;
   subject_category?: string | null;
+  teaching_subject?: string | null;
   is_deleted?: boolean;
   created_by?: string | null;
 };
@@ -186,6 +193,7 @@ const lessonFromRow = (r: LessonRow): CustomLesson => ({
   pdfArUrl: r.pdf_ar_url ?? undefined, pdfEnUrl: r.pdf_en_url ?? undefined,
   quiz: normalizeQuizList(Array.isArray(r.quiz) ? r.quiz : []),
   subjectCategory: ((r.subject_category ?? "quran") as SubjectCategory),
+  teachingSubject: normalizeTeachingSubjectType(r.teaching_subject ?? DEFAULT_TEACHING_SUBJECT),
   published: r.published,
   createdAt: new Date(r.created_at).getTime(),
   createdBy: r.created_by ?? null,
@@ -215,6 +223,7 @@ const lessonToRow = (l: Partial<CustomLesson>) => {
   if (l.pdfEnUrl !== undefined) o.pdf_en_url = l.pdfEnUrl ?? null;
   if (l.quiz !== undefined) o.quiz = l.quiz;
   if (l.subjectCategory !== undefined) o.subject_category = l.subjectCategory;
+  if (l.teachingSubject !== undefined) o.teaching_subject = l.teachingSubject;
   if (l.published !== undefined) o.published = l.published;
   return o;
 };

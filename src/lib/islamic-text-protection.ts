@@ -73,6 +73,23 @@ export function hasProtectedIslamicContent(text: string): boolean {
   return splitChunkByLines(text).some((s) => s.protected);
 }
 
+/** Corrupted replacement characters in honorifics/OCR — flag review, never auto-repair scripture. */
+export function hasCorruptedDisplayText(text: string): boolean {
+  if (!text) return false;
+  if (text.includes("\uFFFD")) return true;
+  if (/\?\?\?+/.test(text)) return true;
+  return false;
+}
+
+export type IslamicTextClassification = "none" | "protected" | "corrupted";
+
+/** Classify Islamic text for review vs translation continuation on ordinary fields. */
+export function classifyIslamicTextContent(text: string): IslamicTextClassification {
+  if (hasCorruptedDisplayText(text)) return "corrupted";
+  if (hasProtectedIslamicContent(text)) return "protected";
+  return "none";
+}
+
 /** Reassemble segments after translating only non-protected parts. */
 export function mergeProtectedSegments(
   segments: TextSegment[],

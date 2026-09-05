@@ -1,7 +1,5 @@
 /** Pure helpers for timetable vision requests (safe for QA fixtures). */
 
-import { TIMETABLE_SCHOOL_DAYS, TIMETABLE_PERIOD_KEYS } from "@/lib/timetable/timetable-transcription";
-
 export type TimetableImagePayloadInput = {
   mimeType: string;
   base64: string;
@@ -24,8 +22,13 @@ export function normalizeTimetableImageMimeType(mimeType: string): string {
   return "image/jpeg";
 }
 
-const TRANSCRIPTION_LAYOUT_GUIDE = `ROWS: ${TIMETABLE_SCHOOL_DAYS.join(", ")}
-COLUMNS: ${TIMETABLE_PERIOD_KEYS.map((k) => `Period ${k}`).join(", ")}
+const TRANSCRIPTION_LAYOUT_GUIDE = `Known coordinates (return each independently):
+Monday: p1, p2, p3, p4, p5, p6, p7
+Tuesday: p1, p2, p3, p4, p5, p6, p7
+Wednesday: p1, p2, p3, p4, p5, p6, p7
+Thursday: p1, p2, p3, p4, p5, p6, p7
+Friday: p1, p2, p3, p4, p5, p6, p7
+
 (Do not transcribe Break — the application inserts it after Period 4.)`;
 
 export function buildTimetableTranscriptionVisionContent(
@@ -42,12 +45,13 @@ export function buildTimetableTranscriptionVisionContent(
 
 ${TRANSCRIPTION_LAYOUT_GUIDE}
 
-Return the 5×7 matrix only. For each cell:
+Return the 5×7 matrix only. For each coordinate cell:
 - subject = visible abbreviation (ISL, QUR, …) or "" if empty
-- text = visible class label exactly as printed or "" if empty
+- text = visible class label exactly as printed (e.g. G11A/G11B) or "" if empty
+- confidence = 0.0–1.0 (use 0.97+ for clearly empty cells)
 - null only when genuinely unreadable
 
-Read each cell independently. Never shift content between columns.`,
+Read each coordinate independently. Never shift content between columns or rows.`,
     },
     {
       type: "input_image",

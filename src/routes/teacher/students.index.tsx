@@ -9,19 +9,24 @@ import {
   type ScopedStudentRow,
 } from "@/lib/teacher-dashboard";
 import { gradeDisplayName } from "@/lib/grade-utils";
+import {
+  isTeachingSubjectType,
+  teachingSubjectLabel,
+} from "@/lib/teacher-assignment-subject";
 
 export const Route = createFileRoute("/teacher/students/")({
   validateSearch: (s: Record<string, unknown>) => ({
     grade: typeof s.grade === "string" ? s.grade : "",
     section: typeof s.section === "string" ? s.section : "",
     islamic_group: typeof s.islamic_group === "string" ? s.islamic_group : "",
+    subject_type: typeof s.subject_type === "string" ? s.subject_type : "",
   }),
   component: TeacherStudentsPage,
 });
 
 function TeacherStudentsPage() {
   const { lang, tr } = useI18n();
-  const { grade, section, islamic_group } = Route.useSearch();
+  const { grade, section, islamic_group, subject_type } = Route.useSearch();
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<ScopedStudentRow[]>([]);
 
@@ -47,7 +52,16 @@ function TeacherStudentsPage() {
 
   const filterLabel =
     grade
-      ? `${gradeDisplayName(grade, lang)}${section ? ` · ${section}` : ""}${islamic_group ? ` · ${islamic_group}` : ""}`
+      ? [
+          isTeachingSubjectType(subject_type)
+            ? teachingSubjectLabel(subject_type, lang)
+            : null,
+          gradeDisplayName(grade, lang),
+          section || null,
+          islamic_group || null,
+        ]
+          .filter(Boolean)
+          .join(" · ")
       : null;
 
   if (loading) {

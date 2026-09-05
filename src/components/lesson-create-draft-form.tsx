@@ -14,6 +14,12 @@ import {
 } from "@/lib/lesson-main-file";
 import { serializeVocabForStorage } from "@/lib/lesson-vocab";
 import { uploadLessonFile, parseLessonUuid } from "@/lib/upload";
+import {
+  DEFAULT_TEACHING_SUBJECT,
+  TEACHING_SUBJECT_TYPES,
+  teachingSubjectLabel,
+  type TeachingSubjectType,
+} from "@/lib/teacher-assignment-subject";
 
 const INPUT_CLASS =
   "block w-full min-w-0 rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm text-foreground shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60";
@@ -22,6 +28,7 @@ type SubmitPhase = "idle" | "creating" | "uploading";
 
 export type LessonCreateDraftFormProps = {
   allowedGradeSlugs: string[];
+  allowedGradesBySubject?: Partial<Record<TeachingSubjectType, string[]>>;
   backTo: "/teacher/lessons" | "/admin/lessons";
   backLabel: string;
   editTo: "/teacher/lessons/edit/$lessonId" | "/admin/lessons/edit/$lessonId";
@@ -61,6 +68,7 @@ function Field({
 
 export function LessonCreateDraftForm({
   allowedGradeSlugs,
+  allowedGradesBySubject,
   backTo,
   backLabel,
   editTo,
@@ -71,7 +79,21 @@ export function LessonCreateDraftForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inFlightRef = useRef(false);
 
-  const normalizedAllowed = allowedGradeSlugs.map(normalizeGradeSlug);
+  const subjectGradeMap: Record<TeachingSubjectType, string[]> = {
+    islamic_education:
+      allowedGradesBySubject?.islamic_education ??
+      allowedGradeSlugs.map(normalizeGradeSlug),
+    quran: allowedGradesBySubject?.quran ?? allowedGradeSlugs.map(normalizeGradeSlug),
+  };
+  const availableSubjects = TEACHING_SUBJECT_TYPES.filter(
+    (subject) => subjectGradeMap[subject].length > 0,
+  );
+
+  const [teachingSubject, setTeachingSubject] = useState<TeachingSubjectType>(
+    () => availableSubjects[0] ?? DEFAULT_TEACHING_SUBJECT,
+  );
+
+  const normalizedAllowed = subjectGradeMap[teachingSubject].map(normalizeGradeSlug);
   const gradeOptions = grades.filter((g) =>
     normalizedAllowed.some((slug) => normalizeGradeSlug(g.slug) === slug),
   );
@@ -91,12 +113,13 @@ export function LessonCreateDraftForm({
   const gradeValid = Boolean(
     gradeSlug && normalizedAllowed.some((g) => normalizeGradeSlug(g) === gradeSlug),
   );
+  const subjectValid = availableSubjects.includes(teachingSubject);
   const unitValid = Boolean(unit.trim());
   const titleValid = Boolean(title.trim());
   const outcomeValid = Boolean(outcome.trim());
   const fileValidation = selectedFile ? validateLessonMainFileForCreate(selectedFile) : null;
   const fileValid = Boolean(selectedFile && !fileValidation);
-  const formValid = gradeValid && unitValid && titleValid && outcomeValid && fileValid;
+  const formValid = subjectValid && gradeValid && unitValid && titleValid && outcomeValid && fileValid;
   const busy = submitPhase !== "idle";
 
   const unitError = touched && !unitValid ? L("Unit number is required", "رقم الوحدة مطلوب")[lang] : null;
@@ -162,8 +185,21 @@ export function LessonCreateDraftForm({
       vocab: serializeVocabForStorage([]),
       quiz: [],
       subject_category: "quran" as const,
+      teaching_subject: teachingSubject,
       published: false,
     };
+  };
+
+  const onTeachingSubjectChange = (nextSubject: TeachingSubjectType) => {
+    setTeachingSubject(nextSubject);
+    const nextAllowed = subjectGradeMap[nextSubject].map(normalizeGradeSlug);
+    const nextGradeOptions = grades.filter((g) =>
+      nextAllowed.some((slug) => normalizeGradeSlug(g.slug) === slug),
+    );
+    const currentNorm = normalizeGradeSlug(grade);
+    if (!nextAllowed.some((slug) => slug === currentNorm)) {
+      setGrade(nextGradeOptions[0]?.slug ?? "");
+    }
   };
 
   const uploadSelectedFile = async (lessonId: string, file: File) => {
@@ -281,6 +317,23 @@ export function LessonCreateDraftForm({
 
       <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] sm:p-8 lg:p-10">
         <div className="grid gap-6 md:grid-cols-2">
+          {availableSubjects.length > 1 || allowedGradesBySubject ? (
+            <Field label={L("Subject", "المادة")[lang]} required>
+              <select
+                className={INPUT_CLASS}
+                value={teachingSubject}
+                disabled={busy || availableSubjects.length <= 1}
+                onChange={(e) => onTeachingSubjectChange(e.target.value as TeachingSubjectType)}
+              >
+                {availableSubjects.map((subject) => (
+                  <option key={subject} value={subject}>
+                    {teachingSubjectLabel(subject, lang)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : null}
+
           <Field label={L("Grade", "الصف")[lang]} required>
             <select
               className={INPUT_CLASS}

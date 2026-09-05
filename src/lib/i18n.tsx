@@ -37,6 +37,10 @@ import {
   translateEducationalContent,
   type EducationalContentType,
 } from "@/lib/translate-content";
+import {
+  resolveLocalizedContent,
+  assertSafeReactLocalizedChild,
+} from "@/lib/localized-content-resolve";
 
 export type { Lang, ContentLocale } from "@/lib/i18n-config";
 export { L, LANG_OPTIONS, pickBi, pickBiLocale, uiBi } from "@/lib/i18n-config";
@@ -386,6 +390,52 @@ export const t = {
   student_profile_grade_readonly: {
     en: "Your grade is assigned by the academy and cannot be changed here.",
     ar: "يُحدَّد صفّك من قبل الأكاديمية ولا يمكن تغييره من هنا.",
+  },
+  student_profile_email_new: { en: "New email", ar: "البريد الإلكتروني الجديد" },
+  student_profile_email_confirm: { en: "Confirm new email", ar: "تأكيد البريد الجديد" },
+  student_profile_email_same: {
+    en: "Enter a new email that is different from your current email.",
+    ar: "أدخل بريدًا إلكترونيًا جديدًا مختلفًا عن بريدك الحالي.",
+  },
+  student_profile_email_mismatch: {
+    en: "New email and confirmation do not match.",
+    ar: "البريد الجديد وتأكيده غير متطابقين.",
+  },
+  student_profile_email_empty: {
+    en: "Enter your new email address.",
+    ar: "أدخل عنوان بريدك الإلكتروني الجديد.",
+  },
+  student_profile_email_updated: {
+    en: "Login email updated.",
+    ar: "تم تحديث بريد تسجيل الدخول.",
+  },
+  student_profile_grade_updated: {
+    en: "Grade updated.",
+    ar: "تم تحديث الصف.",
+  },
+  student_profile_grade_same: {
+    en: "Choose a different grade.",
+    ar: "اختر صفًا مختلفًا.",
+  },
+  student_profile_grade_invalid: {
+    en: "Choose a valid grade.",
+    ar: "اختر صفًا صالحًا.",
+  },
+  student_profile_email_confirm_dialog: {
+    en: "The new email will become your login email for the platform. Continue?",
+    ar: "سيصبح البريد الجديد هو البريد المستخدم لتسجيل الدخول إلى المنصة. هل تريد المتابعة؟",
+  },
+  student_profile_grade_confirm_dialog: {
+    en: "Changing your grade will update the lessons and content available to you. Your previous results will not be deleted. Continue?",
+    ar: "سيؤدي تغيير الصف إلى تحديث الدروس والمحتوى الظاهر لك. لن يتم حذف نتائجك السابقة. هل تريد المتابعة؟",
+  },
+  student_profile_email_change_failed: {
+    en: "Could not update your login email. Your current email is unchanged.",
+    ar: "تعذّر تحديث بريد تسجيل الدخول. بريدك الحالي لم يتغيّر.",
+  },
+  student_profile_grade_change_failed: {
+    en: "Could not update your grade. Your current grade is unchanged.",
+    ar: "تعذّر تحديث الصف. صفّك الحالي لم يتغيّر.",
   },
   student_profile_progress_summary: { en: "Progress Summary", ar: "ملخص التقدّم" },
   student_profile_progress_summary_lead: {
@@ -1046,6 +1096,9 @@ export const t = {
   teacher_assigned_sections: { en: "Assigned sections", ar: "الشعب المكلّفة" },
   teacher_assigned_groups: { en: "Islamic groups", ar: "المجموعات الإسلامية" },
   teacher_all_sections: { en: "All sections", ar: "كل الشعب" },
+  teacher_subject_islamic_education: { en: "Islamic Education", ar: "التربية الإسلامية" },
+  teacher_subject_quran: { en: "Qur'an", ar: "القرآن الكريم" },
+  teacher_lesson_subject: { en: "Subject", ar: "المادة" },
   teacher_all_groups: { en: "Both groups", ar: "كلا المجموعتين" },
   teacher_loading: { en: "Loading…", ar: "جارٍ التحميل…" },
   teacher_load_error: { en: "Could not load teacher dashboard.", ar: "تعذّر تحميل لوحة المعلم." },
@@ -1369,8 +1422,8 @@ export const t = {
     ar: "استيراد جدولك",
   },
   teacher_timetable_import_hint: {
-    en: "Upload JPG, PNG, PDF, Excel, or PowerPoint (max 25 MB).",
-    ar: "ارفع JPG أو PNG أو PDF أو Excel أو PowerPoint (بحد أقصى 25 ميجابايت).",
+    en: "For best accuracy, upload the original Excel timetable when available. JPG, PNG, PDF, and PowerPoint are also supported (max 25 MB).",
+    ar: "لأفضل دقة، ارفع جدول Excel الأصلي عند توفره. يمكن أيضًا رفع JPG أو PNG أو PDF أو PowerPoint (بحد أقصى 25 ميجابايت).",
   },
   teacher_timetable_read_ai: {
     en: "Read timetable with AI",
@@ -1439,6 +1492,22 @@ export const t = {
   teacher_timetable_extract_error: {
     en: "Could not read the timetable. Try another file or edit manually.",
     ar: "تعذرت قراءة الجدول. جرّب ملفًا آخر أو عدّل يدويًا.",
+  },
+  teacher_timetable_error_unsupported_file: {
+    en: "Unsupported file type. Upload JPG, PNG, PDF, Excel (.xlsx), or PowerPoint (.pptx).",
+    ar: "نوع ملف غير مدعوم. ارفع JPG أو PNG أو PDF أو Excel (.xlsx) أو PowerPoint (.pptx).",
+  },
+  teacher_timetable_error_unreadable: {
+    en: "Unreadable timetable. Try a clearer file or the original Excel export.",
+    ar: "جدول غير قابل للقراءة. جرّب ملفًا أوضح أو تصدير Excel الأصلي.",
+  },
+  teacher_timetable_error_parsing_failed: {
+    en: "File parsing failed. Try re-exporting the timetable or upload Excel (.xlsx).",
+    ar: "فشل تحليل الملف. أعد تصدير الجدول أو ارفع Excel (.xlsx).",
+  },
+  teacher_timetable_error_ai_unavailable: {
+    en: "AI temporarily unavailable. Try again shortly or fill the grid manually.",
+    ar: "الذكاء الاصطناعي غير متاح مؤقتًا. أعد المحاولة قريبًا أو عبّئ الجدول يدويًا.",
   },
   teacher_timetable_confirm_error: {
     en: "Could not save your confirmed schedule.",
@@ -2452,12 +2521,15 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const bi = useCallback(
     (text?: Bi | null, meta?: BiFieldMeta) => {
       if (!text) return "";
+      assertSafeReactLocalizedChild(text, meta?.fieldName);
 
       const stored = resolveStoredBiText(text, lang);
       if (stored) return stored;
 
       const source = biSourceForTranslation(text, lang);
-      if (!source) return biPendingDisplayText(text, lang);
+      if (!source) {
+        return resolveLocalizedContent(text, lang, "display").value;
+      }
 
       const lessonId = meta?.lessonId ?? lessonScopeRef.current ?? undefined;
       const fieldName = meta?.fieldName ?? "content";
@@ -2481,7 +2553,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         fieldName,
       });
 
-      return biPendingDisplayText(text, lang);
+      return resolveLocalizedContent(text, lang, "display").value;
     },
     [lang, contentRev],
   );

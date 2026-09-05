@@ -18,6 +18,7 @@ import {
 } from "@/components/lesson-ai-multilingual-review";
 import type { LessonAiReviewBundle } from "@/lib/lesson-ai-saved-content";
 import { reconstructSourceLessonOutput } from "@/lib/lesson-ai-saved-content";
+import { localizeLessonGenerationWarning } from "@/lib/lesson-generation-warnings";
 
 export type LessonAiGenerationUiStatus =
   | "disabled"
@@ -358,7 +359,7 @@ export function LessonAiGeneratePanel({
           {metadata.warnings && metadata.warnings.length > 0 ? (
             <ul className="list-disc ps-4 text-amber-700 dark:text-amber-300">
               {metadata.warnings.map((w) => (
-                <li key={w}>{w}</li>
+                <li key={w}>{localizeLessonGenerationWarning(w, lang)}</li>
               ))}
             </ul>
           ) : null}

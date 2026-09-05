@@ -37,6 +37,12 @@ import {
   type IslamicGroup,
   type StudentSection,
 } from "@/lib/student-academics";
+import {
+  DEFAULT_TEACHING_SUBJECT,
+  TEACHING_SUBJECT_TYPES,
+  teachingSubjectLabel,
+  type TeachingSubjectType,
+} from "@/lib/teacher-assignment-subject";
 
 const selectClass =
   "mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm";
@@ -54,12 +60,14 @@ function formatRequestDate(iso: string, lang: Lang): string {
 }
 
 type AssignmentFormState = {
+  subject_type: TeachingSubjectType;
   grade: string;
   section: "" | StudentSection;
   islamic_group: "" | IslamicGroup;
 };
 
 const EMPTY_ASSIGNMENT_FORM: AssignmentFormState = {
+  subject_type: DEFAULT_TEACHING_SUBJECT,
   grade: grades[0]?.slug ?? "8",
   section: "",
   islamic_group: "",
@@ -67,6 +75,7 @@ const EMPTY_ASSIGNMENT_FORM: AssignmentFormState = {
 
 function assignmentInputFromForm(form: AssignmentFormState): TeacherAssignmentInput {
   return {
+    subject_type: form.subject_type,
     grade: form.grade,
     section: form.section ? normalizeStudentSection(form.section) : null,
     islamic_group: form.islamic_group ? normalizeIslamicGroup(form.islamic_group) : null,
@@ -75,16 +84,22 @@ function assignmentInputFromForm(form: AssignmentFormState): TeacherAssignmentIn
 
 function formFromAssignment(row: TeacherAssignmentRow): AssignmentFormState {
   return {
+    subject_type: row.subject_type ?? DEFAULT_TEACHING_SUBJECT,
     grade: row.grade,
     section: (normalizeStudentSection(row.section) ?? "") as "" | StudentSection,
     islamic_group: (normalizeIslamicGroup(row.islamic_group) ?? "") as "" | IslamicGroup,
   };
 }
 
+function emptyFormForSubject(subject: TeachingSubjectType): AssignmentFormState {
+  return { ...EMPTY_ASSIGNMENT_FORM, subject_type: subject };
+}
+
 function formatAssignmentScope(
   row: TeacherAssignmentRow,
   lang: "en" | "ar",
 ): string {
+  const subjectText = teachingSubjectLabel(row.subject_type ?? DEFAULT_TEACHING_SUBJECT, lang);
   const gradeLabel = gradeDisplayName(row.grade, lang);
   const sectionText = row.section
     ? sectionLabel(normalizeStudentSection(row.section), lang)
@@ -92,20 +107,45 @@ function formatAssignmentScope(
   const groupText = row.islamic_group
     ? islamicGroupLabel(normalizeIslamicGroup(row.islamic_group), lang)
     : L("Both Islamic groups", "كلا المجموعتين الإسلامية")[lang];
-  return `${gradeLabel} · ${sectionText} · ${groupText}`;
+  return `${subjectText} · ${gradeLabel} · ${sectionText} · ${groupText}`;
 }
 
 function AssignmentFormFields({
   form,
   onChange,
   lang,
+  showSubject = false,
 }: {
   form: AssignmentFormState;
   onChange: (next: AssignmentFormState) => void;
   lang: "en" | "ar";
+  showSubject?: boolean;
 }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {showSubject ? (
+        <label className="block sm:col-span-2 lg:col-span-4">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {L("Subject", "المادة")[lang]}
+          </span>
+          <select
+            className={selectClass}
+            value={form.subject_type}
+            onChange={(e) =>
+              onChange({
+                ...form,
+                subject_type: e.target.value as TeachingSubjectType,
+              })
+            }
+          >
+            {TEACHING_SUBJECT_TYPES.map((subject) => (
+              <option key={subject} value={subject}>
+                {teachingSubjectLabel(subject, lang)}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
       <label className="block">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {L("Grade", "الصف")[lang]}
@@ -199,7 +239,7 @@ function TeacherAssignmentEditor({
 
   return (
     <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
-      <AssignmentFormFields form={form} onChange={setForm} lang={lang} />
+      <AssignmentFormFields form={form} onChange={setForm} lang={lang} showSubject />
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -223,6 +263,111 @@ function TeacherAssignmentEditor({
   );
 }
 
+function SubjectAssignmentBlock({
+  subject,
+  teacherId,
+  assignments,
+  lang,
+  editingId,
+  setEditingId,
+  onRefresh,
+  onRemove,
+}: {
+  subject: TeachingSubjectType;
+  teacherId: string;
+  assignments: TeacherAssignmentRow[];
+  lang: "en" | "ar";
+  editingId: string | null;
+  setEditingId: (id: string | null) => void;
+  onRefresh: () => Promise<void>;
+  onRemove: (assignmentId: string) => Promise<void>;
+}) {
+  const [addForm, setAddForm] = useState<AssignmentFormState>(() => emptyFormForSubject(subject));
+  const [adding, setAdding] = useState(false);
+
+  const addAssignment = async () => {
+    setAdding(true);
+    try {
+      await addTeacherAssignment(teacherId, assignmentInputFromForm(addForm));
+      toast.success(L("Assignment added.", "تمت إضافة التكليف.")[lang]);
+      setAddForm(emptyFormForSubject(subject));
+      await onRefresh();
+    } catch (error) {
+      toast.error(formatError(error));
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-background/60 p-4 space-y-3">
+      <h5 className="text-sm font-semibold text-foreground">
+        {teachingSubjectLabel(subject, lang)}
+      </h5>
+      {assignments.length === 0 ? (
+        <p className="text-sm text-muted-foreground italic">
+          {L("No assignments for this subject yet.", "لا توجد تكليفات لهذه المادة بعد.")[lang]}
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {assignments.map((assignment) => (
+            <li key={assignment.id}>
+              {editingId === assignment.id ? (
+                <TeacherAssignmentEditor
+                  assignment={assignment}
+                  lang={lang}
+                  onSaved={() => {
+                    setEditingId(null);
+                    void onRefresh();
+                  }}
+                  onCancel={() => setEditingId(null)}
+                />
+              ) : (
+                <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5">
+                  <span className="flex-1 min-w-0 text-sm text-foreground">
+                    {formatAssignmentScope(assignment, lang)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(assignment.id)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    {L("Edit", "تعديل")[lang]}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void onRemove(assignment.id)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-destructive hover:underline"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    {L("Remove", "إزالة")[lang]}
+                  </button>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="rounded-xl border border-dashed border-border p-3 space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {L("Add assignment", "إضافة تكليف")[lang]}
+        </p>
+        <AssignmentFormFields form={addForm} onChange={setAddForm} lang={lang} />
+        <button
+          type="button"
+          disabled={adding}
+          onClick={() => void addAssignment()}
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-60"
+        >
+          {adding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+          {L("Add assignment", "إضافة تكليف")[lang]}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TeacherCard({
   teacher,
   lang,
@@ -232,24 +377,13 @@ function TeacherCard({
   lang: "en" | "ar";
   onRefresh: () => Promise<void>;
 }) {
-  const [addForm, setAddForm] = useState<AssignmentFormState>(EMPTY_ASSIGNMENT_FORM);
-  const [adding, setAdding] = useState(false);
   const [revoking, setRevoking] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const addAssignment = async () => {
-    setAdding(true);
-    try {
-      await addTeacherAssignment(teacher.userId, assignmentInputFromForm(addForm));
-      toast.success(L("Assignment added.", "تمت إضافة التكليف.")[lang]);
-      setAddForm(EMPTY_ASSIGNMENT_FORM);
-      await onRefresh();
-    } catch (error) {
-      toast.error(formatError(error));
-    } finally {
-      setAdding(false);
-    }
-  };
+  const assignmentsBySubject = TEACHING_SUBJECT_TYPES.map((subject) => ({
+    subject,
+    rows: teacher.assignments.filter((row) => row.subject_type === subject),
+  }));
 
   const removeAssignment = async (assignmentId: string) => {
     try {
@@ -312,71 +446,23 @@ function TeacherCard({
         </div>
       </div>
 
-      <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+      <div className="space-y-4">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {L("Teaching assignments", "تكليفات التدريس")[lang]}
         </h4>
-        {teacher.assignments.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">
-            {L("No grade assignments yet.", "لا توجد تكليفات صفوف بعد.")[lang]}
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {teacher.assignments.map((assignment) => (
-              <li key={assignment.id}>
-                {editingId === assignment.id ? (
-                  <TeacherAssignmentEditor
-                    assignment={assignment}
-                    lang={lang}
-                    onSaved={() => {
-                      setEditingId(null);
-                      void onRefresh();
-                    }}
-                    onCancel={() => setEditingId(null)}
-                  />
-                ) : (
-                  <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5">
-                    <span className="flex-1 min-w-0 text-sm text-foreground">
-                      {formatAssignmentScope(assignment, lang)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(assignment.id)}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                      {L("Edit", "تعديل")[lang]}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void removeAssignment(assignment.id)}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-destructive hover:underline"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      {L("Remove", "إزالة")[lang]}
-                    </button>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="rounded-xl border border-dashed border-border p-4 space-y-3">
-        <h4 className="text-sm font-semibold text-foreground">
-          {L("Add assignment", "إضافة تكليف")[lang]}
-        </h4>
-        <AssignmentFormFields form={addForm} onChange={setAddForm} lang={lang} />
-        <button
-          type="button"
-          disabled={adding}
-          onClick={() => void addAssignment()}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-60"
-        >
-          {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          {L("Add assignment", "إضافة تكليف")[lang]}
-        </button>
+        {assignmentsBySubject.map(({ subject, rows }) => (
+          <SubjectAssignmentBlock
+            key={subject}
+            subject={subject}
+            teacherId={teacher.userId}
+            assignments={rows}
+            lang={lang}
+            editingId={editingId}
+            setEditingId={setEditingId}
+            onRefresh={onRefresh}
+            onRemove={removeAssignment}
+          />
+        ))}
       </div>
     </article>
   );

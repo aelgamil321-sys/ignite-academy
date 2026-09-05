@@ -4,15 +4,13 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
 import { TEACHER_TIMETABLES_BUCKET } from "@/lib/teacher-timetable";
-import { extractTimetableFileContent } from "@/lib/timetable/timetable-file-extract.server";
-import { extractTimetableWithAi } from "@/lib/timetable/extract-timetable.server";
+import { runTeacherTimetableExtraction } from "@/lib/timetable/timetable-extract-pipeline.server";
 import {
   timetableScheduleSchema,
   type TimetableSchedule,
 } from "@/lib/timetable/timetable-types";
 import {
   normalizeTimetableSchedule,
-  scheduleHasNeedsReview,
 } from "@/lib/timetable/timetable-weekday";
 import { ensureFixedGridSchedule } from "@/lib/timetable/timetable-grid";
 import { TIMETABLE_GRID_VERSION } from "@/lib/timetable/timetable-types";
@@ -67,31 +65,27 @@ export async function handleExtractTeacherTimetable(): Promise<{
   if (downloadError || !blob) throw new Error("download_failed");
 
   const bytes = new Uint8Array(await blob.arrayBuffer());
-  const extracted = await extractTimetableFileContent(bytes, row.file_name, row.mime_type);
-  if (!extracted.content) {
-    throw new Error(extracted.error ?? "extract_failed");
-  }
-
-  const ai = await extractTimetableWithAi({
-    content: extracted.content,
+  const result = await runTeacherTimetableExtraction({
+    bytes,
     fileName: row.file_name,
+    mimeType: row.mime_type,
     teacherId,
   });
-  if (!ai.ok) {
-    console.error("[timetable-extract] AI failed", {
+
+  if (!result.ok) {
+    console.error("[timetable-extract] failed", {
       teacherId,
       fileName: row.file_name,
       mimeType: row.mime_type,
-      errorCode: ai.errorCode,
-      error: ai.error,
+      errorCode: result.errorCode,
     });
-    throw new Error(ai.errorCode);
+    throw new Error(result.errorCode);
   }
 
   return {
     ok: true,
-    schedule: ensureFixedGridSchedule(ai.schedule),
-    needsReview: scheduleHasNeedsReview(ai.schedule),
+    schedule: result.schedule,
+    needsReview: result.needsReview,
     fileName: row.file_name,
   };
 }
