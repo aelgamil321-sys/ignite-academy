@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+Disallow: /student/
+Disallow: /teacher/
+Disallow: /admin/
+Disallow: /parent/
+Disallow: /admin-login
+Disallow: /auth
+Disallow: /assignments/
+Disallow: /reset-password
+
+Sitemap: https://ignite-academy.ignite-school.workers.dev/sitemap.xml

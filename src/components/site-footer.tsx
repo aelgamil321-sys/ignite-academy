@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, Mail, MapPin, Phone } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAccountRole } from "@/hooks/use-account-role";
 
@@ -74,9 +74,6 @@ export function SiteFooter() {
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">{tr("ft_contact")}</h4>
           <ul className="space-y-3 text-sm opacity-85">
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hello@igniteislamic.academy</li>
-            <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +1 (555) 010-2030</li>
-            <li className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {tr("ft_online")}</li>
             <li><Link to="/contact" className="underline hover:text-primary">{tr("nav_contact")}</Link></li>
           </ul>
         </div>

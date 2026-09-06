@@ -6,22 +6,13 @@ import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { AcademyHomepage } from "@/components/academy-homepage";
 import { useI18n } from "@/lib/i18n";
-import { SITE_NAME } from "@/lib/site-branding";
+import { homepageHead } from "@/lib/seo";
 import { TeacherHomepage } from "@/components/teacher-homepage";
 import { useAccountRole, resolveHomeVariant } from "@/hooks/use-account-role";
 import { adminHomeNavigateTarget } from "@/lib/account-role";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: SITE_NAME },
-      { name: "description", content: "Bilingual online Islamic education for KG1–Grade 12. Explore lessons, videos, quizzes, worksheets and parent resources in English and Arabic." },
-      { property: "og:title", content: SITE_NAME },
-      { property: "og:description", content: "Bilingual Islamic education for KG1–Grade 12: lessons, videos, quizzes, worksheets and parent resources." },
-      { property: "og:url", content: "https://ignite-faith-learn.lovable.app/" },
-    ],
-    links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/" }],
-  }),
+  head: () => homepageHead(),
   component: Home,
 });
 

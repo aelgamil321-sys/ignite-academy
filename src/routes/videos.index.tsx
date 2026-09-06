@@ -13,17 +13,18 @@ import {
 } from "lucide-react";
 import videoPlaceholder from "@/assets/video-placeholder.jpg";
 
+import { publicPageHead } from "@/lib/seo";
+
 export const Route = createFileRoute("/videos/")({
-  head: () => ({
-    meta: [
-      { title: "Video Library — Ignite Islamic Academy" },
-      { name: "description", content: "Islamic video library organised by Quran, Hadith, Aqeedah, Fiqh, Seerah and Islamic Values. Videos are added by the academy admin." },
-      { property: "og:title", content: "Video Library — Ignite Islamic Academy" },
-      { property: "og:description", content: "Islamic video library across six core subjects." },
-      { property: "og:url", content: "https://ignite-faith-learn.lovable.app/videos" },
-    ],
-    links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/videos" }],
-  }),
+  head: () =>
+    publicPageHead({
+      title: "Video Library — Ignite Islamic Academy",
+      description:
+        "Islamic video library at Ignite Islamic Academy — Quran, Hadith, Aqeedah, Fiqh, Seerah and Islamic Values for KG through Grade 12.",
+      path: "/videos",
+      ogTitle: "Video Library — Ignite Islamic Academy",
+      ogDescription: "Islamic video library across six core subjects.",
+    }),
   component: VideosIndex,
 });
 

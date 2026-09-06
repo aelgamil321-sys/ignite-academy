@@ -4,9 +4,11 @@ import { useI18n } from "@/lib/i18n";
 import { getParentGuide } from "@/lib/extras";
 import { useCMS } from "@/lib/cms";
 
+import { privateRouteHead } from "@/lib/seo";
+
 export const Route = createFileRoute("/parent/$slug")({
   loader: ({ params }) => ({ slug: params.slug }),
-  head: () => ({ meta: [{ title: "Parent Guide — Ignite Islamic Academy" }] }),
+  head: () => privateRouteHead("Parent Guide — Ignite Islamic Academy"),
   component: ParentDetail,
 });
 

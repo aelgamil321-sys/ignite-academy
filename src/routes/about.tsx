@@ -2,18 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/page-shell";
 import { useI18n } from "@/lib/i18n";
 import { Sparkles, Compass, Heart } from "lucide-react";
+import { publicPageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About — Ignite Islamic Academy" },
-      { name: "description", content: "Learn about Ignite Islamic Academy's mission, vision and values — bilingual Islamic education for KG1 to Grade 12." },
-      { property: "og:title", content: "About — Ignite Islamic Academy" },
-      { property: "og:description", content: "Our mission, vision and values for bilingual Islamic education from KG1 to Grade 12." },
-      { property: "og:url", content: "https://ignite-faith-learn.lovable.app/about" },
-    ],
-    links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/about" }],
-  }),
+  head: () =>
+    publicPageHead({
+      title: "About — Ignite Islamic Academy",
+      description:
+        "Learn about Ignite Islamic Academy at Ignite School — bilingual Islamic education, mission, vision and values for KG through Grade 12 in Dubai, UAE.",
+      path: "/about",
+      ogTitle: "About — Ignite Islamic Academy",
+      ogDescription:
+        "Mission, vision and values for bilingual Islamic education from KG through Grade 12 at Ignite School.",
+    }),
   component: AboutPage,
 });
 

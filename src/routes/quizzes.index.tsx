@@ -10,21 +10,22 @@ import { grades } from "@/lib/curriculum";
 import { gradeMatches } from "@/lib/grade-utils";
 import { ClipboardCheck, ArrowRight, Search } from "lucide-react";
 
+import { publicPageHead } from "@/lib/seo";
+
 export const Route = createFileRoute("/quizzes/")({
   beforeLoad: async () => {
     await blockParentFromStudentRoutes();
     await redirectStudentQuizCatalog();
   },
-  head: () => ({
-    meta: [
-      { title: "Online Quizzes — Ignite Islamic Academy" },
-      { name: "description", content: "Test your Islamic Studies knowledge with interactive quizzes for every grade — instant scoring, bilingual questions in English and Arabic." },
-      { property: "og:title", content: "Online Quizzes — Ignite Islamic Academy" },
-      { property: "og:description", content: "Interactive bilingual Islamic Studies quizzes for KG1 to Grade 12." },
-      { property: "og:url", content: "https://ignite-faith-learn.lovable.app/quizzes" },
-    ],
-    links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/quizzes" }],
-  }),
+  head: () =>
+    publicPageHead({
+      title: "Online Quizzes — Ignite Islamic Academy",
+      description:
+        "Interactive Islamic Studies quizzes for every grade at Ignite Islamic Academy — bilingual questions in English and Arabic, KG through Grade 12.",
+      path: "/quizzes",
+      ogTitle: "Online Quizzes — Ignite Islamic Academy",
+      ogDescription: "Interactive bilingual Islamic Studies quizzes for KG through Grade 12.",
+    }),
   component: QuizzesIndex,
 });
 

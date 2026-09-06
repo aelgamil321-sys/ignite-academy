@@ -10,17 +10,18 @@ import { FileText, FileSpreadsheet, Presentation, Download, Search } from "lucid
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { publicPageHead } from "@/lib/seo";
+
 export const Route = createFileRoute("/resources")({
-  head: () => ({
-    meta: [
-      { title: "Resource Library — Ignite Islamic Academy" },
-      { name: "description", content: "Download PDFs, PowerPoints and worksheets for Islamic Studies — filterable by format and searchable across all grades." },
-      { property: "og:title", content: "Resource Library — Ignite Islamic Academy" },
-      { property: "og:description", content: "PDFs, PowerPoints and worksheets for Islamic Studies, KG1 to Grade 12." },
-      { property: "og:url", content: "https://ignite-faith-learn.lovable.app/resources" },
-    ],
-    links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/resources" }],
-  }),
+  head: () =>
+    publicPageHead({
+      title: "Resource Library — Ignite Islamic Academy",
+      description:
+        "Download PDFs, PowerPoints and worksheets for Islamic Studies at Ignite Islamic Academy — searchable resources for KG through Grade 12.",
+      path: "/resources",
+      ogTitle: "Resource Library — Ignite Islamic Academy",
+      ogDescription: "PDFs, PowerPoints and worksheets for Islamic Studies, KG through Grade 12.",
+    }),
   component: ResourcesPage,
 });
 

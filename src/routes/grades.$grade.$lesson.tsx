@@ -37,7 +37,12 @@ export const Route = createFileRoute("/grades/$grade/$lesson")({
     if (!grade) throw notFound();
     return { gradeSlug: params.grade, lessonSlug: params.lesson };
   },
-  head: () => ({ meta: [{ title: pageHeadTitle("lesson") }] }),
+  head: () => ({
+    meta: [
+      { title: pageHeadTitle("lesson") },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
   component: LessonRoutePage,
   notFoundComponent: LessonNotFound,
   errorComponent: ({ error }) => <div className="container-page py-20">Error: {error.message}</div>,

@@ -6,19 +6,19 @@ import { useI18n } from "@/lib/i18n";
 import { useAllAnnouncements } from "@/lib/cms";
 import { useAnnouncementsContentPrefetch } from "@/hooks/use-cms-content-prefetch";
 import { AnnouncementCard } from "@/components/announcement-card";
-import { pageHeadTitle } from "@/lib/page-head";
+
+import { publicPageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/announcements/")({
-  head: () => ({
-    meta: [
-      { title: pageHeadTitle("announcements") },
-      { name: "description", content: "Latest news, events, exam schedules and competition updates from Ignite Islamic Academy." },
-      { property: "og:title", content: "Announcements — Ignite Islamic Academy" },
-      { property: "og:description", content: "School news, events and competitions from Ignite Islamic Academy." },
-      { property: "og:url", content: "https://ignite-faith-learn.lovable.app/announcements" },
-    ],
-    links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/announcements" }],
-  }),
+  head: () =>
+    publicPageHead({
+      title: "Announcements — Ignite Islamic Academy",
+      description:
+        "Latest news, events, exam schedules and competition updates from Ignite Islamic Academy at Ignite School in Dubai, UAE.",
+      path: "/announcements",
+      ogTitle: "Announcements — Ignite Islamic Academy",
+      ogDescription: "School news, events and competitions from Ignite Islamic Academy.",
+    }),
   component: AnnouncementsIndex,
 });
 

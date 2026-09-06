@@ -4,7 +4,7 @@ import { ParentAccountRequired } from "@/components/parent-account-required";
 import { useI18n } from "@/lib/i18n";
 import { useAllParentGuides } from "@/lib/cms";
 import { resolveParentCornerAccess } from "@/lib/parent-corner-access";
-import { pageHeadTitle } from "@/lib/page-head";
+import { privateRouteHead } from "@/lib/seo";
 import { ArrowRight, Users } from "lucide-react";
 
 export const Route = createFileRoute("/parent/")({
@@ -21,16 +21,11 @@ export const Route = createFileRoute("/parent/")({
     const access = await resolveParentCornerAccess();
     return { showStudentNotice: access.kind === "student" };
   },
-  head: () => ({
-    meta: [
-      { title: pageHeadTitle("parent_corner") },
-      { name: "description", content: "Parent guides, resources and tips to support your child's Islamic education at home, from KG1 through Grade 12." },
-      { property: "og:title", content: "Parent Corner — Ignite Islamic Academy" },
-      { property: "og:description", content: "Guides and resources for parents supporting Islamic education at home." },
-      { property: "og:url", content: "https://ignite-faith-learn.lovable.app/parent" },
-    ],
-    links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/parent" }],
-  }),
+  head: () =>
+    privateRouteHead(
+      "Parent Corner — Ignite Islamic Academy",
+      "Parent guides and resources for Ignite Islamic Academy.",
+    ),
   component: ParentPage,
 });
 

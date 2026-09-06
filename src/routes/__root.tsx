@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider, useI18n } from "../lib/i18n";
 import { CMSProvider } from "../lib/cms";
 import { SITE_NAME } from "../lib/site-branding";
+import { absoluteOgImageUrl, googleSiteVerificationMeta, HOME_PAGE_DESCRIPTION } from "../lib/seo";
 import { Toaster } from "../components/ui/sonner";
 import { PasswordRecoveryGuard } from "../components/password-recovery-guard";
 
@@ -86,10 +87,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: SITE_NAME },
-      { name: "description", content: "Online Islamic education for KG1–Grade 12: lessons, worksheets, videos, quizzes and parent resources." },
+      { name: "description", content: HOME_PAGE_DESCRIPTION },
       { property: "og:site_name", content: SITE_NAME },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: absoluteOgImageUrl() },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: absoluteOgImageUrl() },
+      ...googleSiteVerificationMeta(),
     ],
     links: [
       { rel: "stylesheet", href: appCss },

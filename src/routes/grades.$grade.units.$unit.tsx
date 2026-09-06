@@ -42,14 +42,11 @@ export const Route = createFileRoute("/grades/$grade/units/$unit")({
     if (!grade) throw notFound();
     return { grade, unitSlug: params.unit };
   },
-  head: ({ params }) => ({
+  head: () => ({
     meta: [
       { title: `Unit — Ignite Islamic Academy` },
       { name: "description", content: "Unit content management." },
       { name: "robots", content: "noindex,nofollow" },
-    ],
-    links: [
-      { rel: "canonical", href: `https://ignite-faith-learn.lovable.app/grades/${params.grade}/units/${params.unit}` },
     ],
   }),
   component: GradeUnitRoutePage,

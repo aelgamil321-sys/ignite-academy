@@ -48,7 +48,6 @@ export const adminRouteHead = () => ({
     { name: "description", content: "Manage lessons, articles, videos, quizzes, resources and announcements for Ignite Islamic Academy." },
     { name: "robots", content: "noindex,nofollow" },
   ],
-  links: [{ rel: "canonical", href: "https://ignite-faith-learn.lovable.app/admin" }],
 });
 
 export function AdminGate() {

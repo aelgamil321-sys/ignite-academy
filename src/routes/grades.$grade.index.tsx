@@ -6,6 +6,7 @@ import { GradeDetailPanel } from "@/components/grade-detail-panel";
 import { getGrade } from "@/lib/curriculum";
 import { studentGradeSearch } from "@/lib/student-grade-nav";
 import { useI18n } from "@/lib/i18n";
+import { publicPageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/grades/$grade/")({
   validateSearch: studentGradeSearch,
@@ -20,16 +21,13 @@ export const Route = createFileRoute("/grades/$grade/")({
   },
   head: ({ loaderData, params }) => {
     const name = loaderData?.grade.name.en ?? "Grade";
-    return {
-      meta: [
-        { title: `${name} Islamic Studies — Ignite Islamic Academy` },
-        { name: "description", content: `Islamic Studies lessons, worksheets, videos and quizzes for ${name} students at Ignite Islamic Academy.` },
-        { property: "og:title", content: `${name} Islamic Studies — Ignite Islamic Academy` },
-        { property: "og:description", content: `Lessons, worksheets, videos and quizzes for ${name}.` },
-        { property: "og:url", content: `https://ignite-faith-learn.lovable.app/grades/${params.grade}` },
-      ],
-      links: [{ rel: "canonical", href: `https://ignite-faith-learn.lovable.app/grades/${params.grade}` }],
-    };
+    return publicPageHead({
+      title: `${name} Islamic Studies — Ignite Islamic Academy`,
+      description: `Islamic Studies lessons, worksheets, videos and quizzes for ${name} students at Ignite Islamic Academy.`,
+      path: `/grades/${params.grade}`,
+      ogTitle: `${name} Islamic Studies — Ignite Islamic Academy`,
+      ogDescription: `Lessons, worksheets, videos and quizzes for ${name}.`,
+    });
   },
   component: GradePage,
   notFoundComponent: GradeNotFound,
