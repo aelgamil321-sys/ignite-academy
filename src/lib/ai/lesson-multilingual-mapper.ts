@@ -16,6 +16,7 @@ import type {
   LessonGenerationMetadata,
 } from "@/lib/ai/lesson-generation-types";
 import type { LessonTranslationOutput, TranslatedLanguageLesson } from "@/lib/ai/lesson-translation-types";
+import { isRefusalOrMetaAiOutput } from "@/lib/ai/lesson-ai-output-guard";
 
 function clampMcAnswerIndex(correctAnswer: number): number {
   return Math.min(Math.max(0, correctAnswer), 3);
@@ -23,7 +24,13 @@ function clampMcAnswerIndex(correctAnswer: number): number {
 
 function localizedField(sourceLang: "en" | "ar", sourceText: string, translations: Partial<Record<LessonLang, string>>): Bi {
   const base = localizedFromSource(sourceText, sourceLang);
-  return serializeLocalizedText(mergeLocalizedTexts(base, translations));
+  const sanitized: Partial<Record<LessonLang, string>> = {};
+  for (const [lang, value] of Object.entries(translations)) {
+    const trimmed = value?.trim();
+    if (!trimmed || isRefusalOrMetaAiOutput(trimmed)) continue;
+    sanitized[lang as LessonLang] = trimmed;
+  }
+  return serializeLocalizedText(mergeLocalizedTexts(base, sanitized));
 }
 
 export function buildSourceLessonPayload(input: {

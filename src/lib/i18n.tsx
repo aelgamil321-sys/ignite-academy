@@ -42,6 +42,7 @@ import {
   assertSafeReactLocalizedChild,
 } from "@/lib/localized-content-resolve";
 import { isStrictLessonContentType } from "@/lib/lesson-content-resolve";
+import { isRefusalOrMetaAiOutput } from "@/lib/ai/lesson-ai-output-guard";
 
 export type { Lang, ContentLocale } from "@/lib/i18n-config";
 export { L, LANG_OPTIONS, pickBi, pickBiLocale, uiBi } from "@/lib/i18n-config";
@@ -2631,7 +2632,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
           fieldName,
           source: source.text,
         });
-        if (cached?.trim()) return cached;
+        if (cached?.trim() && !isRefusalOrMetaAiOutput(cached)) return cached;
 
         void translateEducationalContent({
           text: source.text,

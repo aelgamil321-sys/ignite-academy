@@ -9,6 +9,7 @@ import {
 } from "@/lib/lesson-localized";
 import { isLessonLangSlotMissing } from "@/lib/lesson-multilingual-resolve";
 import { isVocabWordLangSlotMissing } from "@/lib/lesson-vocab-localization";
+import { isRefusalOrMetaAiOutput } from "@/lib/ai/lesson-ai-output-guard";
 
 export type MissingLocalizedSlot = {
   path: string;
@@ -72,6 +73,25 @@ export function collectLessonMissingLocalizedSlots(input: {
   return { missing, complete: missing.length === 0 };
 }
 
+/** Reject refusal/meta AI strings from merge patches (OpenAI-free). */
+export function isInvalidLocalizedSlotValue(value: string | null | undefined): boolean {
+  return isRefusalOrMetaAiOutput(value);
+}
+
+/** Remove refusal/meta strings from stored Bi slots before persistence. */
+export function stripInvalidLocalizedSlots(bi: Bi): Bi {
+  const parsed = parseLocalizedText(bi);
+  let changed = false;
+  const next = { ...parsed };
+  for (const lang of LESSON_LANGS) {
+    if (isInvalidLocalizedSlotValue(next[lang])) {
+      next[lang] = "";
+      changed = true;
+    }
+  }
+  return changed ? serializeLocalizedText(next) : bi;
+}
+
 /** Merge AI/backfill output without overwriting existing non-empty slots. */
 export function mergeMissingLocalizedSlotsOnly(
   base: Bi,
@@ -80,8 +100,10 @@ export function mergeMissingLocalizedSlotsOnly(
   const parsed = parseLocalizedText(base);
   const patch: Partial<Record<LessonLang, string>> = {};
   for (const lang of LESSON_LANGS) {
-    if (isLessonLangSlotMissing(parsed, lang) && incoming[lang]?.trim()) {
-      patch[lang] = incoming[lang]!.trim();
+    const candidate = incoming[lang]?.trim();
+    if (!candidate || isInvalidLocalizedSlotValue(candidate)) continue;
+    if (isLessonLangSlotMissing(parsed, lang) && candidate) {
+      patch[lang] = candidate;
     }
   }
   return serializeLocalizedText(mergeLocalizedTexts(parsed, patch));

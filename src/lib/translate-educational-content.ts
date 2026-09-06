@@ -15,6 +15,7 @@ import {
   resolveLocalizedPendingText,
   resolveStoredLocalizedText,
 } from "@/lib/localized-content-resolve";
+import { isRefusalOrMetaAiOutput } from "@/lib/ai/lesson-ai-output-guard";
 
 export type EducationalContentType =
   | "title"
@@ -106,7 +107,7 @@ export function biSourceForTranslation(
   }
   const extended = bi as Record<string, string | undefined>;
   const storedTarget = extended[targetLang]?.trim();
-  if (storedTarget) return null;
+  if (storedTarget && !isRefusalOrMetaAiOutput(storedTarget)) return null;
   const en = bi.en?.trim();
   if (en) return { text: en, sourceLanguage: "en" };
   const ar = bi.ar?.trim();
@@ -407,7 +408,7 @@ function pumpBrowserQueue() {
           );
         }
 
-        if (translated) {
+        if (translated && !isRefusalOrMetaAiOutput(translated)) {
           setCachedEducationalTranslation(cacheInput, translated);
           sessionSuccessCount += 1;
           debugTranslate("browser-ok", job, { resultPreview: translated.slice(0, 80) });
@@ -510,7 +511,7 @@ export async function translateEducationalContent(
   };
 
   const cached = getCachedEducationalTranslation(cacheInput);
-  if (cached) {
+  if (cached && !isRefusalOrMetaAiOutput(cached)) {
     sessionSuccessCount += 1;
     recomputeTranslationAvailability();
     debugTranslate("cache-hit", input, { resultPreview: cached.slice(0, 80) });

@@ -136,8 +136,12 @@ function testHonorBoardEnglishNames() {
 function testAiRefusalGuard() {
   const guard = read("src/lib/ai/lesson-ai-output-guard.ts");
   const gen = read("src/lib/ai/generate-lesson-from-file.server.ts");
+  const resolve = read("src/lib/lesson-multilingual-resolve.ts");
+  const translate = read("src/lib/translate-educational-content.ts");
   assert.match(guard, /isRefusalOrMetaAiOutput/);
   assert.match(gen, /validateLessonAiOutputGuard/);
+  assert.match(resolve, /isRefusalOrMetaAiOutput/);
+  assert.match(translate, /isRefusalOrMetaAiOutput/);
   console.log("PASS AI refusal/meta output guard");
 }
 

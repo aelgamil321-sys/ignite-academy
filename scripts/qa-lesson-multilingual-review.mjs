@@ -95,9 +95,17 @@ function containsLatinScript(text) {
 function readLessonLangSlot(text, lang) {
   return parseLocalizedText(text)[lang]?.trim() ?? "";
 }
+function isRefusalOrMetaAiOutput(text) {
+  const value = String(text ?? "").trim();
+  if (!value) return false;
+  return /\bi['’]?m sorry\b|\bi can only assist\b|\bas an ai\b|\bplease provide\b|\bi am unable\b|\bhere is the translation\b/i.test(
+    value,
+  );
+}
 function isLessonLangSlotMissing(text, lang) {
   const value = readLessonLangSlot(text, lang);
   if (!value) return true;
+  if (isRefusalOrMetaAiOutput(value)) return true;
   if (lang === "ar" || lang === "ur") {
     return containsLatinScript(value) && !containsArabicScript(value);
   }
@@ -309,6 +317,21 @@ const i18nSrc = readFileSync(join(root, "src/lib/i18n.tsx"), "utf8");
 assert.match(strictSrc, /isStrictLessonContentType/);
 assert.match(i18nSrc, /isStrictLessonContentType/);
 assert.match(i18nSrc, /resolveLocalizedContent\(text, lang, "strict"\)/);
+assert.match(i18nSrc, /isRefusalOrMetaAiOutput/);
+
+// --- C5b. INVALID localized slots must not render (strict student lesson fields) ---
+const refusalFixture = parseLocalizedText({
+  en: "Valid English lesson text.",
+  fr: "I'm sorry, but I can only assist with Islamic Studies content in English.",
+  de: "Gültiger deutscher Lesetext.",
+});
+assert.ok(isLessonLangSlotMissing(refusalFixture, "fr"), "French refusal slot must be INVALID/MISSING");
+assert.ok(!isLessonLangSlotMissing(refusalFixture, "en"));
+assert.ok(!isLessonLangSlotMissing(refusalFixture, "de"));
+assert.equal(displayLessonLangForTab(refusalFixture, "fr"), "");
+assert.equal(displayLessonLangForTab(refusalFixture, "de"), "Gültiger deutscher Lesetext.");
+const gradeCardsSrc = readFileSync(join(root, "src/components/grade-lessons-section.tsx"), "utf8");
+assert.match(gradeCardsSrc, /contentType: "title"/);
 
 // --- C6. Honor Board uses English display name ---
 const hofSrc = readFileSync(join(root, "src/lib/hall-of-fame.ts"), "utf8");

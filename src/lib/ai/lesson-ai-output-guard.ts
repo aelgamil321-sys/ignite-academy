@@ -8,7 +8,12 @@ const REFUSAL_PATTERNS: RegExp[] = [
   /\bas an ai\b/i,
   /\bas a language model\b/i,
   /\bi(?:'m| am) not able to\b/i,
+  /\bi am unable\b/i,
   /\bunable to help\b/i,
+  /\bplease provide\b/i,
+  /\bhere is the translation\b/i,
+  /\bif you have any specific questions\b/i,
+  /\bislamic studies content in english\b/i,
   /\bpolicy (?:prevents|does not allow)\b/i,
   /\bnot (?:able|allowed) to (?:assist|help|provide)\b/i,
 ];

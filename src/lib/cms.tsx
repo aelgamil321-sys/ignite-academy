@@ -12,6 +12,7 @@ import { ytId } from "./youtube-url";
 export { ytId };
 import { parseVocabFromStorage, serializeVocabForStorage, type VocabularyItem } from "./lesson-vocab";
 import { parseLocalizedText } from "./lesson-localized";
+import { stripInvalidLocalizedSlots } from "./localized-content-completeness";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { L } from "@/lib/i18n-config";
@@ -201,10 +202,10 @@ const lessonFromRow = (r: LessonRow): CustomLesson => ({
 const lessonToRow = (l: Partial<CustomLesson>) => {
   const o: Record<string, unknown> = {};
   if (l.grade !== undefined) o.grade = normalizeGradeSlug(l.grade);
-  if (l.unit !== undefined) o.unit = l.unit;
-  if (l.title !== undefined) o.title = l.title;
-  if (l.outcome !== undefined) o.outcome = l.outcome;
-  if (l.explanation !== undefined) o.explanation = l.explanation;
+  if (l.unit !== undefined) o.unit = stripInvalidLocalizedSlots(l.unit);
+  if (l.title !== undefined) o.title = stripInvalidLocalizedSlots(l.title);
+  if (l.outcome !== undefined) o.outcome = stripInvalidLocalizedSlots(l.outcome);
+  if (l.explanation !== undefined) o.explanation = stripInvalidLocalizedSlots(l.explanation);
   if (l.vocab !== undefined) o.vocab = serializeVocabForStorage(l.vocab);
   if (l.youtubeUrl !== undefined) o.youtube_url = l.youtubeUrl;
   if (l.youtubeArUrl !== undefined) o.youtube_url_ar = l.youtubeArUrl ?? "";

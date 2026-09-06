@@ -289,10 +289,18 @@ export function GradeLessonsSection({
                       {tr("lesson")} {index + 1} · {subject}
                     </div>
                     <h3 className="font-display text-xl sm:text-2xl font-semibold text-foreground leading-snug break-words">
-                      {bi(lesson.title)}
+                      {bi(lesson.title, {
+                        lessonId: custom.id,
+                        fieldName: "title",
+                        contentType: "title",
+                      })}
                     </h3>
                     <p className="mt-1.5 text-sm text-muted-foreground break-words">
-                      {bi(lesson.unit)}
+                      {bi(lesson.unit, {
+                        lessonId: custom.id,
+                        fieldName: "unit",
+                        contentType: "general",
+                      })}
                     </p>
                   </div>
                   <StatusBadge status={status} lang={lang} />

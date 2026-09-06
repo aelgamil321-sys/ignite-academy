@@ -1,4 +1,5 @@
 import type { Bi, QuizQuestion } from "@/lib/curriculum";
+import { isRefusalOrMetaAiOutput } from "@/lib/ai/lesson-ai-output-guard";
 import {
   LESSON_LANGS,
   type LessonLang,
@@ -39,6 +40,7 @@ export function readLessonLangSlot(text: Bi | undefined, lang: LessonLang): stri
 export function isLessonLangSlotMissing(text: Bi | undefined, lang: LessonLang): boolean {
   const value = readLessonLangSlot(text, lang);
   if (!value) return true;
+  if (isRefusalOrMetaAiOutput(value)) return true;
 
   if (lang === "ar") {
     return containsLatinScript(value) && !containsArabicScript(value);
