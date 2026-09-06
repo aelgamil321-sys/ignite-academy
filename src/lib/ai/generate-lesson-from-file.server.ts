@@ -22,6 +22,7 @@ import {
   LESSON_AI_MAX_PROMPT_CHARS,
   lessonAiOutputSchema,
 } from "@/lib/ai/lesson-generation-types";
+import { validateLessonAiOutputGuard } from "@/lib/ai/lesson-ai-output-guard";
 import { getLessonGenerationProvider } from "@/lib/ai/providers/openai-lesson-generation-provider.server";
 import type { LessonGenerationProviderErrorCode } from "@/lib/ai/providers/lesson-generation-provider";
 import { isOpenAiConfigured } from "@/lib/ai/ignite-ai.server";
@@ -266,6 +267,17 @@ export async function generateLessonFromFile(
       }
 
       sourceOutput = validated.data;
+
+      const refusalGuard = validateLessonAiOutputGuard(sourceOutput);
+      if (!refusalGuard.ok) {
+        return fail(
+          "AI returned refusal or meta-assistant text instead of lesson content. Please retry generation.",
+          "ai_failed",
+          openAiConfigured,
+          { ...logBase, durationMs: Date.now() - startedAt },
+        );
+      }
+
       sourceUsage = providerResult.usage;
 
       if (input.sourceOnly) {

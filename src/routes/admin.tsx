@@ -360,12 +360,13 @@ export function AdminDashboard() {
 
 function DebugPanel() {
   const { debug, refresh, lessons, videos, files, articles } = useCMS();
+  const { tr } = useI18n();
   const dotClass = debug.lastStatus === "error" ? "bg-red-500" : debug.lastStatus === "success" ? "bg-primary" : "bg-muted-foreground";
   return (
     <div className="rounded-xl border border-border bg-card p-4 text-xs font-mono">
       <div className="flex items-center justify-between mb-2">
-        <div className="font-sans text-sm font-semibold">CMS Debug</div>
-        <button onClick={() => void refresh()} className="px-2 py-1 rounded border border-border hover:bg-muted text-[11px]">Refetch</button>
+        <div className="font-sans text-sm font-semibold">{tr("admin_cms_debug")}</div>
+        <button onClick={() => void refresh()} className="px-2 py-1 rounded border border-border hover:bg-muted text-[11px]">{tr("admin_refetch")}</button>
       </div>
       <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1">
         <div>Supabase connected: <span className={debug.connected ? "text-primary" : "text-red-500"}>{debug.connected ? "yes" : "no"}</span></div>
@@ -614,7 +615,7 @@ function FileForm() {
       <Row>
         <Field label={L("File Type", "نوع الملف")[lang]}>
           <select className="input" value={type} onChange={(e) => setType(e.target.value as FileType)}>
-            <option value="pdf">PDF</option><option value="ppt">PowerPoint</option><option value="worksheet">Worksheet</option><option value="image">Image</option>
+            <option value="pdf">PDF</option><option value="ppt">{L("PowerPoint", "PowerPoint")[lang]}</option><option value="worksheet">{L("Worksheet", "ورقة العمل")[lang]}</option><option value="image">{L("Image", "صورة")[lang]}</option>
           </select>
         </Field>
         <Field label={L("Subject Category", "التصنيف")[lang]}>
@@ -658,7 +659,7 @@ function ItemRow({
         {!readOnly ? (
           <>
             <button onClick={onPublish} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${published ? "border-primary text-primary" : "border-border text-muted-foreground"}`}>
-              {published ? <><Eye className="h-3.5 w-3.5" /> Published</> : <><EyeOff className="h-3.5 w-3.5" /> Draft</>}
+              {published ? <><Eye className="h-3.5 w-3.5" /> {tr("teacher_published")}</> : <><EyeOff className="h-3.5 w-3.5" /> {tr("teacher_draft")}</>}
             </button>
             {lessonDelete ? (
               <DeleteLessonButton

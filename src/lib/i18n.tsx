@@ -41,6 +41,7 @@ import {
   resolveLocalizedContent,
   assertSafeReactLocalizedChild,
 } from "@/lib/localized-content-resolve";
+import { isStrictLessonContentType } from "@/lib/lesson-content-resolve";
 
 export type { Lang, ContentLocale } from "@/lib/i18n-config";
 export { L, LANG_OPTIONS, pickBi, pickBiLocale, uiBi } from "@/lib/i18n-config";
@@ -2375,6 +2376,81 @@ export const t = {
     en: "Quiz scores will appear here after the first submission.",
     ar: "ستظهر درجات الاختبارات هنا بعد أول إرسال.",
   },
+
+  // Error & not-found pages
+  err_page_title: { en: "This page didn't load", ar: "تعذّر تحميل هذه الصفحة" },
+  err_page_body: {
+    en: "Something went wrong on our end. You can try refreshing or head back home.",
+    ar: "حدث خطأ من جانبنا. يمكنك تحديث الصفحة أو العودة إلى الرئيسية.",
+  },
+  try_again: { en: "Try again", ar: "حاول مرة أخرى" },
+  go_home: { en: "Go home", ar: "العودة للرئيسية" },
+  page_not_found: { en: "Page not found", ar: "الصفحة غير موجودة" },
+  page_not_found_body: {
+    en: "The page you're looking for doesn't exist or has been moved.",
+    ar: "الصفحة التي تبحث عنها غير موجودة أو نُقلت.",
+  },
+  grade_not_found: { en: "Grade not found.", ar: "الصف غير موجود." },
+  unit_not_found: { en: "Unit not found.", ar: "الوحدة غير موجودة." },
+  lesson_not_found: { en: "Lesson not found.", ar: "الدرس غير موجود." },
+  quiz_not_found: { en: "Quiz not found.", ar: "الاختبار غير موجود." },
+  quiz_not_available: { en: "This quiz is not available.", ar: "هذا الاختبار غير متاح." },
+  back_to_quizzes: { en: "Back to quizzes", ar: "العودة إلى الاختبارات" },
+  video_not_found: { en: "Video not found.", ar: "الفيديو غير موجود." },
+  category_not_found: { en: "Category not found.", ar: "التصنيف غير موجود." },
+  admin_no_lessons_found: { en: "No lessons found.", ar: "لا توجد دروس." },
+  session_retry_hint: {
+    en: "Sign out and sign in again, or contact support if this persists.",
+    ar: "سجّل الخروج ثم الدخول مجددًا، أو تواصل مع الدعم إذا استمرت المشكلة.",
+  },
+  parent_role_error: {
+    en: "Could not confirm parent role from public.user_roles.",
+    ar: "تعذّر تأكيد دور ولي الأمر من public.user_roles.",
+  },
+  student_role_error: {
+    en: "Could not confirm student role from public.user_roles.",
+    ar: "تعذّر تأكيد دور الطالب من public.user_roles.",
+  },
+  account_role_error: {
+    en: "Could not resolve account role from public.user_roles.",
+    ar: "تعذّر تحديد دور الحساب من public.user_roles.",
+  },
+
+  // Aria & generic UI chrome
+  aria_breadcrumb: { en: "Breadcrumb", ar: "مسار التنقل" },
+  aria_toggle_menu: { en: "Toggle menu", ar: "فتح/إغلاق القائمة" },
+  aria_toggle_admin_menu: { en: "Toggle admin menu", ar: "فتح/إغلاق قائمة الإدارة" },
+  aria_toggle_sidebar: { en: "Toggle Sidebar", ar: "فتح/إغلاق الشريط الجانبي" },
+  aria_sidebar: { en: "Sidebar", ar: "الشريط الجانبي" },
+  aria_sidebar_mobile_desc: { en: "Displays the mobile sidebar.", ar: "يعرض الشريط الجانبي على الجوال." },
+  aria_pagination: { en: "pagination", ar: "ترقيم الصفحات" },
+  aria_go_prev_page: { en: "Go to previous page", ar: "الانتقال إلى الصفحة السابقة" },
+  aria_go_next_page: { en: "Go to next page", ar: "الانتقال إلى الصفحة التالية" },
+  ui_previous: { en: "Previous", ar: "السابق" },
+  ui_next: { en: "Next", ar: "التالي" },
+  ui_more_pages: { en: "More pages", ar: "صفحات إضافية" },
+  carousel_prev_slide: { en: "Previous slide", ar: "الشريحة السابقة" },
+  carousel_next_slide: { en: "Next slide", ar: "الشريحة التالية" },
+
+  // Contact page labels
+  contact_email_label: { en: "Email", ar: "البريد الإلكتروني" },
+  contact_phone_label: { en: "Phone", ar: "الهاتف" },
+  contact_location_label: { en: "Location", ar: "الموقع" },
+
+  // Admin debug
+  admin_cms_debug: { en: "CMS Debug", ar: "تصحيح CMS" },
+  admin_refetch: { en: "Refetch", ar: "إعادة الجلب" },
+  file_type_powerpoint: { en: "PowerPoint", ar: "PowerPoint" },
+  file_type_word_doc: { en: "Word Document", ar: "مستند Word" },
+
+  // Certificate template (fixed bilingual layout)
+  cert_title_en: { en: "Certificate of Achievement", ar: "شهادة إنجاز" },
+  cert_award_org_en: {
+    en: "Ignite School – Department of Islamic Education",
+    ar: "مدرسة اجنايت – قسم التربية الإسلامية",
+  },
+  cert_lesson_details_en: { en: "LESSON DETAILS", ar: "بيانات الدرس" },
+  cert_dept_alt: { en: "Department of Islamic Education", ar: "قسم التربية الإسلامية" },
 } satisfies Dict;
 
 export type TKey = keyof typeof t;
@@ -2533,35 +2609,41 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       if (!text) return "";
       assertSafeReactLocalizedChild(text, meta?.fieldName);
 
-      const stored = resolveStoredBiText(text, lang);
+      const contentType = meta?.contentType ?? "general";
+      const strictLesson = isStrictLessonContentType(contentType);
+      const stored = resolveStoredBiText(text, lang, { contentType });
+
       if (stored) return stored;
 
-      const source = biSourceForTranslation(text, lang);
-      if (!source) {
-        return resolveLocalizedContent(text, lang, "display").value;
+      if (strictLesson) {
+        return resolveLocalizedContent(text, lang, "strict").value;
       }
 
-      const lessonId = meta?.lessonId ?? lessonScopeRef.current ?? undefined;
-      const fieldName = meta?.fieldName ?? "content";
-      const contentType = meta?.contentType ?? "general";
+      const source = biSourceForTranslation(text, lang, { contentType });
+      if (source) {
+        const lessonId = meta?.lessonId ?? lessonScopeRef.current ?? undefined;
+        const fieldName = meta?.fieldName ?? "content";
 
-      const cached = getCachedEducationalTranslation({
-        lang,
-        contentType,
-        lessonId,
-        fieldName,
-        source: source.text,
-      });
-      if (cached?.trim()) return cached;
+        const cached = getCachedEducationalTranslation({
+          lang,
+          contentType,
+          lessonId,
+          fieldName,
+          source: source.text,
+        });
+        if (cached?.trim()) return cached;
 
-      void translateEducationalContent({
-        text: source.text,
-        targetLanguage: lang,
-        sourceLanguage: source.sourceLanguage,
-        contentType,
-        lessonId,
-        fieldName,
-      });
+        void translateEducationalContent({
+          text: source.text,
+          targetLanguage: lang,
+          sourceLanguage: source.sourceLanguage,
+          contentType,
+          lessonId,
+          fieldName,
+        });
+
+        return "";
+      }
 
       return resolveLocalizedContent(text, lang, "display").value;
     },

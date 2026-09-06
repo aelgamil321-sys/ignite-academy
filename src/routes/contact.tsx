@@ -70,15 +70,15 @@ function ContactPage() {
         <div className="space-y-4">
           <div className="rounded-2xl border border-border bg-card p-6 flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary"><Mail className="h-5 w-5" /></div>
-            <div><div className="text-sm text-muted-foreground">Email</div><div className="font-medium">hello@igniteislamic.academy</div></div>
+            <div><div className="text-sm text-muted-foreground">{tr("contact_email_label")}</div><div className="font-medium">hello@igniteislamic.academy</div></div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-6 flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary"><Phone className="h-5 w-5" /></div>
-            <div><div className="text-sm text-muted-foreground">Phone</div><div className="font-medium">+1 (555) 010-2030</div></div>
+            <div><div className="text-sm text-muted-foreground">{tr("contact_phone_label")}</div><div className="font-medium">+1 (555) 010-2030</div></div>
           </div>
           <div className="rounded-2xl border border-border bg-card p-6 flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary"><MapPin className="h-5 w-5" /></div>
-            <div><div className="text-sm text-muted-foreground">Location</div><div className="font-medium">{tr("ft_online")}</div></div>
+            <div><div className="text-sm text-muted-foreground">{tr("contact_location_label")}</div><div className="font-medium">{tr("ft_online")}</div></div>
           </div>
         </div>
       </div>

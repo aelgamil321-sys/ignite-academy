@@ -106,6 +106,25 @@ function isLessonLangSlotMissing(text, lang) {
   }
   return false;
 }
+
+function isVocabWordLangSlotMissing(word, lang) {
+  const value = readLessonLangSlot(word, lang);
+  if (!value) return true;
+  const ar = readLessonLangSlot(word, "ar");
+  if (lang !== "ar" && ar && value.trim() === ar.trim()) return true;
+  return isLessonLangSlotMissing(word, lang);
+}
+
+function collectVocabMissing(word, meaning) {
+  const missing = [];
+  for (const lang of LANGS) {
+    if (isVocabWordLangSlotMissing(word, lang)) missing.push(`word.${lang}`);
+  }
+  for (const lang of LANGS) {
+    if (isLessonLangSlotMissing(meaning, lang)) missing.push(`meaning.${lang}`);
+  }
+  return missing;
+}
 function displayLessonLangForTab(text, lang) {
   return isLessonLangSlotMissing(text, lang) ? "" : readLessonLangSlot(text, lang);
 }
@@ -226,6 +245,77 @@ const enOnly = { en: "English only", ar: "", fr: "", de: "", ur: "", zh: "" };
 assert.equal(displayLessonLangForTab(enOnly, "ar"), "");
 assert.ok(isLessonLangSlotMissing(enOnly, "ar"));
 
+// --- C2. Arabic-source vocab: localized terms required in every language ---
+const quranTermAr = "الواقعة";
+const quranVocabWord = {
+  ar: quranTermAr,
+  en: quranTermAr,
+  fr: quranTermAr,
+  de: quranTermAr,
+  ur: quranTermAr,
+  zh: quranTermAr,
+};
+const quranVocabMeaning = {
+  ar: "معنى عربي",
+  en: "English meaning",
+  fr: "Sens français",
+  de: "Deutsche Bedeutung",
+  ur: "اردو معنی",
+  zh: "中文含义",
+};
+const quranMissing = collectVocabMissing(quranVocabWord, quranVocabMeaning);
+assert.equal(
+  quranMissing.filter((slot) => slot.startsWith("word.") && slot !== "word.ar").length,
+  5,
+  "Arabic-only extended vocab terms must count as missing",
+);
+assert.ok(!quranMissing.includes("meaning.de"), "meanings remain complete");
+
+const mergedWord = {
+  ...quranVocabWord,
+  en: "The Inevitable Event",
+  fr: "L'Événement inéluctable",
+  de: "Das Unausweichliche Ereignis",
+  ur: "واقعہ",
+  zh: "必然事件",
+};
+assert.equal(collectVocabMissing(mergedWord, quranVocabMeaning).length, 0);
+assert.equal(mergedWord.ar, quranTermAr, "word.ar must remain unchanged after merge");
+
+// --- C3. Ordinary English vocab must still detect missing extended translations ---
+const englishWord = { en: "justice", ar: "عدالة", fr: "", de: "", ur: "", zh: "" };
+const englishMeaning = { en: "fairness", ar: "انصاف", fr: "", de: "", ur: "", zh: "" };
+const englishMissing = collectVocabMissing(englishWord, englishMeaning);
+assert.ok(
+  englishMissing.some((slot) => slot.startsWith("word.fr") || slot.startsWith("meaning.fr")),
+  "ordinary English vocab must flag missing French slots",
+);
+
+// --- C4. AI refusal/meta output must be rejected ---
+const guardSrc = readFileSync(join(root, "src/lib/ai/lesson-ai-output-guard.ts"), "utf8");
+assert.match(guardSrc, /isRefusalOrMetaAiOutput/);
+assert.match(guardSrc, /validateLessonAiOutputGuard/);
+const genSrc = readFileSync(join(root, "src/lib/ai/generate-lesson-from-file.server.ts"), "utf8");
+assert.match(genSrc, /validateLessonAiOutputGuard/);
+assert.ok(
+  /I'm sorry|I can only assist/i.test(
+    "I'm sorry, but I can only assist with Islamic Studies content in English",
+  ),
+);
+
+// --- C5. Strict lesson resolver — no silent English fallback for de ---
+const strictSrc = readFileSync(join(root, "src/lib/lesson-content-resolve.ts"), "utf8");
+const i18nSrc = readFileSync(join(root, "src/lib/i18n.tsx"), "utf8");
+assert.match(strictSrc, /isStrictLessonContentType/);
+assert.match(i18nSrc, /isStrictLessonContentType/);
+assert.match(i18nSrc, /resolveLocalizedContent\(text, lang, "strict"\)/);
+
+// --- C6. Honor Board uses English display name ---
+const hofSrc = readFileSync(join(root, "src/lib/hall-of-fame.ts"), "utf8");
+const hofPageSrc = readFileSync(join(root, "src/components/hall-of-fame-page.tsx"), "utf8");
+assert.match(hofSrc, /hallOfFameStudentDisplayName/);
+assert.match(hofPageSrc, /student\.displayName/);
+
 // --- C. Quiz serialize must preserve six languages ---
 const quizIn = [
   {
@@ -279,6 +369,10 @@ assert.ok(!/qa-lesson-create-flow|Create flow QA/.test(formSrc));
 assert.match(reviewSrc, /readLessonLangSlot/);
 assert.match(reviewSrc, /isLessonLangSlotMissing/);
 assert.ok(!/placeholder=\{showFallbackWarning/.test(reviewSrc), "review must not use English placeholder fallback");
+assert.ok(
+  !/activeLang === "ar"\s*\?\s*"الترجمة العربية/.test(reviewSrc),
+  "review missing-translation notice must follow global UI locale, not hardcoded Arabic",
+);
 
 const serverTs = readFileSync(join(root, "src/lib/ai/generate-lesson-from-file.server.ts"), "utf8");
 assert.ok(

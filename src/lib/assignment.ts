@@ -1,5 +1,10 @@
 import type { Bi } from "@/lib/curriculum";
 import { gradeMatches } from "@/lib/grade-utils";
+import {
+  localizedDualWriteColumnSet,
+  mergeLocalizedWithLegacyEnAr,
+  readLocalizedFieldWithLegacyFallback,
+} from "@/lib/complete-missing-translations";
 import { supabase } from "@/integrations/supabase/client";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 import { normalizeIslamicGroup, normalizeStudentSection } from "@/lib/student-academics";
@@ -8,8 +13,10 @@ export type AssignmentSubmissionStatus = "submitted" | "late" | "graded" | "miss
 
 export type AssignmentRow = {
   id: string;
+  title: unknown;
   title_en: string;
   title_ar: string;
+  instructions: unknown;
   instructions_en: string;
   instructions_ar: string;
   grade: string;
@@ -61,14 +68,20 @@ export type AssignmentAnalytics = {
   byIslamicGroup: Array<{ key: string; total: number; completed: number; pct: number }>;
 };
 
-export function assignmentTitle(a: Pick<AssignmentRow, "title_en" | "title_ar">): Bi {
-  return { en: a.title_en, ar: a.title_ar };
+export function assignmentTitle(
+  a: Pick<AssignmentRow, "title" | "title_en" | "title_ar">,
+): Bi {
+  return readLocalizedFieldWithLegacyFallback(a.title, a.title_en, a.title_ar);
 }
 
 export function assignmentInstructions(
-  a: Pick<AssignmentRow, "instructions_en" | "instructions_ar">,
+  a: Pick<AssignmentRow, "instructions" | "instructions_en" | "instructions_ar">,
 ): Bi {
-  return { en: a.instructions_en, ar: a.instructions_ar };
+  return readLocalizedFieldWithLegacyFallback(
+    a.instructions,
+    a.instructions_en,
+    a.instructions_ar,
+  );
 }
 
 export function assignmentFeedback(
@@ -289,6 +302,9 @@ export type AssignmentSaveInput = {
   title_ar: string;
   instructions_en: string;
   instructions_ar: string;
+  /** Optional existing jsonb; merged on update to preserve fr/de/ur/zh. */
+  title?: unknown;
+  instructions?: unknown;
   grade: string;
   section: StudentSection | null;
   islamic_group: IslamicGroup | null;
@@ -301,14 +317,31 @@ export type AssignmentSaveInput = {
   attachment_mime?: string | null;
 };
 
+function buildAssignmentPersistencePayload(
+  input: Partial<AssignmentSaveInput>,
+): Record<string, unknown> {
+  const title = mergeLocalizedWithLegacyEnAr(input.title, input.title_en, input.title_ar);
+  const instructions = mergeLocalizedWithLegacyEnAr(
+    input.instructions,
+    input.instructions_en,
+    input.instructions_ar,
+  );
+  return {
+    ...input,
+    ...localizedDualWriteColumnSet("title", title),
+    ...localizedDualWriteColumnSet("instructions", instructions),
+  };
+}
+
 export async function createAssignment(
   input: AssignmentSaveInput,
   createdBy: string,
 ): Promise<{ data: AssignmentRow | null; error: string | null }> {
+  const { title, instructions, ...rest } = input;
   const { data, error } = await supabase
     .from("assignments")
     .insert({
-      ...input,
+      ...buildAssignmentPersistencePayload({ title, instructions, ...rest }),
       created_by: createdBy,
       updated_at: new Date().toISOString(),
     })
@@ -323,9 +356,21 @@ export async function updateAssignment(
   id: string,
   input: Partial<AssignmentSaveInput>,
 ): Promise<{ error: string | null }> {
+  const hasLocalizedFields =
+    input.title_en !== undefined ||
+    input.title_ar !== undefined ||
+    input.instructions_en !== undefined ||
+    input.instructions_ar !== undefined ||
+    input.title !== undefined ||
+    input.instructions !== undefined;
+
+  const payload = hasLocalizedFields
+    ? buildAssignmentPersistencePayload(input)
+    : { ...input };
+
   const { error } = await supabase
     .from("assignments")
-    .update({ ...input, updated_at: new Date().toISOString() })
+    .update({ ...payload, updated_at: new Date().toISOString() })
     .eq("id", id);
   return { error: error?.message ?? null };
 }

@@ -74,7 +74,8 @@ RULES:
 - Do NOT change quiz semantics: keep the SAME multiple-choice correctAnswer indexes (0–3) and the SAME true/false boolean answers.
 - Do NOT add, remove, or reorder quiz questions or vocabulary items.
 - Preserve Islamic proper nouns and recognized transliterations where appropriate.
-- NEVER translate or rewrite Qur'an or Hadith Arabic source text. If sacred Arabic appears in the source, preserve it EXACTLY in Arabic fields and do not paraphrase it in other languages.
+- For vocabulary TERM fields: translate each term into the target language (English/French/German/Urdu/Chinese as appropriate). Keep the original Arabic term ONLY in the Arabic vocabulary term field.
+- Qur'an or Hadith Arabic source wording in lesson body fields must remain in Arabic in the Arabic field only — never copy untranslated Arabic terms into en/fr/de/ur/zh vocabulary term slots.
 - Use clear Modern Standard Arabic (ar), school-level English (en), educational French (fr), German (de), natural Urdu script (ur), and Simplified Chinese (zh).
 - Urdu must be in Urdu script, not Roman Urdu.
 - Translate explanations and grading guides faithfully without inventing new facts.`;

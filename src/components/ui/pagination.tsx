@@ -1,3 +1,4 @@
+// i18n-allow-hardcoded — shadcn pagination primitive; optional label props when used in app routes.
 import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 

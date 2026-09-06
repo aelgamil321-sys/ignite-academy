@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { UnitPage } from "@/routes/grades.$grade.units.$unit";
 import { getGrade } from "@/lib/curriculum";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/grades/$grade/units/$unit")({
   loader: ({ params }) => {
@@ -15,8 +16,13 @@ export const Route = createFileRoute("/admin/grades/$grade/units/$unit")({
     ],
   }),
   component: AdminGradeUnitPage,
-  notFoundComponent: () => <div className="text-sm text-muted-foreground">Unit not found.</div>,
+  notFoundComponent: AdminUnitNotFound,
 });
+
+function AdminUnitNotFound() {
+  const { tr } = useI18n();
+  return <div className="text-sm text-muted-foreground">{tr("unit_not_found")}</div>;
+}
 
 function AdminGradeUnitPage() {
   const { grade, unitSlug } = Route.useLoaderData();

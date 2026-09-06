@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { GradeDetailPanel } from "@/components/grade-detail-panel";
 import { LeadTeacherPageHeader } from "@/components/lead-teacher-page-header";
 import { getGrade } from "@/lib/curriculum";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/teacher/lead/grades/$grade/")({
   loader: ({ params }) => {
@@ -19,8 +20,13 @@ export const Route = createFileRoute("/teacher/lead/grades/$grade/")({
     };
   },
   component: LeadTeacherGradeDetailPage,
-  notFoundComponent: () => <div className="text-sm text-muted-foreground">Grade not found.</div>,
+  notFoundComponent: LeadGradeNotFound,
 });
+
+function LeadGradeNotFound() {
+  const { tr } = useI18n();
+  return <div className="text-sm text-muted-foreground">{tr("grade_not_found")}</div>;
+}
 
 function LeadTeacherGradeDetailPage() {
   const { grade } = Route.useLoaderData();

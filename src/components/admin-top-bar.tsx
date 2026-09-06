@@ -332,7 +332,7 @@ export function AdminTopBar({
           </DropdownMenu>
           <button
             type="button"
-            aria-label="Toggle admin menu"
+            aria-label={tr("aria_toggle_admin_menu")}
             className="inline-flex h-10 w-10 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/20 text-white lg:hidden"
             onClick={() => setMobileOpen((o) => !o)}
           >

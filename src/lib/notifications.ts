@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { readLocalizedFieldWithLegacyFallback } from "@/lib/complete-missing-translations";
 import { localeForFormatting, type Lang } from "@/lib/i18n-config";
 import type { StudentBadgeId } from "@/lib/student-badges";
 
@@ -6,8 +7,10 @@ export type NotificationRow = {
   id: string;
   user_id: string;
   type: string;
+  title: unknown;
   title_en: string;
   title_ar: string;
+  body: unknown;
   body_en: string;
   body_ar: string;
   href: string | null;
@@ -19,12 +22,12 @@ export type NotificationRow = {
 
 const BADGE_STORAGE_KEY = "ignite_seen_badges_v1";
 
-export function notificationTitle(n: Pick<NotificationRow, "title_en" | "title_ar">) {
-  return { en: n.title_en, ar: n.title_ar };
+export function notificationTitle(n: Pick<NotificationRow, "title" | "title_en" | "title_ar">) {
+  return readLocalizedFieldWithLegacyFallback(n.title, n.title_en, n.title_ar);
 }
 
-export function notificationBody(n: Pick<NotificationRow, "body_en" | "body_ar">) {
-  return { en: n.body_en, ar: n.body_ar };
+export function notificationBody(n: Pick<NotificationRow, "body" | "body_en" | "body_ar">) {
+  return readLocalizedFieldWithLegacyFallback(n.body, n.body_en, n.body_ar);
 }
 
 function normalizeRow(row: Record<string, unknown>): NotificationRow {
@@ -32,8 +35,10 @@ function normalizeRow(row: Record<string, unknown>): NotificationRow {
     id: String(row.id),
     user_id: String(row.user_id),
     type: String(row.type),
+    title: row.title ?? null,
     title_en: String(row.title_en ?? ""),
     title_ar: String(row.title_ar ?? ""),
+    body: row.body ?? null,
     body_en: String(row.body_en ?? ""),
     body_ar: String(row.body_ar ?? ""),
     href: row.href ? String(row.href) : null,

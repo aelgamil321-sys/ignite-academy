@@ -141,10 +141,10 @@ export function StudentGate() {
       <StudentAuthFallback title={tr("student_dashboard_title")}>
         <div className="space-y-2 text-sm">
           <p className="font-medium text-destructive">
-            Could not confirm student role from public.user_roles.
+            {tr("student_role_error")}
           </p>
           <p className="text-muted-foreground">
-            Sign out and sign in again, or contact support if this persists.
+            {tr("session_retry_hint")}
           </p>
         </div>
       </StudentAuthFallback>

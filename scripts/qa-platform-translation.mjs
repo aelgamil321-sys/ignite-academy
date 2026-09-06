@@ -115,6 +115,32 @@ function testSixLanguageStaticOverrides() {
   console.log("PASS six-language translation status UI keys");
 }
 
+function testStrictLessonResolver() {
+  const lessonResolve = read("src/lib/lesson-content-resolve.ts");
+  const i18n = read("src/lib/i18n.tsx");
+  const cards = read("src/components/lesson-vocabulary-cards.tsx");
+  assert.match(lessonResolve, /isStrictLessonContentType/);
+  assert.match(i18n, /strictLesson/);
+  assert.match(cards, /vocabArabicSourceSubtitle/);
+  console.log("PASS strict lesson resolver + localized vocab cards");
+}
+
+function testHonorBoardEnglishNames() {
+  const hof = read("src/lib/hall-of-fame.ts");
+  const page = read("src/components/hall-of-fame-page.tsx");
+  assert.match(hof, /hallOfFameStudentDisplayName/);
+  assert.match(page, /displayName/);
+  console.log("PASS Honor Board English display names");
+}
+
+function testAiRefusalGuard() {
+  const guard = read("src/lib/ai/lesson-ai-output-guard.ts");
+  const gen = read("src/lib/ai/generate-lesson-from-file.server.ts");
+  assert.match(guard, /isRefusalOrMetaAiOutput/);
+  assert.match(gen, /validateLessonAiOutputGuard/);
+  console.log("PASS AI refusal/meta output guard");
+}
+
 function testLessonPersistenceShape() {
   const localized = read("src/lib/lesson-localized.ts");
   assert.match(localized, /LESSON_LANGS = \["ar", "en", "fr", "de", "ur", "zh"\]/);
@@ -185,6 +211,9 @@ function main() {
   testTimetableLocalization();
   testRtlLtrConfig();
   testSixLanguageStaticOverrides();
+  testStrictLessonResolver();
+  testHonorBoardEnglishNames();
+  testAiRefusalGuard();
   testLessonPersistenceShape();
   testRepresentativeSurfacesUseI18n();
   testNoRawObjectChildPatterns();

@@ -1,3 +1,4 @@
+// i18n-allow-hardcoded — shadcn carousel primitive; slide labels supplied by consuming routes when used.
 import * as React from "react";
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
 import { ArrowLeft, ArrowRight } from "lucide-react";

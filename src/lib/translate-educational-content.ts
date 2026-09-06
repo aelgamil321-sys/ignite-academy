@@ -72,8 +72,16 @@ export function needsDynamicTranslation(lang: Lang): boolean {
   return lang !== "en";
 }
 
+export type ResolveStoredBiTextOptions = {
+  contentType?: EducationalContentType;
+};
+
 /** Stored multilingual lesson text for a locale (no machine translation). */
-export function resolveStoredBiText(bi: Bi, lang: Lang): string | null {
+export function resolveStoredBiText(
+  bi: Bi,
+  lang: Lang,
+  _options?: ResolveStoredBiTextOptions,
+): string | null {
   return resolveStoredLocalizedText(bi, lang);
 }
 
@@ -81,6 +89,7 @@ export function resolveStoredBiText(bi: Bi, lang: Lang): string | null {
 export function biSourceForTranslation(
   bi: Bi,
   targetLang: Lang,
+  _options?: ResolveStoredBiTextOptions,
 ): { text: string; sourceLanguage: "en" | "ar" } | null {
   if (targetLang === "en") {
     const en = bi.en?.trim();

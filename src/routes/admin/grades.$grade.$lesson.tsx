@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { LessonPageBody } from "@/routes/grades.$grade.$lesson";
 import { getGrade } from "@/lib/curriculum";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/grades/$grade/$lesson")({
   loader: ({ params }) => {
@@ -15,8 +16,13 @@ export const Route = createFileRoute("/admin/grades/$grade/$lesson")({
     ],
   }),
   component: AdminGradeLessonPage,
-  notFoundComponent: () => <div className="text-sm text-muted-foreground">Lesson not found.</div>,
+  notFoundComponent: AdminLessonNotFound,
 });
+
+function AdminLessonNotFound() {
+  const { tr } = useI18n();
+  return <div className="text-sm text-muted-foreground">{tr("lesson_not_found")}</div>;
+}
 
 function AdminGradeLessonPage() {
   const { gradeSlug, lessonSlug } = Route.useLoaderData();

@@ -138,15 +138,16 @@ function HomeRoleLoading() {
 }
 
 function HomeRoleError() {
+  const { tr } = useI18n();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main className="container-page py-24 space-y-2">
         <p className="text-sm font-semibold text-destructive">
-          Could not resolve account role from public.user_roles.
+          {tr("account_role_error")}
         </p>
         <p className="text-xs text-muted-foreground">
-          Sign out and sign in again, or contact support if this persists.
+          {tr("session_retry_hint")}
         </p>
       </main>
       <SiteFooter />

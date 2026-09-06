@@ -53,9 +53,14 @@ export const Route = createFileRoute("/grades/$grade/units/$unit")({
     ],
   }),
   component: GradeUnitRoutePage,
-  notFoundComponent: () => <div className="container-page py-20">Unit not found.</div>,
+  notFoundComponent: UnitNotFound,
   errorComponent: ({ error }) => <div className="container-page py-20">Error: {error.message}</div>,
 });
+
+function UnitNotFound() {
+  const { tr } = useI18n();
+  return <div className="container-page py-20">{tr("unit_not_found")}</div>;
+}
 
 function GradeUnitRoutePage() {
   const { grade, unitSlug } = Route.useLoaderData();
@@ -346,6 +351,7 @@ function PublishBar({
 function ItemActions({
   published, onToggle, onDelete,
 }: { published: boolean; onToggle: () => void; onDelete: () => void }) {
+  const { tr } = useI18n();
   return (
     <div className="flex items-center gap-2">
       <button
@@ -354,7 +360,7 @@ function ItemActions({
           published ? "border-primary text-primary" : "border-border text-muted-foreground"
         }`}
       >
-        {published ? <><Eye className="h-3.5 w-3.5" /> Published</> : <><EyeOff className="h-3.5 w-3.5" /> Draft</>}
+        {published ? <><Eye className="h-3.5 w-3.5" /> {tr("teacher_published")}</> : <><EyeOff className="h-3.5 w-3.5" /> {tr("teacher_draft")}</>}
       </button>
       <button
         onClick={onDelete}
@@ -807,10 +813,10 @@ function FilesTab({
           <Field label={L("File Type", "نوع الملف")[lang]}>
             <select className={inputCls} value={type} onChange={(e) => setType(e.target.value as typeof type)}>
               <option value="pdf">PDF</option>
-              <option value="ppt">PowerPoint</option>
-              <option value="worksheet">Worksheet</option>
-              <option value="image">Image</option>
-              <option value="word">Word Document</option>
+              <option value="ppt">{L("PowerPoint", "PowerPoint")[lang]}</option>
+              <option value="worksheet">{L("Worksheet", "ورقة العمل")[lang]}</option>
+              <option value="image">{L("Image", "صورة")[lang]}</option>
+              <option value="word">{L("Word Document", "مستند Word")[lang]}</option>
             </select>
           </Field>
           <Field label={L("File", "الملف")[lang]} required>

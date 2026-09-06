@@ -2,9 +2,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { grades } from "@/lib/curriculum";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
+import { hallOfFameStudentDisplayName } from "@/lib/hall-of-fame";
 
 export type AdminHallOfFameStudent = {
   userId: string;
+  displayName: string;
   arabicName: string;
   grade: string | null;
   section: StudentSection | null;
@@ -26,6 +28,8 @@ export type AdminHallOfFameData = {
 
 type RpcStudent = {
   user_id?: string | null;
+  english_name?: string | null;
+  full_name?: string | null;
   arabic_name?: string | null;
   grade?: string | null;
   section?: string | null;
@@ -53,6 +57,7 @@ function mapStudent(row: RpcStudent | null | undefined): AdminHallOfFameStudent 
 
   return {
     userId: row.user_id,
+    displayName: hallOfFameStudentDisplayName(row),
     arabicName: row.arabic_name?.trim() || "—",
     grade: row.grade?.trim() || null,
     section: normalizeSection(row.section),
@@ -79,7 +84,7 @@ export async function fetchAdminHallOfFame(): Promise<AdminHallOfFameData> {
   const payload = (data ?? {}) as {
     top_students?: RpcStudent[];
     student_of_month?: RpcStudent | null;
-    grade_champions?: RpcStudent[];
+    grade_champions?: RpcGradeChampion[];
   };
 
   const topStudents = (payload.top_students ?? [])

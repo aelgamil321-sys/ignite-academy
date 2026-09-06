@@ -16,7 +16,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
   );
   const all: Crumb[] = [{ label: tr("bc_home"), to: "/" }, ...items];
   return (
-    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+    <nav aria-label={tr("aria_breadcrumb")} className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       {all.map((c, i) => {
         const isLast = i === all.length - 1;
         const content: ReactNode = c.to && !isLast

@@ -274,7 +274,7 @@ export function SiteHeader() {
 
   const menuButton = (
     <button
-      aria-label="Toggle menu"
+      aria-label={tr("aria_toggle_menu")}
       onClick={() => setOpen((o) => !o)}
       className={cn(headerPillBase, "xl:hidden h-8 w-8 shrink-0 hover:bg-muted")}
     >

@@ -21,7 +21,7 @@ function VideoDetail() {
     : custom
     ? { title: custom.title, description: custom.description, grade: { en: custom.grade, ar: custom.grade }, ytId: ytId(custom.youtubeUrl), duration: "" }
     : null;
-  if (!data) return <div className="container-page py-20">Video not found.</div>;
+  if (!data) return <div className="container-page py-20">{tr("video_not_found")}</div>;
 
   return (
     <StudentOrPublicPage

@@ -1,5 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import { grades } from "@/lib/curriculum";
+import {
+  localizedDualWriteColumnSet,
+  readLocalizedFieldWithLegacyFallback,
+} from "@/lib/complete-missing-translations";
 import { gradeMatches, normalizeGradeSlug } from "@/lib/grade-utils";
 import type { Lang } from "@/lib/i18n-config";
 import {
@@ -127,6 +131,7 @@ export type WeeklyPlanRow = {
 export type WeeklyPlanMasterListItem = {
   id: string;
   list_id: string;
+  label: unknown;
   label_ar: string;
   label_en: string;
   sort_order: number;
@@ -137,6 +142,7 @@ export type WeeklyPlanMasterListItem = {
 export type WeeklyPlanMasterList = {
   id: string;
   list_key: string;
+  label: unknown;
   label_ar: string;
   label_en: string;
   is_active: boolean;
@@ -859,25 +865,56 @@ export async function deleteWeeklyPlan(planId: string): Promise<void> {
   if (error) throw error;
 }
 
+export function masterListLabelBi(
+  item: Pick<WeeklyPlanMasterListItem, "label" | "label_en" | "label_ar">,
+) {
+  return readLocalizedFieldWithLegacyFallback(item.label, item.label_en, item.label_ar);
+}
+
 export function masterListItemLabel(item: WeeklyPlanMasterListItem, lang: Lang): string {
-  const primary = lang === "ar" ? item.label_ar : item.label_en;
+  const bi = masterListLabelBi(item);
+  const primary = lang === "ar" ? bi.ar : bi.en;
   if (!isCorruptedMasterListText(primary)) return primary;
-  const fallback = lang === "ar" ? item.label_en : item.label_ar;
+  const fallback = lang === "ar" ? bi.en : bi.ar;
   if (!isCorruptedMasterListText(fallback)) return fallback;
   return primary;
 }
 
+/** Dual-write label jsonb + legacy en/ar for master list items (transition). */
+export function prepareWeeklyPlanMasterListItemLabelPayload(
+  label: unknown,
+  labelEn: string,
+  labelAr: string,
+): Record<string, unknown> {
+  const resolved = readLocalizedFieldWithLegacyFallback(label, labelEn, labelAr);
+  return localizedDualWriteColumnSet("label", {
+    ...resolved,
+    en: labelEn.trim(),
+    ar: labelAr.trim(),
+  });
+}
+
+/** Dual-write label jsonb + legacy en/ar for master lists (transition). */
+export function prepareWeeklyPlanMasterListLabelPayload(
+  label: unknown,
+  labelEn: string,
+  labelAr: string,
+): Record<string, unknown> {
+  return prepareWeeklyPlanMasterListItemLabelPayload(label, labelEn, labelAr);
+}
+
 export function masterListItemValue(item: WeeklyPlanMasterListItem): string {
+  const bi = masterListLabelBi(item);
   const workbook = item.metadata?.workbook_value;
   if (typeof workbook === "string" && workbook.trim() && !isCorruptedMasterListText(workbook)) {
     return workbook.trim();
   }
-  if (item.label_ar && item.label_en && !isCorruptedMasterListText(item.label_ar)) {
-    return `${item.label_ar} / ${item.label_en}`;
+  if (bi.ar && bi.en && !isCorruptedMasterListText(bi.ar)) {
+    return `${bi.ar} / ${bi.en}`;
   }
-  if (!isCorruptedMasterListText(item.label_en)) return item.label_en;
-  if (!isCorruptedMasterListText(item.label_ar)) return item.label_ar;
-  return item.label_ar || item.label_en;
+  if (!isCorruptedMasterListText(bi.en)) return bi.en;
+  if (!isCorruptedMasterListText(bi.ar)) return bi.ar;
+  return bi.ar || bi.en;
 }
 
 export function normalizeWeeklyPlanInputFields(

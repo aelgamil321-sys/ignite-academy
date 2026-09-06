@@ -55,11 +55,11 @@ function StudentCard({
     >
       <StudentProfileAvatar
         profilePhotoPath={student.profilePhotoPath}
-        alt={student.arabicName}
+        alt={student.displayName}
         className={cn("h-20 w-20 rounded-2xl sm:h-24 sm:w-24", featured && "h-28 w-28 sm:h-32 sm:w-32")}
       />
       <h3 className="mt-3 font-display text-lg font-semibold text-foreground leading-snug">
-        {student.arabicName}
+        {student.displayName}
       </h3>
       <p className="mt-1 text-xs text-muted-foreground">{gradeLabel}</p>
       <p className="text-xs font-medium text-primary">
@@ -78,6 +78,7 @@ function StudentCard({
 
 function adminStudentToPublic(student: AdminHallOfFameStudent): HallOfFameStudent {
   return {
+    displayName: student.displayName,
     arabicName: student.arabicName,
     grade: student.grade,
     islamicGroup: student.islamicGroup,
@@ -323,7 +324,7 @@ export function HallOfFameContent({ variant = "public" }: { variant?: "public" |
                 <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">
                   <StudentProfileAvatar
                     profilePhotoPath={filtered.studentOfMonth.profilePhotoPath}
-                    alt={filtered.studentOfMonth.arabicName}
+                    alt={filtered.studentOfMonth.displayName}
                     className="h-32 w-32 rounded-3xl sm:h-40 sm:w-40"
                   />
                   <div className="flex-1 text-center sm:text-start">
@@ -332,7 +333,7 @@ export function HallOfFameContent({ variant = "public" }: { variant?: "public" |
                       {tr("hof_achievement_badge")}
                     </div>
                     <h3 className="mt-4 font-display text-3xl font-semibold text-foreground">
-                      {filtered.studentOfMonth.arabicName}
+                      {filtered.studentOfMonth.displayName}
                     </h3>
                     <p className="mt-2 text-sm text-muted-foreground">
                       {filtered.studentOfMonth.grade
@@ -373,7 +374,7 @@ export function HallOfFameContent({ variant = "public" }: { variant?: "public" |
                   >
                     <StudentProfileAvatar
                       profilePhotoPath={champion.profilePhotoPath}
-                      alt={champion.arabicName}
+                      alt={champion.displayName}
                       className="h-16 w-16 shrink-0 rounded-2xl"
                     />
                     <div className="min-w-0">
@@ -381,7 +382,7 @@ export function HallOfFameContent({ variant = "public" }: { variant?: "public" |
                         {gradeChampionLabel(champion.gradeSlug)}
                       </p>
                       <h3 className="mt-1 truncate font-display text-lg font-semibold text-foreground">
-                        {champion.arabicName}
+                        {champion.displayName}
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         {champion.averageScorePct}%

@@ -5,6 +5,7 @@ import { StudentOrPublicSiteLayout } from "@/components/student-or-public-site-l
 import { GradeDetailPanel } from "@/components/grade-detail-panel";
 import { getGrade } from "@/lib/curriculum";
 import { studentGradeSearch } from "@/lib/student-grade-nav";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/grades/$grade/")({
   validateSearch: studentGradeSearch,
@@ -31,9 +32,14 @@ export const Route = createFileRoute("/grades/$grade/")({
     };
   },
   component: GradePage,
-  notFoundComponent: () => <div className="container-page py-20">Grade not found.</div>,
+  notFoundComponent: GradeNotFound,
   errorComponent: ({ error }) => <div className="container-page py-20">Error: {error.message}</div>,
 });
+
+function GradeNotFound() {
+  const { tr } = useI18n();
+  return <div className="container-page py-20">{tr("grade_not_found")}</div>;
+}
 
 function GradePage() {
   const { grade } = Route.useLoaderData();

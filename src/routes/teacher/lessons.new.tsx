@@ -1,14 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
+import { ChevronLeft } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LessonCreateDraftForm } from "@/components/lesson-create-draft-form";
-import {
-  fetchTeacherContext,
-  teacherAssignedGradesForSubject,
-  type TeacherContext,
-} from "@/lib/teacher-dashboard";
+import { teacherAssignedGradesForSubject } from "@/lib/teacher-dashboard";
+import { useTeacherShell } from "@/lib/teacher-shell-context";
 
 export const Route = createFileRoute("/teacher/lessons/new")({
   component: TeacherNewLessonPage,
@@ -16,21 +12,7 @@ export const Route = createFileRoute("/teacher/lessons/new")({
 
 function TeacherNewLessonPage() {
   const { tr } = useI18n();
-  const [context, setContext] = useState<TeacherContext | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    void (async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        setLoading(false);
-        return;
-      }
-      const ctx = await fetchTeacherContext(data.user.id);
-      setContext(ctx);
-      setLoading(false);
-    })();
-  }, []);
+  const { context } = useTeacherShell();
 
   const allowedGradesBySubject = useMemo(
     () =>
@@ -50,15 +32,6 @@ function TeacherNewLessonPage() {
       allowedGradesBySubject.quran.length > 0
     );
   }, [allowedGradesBySubject]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        {tr("teacher_loading")}
-      </div>
-    );
-  }
 
   if (!context || !hasAnyAssignment || !allowedGradesBySubject) {
     return (

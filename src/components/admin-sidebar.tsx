@@ -137,7 +137,7 @@ export function AdminSidebar({
           onClick={onLogout}
           className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted w-full justify-center"
         >
-          <LogOut className="h-3.5 w-3.5" /> Log out
+          <LogOut className="h-3.5 w-3.5" /> {L("Log out", "تسجيل الخروج")[lang]}
         </button>
       </div>
     </aside>

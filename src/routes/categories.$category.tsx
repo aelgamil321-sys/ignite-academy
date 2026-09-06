@@ -23,8 +23,13 @@ export const Route = createFileRoute("/categories/$category")({
     ],
   }),
   component: CategoryPage,
-  notFoundComponent: () => <div className="container-page py-20">Category not found.</div>,
+  notFoundComponent: CategoryNotFound,
 });
+
+function CategoryNotFound() {
+  const { tr } = useI18n();
+  return <div className="container-page py-20">{tr("category_not_found")}</div>;
+}
 
 function CategoryPage() {
   const { category } = Route.useLoaderData();

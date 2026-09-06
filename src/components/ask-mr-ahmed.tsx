@@ -28,7 +28,7 @@ export function AskMrAhmed() {
                 <div className="text-xs opacity-80">{tr("ask_sub")}</div>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} aria-label="Close" className="hover:opacity-80">
+            <button onClick={() => setOpen(false)} aria-label={tr("wp_preview_close")} className="hover:opacity-80">
               <X className="h-5 w-5" />
             </button>
           </div>

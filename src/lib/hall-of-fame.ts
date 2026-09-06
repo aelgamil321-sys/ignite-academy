@@ -3,7 +3,23 @@ import { normalizeGradeSlug } from "@/lib/grade-utils";
 import { grades } from "@/lib/curriculum";
 import type { IslamicGroup } from "@/lib/student-academics";
 
+/** Canonical English display name for Honor Board (UI locale independent). */
+export function hallOfFameStudentDisplayName(input: {
+  english_name?: string | null;
+  full_name?: string | null;
+  arabic_name?: string | null;
+}): string {
+  return (
+    input.english_name?.trim() ||
+    input.full_name?.trim() ||
+    input.arabic_name?.trim() ||
+    "—"
+  );
+}
+
 export type HallOfFameStudent = {
+  /** Always the student's English name for Honor Board display. */
+  displayName: string;
   arabicName: string;
   grade: string | null;
   islamicGroup: IslamicGroup | null;
@@ -23,6 +39,8 @@ export type HallOfFameData = {
 };
 
 type RpcStudent = {
+  english_name?: string | null;
+  full_name?: string | null;
   arabic_name?: string | null;
   grade?: string | null;
   islamic_group?: string | null;
@@ -44,6 +62,7 @@ function mapStudent(row: RpcStudent | null | undefined): HallOfFameStudent | nul
   if (!row || row.average_score_pct == null) return null;
 
   return {
+    displayName: hallOfFameStudentDisplayName(row),
     arabicName: row.arabic_name?.trim() || "—",
     grade: row.grade?.trim() || null,
     islamicGroup: normalizeIslamicGroup(row.islamic_group),

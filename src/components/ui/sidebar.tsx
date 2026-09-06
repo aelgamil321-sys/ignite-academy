@@ -1,3 +1,4 @@
+// i18n-allow-hardcoded — shadcn sidebar primitive; app shells pass translated labels when wired.
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";

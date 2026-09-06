@@ -1,3 +1,4 @@
+// i18n-allow-hardcoded — dev-only admin storage upload test route; strings are debug labels only.
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";

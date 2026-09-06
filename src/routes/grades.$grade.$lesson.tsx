@@ -39,9 +39,14 @@ export const Route = createFileRoute("/grades/$grade/$lesson")({
   },
   head: () => ({ meta: [{ title: pageHeadTitle("lesson") }] }),
   component: LessonRoutePage,
-  notFoundComponent: () => <div className="container-page py-20">Lesson not found.</div>,
+  notFoundComponent: LessonNotFound,
   errorComponent: ({ error }) => <div className="container-page py-20">Error: {error.message}</div>,
 });
+
+function LessonNotFound() {
+  const { tr } = useI18n();
+  return <div className="container-page py-20">{tr("lesson_not_found")}</div>;
+}
 
 function LessonRoutePage() {
   const { gradeSlug, lessonSlug } = Route.useLoaderData();
@@ -110,7 +115,7 @@ export function LessonPageBody({
     }
 
     for (const [i, v] of lesson.vocab.entries()) {
-      const wordSource = biSourceForTranslation(v.word, lang);
+      const wordSource = biSourceForTranslation(v.word, lang, { contentType: "vocab_term" });
       if (wordSource) {
         fields.push({
           fieldName: `vocab_term_${i}`,
@@ -119,7 +124,7 @@ export function LessonPageBody({
           sourceLanguage: wordSource.sourceLanguage,
         });
       }
-      const meaningSource = biSourceForTranslation(v.meaning, lang);
+      const meaningSource = biSourceForTranslation(v.meaning, lang, { contentType: "vocab_def" });
       if (meaningSource) {
         fields.push({
           fieldName: `vocab_def_${i}`,
@@ -155,7 +160,7 @@ export function LessonPageBody({
   }
 
   if (!resolved?.grade) {
-    return <div className="container-page py-20">Grade not found.</div>;
+    return <div className="container-page py-20">{tr("grade_not_found")}</div>;
   }
   const { grade, lesson, custom, lessonFiles } = resolved;
   if (!lesson) {

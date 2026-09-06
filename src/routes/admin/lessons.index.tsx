@@ -50,7 +50,7 @@ function AdminLessonsPage() {
       {loading ? (
         <p className="text-sm text-muted-foreground">{L("Loading lessons…", "جارٍ تحميل الدروس…")[lang]}</p>
       ) : lessons.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No lessons found.</p>
+        <p className="text-sm text-muted-foreground">{tr("admin_no_lessons_found")}</p>
       ) : (
         <ul className="space-y-3">
           {lessons.map((lesson) => {

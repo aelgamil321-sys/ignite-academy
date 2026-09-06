@@ -15,8 +15,13 @@ export const Route = createFileRoute("/quizzes/$slug")({
   loader: ({ params }) => ({ slug: params.slug }),
   head: () => ({ meta: [{ title: "Quiz — Ignite Islamic Academy" }] }),
   component: QuizDetail,
-  notFoundComponent: () => <div className="container-page py-20">Quiz not found.</div>,
+  notFoundComponent: QuizNotFound,
 });
+
+function QuizNotFound() {
+  const { tr } = useI18n();
+  return <div className="container-page py-20">{tr("quiz_not_found")}</div>;
+}
 
 function QuizDetail() {
   const { slug } = Route.useLoaderData();
@@ -28,9 +33,9 @@ function QuizDetail() {
 
   if (!quiz) {
     return (
-      <PageShell eyebrow={tr("nav_quizzes")} title="Quiz not found" crumbs={[{ label: tr("nav_quizzes"), to: "/quizzes" }]}>
-        <p className="text-muted-foreground">This quiz is not available.</p>
-        <Link to="/quizzes" className="text-primary hover:underline mt-4 inline-block">Back to quizzes</Link>
+      <PageShell eyebrow={tr("nav_quizzes")} title={tr("quiz_not_found")} crumbs={[{ label: tr("nav_quizzes"), to: "/quizzes" }]}>
+        <p className="text-muted-foreground">{tr("quiz_not_available")}</p>
+        <Link to="/quizzes" className="text-primary hover:underline mt-4 inline-block">{tr("back_to_quizzes")}</Link>
       </PageShell>
     );
   }

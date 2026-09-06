@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BookOpen } from "lucide-react";
 import { useI18n, type BiFieldMeta } from "@/lib/i18n";
 import type { VocabularyItem } from "@/lib/lesson-vocab";
+import { vocabArabicSourceSubtitle } from "@/lib/lesson-vocab-localization";
 import { TranslatedContentShell } from "@/components/translation-loading-indicator";
 
 function VocabFlipCard({
@@ -15,10 +16,14 @@ function VocabFlipCard({
 }) {
   const { lang, bi, tr, dir } = useI18n();
   const [flipped, setFlipped] = useState(false);
-  const contentLang = lang === "ar" || lang === "ur" ? "ar" : "en";
-  const hasMeaning = Boolean(item.meaning.en?.trim() || item.meaning.ar?.trim());
   const wordMeta = { ...lessonMeta, fieldName: `vocab_term_${index}`, contentType: "vocab_term" as const };
   const meaningMeta = { ...lessonMeta, fieldName: `vocab_def_${index}`, contentType: "vocab_def" as const };
+  const wordText = bi(item.word, wordMeta);
+  const meaningText = bi(item.meaning, meaningMeta);
+  const arabicSource = vocabArabicSourceSubtitle(item.word, wordText);
+  const hasMeaning = Boolean(meaningText.trim());
+  const termIsArabic = /[\u0600-\u06FF]/.test(wordText);
+  const missingTerm = !wordText.trim();
 
   return (
     <button
@@ -26,51 +31,56 @@ function VocabFlipCard({
       onClick={() => setFlipped((f) => !f)}
       className="group relative h-44 w-full text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
       aria-pressed={flipped}
-      aria-label={`${bi(item.word, wordMeta)} — ${tr("vocab_flip_hint")}`}
+      aria-label={`${wordText || tr("content_translation_unavailable")} — ${tr("vocab_flip_hint")}`}
     >
       <div
         className={`relative h-full w-full transition-transform duration-500 [transform-style:preserve-3d] ${
           flipped ? "[transform:rotateY(180deg)]" : ""
         }`}
       >
-        {/* Front — word */}
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-primary/25 bg-white p-5 shadow-[0_8px_24px_hsl(var(--primary)/0.12)] transition-shadow group-hover:shadow-[0_12px_32px_hsl(var(--primary)/0.18)] [backface-visibility:hidden]"
-        >
+        <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-primary/25 bg-white p-5 shadow-[0_8px_24px_hsl(var(--primary)/0.12)] transition-shadow group-hover:shadow-[0_12px_32px_hsl(var(--primary)/0.18)] [backface-visibility:hidden]">
           <div className="mb-2 text-[10px] uppercase tracking-[0.2em] text-primary/70">
             {tr("vocab_flip_hint")}
           </div>
           <TranslatedContentShell>
-            <p
-              className={`font-display text-xl font-semibold text-foreground text-center [overflow-wrap:anywhere] ${
-                dir === "rtl" ? "font-arabic" : ""
-              }`}
-              dir={contentLang === "ar" ? "rtl" : "ltr"}
-            >
-              {bi(item.word, wordMeta)}
-            </p>
+            {missingTerm ? (
+              <p className="text-sm italic text-muted-foreground text-center">{tr("content_translation_unavailable")}</p>
+            ) : (
+              <div className="space-y-1 text-center">
+                <p
+                  className={`font-display text-xl font-semibold text-foreground [overflow-wrap:anywhere] ${
+                    termIsArabic ? "font-arabic" : ""
+                  }`}
+                  dir={termIsArabic ? "rtl" : dir === "rtl" ? "rtl" : "ltr"}
+                >
+                  {wordText}
+                </p>
+                {arabicSource ? (
+                  <p className="font-arabic text-sm text-muted-foreground" dir="rtl">
+                    {arabicSource}
+                  </p>
+                ) : null}
+              </div>
+            )}
           </TranslatedContentShell>
           <div className="mt-3 h-1 w-10 rounded-full bg-primary/40" />
         </div>
 
-        {/* Back — meaning */}
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-primary/35 bg-gradient-to-br from-primary/10 via-white to-cream p-5 shadow-[0_8px_24px_hsl(var(--primary)/0.15)] [backface-visibility:hidden] [transform:rotateY(180deg)]"
-        >
+        <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-primary/35 bg-gradient-to-br from-primary/10 via-white to-cream p-5 shadow-[0_8px_24px_hsl(var(--primary)/0.15)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
           {hasMeaning ? (
             <TranslatedContentShell>
               <p
                 className={`text-sm leading-[1.8] text-foreground/90 text-center [overflow-wrap:anywhere] md:text-base ${
                   dir === "rtl" ? "font-arabic" : ""
                 }`}
-                dir={contentLang === "ar" ? "rtl" : "ltr"}
+                dir={dir}
               >
-                {bi(item.meaning, meaningMeta)}
+                {meaningText}
               </p>
             </TranslatedContentShell>
           ) : (
             <p className="text-sm italic text-muted-foreground text-center leading-relaxed">
-              {tr("vocab_meaning_soon")}
+              {tr("content_translation_unavailable")}
             </p>
           )}
         </div>

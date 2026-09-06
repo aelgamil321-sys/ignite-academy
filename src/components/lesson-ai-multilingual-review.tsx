@@ -17,6 +17,7 @@ import {
   readLessonLangSlot,
   validateQuizAnswerConsistency,
 } from "@/lib/lesson-multilingual-resolve";
+import { isVocabWordLangSlotMissing } from "@/lib/lesson-vocab-localization";
 import { useI18n, L } from "@/lib/i18n";
 import type { LessonAiReviewBundle } from "@/lib/lesson-ai-saved-content";
 
@@ -63,12 +64,10 @@ function MissingTranslationNotice({
       <p className="flex items-start gap-1.5">
         <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" aria-hidden />
         <span>
-          {activeLang === "ar"
-            ? "الترجمة العربية غير متوفرة — أعد محاولة الترجمة"
-            : L(
-                `${label} translation missing — retry translations`,
-                `ترجمة ${label} غير متوفرة — أعد محاولة الترجمة`,
-              )[uiLang]}
+          {L(
+            `${label} translation missing — retry translations`,
+            `ترجمة ${label} غير متوفرة — أعد محاولة الترجمة`,
+          )[uiLang]}
         </span>
       </p>
       {onRetry ? (
@@ -92,6 +91,7 @@ function LocalizedField({
   onChange,
   onRetryTranslations,
   multiline = false,
+  vocabWord = false,
 }: {
   label: string;
   bi: Bi;
@@ -100,9 +100,12 @@ function LocalizedField({
   onChange: (next: Bi) => void;
   onRetryTranslations?: () => void;
   multiline?: boolean;
+  vocabWord?: boolean;
 }) {
   const stored = readLessonLangSlot(bi, activeLang);
-  const missing = isLessonLangSlotMissing(bi, activeLang);
+  const missing = vocabWord
+    ? isVocabWordLangSlotMissing(bi, activeLang)
+    : isLessonLangSlotMissing(bi, activeLang);
 
   return (
     <label className="block text-xs font-medium text-foreground">
@@ -275,6 +278,7 @@ export function LessonAiMultilingualReview({
                     bi={item.word}
                     activeLang={activeLang}
                     uiLang={lang}
+                    vocabWord
                     onChange={(word) => updateVocabItem(index, { word })}
                     onRetryTranslations={onRetryTranslations}
                   />

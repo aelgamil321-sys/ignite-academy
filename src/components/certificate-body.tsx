@@ -7,6 +7,7 @@
  */
 import type { CSSProperties } from "react";
 import type { CertificateDisplayData } from "@/lib/certificate";
+import { L } from "@/lib/i18n";
 import {
   CERTIFICATE_SIGNATURE,
   certificateIslamicLogoUrl,
@@ -189,7 +190,7 @@ function CertificateHeader({
         boxSizing: "border-box",
       }}
     >
-      <HeaderLogoBox src={islamicLogoUrl} alt="Department of Islamic Education" />
+      <HeaderLogoBox src={islamicLogoUrl} alt={L("Department of Islamic Education", "قسم التربية الإسلامية").en} />
       <div
         style={{
           flex: 1,
@@ -226,7 +227,7 @@ function CertificateHeader({
             marginTop: 6,
           }}
         >
-          Certificate of Achievement
+          {L("Certificate of Achievement", "شهادة إنجاز").en}
         </div>
         <div
           style={{
@@ -578,7 +579,7 @@ export function CertificatePageBody({ data }: { data: CertificateDisplayData }) 
         >
           <div style={{ ...colText, direction: "ltr", textAlign: "left" }}>
             <div style={{ fontWeight: 700, color: CERT_COLORS.navy, fontSize: 12, lineHeight: 1.25 }}>
-              Ignite School – Department of Islamic Education
+              {L("Ignite School – Department of Islamic Education", "مدرسة اجنايت – قسم التربية الإسلامية").en}
             </div>
             <div style={{ fontSize: 11, marginTop: 3 }}>is proud to award this certificate to:</div>
             <div style={nameStyle}>{data.studentName}</div>
@@ -679,7 +680,7 @@ export function CertificatePageBody({ data }: { data: CertificateDisplayData }) 
                 lineHeight: 1,
               }}
             >
-              LESSON DETAILS
+              {L("LESSON DETAILS", "بيانات الدرس").en}
             </span>
           </div>
           <div

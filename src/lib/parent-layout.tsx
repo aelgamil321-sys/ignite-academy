@@ -146,10 +146,10 @@ export function ParentGate({ children }: ParentGateProps) {
       <ParentAuthFallback title={tr("parent_dashboard_title")}>
         <div className="space-y-2 text-sm">
           <p className="font-medium text-destructive">
-            Could not confirm parent role from public.user_roles.
+            {tr("parent_role_error")}
           </p>
           <p className="text-muted-foreground">
-            Sign out and sign in again, or contact support if this persists.
+            {tr("session_retry_hint")}
           </p>
         </div>
       </ParentAuthFallback>
