@@ -134,51 +134,67 @@ async function googleTranslateTerm(sourceAr, targetLang, attempt = 1) {
   return text;
 }
 
+function isAcceptedVocabTranslation(text, sourceAr, targetLang) {
+  const value = text?.trim() ?? "";
+  if (!value) return false;
+  if (value === sourceAr.trim()) return false;
+  if (targetLang !== "ar" && isWordSlotMissing({ ar: sourceAr, [targetLang]: value }, targetLang)) {
+    return false;
+  }
+  return true;
+}
+
 async function translateVocabTerm(sourceAr, targetLang) {
   const apiKey = process.env.OPENAI_API_KEY;
+  const langLabel = {
+    en: "English",
+    fr: "French",
+    de: "German",
+    ur: "Urdu (Urdu script, not Arabic copy)",
+    zh: "Simplified Chinese",
+  }[targetLang];
+
   if (apiKey) {
     const model = "gpt-4o-mini";
-    const langLabel = {
-      en: "English",
-      fr: "French",
-      de: "German",
-      ur: "Urdu (Urdu script)",
-      zh: "Simplified Chinese",
-    }[targetLang];
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          temperature: 0.2,
+          messages: [
+            {
+              role: "system",
+              content:
+                "Translate Islamic/Qur'anic vocabulary terms for a school lesson. Return ONLY the translated term in the target language/script. Never repeat the Arabic source.",
+            },
+            {
+              role: "user",
+              content: `Arabic term: ${sourceAr}\nTarget language: ${langLabel}\nProvide a concise classroom vocabulary term translation. Do not output Arabic.`,
+            },
+          ],
+        }),
+      });
 
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.2,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Translate Islamic/Qur'anic vocabulary terms for a school lesson. Return ONLY the translated term, no explanation.",
-          },
-          {
-            role: "user",
-            content: `Arabic term: ${sourceAr}\nTarget language: ${langLabel}\nProvide a concise classroom vocabulary term translation.`,
-          },
-        ],
-      }),
-    });
-
-    if (res.ok) {
-      const body = await res.json();
-      const text = body.choices?.[0]?.message?.content?.trim();
-      if (text) {
-        return { text: text.replace(/^["']|["']$/g, ""), provider: "openai" };
+      if (res.ok) {
+        const body = await res.json();
+        const text = body.choices?.[0]?.message?.content?.trim()?.replace(/^["']|["']$/g, "");
+        if (text && isAcceptedVocabTranslation(text, sourceAr, targetLang)) {
+          return { text, provider: "openai" };
+        }
       }
+      await sleep(400 * attempt);
     }
   }
 
   const fallback = await googleTranslateTerm(sourceAr, targetLang);
+  if (!isAcceptedVocabTranslation(fallback, sourceAr, targetLang)) {
+    throw new Error(`Rejected vocab translation for ${targetLang}: identical or invalid script`);
+  }
   return { text: fallback, provider: "google" };
 }
 
