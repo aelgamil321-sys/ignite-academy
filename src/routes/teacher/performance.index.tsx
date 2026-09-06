@@ -9,16 +9,17 @@ import {
   type TeacherContext,
 } from "@/lib/teacher-dashboard";
 import {
-  fetchTeacherAnalytics,
   teacherAllowedGradeOptions,
   teacherCanUseAnalyticsFilter,
   type TeacherAnalyticsScope,
 } from "@/lib/teacher-analytics";
+import { fetchTeacherKhdaAnalytics } from "@/lib/khda-analytics-fetch";
 import {
   teacherAllowedIslamicGroupOptions,
   teacherAllowedSectionOptions,
 } from "@/lib/teacher-analytics-ui";
-import type { AdminAnalyticsSnapshot, AnalyticsFilters } from "@/lib/admin-analytics";
+import type { AnalyticsFilters } from "@/lib/admin-analytics";
+import type { KhdaAnalyticsBundle } from "@/lib/khda-analytics-fetch";
 import {
   TeacherPerformanceAnalytics,
   TeacherPerformanceError,
@@ -45,7 +46,7 @@ function TeacherPerformancePage() {
   const [filters, setFilters] = useState<AnalyticsFilters>(EMPTY_FILTERS);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState(false);
-  const [snapshot, setSnapshot] = useState<AdminAnalyticsSnapshot | null>(null);
+  const [snapshot, setSnapshot] = useState<KhdaAnalyticsBundle | null>(null);
 
   const analyticsScope: TeacherAnalyticsScope | null = useMemo(
     () =>
@@ -82,7 +83,7 @@ function TeacherPerformancePage() {
     }
     setAnalyticsLoading(true);
     setAnalyticsError(false);
-    const { data, error } = await fetchTeacherAnalytics(analyticsScope, filters);
+    const { data, error } = await fetchTeacherKhdaAnalytics(analyticsScope, filters);
     setAnalyticsLoading(false);
     if (error) {
       setAnalyticsError(true);
@@ -198,7 +199,7 @@ function TeacherPerformancePage() {
       ) : analyticsError ? (
         <TeacherPerformanceError onRetry={() => void loadAnalytics()} />
       ) : snapshot && analyticsScope ? (
-        <TeacherPerformanceAnalytics data={snapshot} scope={analyticsScope} />
+        <TeacherPerformanceAnalytics bundle={snapshot} scope={analyticsScope} />
       ) : (
         <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-[var(--shadow-soft)]">
           {tr("teacher_analytics_not_permitted")}

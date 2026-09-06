@@ -25,6 +25,7 @@ export type AnalyticsFilters = {
   grade: string;
   section: string;
   islamicGroup: string;
+  teachingSubject?: string;
 };
 
 export type AnalyticsGroupRow = {
@@ -135,7 +136,14 @@ function averageRounded(values: number[]): number | null {
   return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
 }
 
-function countByStudent<T extends { student_id: string }>(rows: T[]): Map<string, number> {
+export function filterAnalyticsStudents(
+  students: StudentRow[],
+  filters: AnalyticsFilters,
+): StudentRow[] {
+  return students.filter((student) => matchesFilters(student, filters));
+}
+
+export function countByStudent<T extends { student_id: string }>(rows: T[]): Map<string, number> {
   const counts = new Map<string, number>();
   for (const row of rows) {
     counts.set(row.student_id, (counts.get(row.student_id) ?? 0) + 1);
@@ -343,13 +351,21 @@ function buildIslamicGroupCards(byIslamicGroup: AnalyticsGroupRow[]): IslamicGro
   });
 }
 
+/** Evidence-based: submissions required; certificates alone never trigger attention. */
+export function studentNeedsAttention(performance: {
+  submissionCount: number;
+  averageScorePct: number | null;
+}): boolean {
+  return (
+    performance.submissionCount > 0 &&
+    performance.averageScorePct !== null &&
+    performance.averageScorePct < AT_RISK_SCORE_THRESHOLD
+  );
+}
+
 function buildAtRiskStudents(performances: StudentPerformance[]): AtRiskStudentRow[] {
   return performances
-    .filter(
-      (row) =>
-        row.certificatesEarned === 0 ||
-        (row.averageScorePct !== null && row.averageScorePct < AT_RISK_SCORE_THRESHOLD),
-    )
+    .filter((row) => studentNeedsAttention(row))
     .sort((a, b) => {
       const aScore = a.averageScorePct ?? -1;
       const bScore = b.averageScorePct ?? -1;
@@ -499,7 +515,7 @@ export async function fetchAdminAnalytics(filters: AnalyticsFilters): Promise<{
       "user_id, full_name, arabic_name, english_name, profile_photo_path, grade, section, islamic_group",
     ),
     supabase.from("user_roles").select("user_id, role"),
-    supabase.from("lesson_quiz_submissions").select("student_id, percentage"),
+    supabase.from("lesson_quiz_submissions").select("student_id, percentage, submitted_at, lesson_id"),
     supabase.from("quiz_certificates").select("student_id"),
   ]);
 

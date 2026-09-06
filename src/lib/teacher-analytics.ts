@@ -108,7 +108,7 @@ export async function fetchTeacherAnalytics(
       "user_id, full_name, arabic_name, english_name, profile_photo_path, grade, section, islamic_group",
     ),
     supabase.from("user_roles").select("user_id, role"),
-    supabase.from("lesson_quiz_submissions").select("student_id, percentage"),
+    supabase.from("lesson_quiz_submissions").select("student_id, percentage, submitted_at, lesson_id"),
     supabase.from("quiz_certificates").select("student_id"),
   ]);
 
