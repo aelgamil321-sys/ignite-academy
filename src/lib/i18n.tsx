@@ -1760,6 +1760,10 @@ export const t = {
   wp_no_plans: { en: "No weekly plans yet.", ar: "لا توجد خطط أسبوعية بعد." },
   wp_no_title: { en: "Untitled lesson", ar: "درس بدون عنوان" },
   wp_saved: { en: "Weekly plan saved.", ar: "تم حفظ الخطة الأسبوعية." },
+  wp_saved_existing_scope: {
+    en: "Your existing weekly plan for this week and class scope was updated.",
+    ar: "تم تحديث خطتك الأسبوعية الحالية لهذا الأسبوع ونطاق الصف.",
+  },
   wp_save_draft: { en: "Save draft", ar: "حفظ كمسودة" },
   wp_save_return: { en: "Save & return to list", ar: "حفظ والعودة إلى القائمة" },
   wp_grade_required: { en: "Grade is required.", ar: "الصف مطلوب." },

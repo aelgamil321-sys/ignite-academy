@@ -967,6 +967,8 @@ export const de: Record<string, string> = {
   wp_no_plans: "Noch keine Wochenpläne.",
   wp_no_title: "Ohne Titel Lektion",
   wp_saved: "Wochenplan gespeichert.",
+  wp_saved_existing_scope:
+    "Ihr bestehender Wochenplan für diese Woche und diesen Klassenbereich wurde aktualisiert.",
   wp_save_draft: "Entwurf speichern",
   wp_save_return: "Speichern und zur Liste zurückkehren",
   wp_grade_required: "Jahrgangsstufe ist erforderlich.",

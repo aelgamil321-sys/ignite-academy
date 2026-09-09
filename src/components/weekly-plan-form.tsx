@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import { WeeklyPlanPeriodBlock } from "@/components/weekly-plan-period-block";
 import { WeeklyPlanSectionMultiSelect } from "@/components/weekly-plan-section-multi-select";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { useI18n } from "@/lib/i18n";
+import { formatError } from "@/lib/upload";
 import {
   islamicGroupLabel,
   type IslamicGroup,
@@ -23,7 +24,6 @@ import type { ScopedStudentRow, TeacherContext } from "@/lib/teacher-dashboard";
 import {
   assignmentAllowsSections,
   buildDefaultWeeklyPlanPeriod,
-  createWeeklyPlan,
   derivePhaseFromGradeSlug,
   dayWorkbookValueFromPlanDate,
   isNonWorkingPlanDate,
@@ -36,7 +36,8 @@ import {
   masterListItemValue,
   normalizeWeeklyPlanSections,
   scopedStudentWeeklyPlanLabel,
-  updateWeeklyPlan,
+  saveWeeklyPlan,
+  verifyWeeklyPlanPersisted,
   type CreateWeeklyPlanInput,
   type WeeklyPlanMasterList,
   type WeeklyPlanRow,
@@ -76,6 +77,7 @@ export function WeeklyPlanForm({
   const [form, setForm] = useState<CreateWeeklyPlanInput>(initial);
   const [scopedStudents, setScopedStudents] = useState<ScopedStudentRow[]>([]);
   const [saving, setSaving] = useState(false);
+  const saveInFlightRef = useRef(false);
 
   useEffect(() => {
     setForm(initial);
@@ -257,7 +259,9 @@ export function WeeklyPlanForm({
   };
 
   const save = async (redirect: "list" | "stay" | "view") => {
+    if (saveInFlightRef.current || saving) return;
     if (!validateScope()) return;
+    saveInFlightRef.current = true;
     setSaving(true);
     try {
       const payload: CreateWeeklyPlanInput = {
@@ -265,35 +269,40 @@ export function WeeklyPlanForm({
         subject: WEEKLY_PLAN_DEFAULT_SUBJECT,
         plan_language: lang === "ar" ? "ar" : "en",
       };
+      const { plan: saved, resumedExisting } = await saveWeeklyPlan({
+        mode,
+        planId,
+        input: payload,
+      });
+      await verifyWeeklyPlanPersisted(saved.id);
+
+      toast.success(resumedExisting ? tr("wp_saved_existing_scope") : tr("wp_saved"));
+
+      if (redirect === "list") {
+        navigate({ to: "/teacher/weekly-planning" });
+        return;
+      }
+
+      const targetPlanId = saved.id;
+      if (redirect === "view") {
+        navigate({ to: "/teacher/weekly-planning/$planId", params: { planId: targetPlanId } });
+        return;
+      }
+
       if (mode === "create") {
-        const created = await createWeeklyPlan(payload);
-        toast.success(tr("wp_saved"));
-        if (redirect === "list") {
-          navigate({ to: "/teacher/weekly-planning" });
-        } else if (redirect === "view") {
-          navigate({ to: "/teacher/weekly-planning/$planId", params: { planId: created.id } });
-        } else {
-          navigate({
-            to: "/teacher/weekly-planning/$planId/edit",
-            params: { planId: created.id },
-          });
-        }
-      } else if (planId) {
-        await updateWeeklyPlan(planId, payload);
-        toast.success(tr("wp_saved"));
-        if (redirect === "list") {
-          navigate({ to: "/teacher/weekly-planning" });
-        } else if (redirect === "view") {
-          navigate({ to: "/teacher/weekly-planning/$planId", params: { planId } });
-        }
+        navigate({
+          to: "/teacher/weekly-planning/$planId/edit",
+          params: { planId: targetPlanId },
+        });
       }
     } catch (e) {
       if (isWeeklyPlanUniqueScopeError(e)) {
         toast.error(tr("wp_duplicate_scope_error"));
       } else {
-        toast.error(e instanceof Error ? e.message : String(e));
+        toast.error(formatError(e));
       }
     } finally {
+      saveInFlightRef.current = false;
       setSaving(false);
     }
   };

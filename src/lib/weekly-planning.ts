@@ -829,6 +829,93 @@ export async function createWeeklyPlan(
   return data as WeeklyPlanRow;
 }
 
+export async function findWeeklyPlanByScope(
+  teacherId: string,
+  weekNumber: number,
+  grade: string,
+  sections: StudentSection[],
+  islamicGroup: string | null,
+): Promise<WeeklyPlanRow | null> {
+  const scopeFields = prepareWeeklyPlanPersistenceFields({
+    grade,
+    sections,
+    section: sections[0] ?? null,
+    islamic_group: islamicGroup,
+  });
+  let query = supabase
+    .from("weekly_plans")
+    .select("*")
+    .eq("teacher_id", teacherId)
+    .eq("week_number", weekNumber)
+    .eq("grade", normalizeGradeSlug(grade))
+    .eq("sections_key", scopeFields.sections_key);
+
+  query =
+    islamicGroup === null || islamicGroup === ""
+      ? query.is("islamic_group", null)
+      : query.eq("islamic_group", islamicGroup);
+
+  const { data, error } = await query.maybeSingle();
+  if (error) throw error;
+  return (data as WeeklyPlanRow | null) ?? null;
+}
+
+export type SaveWeeklyPlanResult = {
+  plan: WeeklyPlanRow;
+  /** True when a create save updated an existing scope row instead of inserting. */
+  resumedExisting: boolean;
+};
+
+export async function saveWeeklyPlan(args: {
+  mode: "create" | "edit";
+  planId?: string;
+  input: CreateWeeklyPlanInput;
+}): Promise<SaveWeeklyPlanResult> {
+  const { mode, planId, input } = args;
+
+  if (mode === "edit") {
+    if (!planId) throw new Error("Weekly plan id is required for edit saves.");
+    const plan = await updateWeeklyPlan(planId, input);
+    return { plan, resumedExisting: false };
+  }
+
+  const scopeFields = prepareWeeklyPlanPersistenceFields(input);
+  const existing = await findWeeklyPlanByScope(
+    input.teacher_id,
+    input.week_number,
+    input.grade,
+    scopeFields.sections,
+    input.islamic_group,
+  );
+  if (existing) {
+    const plan = await updateWeeklyPlan(existing.id, input);
+    return { plan, resumedExisting: true };
+  }
+
+  try {
+    const plan = await createWeeklyPlan(input);
+    return { plan, resumedExisting: false };
+  } catch (error) {
+    if (!isWeeklyPlanUniqueScopeError(error)) throw error;
+    const raced = await findWeeklyPlanByScope(
+      input.teacher_id,
+      input.week_number,
+      input.grade,
+      scopeFields.sections,
+      input.islamic_group,
+    );
+    if (!raced) throw error;
+    const plan = await updateWeeklyPlan(raced.id, input);
+    return { plan, resumedExisting: true };
+  }
+}
+
+export async function verifyWeeklyPlanPersisted(planId: string): Promise<WeeklyPlanRow> {
+  const row = await fetchWeeklyPlanById(planId);
+  if (!row) throw new Error("Weekly plan save verification failed.");
+  return row;
+}
+
 export async function updateWeeklyPlan(
   planId: string,
   patch: Partial<CreateWeeklyPlanInput>,

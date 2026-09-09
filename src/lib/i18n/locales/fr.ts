@@ -967,6 +967,8 @@ export const fr: Record<string, string> = {
   wp_no_plans: "Pas encore de plans hebdomadaires.",
   wp_no_title: "Sans titre Leçon",
   wp_saved: "Plan hebdomadaire enregistré.",
+  wp_saved_existing_scope:
+    "Votre plan hebdomadaire existant pour cette semaine et cette portée de classe a été mis à jour.",
   wp_save_draft: "Enregistrer le brouillon",
   wp_save_return: "Enregistrer et revenir à la liste",
   wp_grade_required: "Niveau est requis.",

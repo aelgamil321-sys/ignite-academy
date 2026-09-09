@@ -11,12 +11,15 @@ import {
   getSectionsForGrade,
   masterListItemLabel,
   teacherAssignmentCoversWeeklyPlanScope,
+  isWeeklyPlanUniqueScopeError,
+  prepareWeeklyPlanPersistenceFields,
   type WeeklyPlanMasterListItem,
   type WeeklyPlanRow,
 } from "@/lib/weekly-planning";
 import type { TeacherContext } from "@/lib/teacher-dashboard";
 import { runWeeklyPlanDashboardTests } from "@/lib/weekly-planning-dashboard-tests";
 import { runWeeklyPlanPdfCaptureTests, runWeeklyPlanImageConstraintTest, runWeeklyPlanPdfPaginationTests } from "@/lib/weekly-plan-pdf-tests";
+import { formatError } from "@/lib/upload";
 
 export type WeeklyPlanUiTestResult = { name: string; pass: boolean; detail: string };
 
@@ -163,6 +166,43 @@ export function runWeeklyPlanUiTests(): WeeklyPlanUiTestResult[] {
         return c.status === "not_started" || c.status === "in_progress";
       })(),
       detail: "partial plan not marked complete",
+    },
+    {
+      name: "Duplicate scope Postgres error is detectable",
+      pass: (() => {
+        const err = {
+          code: "23505",
+          message: 'duplicate key value violates unique constraint "idx_weekly_plans_unique_scope"',
+        };
+        return isWeeklyPlanUniqueScopeError(err);
+      })(),
+      detail: "23505 + idx_weekly_plans_unique_scope",
+    },
+    {
+      name: "Supabase save errors render as readable text",
+      pass: (() => {
+        const err = {
+          code: "23505",
+          message: "duplicate key value violates unique constraint",
+          details: "Key already exists.",
+        };
+        const text = formatError(err);
+        return !text.includes("[object Object]") && text.includes("duplicate key");
+      })(),
+      detail: formatError({ code: "42501", message: "new row violates row-level security policy" }),
+    },
+    {
+      name: "Multi-section scope key is normalized",
+      pass: (() => {
+        const scope = prepareWeeklyPlanPersistenceFields({
+          grade: "6",
+          sections: ["C", "A", "B"],
+          section: "C",
+          islamic_group: "B",
+        });
+        return scope.sections_key === "A,B,C";
+      })(),
+      detail: "sections_key sorted unique",
     },
     {
       name: "Print route path pattern (no sidebar layout)",

@@ -31,6 +31,7 @@ import {
   weeklyPlanSectionsFromRow,
   type WeeklyPlanRow,
 } from "@/lib/weekly-planning";
+import { formatError } from "@/lib/upload";
 import type { IslamicGroup, StudentSection } from "@/lib/student-academics";
 
 export const Route = createFileRoute("/teacher/weekly-planning/")({
@@ -101,7 +102,7 @@ function DuplicateDialog({
       if (isWeeklyPlanUniqueScopeError(e)) {
         toast.error(tr("wp_duplicate_scope_error"));
       } else {
-        toast.error(e instanceof Error ? e.message : String(e));
+        toast.error(formatError(e));
       }
     } finally {
       setBusy(false);

@@ -967,6 +967,8 @@ export const ur: Record<string, string> = {
   wp_no_plans: "ابھی تک کوئی ہفتہ وار منصوبہ نہیں ہے۔",
   wp_no_title: "بلا عنوان سبق",
   wp_saved: "ہفتہ وار منصوبہ محفوظ ہو گیا۔",
+  wp_saved_existing_scope:
+    "اس ہفتے اور کلاس کے دائرہ کار کے لیے آپ کا موجودہ ہفتہ وار منصوبہ اپ ڈیٹ کر دیا گیا۔",
   wp_save_draft: "مسودہ محفوظ کریں",
   wp_save_return: "محفوظ کریں اور فہرست میں واپس جائیں۔",
   wp_grade_required: "جماعت درکار ہے۔",

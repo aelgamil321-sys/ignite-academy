@@ -6,15 +6,8 @@ import { WeeklyPlanForm } from "@/components/weekly-plan-form";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { fetchTeacherContext } from "@/lib/teacher-dashboard";
-import {
-  buildEmptyWeeklyPlanInput,
-  derivePhaseFromGradeSlug,
-  fetchWeeklyPlanMasterLists,
-  getAssignableGrades,
-  getIslamicGroupsForSections,
-  getSectionsForGrade,
-  type WeeklyPlanMasterList,
-} from "@/lib/weekly-planning";
+import { fetchWeeklyPlanMasterLists, buildEmptyWeeklyPlanInput, derivePhaseFromGradeSlug, getAssignableGrades, getIslamicGroupsForSections, getSectionsForGrade, type WeeklyPlanMasterList } from "@/lib/weekly-planning";
+import { formatError } from "@/lib/upload";
 import type { TeacherContext } from "@/lib/teacher-dashboard";
 
 export const Route = createFileRoute("/teacher/weekly-planning/new")({
@@ -37,7 +30,7 @@ function TeacherWeeklyPlanningNewPage() {
         setCtx(context);
         setMasterLists(lists);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : String(e));
+        toast.error(formatError(e));
       } finally {
         setLoading(false);
       }

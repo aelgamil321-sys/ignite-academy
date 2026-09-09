@@ -967,6 +967,7 @@ export const zh: Record<string, string> = {
   wp_no_plans: "还没有每周计划。",
   wp_no_title: "未命名课程",
   wp_saved: "每周套餐已保存。",
+  wp_saved_existing_scope: "已更新本周该班级范围的现有每周计划。",
   wp_save_draft: "保存草稿",
   wp_save_return: "返回列表",
   wp_grade_required: "是必须的.",
