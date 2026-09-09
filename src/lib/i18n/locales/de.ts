@@ -974,6 +974,8 @@ export const de: Record<string, string> = {
   wp_grade_required: "Jahrgangsstufe ist erforderlich.",
   wp_scope_forbidden: "Der ausgewählte Klassenbereich liegt außerhalb Ihres Aufgabe.",
   wp_duplicate_scope_error: "Für diese Woche und den Unterrichtsumfang liegt bereits ein Plan vor.",
+  wp_student_count_constraint_error:
+    "Die Schülerzahl muss zwischen 0 und 30 liegen. Bitte passen Sie das Feld an und versuchen Sie es erneut.",
   wp_status_not_started: "Nicht gestartet",
   wp_status_in_progress: "Im Gange",
   wp_status_complete: "Vollständig",

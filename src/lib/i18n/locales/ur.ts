@@ -974,6 +974,8 @@ export const ur: Record<string, string> = {
   wp_grade_required: "جماعت درکار ہے۔",
   wp_scope_forbidden: "منتخب کلاس کا دائرہ آپ کے اسائنمنٹ سے باہر ہے۔",
   wp_duplicate_scope_error: "اس ہفتے اور کلاس کے دائرہ کار کے لیے ایک منصوبہ پہلے سے موجود ہے۔",
+  wp_student_count_constraint_error:
+    "طلباء کی تعداد 0 سے 30 کے درمیان ہونی چاہیے۔ براہ کرم فیلڈ درست کریں اور دوبارہ کوشش کریں۔",
   wp_status_not_started: "شروع نہیں ہوا۔",
   wp_status_in_progress: "جاری ہے۔",
   wp_status_complete: "مکمل",

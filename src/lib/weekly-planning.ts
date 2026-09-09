@@ -811,9 +811,14 @@ export type CreateWeeklyPlanInput = Omit<
 
 export async function createWeeklyPlan(
   input: CreateWeeklyPlanInput,
+  options?: { authoritativeStudentCount?: number | null },
 ): Promise<WeeklyPlanRow> {
   const scopeFields = prepareWeeklyPlanPersistenceFields(input);
-  const normalizedInput = { ...input, ...scopeFields };
+  const student_count = resolveWeeklyPlanStudentCountForCreate(
+    input.student_count,
+    options?.authoritativeStudentCount,
+  );
+  const normalizedInput = { ...input, ...scopeFields, student_count };
   const completion = calculateWeeklyPlanCompletion(normalizedInput);
   const payload = {
     ...normalizedInput,
@@ -870,12 +875,13 @@ export async function saveWeeklyPlan(args: {
   mode: "create" | "edit";
   planId?: string;
   input: CreateWeeklyPlanInput;
+  authoritativeStudentCount?: number | null;
 }): Promise<SaveWeeklyPlanResult> {
-  const { mode, planId, input } = args;
+  const { mode, planId, input, authoritativeStudentCount } = args;
 
   if (mode === "edit") {
     if (!planId) throw new Error("Weekly plan id is required for edit saves.");
-    const plan = await updateWeeklyPlan(planId, input);
+    const plan = await updateWeeklyPlan(planId, input, { authoritativeStudentCount });
     return { plan, resumedExisting: false };
   }
 
@@ -888,12 +894,12 @@ export async function saveWeeklyPlan(args: {
     input.islamic_group,
   );
   if (existing) {
-    const plan = await updateWeeklyPlan(existing.id, input);
+    const plan = await updateWeeklyPlan(existing.id, input, { authoritativeStudentCount });
     return { plan, resumedExisting: true };
   }
 
   try {
-    const plan = await createWeeklyPlan(input);
+    const plan = await createWeeklyPlan(input, { authoritativeStudentCount });
     return { plan, resumedExisting: false };
   } catch (error) {
     if (!isWeeklyPlanUniqueScopeError(error)) throw error;
@@ -905,7 +911,7 @@ export async function saveWeeklyPlan(args: {
       input.islamic_group,
     );
     if (!raced) throw error;
-    const plan = await updateWeeklyPlan(raced.id, input);
+    const plan = await updateWeeklyPlan(raced.id, input, { authoritativeStudentCount });
     return { plan, resumedExisting: true };
   }
 }
@@ -919,22 +925,39 @@ export async function verifyWeeklyPlanPersisted(planId: string): Promise<WeeklyP
 export async function updateWeeklyPlan(
   planId: string,
   patch: Partial<CreateWeeklyPlanInput>,
+  options?: { authoritativeStudentCount?: number | null },
 ): Promise<WeeklyPlanRow> {
   const existing = await fetchWeeklyPlanById(planId);
   if (!existing) throw new Error("Weekly plan not found");
 
+  const studentCountUpdate = resolveWeeklyPlanStudentCountForUpdate(
+    patch.student_count,
+    existing.student_count,
+    options?.authoritativeStudentCount,
+  );
+
   const merged = { ...existing, ...patch } as WeeklyPlanRow;
+  if (studentCountUpdate !== undefined) {
+    merged.student_count = studentCountUpdate;
+  } else {
+    merged.student_count = existing.student_count;
+  }
+
   const scopeFields = prepareWeeklyPlanPersistenceFields(merged);
   const mergedWithScope = { ...merged, ...scopeFields };
   const completion = calculateWeeklyPlanCompletion(mergedWithScope);
-  const payload = {
-    ...patch,
+  const { student_count: _patchStudentCount, ...patchWithoutStudentCount } = patch;
+  const payload: Record<string, unknown> = {
+    ...patchWithoutStudentCount,
     ...scopeFields,
     ...(patch.grade ? { grade: normalizeGradeSlug(patch.grade) } : {}),
     status: completion.status,
     completion_percentage: completion.percentage,
     updated_at: new Date().toISOString(),
   };
+  if (studentCountUpdate !== undefined) {
+    payload.student_count = studentCountUpdate;
+  }
 
   const { data, error } = await supabase
     .from("weekly_plans")
@@ -1324,6 +1347,67 @@ export async function duplicateWeeklyPlan(
   if (!source) throw new Error("Weekly plan not found");
   const input = buildDuplicateWeeklyPlanInput(source, teacherId, overrides);
   return createWeeklyPlan(input);
+}
+
+export const WEEKLY_PLAN_STUDENT_COUNT_MIN = 0;
+export const WEEKLY_PLAN_STUDENT_COUNT_MAX = 30;
+
+export function isValidWeeklyPlanStudentCount(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    Number.isInteger(value) &&
+    value >= WEEKLY_PLAN_STUDENT_COUNT_MIN &&
+    value <= WEEKLY_PLAN_STUDENT_COUNT_MAX
+  );
+}
+
+/** Returns a DB-safe count, or null when the input is empty/invalid. */
+export function normalizeWeeklyPlanStudentCountInput(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number" && Number.isNaN(value)) return null;
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n) || !Number.isInteger(n)) return null;
+  return isValidWeeklyPlanStudentCount(n) ? n : null;
+}
+
+/**
+ * INSERT: prefer valid patch, then authoritative scoped enrollment, else null (allowed by CHECK).
+ */
+export function resolveWeeklyPlanStudentCountForCreate(
+  patchValue: unknown,
+  authoritativeCount?: number | null,
+): number | null {
+  const fromPatch = normalizeWeeklyPlanStudentCountInput(patchValue);
+  if (fromPatch !== null) return fromPatch;
+  const fromAuth = normalizeWeeklyPlanStudentCountInput(authoritativeCount ?? null);
+  if (fromAuth !== null) return fromAuth;
+  return null;
+}
+
+/**
+ * UPDATE: preserve existing DB value when patch is invalid and existing is valid.
+ * Returns undefined to omit student_count from the SQL UPDATE payload.
+ */
+export function resolveWeeklyPlanStudentCountForUpdate(
+  patchValue: unknown,
+  existingValue: number | null | undefined,
+  authoritativeCount?: number | null,
+): number | null | undefined {
+  if (patchValue === undefined) return undefined;
+  const fromPatch = normalizeWeeklyPlanStudentCountInput(patchValue);
+  if (fromPatch !== null) return fromPatch;
+  if (patchValue === null) return null;
+  if (isValidWeeklyPlanStudentCount(existingValue)) return undefined;
+  const fromAuth = normalizeWeeklyPlanStudentCountInput(authoritativeCount ?? null);
+  if (fromAuth !== null) return fromAuth;
+  return null;
+}
+
+export function isWeeklyPlanStudentCountCheckError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const e = error as { code?: string; message?: string };
+  return e.code === "23514" || (e.message ?? "").includes("weekly_plans_student_count_check");
 }
 
 export function isWeeklyPlanUniqueScopeError(error: unknown): boolean {

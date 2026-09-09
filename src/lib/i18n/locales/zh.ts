@@ -973,6 +973,7 @@ export const zh: Record<string, string> = {
   wp_grade_required: "是必须的.",
   wp_scope_forbidden: "所选类的范围超出了您的 作业。",
   wp_duplicate_scope_error: "本周和课程范围的计划已经存在。",
+  wp_student_count_constraint_error: "学生人数必须在 0 到 30 之间。请调整学生人数字段后重试。",
   wp_status_not_started: "未开始",
   wp_status_in_progress: "正在进行",
   wp_status_complete: "已完成",

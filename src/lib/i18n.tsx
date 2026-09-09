@@ -1772,6 +1772,10 @@ export const t = {
     en: "A plan already exists for this week and class scope.",
     ar: "توجد خطة بالفعل لهذا الأسبوع ونطاق الصف.",
   },
+  wp_student_count_constraint_error: {
+    en: "Student count must be between 0 and 30. Please adjust the student count field and try again.",
+    ar: "يجب أن يكون عدد الطلاب بين 0 و30. يرجى تعديل حقل عدد الطلاب والمحاولة مرة أخرى.",
+  },
   wp_status_not_started: { en: "Not started", ar: "لم يبدأ" },
   wp_status_in_progress: { en: "In progress", ar: "قيد التنفيذ" },
   wp_status_complete: { en: "Complete", ar: "مكتمل" },

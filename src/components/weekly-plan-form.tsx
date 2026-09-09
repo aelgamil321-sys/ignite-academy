@@ -32,6 +32,9 @@ import {
   getIslamicGroupsForSections,
   getSectionsForGrade,
   isWeeklyPlanUniqueScopeError,
+  isWeeklyPlanStudentCountCheckError,
+  isValidWeeklyPlanStudentCount,
+  normalizeWeeklyPlanStudentCountInput,
   masterListItemLabel,
   masterListItemValue,
   normalizeWeeklyPlanSections,
@@ -141,9 +144,10 @@ export function WeeklyPlanForm({
 
       setScopedStudents(students);
       const validIds = new Set(students.map((s) => s.userId));
+      const scopedCount = normalizeWeeklyPlanStudentCountInput(students.length);
       setForm((prev) => ({
         ...prev,
-        student_count: students.length,
+        ...(scopedCount !== null ? { student_count: scopedCount } : {}),
         differentiation_sod: filterDifferentiationToStudents(prev.differentiation_sod ?? {}, validIds),
         differentiation_eal: filterDifferentiationToStudents(prev.differentiation_eal ?? {}, validIds),
         differentiation_gt: filterDifferentiationToStudents(prev.differentiation_gt ?? {}, validIds),
@@ -269,10 +273,12 @@ export function WeeklyPlanForm({
         subject: WEEKLY_PLAN_DEFAULT_SUBJECT,
         plan_language: lang === "ar" ? "ar" : "en",
       };
+      const authoritativeStudentCount = normalizeWeeklyPlanStudentCountInput(scopedStudents.length);
       const { plan: saved, resumedExisting } = await saveWeeklyPlan({
         mode,
         planId,
         input: payload,
+        authoritativeStudentCount,
       });
       await verifyWeeklyPlanPersisted(saved.id);
 
@@ -298,6 +304,8 @@ export function WeeklyPlanForm({
     } catch (e) {
       if (isWeeklyPlanUniqueScopeError(e)) {
         toast.error(tr("wp_duplicate_scope_error"));
+      } else if (isWeeklyPlanStudentCountCheckError(e)) {
+        toast.error(tr("wp_student_count_constraint_error"));
       } else {
         toast.error(formatError(e));
       }
@@ -390,9 +398,18 @@ export function WeeklyPlanForm({
                     min={0}
                     max={30}
                     value={form.student_count ?? ""}
-                    onChange={(e) =>
-                      setField("student_count", e.target.value ? Number(e.target.value) : null)
-                    }
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (!raw.trim()) {
+                        setField("student_count", null);
+                        return;
+                      }
+                      const parsed = Number(raw);
+                      setField(
+                        "student_count",
+                        isValidWeeklyPlanStudentCount(parsed) ? parsed : null,
+                      );
+                    }}
                   />
                 </label>
                 <label className="block text-sm">

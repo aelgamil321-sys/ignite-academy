@@ -12,6 +12,8 @@ import {
   masterListItemLabel,
   teacherAssignmentCoversWeeklyPlanScope,
   isWeeklyPlanUniqueScopeError,
+  isWeeklyPlanStudentCountCheckError,
+  resolveWeeklyPlanStudentCountForUpdate,
   prepareWeeklyPlanPersistenceFields,
   type WeeklyPlanMasterListItem,
   type WeeklyPlanRow,
@@ -190,6 +192,19 @@ export function runWeeklyPlanUiTests(): WeeklyPlanUiTestResult[] {
         return !text.includes("[object Object]") && text.includes("duplicate key");
       })(),
       detail: formatError({ code: "42501", message: "new row violates row-level security policy" }),
+    },
+    {
+      name: "Invalid student_count update preserves existing DB value",
+      pass: resolveWeeklyPlanStudentCountForUpdate(40, 4, 4) === undefined,
+      detail: "40 rejected, existing 4 preserved",
+    },
+    {
+      name: "23514 student_count constraint is detectable",
+      pass: isWeeklyPlanStudentCountCheckError({
+        code: "23514",
+        message: 'violates check constraint "weekly_plans_student_count_check"',
+      }),
+      detail: "23514 + weekly_plans_student_count_check",
     },
     {
       name: "Multi-section scope key is normalized",

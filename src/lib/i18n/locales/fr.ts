@@ -974,6 +974,8 @@ export const fr: Record<string, string> = {
   wp_grade_required: "Niveau est requis.",
   wp_scope_forbidden: "La portée de la classe sélectionnée est en dehors de votre Devoir .",
   wp_duplicate_scope_error: "Un plan existe déjà pour cette semaine et la portée du cours.",
+  wp_student_count_constraint_error:
+    "Le nombre d'élèves doit être compris entre 0 et 30. Veuillez ajuster le champ et réessayer.",
   wp_status_not_started: "Pas démarré",
   wp_status_in_progress: "En cours",
   wp_status_complete: "Complet",
