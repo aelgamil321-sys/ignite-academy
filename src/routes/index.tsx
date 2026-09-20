@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
+import { GhirasHomeHeader } from "@/components/ghiras-home-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { AcademyHomepage } from "@/components/academy-homepage";
@@ -148,8 +149,8 @@ function HomeRoleError() {
 
 function PublicHome({ signedIn }: { signedIn: boolean }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader />
+    <div className="min-h-screen overflow-x-clip bg-background text-foreground">
+      <GhirasHomeHeader />
       <AcademyHomepage signedIn={signedIn} />
       <SiteFooter />
       <AskMrAhmed />

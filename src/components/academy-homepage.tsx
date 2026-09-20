@@ -1,25 +1,29 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import {
   ArrowRight, BookOpen, GraduationCap, Library, Video, ClipboardCheck,
-  Users, Award, Sparkles, Play,
+  Users, Heart, ShieldCheck, Sparkles, Baby, Landmark,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero.jpg";
-import patternImg from "@/assets/pattern.jpg";
-import { getStage } from "@/lib/curriculum";
-import { HOMEPAGE_STAGE_CARDS, STAGE_CARD_CONFIG, STAGE_CARD_IMAGES } from "@/lib/stage-images";
+import { HOMEPAGE_STAGE_CARDS, STAGE_CARD_IMAGES } from "@/lib/stage-images";
 import { useI18n } from "@/lib/i18n";
 import { SUBJECT_CATEGORIES } from "@/lib/categories";
 import { useCMS, useCMSStats, useAllAnnouncements } from "@/lib/cms";
 import { gradeNameBi } from "@/lib/grade-utils";
 import { useHomepageContentPrefetch } from "@/hooks/use-cms-content-prefetch";
 import { getAccountRole, postAuthPathForRole } from "@/lib/account-role";
-import { BRAND, brandLogoPrimaryUrl } from "@/lib/brand";
-import { DepartmentLogoCard } from "@/components/brand-logo";
+import { BRAND } from "@/lib/brand";
 import { HomepageAnnouncements } from "@/components/homepage-announcements";
 import { AdminHomeAnalyticsPreview } from "@/components/admin-home-analytics-preview";
 import { AdminHomeAnnouncements } from "@/components/admin-home-announcements";
+
+const STAGE_ICONS: Record<(typeof HOMEPAGE_STAGE_CARDS)[number]["key"], ComponentType<{ className?: string }>> = {
+  kg: Baby,
+  elementary: BookOpen,
+  middle: Landmark,
+  high: GraduationCap,
+};
 
 function SectionHeader({
   eyebrow, title, desc, align = "center", tone = "dark",
@@ -83,41 +87,37 @@ export function AcademyHomepage({
   const stages = HOMEPAGE_STAGE_CARDS.map((card) => ({
     ...card,
     img: STAGE_CARD_IMAGES[card.key],
-    ...STAGE_CARD_CONFIG[card.key],
-    stage: getStage(card.stageSlug),
   }));
+
+  const benefits = [
+    { icon: Sparkles, label: tr("hero_benefit_impact") },
+    { icon: ShieldCheck, label: tr("hero_benefit_trusted") },
+    { icon: Heart, label: tr("hero_benefit_community") },
+  ];
 
   return (
     <main>
       {/* HERO */}
-      <section className="relative overflow-hidden bg-brand-dark text-white">
-        <div
-          className="absolute inset-0 opacity-[0.07] mix-blend-luminosity pointer-events-none"
-          style={{ backgroundImage: `url(${patternImg})`, backgroundSize: "320px" }}
-          aria-hidden
-        />
-        <div className="container-page relative grid items-start gap-10 py-16 sm:gap-12 sm:py-20 md:py-24 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-24 xl:gap-16 xl:py-28">
-          <div className="relative z-10 flex flex-col justify-center">
-            <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-primary/50 bg-primary/15 px-4 py-2 text-xs font-medium tracking-wide text-primary sm:text-sm">
-              <Sparkles className="h-3.5 w-3.5 shrink-0" />
-              <span>{tr("hero_badge")}</span>
-            </div>
-            <h1 className="mt-5 font-display text-3xl font-semibold leading-[1.12] tracking-tight text-[#FF7A00] sm:mt-6 sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.08] xl:text-6xl">
-              {BRAND.nameEn}
-            </h1>
-            <p className="mt-2 font-display text-2xl font-semibold text-white sm:text-3xl md:text-4xl" dir="rtl">
-              {BRAND.nameAr}
+      <section className="relative overflow-x-clip bg-[#FAF8F5]">
+        <div className="container-page grid items-center gap-10 py-10 sm:py-14 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 lg:gap-12 lg:py-16 xl:py-20">
+          <div className="relative z-10 mx-auto max-w-xl text-center md:mx-0 md:max-w-none md:text-start">
+            <p className="text-[13px] font-semibold tracking-wide text-[#FF7A00] sm:text-sm">
+              {tr("hero_eyebrow")}
             </p>
-            <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-primary sm:text-lg" dir="rtl">
+            <h1
+              className="mt-3 font-display text-[2rem] font-bold leading-[1.2] text-[#7A0D14] sm:text-4xl md:text-[2.65rem] lg:text-[3.15rem] lg:leading-[1.18]"
+              dir="rtl"
+              lang="ar"
+            >
               {BRAND.taglineAr}
-            </p>
-            <p className="mt-1 max-w-xl text-sm font-medium leading-relaxed text-white/85 sm:text-base">
+            </h1>
+            <p className="mt-3 font-display text-lg font-medium text-[#2D2D2D] sm:text-xl lg:text-[1.35rem]" dir="ltr">
               {BRAND.taglineEn}
             </p>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90 sm:mt-6 sm:text-lg sm:leading-relaxed">
+            <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-[#2D2D2D]/80 sm:text-base lg:text-[1.05rem] lg:leading-8">
               {tr("hero_desc")}
             </p>
-            <div className="relative z-20 mt-7 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
+            <div className="relative z-20 mt-7 flex flex-wrap items-center justify-center gap-3 md:justify-start">
               {signedIn ? (
                 <a
                   href={dashboardPath}
@@ -125,7 +125,7 @@ export function AcademyHomepage({
                     e.preventDefault();
                     goToDashboard();
                   }}
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_rgba(122,13,20,0.45)] hover:translate-y-[-2px] transition-transform"
+                  className="inline-flex items-center justify-center rounded-lg bg-[#7A0D14] px-7 py-3 text-sm font-semibold text-[#FAF8F5] shadow-[0_10px_24px_-12px_rgba(122,13,20,0.55)] transition-transform hover:-translate-y-0.5"
                 >
                   {dashboardPath === "/teacher"
                     ? tr("teacher_title")
@@ -133,68 +133,44 @@ export function AcademyHomepage({
                       ? tr("parent_dashboard_title")
                       : dashboardPath.startsWith("/admin")
                         ? tr("nav_admin")
-                        : tr("nav_student")}
-                  <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
+                        : tr("cta_start_now")}
                 </a>
               ) : (
-                <>
-                  <Link
-                    to="/auth"
-                    search={{ mode: "signup" }}
-                    className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_rgba(122,13,20,0.45)] hover:translate-y-[-2px] transition-transform"
-                  >
-                    {tr("cta_signup")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-                  </Link>
-                  <Link
-                    to="/auth"
-                    search={{ mode: "login" }}
-                    className="inline-flex items-center gap-2 rounded-full bg-white text-foreground px-7 py-3.5 font-semibold hover:bg-white/90 transition-colors"
-                  >
-                    {tr("cta_login")}
-                  </Link>
-                </>
+                <Link
+                  to="/auth"
+                  search={{ mode: "signup" }}
+                  className="inline-flex items-center justify-center rounded-lg bg-[#7A0D14] px-7 py-3 text-sm font-semibold text-[#FAF8F5] shadow-[0_10px_24px_-12px_rgba(122,13,20,0.55)] transition-transform hover:-translate-y-0.5"
+                >
+                  {tr("cta_start_now")}
+                </Link>
               )}
-              <Link to="/grades" className="inline-flex items-center gap-2 rounded-full border border-white/35 px-7 py-3.5 font-semibold text-white hover:bg-white/10 transition-colors">
-                <Play className="h-4 w-4" /> {tr("cta_explore")}
+              <Link
+                to="/grades"
+                className="inline-flex items-center justify-center rounded-lg border-2 border-[#7A0D14] bg-[#FAF8F5] px-7 py-3 text-sm font-semibold text-[#7A0D14] transition-colors hover:bg-white"
+              >
+                {tr("cta_explore_stages")}
               </Link>
             </div>
-
-            <div className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-white/15 pt-8 sm:mt-12 sm:gap-6 sm:pt-10">
-              {[
-                { n: String(stats.lessonCount), l: tr("stat_lessons") },
-                { n: String(stats.gradeCount), l: tr("stat_grades") },
-                { n: String(stats.subjectCount), l: tr("stat_subjects") },
-              ].map((s) => (
-                <div key={s.l} className="text-center sm:text-start">
-                  <div className="font-display text-2xl text-primary sm:text-3xl">{s.n}</div>
-                  <div className="mt-1 text-[10px] uppercase tracking-wider text-white/75 sm:text-xs">{s.l}</div>
-                </div>
+            <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-2 lg:gap-4">
+              {benefits.map((b) => (
+                <li key={b.label} className="flex items-center justify-center gap-2.5 text-sm font-medium text-[#2D2D2D] md:justify-start">
+                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FF7A00] text-white">
+                    <b.icon className="h-4 w-4" aria-hidden />
+                  </span>
+                  {b.label}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
-          <div className="relative z-10 flex w-full flex-col items-center lg:items-stretch">
-            <div className="relative w-full">
-              <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full pointer-events-none sm:-inset-6" aria-hidden />
-              <div className="relative overflow-hidden rounded-3xl border border-primary/25 shadow-[var(--shadow-elegant)]">
-                <img src={heroImg} alt="" width={1600} height={1100} className="w-full h-auto" />
-              </div>
-            </div>
-
-            <div className="mt-6 flex w-full max-w-[340px] flex-col items-center gap-4 sm:mt-8 sm:gap-5 lg:mx-auto">
-              <div className="flex w-full min-w-[260px] max-w-[340px] items-center gap-3 rounded-2xl bg-white p-4 text-foreground shadow-[var(--shadow-elegant)] sm:p-5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                  <Award className="h-6 w-6" />
-                </div>
-                <div className="min-w-0 text-start">
-                  <div className="font-semibold text-sm leading-snug">{tr("badge_certified")}</div>
-                  <div className="mt-0.5 text-xs leading-relaxed text-foreground/65">{tr("badge_certified_sub")}</div>
-                </div>
-              </div>
-
-              <DepartmentLogoCard
-                src={brandLogoPrimaryUrl()}
-                alt={tr("school_logo_alt")}
-                className="min-w-[260px]"
+          <div className="relative mx-auto w-full max-w-lg md:max-w-none">
+            <div className="absolute -inset-6 rounded-[2rem] bg-[#FF7A00]/10 blur-2xl" aria-hidden />
+            <div className="relative overflow-hidden rounded-[1.35rem] shadow-[0_24px_50px_-24px_rgba(45,45,45,0.45)]">
+              <img
+                src={heroImg}
+                alt=""
+                width={1600}
+                height={1100}
+                className="aspect-[4/3] h-auto w-full object-cover object-[50%_35%] sm:aspect-[5/4]"
               />
             </div>
           </div>
@@ -202,46 +178,49 @@ export function AcademyHomepage({
       </section>
 
       {/* QUICK ACCESS — Academic stages */}
-      <section className="container-page py-20">
-        <SectionHeader eyebrow={tr("stages_eyebrow")} title={tr("stages_title")} desc={tr("stages_desc")} />
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {stages.map((s) => (
-            <Link
-              key={s.name}
-              to={isAdmin ? "/admin/grades" : s.to}
-              search={isAdmin ? { stage: s.stageSlug } : undefined}
-              className="group relative overflow-hidden rounded-3xl bg-white border border-foreground/10 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all hover:-translate-y-1"
-            >
-              <div className="aspect-[4/5] overflow-hidden">
-                <img
-                  src={s.img}
-                  alt={tr(s.name)}
-                  width={800}
-                  height={1000}
-                  loading="lazy"
-                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  style={{ objectPosition: s.objectPosition }}
-                />
-              </div>
-              <div className={`absolute inset-0 ${s.overlayClass}`} />
-              <div className="absolute inset-0 flex flex-col justify-end p-6 text-white [text-shadow:0_1px_12px_rgba(47,53,66,0.55)]">
-                <div className="text-xs uppercase tracking-wider text-primary">{tr(s.grades)}</div>
-                <div className="font-display text-2xl mt-1">{tr(s.name)}</div>
-                <div className="mt-1 text-sm font-medium opacity-95">{tr(s.subtitle)}</div>
-                {s.stage ? (
-                  <div className="mt-1 text-sm opacity-85 line-clamp-2">
-                    {bi(s.stage.desc, {
-                      fieldName: `stage_${s.stageSlug}_desc`,
-                      contentType: "general",
-                    })}
+      <section id="stages" className="bg-[#FAF8F5] pb-16 pt-4 sm:pb-20">
+        <div className="container-page">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-[13px] font-semibold tracking-wide text-[#FF7A00] sm:text-sm">{tr("stages_eyebrow")}</p>
+            <h2 className="mt-3 font-display text-3xl font-bold text-[#2D2D2D] sm:text-4xl md:text-[2.6rem]">{tr("stages_title")}</h2>
+            <p className="mt-4 text-[15px] leading-relaxed text-[#2D2D2D]/70 sm:text-base">{tr("stages_desc")}</p>
+          </div>
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+            {stages.map((s) => {
+              const Icon = STAGE_ICONS[s.key];
+              return (
+                <Link
+                  key={s.name}
+                  to={isAdmin ? "/admin/grades" : s.to}
+                  search={isAdmin ? { stage: s.stageSlug } : undefined}
+                  className="group relative isolate min-h-0 overflow-hidden rounded-[1.25rem] shadow-[0_16px_40px_-24px_rgba(45,45,45,0.45)]"
+                >
+                  <div className="aspect-[3/4] overflow-hidden">
+                    <img
+                      src={s.img}
+                      alt={tr(s.name)}
+                      width={800}
+                      height={1000}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
                   </div>
-                ) : null}
-                <div className="mt-3 inline-flex items-center gap-1 text-sm opacity-90 group-hover:gap-2 transition-all">
-                  {tr("explore")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
-                </div>
-              </div>
-            </Link>
-          ))}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/15" />
+                  <span className="absolute start-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FF7A00] text-white shadow-md">
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </span>
+                  <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start p-5 text-white">
+                    <h3 className="font-display text-xl font-semibold leading-snug">{tr(s.name)}</h3>
+                    <p className="mt-1 text-sm font-medium text-white/95">{tr(s.subtitle)}</p>
+                    <p className="mt-1 text-xs text-white/80">{tr(s.grades)}</p>
+                    <span className="mt-4 inline-flex items-center rounded-full border border-white/90 px-4 py-1.5 text-sm font-semibold text-white transition-colors group-hover:bg-white/15">
+                      {tr("explore")}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -276,7 +255,7 @@ export function AcademyHomepage({
       {isAdmin ? (
         <AdminHomeAnalyticsPreview />
       ) : (
-        <section className="container-page py-20">
+        <section id="featured-lessons" className="container-page scroll-mt-24 py-20">
           <SectionHeader eyebrow={tr("lessons_eyebrow")} title={tr("lessons_title")} align="left" />
           <div className="mt-10 space-y-4">
             {featuredLessons.length === 0 ? (
@@ -315,44 +294,28 @@ export function AcademyHomepage({
       )}
 
       {/* FEATURES strip */}
-      <section className="bg-brand-dark text-white relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{ backgroundImage: `url(${patternImg})`, backgroundSize: "240px" }}
-          aria-hidden
-        />
-        <div className="container-page py-20 relative">
-          <SectionHeader eyebrow={tr("feat_eyebrow")} title={tr("feat_title")} desc={tr("feat_desc")} tone="light" />
+      <section className="relative bg-[#FAF8F5]">
+        <div className="container-page relative py-20">
+          <SectionHeader eyebrow={tr("feat_eyebrow")} title={tr("feat_title")} desc={tr("feat_desc")} />
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: Library, t: tr("feat_lib_t"), d: tr("feat_lib_d"), to: "/resource-library" as const },
               { icon: Video, t: tr("feat_vid_t"), d: tr("feat_vid_d"), to: "/video-lessons" as const },
               { icon: ClipboardCheck, t: tr("feat_quiz_t"), d: tr("feat_quiz_d"), to: "/quizzes" as const },
               { icon: Users, t: tr("feat_par_t"), d: tr("feat_par_d"), to: "/parent" as const },
-            ].map((f) => {
-              const card = (
-                <>
-                  <div className="h-12 w-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center">
-                    <f.icon className="h-6 w-6" />
-                  </div>
-                  <div className="mt-4 font-display text-xl">{f.t}</div>
-                  <div className="mt-2 text-sm opacity-80 leading-relaxed">{f.d}</div>
-                </>
-              );
-              return f.to ? (
-                <Link
-                  key={f.t}
-                  to={f.to}
-                  className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:bg-white/10 transition-colors block"
-                >
-                  {card}
-                </Link>
-              ) : (
-                <div key={f.t} className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:bg-white/10 transition-colors">
-                  {card}
+            ].map((f) => (
+              <Link
+                key={f.t}
+                to={f.to}
+                className="block rounded-2xl border border-[#E7E2DC] bg-white p-6 shadow-[var(--shadow-soft)] transition-colors hover:border-[#7A0D14]/35"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#7A0D14] text-[#FAF8F5]">
+                  <f.icon className="h-6 w-6" />
                 </div>
-              );
-            })}
+                <div className="mt-4 font-display text-xl text-[#2D2D2D]">{f.t}</div>
+                <div className="mt-2 text-sm leading-relaxed text-[#2D2D2D]/70">{f.d}</div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

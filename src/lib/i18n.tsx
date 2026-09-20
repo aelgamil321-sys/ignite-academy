@@ -81,6 +81,13 @@ export const t = {
   nav_hall_of_fame: { en: "Hall of Fame", ar: "لوحة الشرف" },
   nav_contact: { en: "Contact", ar: "اتصل بنا" },
   nav_login: { en: "Student Login", ar: "دخول الطالب" },
+  home_nav_home: { en: "Home", ar: "الرئيسية" },
+  home_nav_stages: { en: "Stages", ar: "المراحل" },
+  home_nav_lessons: { en: "Lessons", ar: "الدروس" },
+  home_nav_parents: { en: "Parents", ar: "أولياء الأمور" },
+  home_nav_teachers: { en: "Teachers", ar: "المعلمون" },
+  home_nav_contact: { en: "Contact us", ar: "تواصل معنا" },
+  aria_search: { en: "Search", ar: "بحث" },
 
   // Brand
   brand_name: { en: "GHIRAS", ar: "غراس" },
@@ -93,19 +100,25 @@ export const t = {
 
   // Hero
   hero_badge: { en: "Online Islamic Education · KG1 to Grade 12", ar: "تعليم إسلامي عبر الإنترنت · من الروضة إلى الصف الثاني عشر" },
+  hero_eyebrow: { en: "Building a generation that shapes the future", ar: "بناء جيل يصنع المستقبل" },
   hero_subtitle: {
     en: "Plant Knowledge. Create Impact.",
     ar: "نغرس معرفة... ونصنع أثرًا",
   },
   hero_desc: {
-    en: "A modern platform for students, parents, and teachers — bringing classical Islamic Studies to life with beautiful lessons, videos, worksheets, and interactive assessments.",
-    ar: "منصة عصرية للطلاب وأولياء الأمور والمعلمين، تُحيي الدراسات الإسلامية الأصيلة من خلال دروس راقية ومقاطع فيديو وأوراق عمل وتقييمات تفاعلية.",
+    en: "A modern learning platform for students, parents, and teachers — offering structured content, interactive activities, and inspiring lessons from kindergarten through high school.",
+    ar: "منصة تعليمية عصرية للطلاب وأولياء الأمور والمعلمين، تقدم محتوى منظمًا، أنشطة تفاعلية، ودروسًا ملهمة من الروضة إلى المرحلة الثانوية.",
   },
+  hero_benefit_impact: { en: "Education that creates real impact", ar: "تعليم يصنع أثرًا حقيقيًا" },
+  hero_benefit_trusted: { en: "Trusted, purposeful content", ar: "محتوى موثوق وهادف" },
+  hero_benefit_community: { en: "A supportive learning community", ar: "مجتمع تعليمي داعم" },
   cta_start: { en: "Start Learning", ar: "ابدأ التعلّم" },
   cta_watch: { en: "Watch Intro", ar: "شاهد المقدمة" },
   cta_signup: { en: "Create Account", ar: "إنشاء حساب" },
   cta_login: { en: "Login", ar: "تسجيل الدخول" },
   cta_explore: { en: "Explore Academy", ar: "استكشف الأكاديمية" },
+  cta_start_now: { en: "Start now", ar: "ابدأ الآن" },
+  cta_explore_stages: { en: "Explore the stages", ar: "استكشف المراحل" },
 
   stat_lessons: { en: "Lessons", ar: "الدروس" },
   stat_grades: { en: "Grade Levels", ar: "الصفوف الدراسية" },
@@ -121,20 +134,23 @@ export const t = {
   badge_certified_sub: { en: "Aligned with international standards", ar: "متوافق مع المعايير الدولية" },
 
   // Stages section
-  stages_eyebrow: { en: "Academic Stages", ar: "المراحل الدراسية" },
-  stages_title: { en: "Find your learning path", ar: "اختر مسار تعلّمك" },
-  stages_desc: { en: "From first letters to final exams — a structured journey through every grade.", ar: "من الحروف الأولى إلى الاختبارات النهائية — رحلة منظَّمة عبر كل صف." },
+  stages_eyebrow: { en: "A complete learning journey", ar: "رحلة تعليمية متكاملة" },
+  stages_title: { en: "Learning stages at GHIRAS", ar: "المراحل التعليمية في غراس" },
+  stages_desc: {
+    en: "Carefully designed content for every stage — raising a generation grounded in its values and ready to shape its future.",
+    ar: "محتوى مصمم بعناية لكل مرحلة، لبناء جيل واعٍ متمسك بقيمه، قادر على صناعة مستقبله.",
+  },
   stage_kg: { en: "Kindergarten", ar: "رياض الأطفال" },
   stage_kg_subtitle: { en: "Planting values · building hearts", ar: "غرس القيم .. وبناء القلوب" },
   stage_kg_grades: { en: "KG1 – KG2", ar: "روضة 1 – روضة 2" },
   stage_elem: { en: "Elementary", ar: "المرحلة الابتدائية" },
-  stage_elem_subtitle: { en: "We learn to understand · we apply to master", ar: "نتعلم لنفهم .. ونطبق لنتقن" },
+  stage_elem_subtitle: { en: "We learn to understand · we rise to excel", ar: "نتعلم لنفهم .. وننطلق لنرتقي" },
   stage_elem_grades: { en: "Grade 1 – 5", ar: "الصف 1 – 5" },
   stage_mid: { en: "Middle School", ar: "المرحلة المتوسطة" },
-  stage_mid_subtitle: { en: "We strengthen our identity · we live our values", ar: "نعزز هويتنا .. ونطبق قيمنا" },
+  stage_mid_subtitle: { en: "We strengthen our identity · we build our abilities", ar: "نعزز هويتنا .. ونبني قدراتنا" },
   stage_mid_grades: { en: "Grade 6 – 8", ar: "الصف 6 – 8" },
   stage_high: { en: "High School", ar: "المرحلة الثانوية" },
-  stage_high_subtitle: { en: "We lead our future · we make an impact", ar: "نقود مستقبلنا .. نصنع الأثر" },
+  stage_high_subtitle: { en: "We lead our future · we create impact", ar: "نقود مستقبلنا .. نصنع الأثر" },
   stage_high_grades: { en: "Grade 9 – 12", ar: "الصف 9 – 12" },
   explore: { en: "Explore", ar: "استكشف" },
 
