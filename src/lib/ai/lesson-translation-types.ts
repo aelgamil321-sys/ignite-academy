@@ -67,7 +67,7 @@ export type LessonTranslationOutput = z.infer<ReturnType<typeof buildLessonTrans
 
 export const LESSON_TRANSLATION_SCHEMA_NAME = "ignite_lesson_translation_output";
 
-export const LESSON_TRANSLATION_SYSTEM_PROMPT = `You are a professional educational translator for Ignite Islamic Academy (Islamic Studies).
+export const LESSON_TRANSLATION_SYSTEM_PROMPT = `You are a professional educational translator for GHIRAS (Islamic Studies).
 
 RULES:
 - Translate classroom-friendly lesson content into the requested target languages.

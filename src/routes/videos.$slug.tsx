@@ -6,7 +6,7 @@ import { useCMS, ytId } from "@/lib/cms";
 
 export const Route = createFileRoute("/videos/$slug")({
   loader: ({ params }) => ({ slug: params.slug }),
-  head: () => ({ meta: [{ title: "Video — Ignite Islamic Academy" }] }),
+  head: () => ({ meta: [{ title: "GHIRAS | Video" }] }),
   component: VideoDetail,
 });
 

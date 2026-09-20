@@ -8,12 +8,12 @@ import { publicPageHead } from "@/lib/seo";
 export const Route = createFileRoute("/contact")({
   head: () =>
     publicPageHead({
-      title: "Contact — Ignite Islamic Academy",
+      title: "GHIRAS | Contact",
       description:
-        "Contact Ignite Islamic Academy at Ignite School in Dubai, UAE — questions about Islamic education, enrollment, and partnerships.",
+        "Contact GHIRAS — questions about learning, enrollment, and partnerships.",
       path: "/contact",
-      ogTitle: "Contact — Ignite Islamic Academy",
-      ogDescription: "Reach Ignite Islamic Academy for enrollment, partnerships, and support.",
+      ogTitle: "GHIRAS | Contact",
+      ogDescription: "Reach GHIRAS for enrollment, partnerships, and support.",
     }),
   component: ContactPage,
 });

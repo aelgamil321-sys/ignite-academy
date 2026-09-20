@@ -18,7 +18,7 @@ export const Route = createFileRoute("/categories/$category")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.category.name.en ?? "Category"} — Ignite Islamic Academy` },
+      { title: `GHIRAS | ${loaderData?.category.name.en ?? "Category"}` },
       { name: "description", content: loaderData?.category.desc.en ?? "" },
     ],
   }),

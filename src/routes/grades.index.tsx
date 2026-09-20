@@ -13,11 +13,11 @@ export const Route = createFileRoute("/grades/")({
   },
   head: () =>
     publicPageHead({
-      title: "Academic Stages — Ignite Islamic Academy",
+      title: "GHIRAS | Academic Stages",
       description:
-        "Browse grades from KG through Grade 12 at Ignite Islamic Academy — curated Islamic Studies lessons and resources at Ignite School in Dubai, UAE.",
+        "Browse grades from KG through Grade 12 at GHIRAS — curated lessons and learning resources.",
       path: "/grades",
-      ogTitle: "Academic Stages — Ignite Islamic Academy",
+      ogTitle: "GHIRAS | Academic Stages",
       ogDescription: "All grades KG through 12 grouped by academic stage.",
     }),
   component: GradesIndex,

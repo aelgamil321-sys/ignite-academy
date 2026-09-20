@@ -15,11 +15,11 @@ import { publicPageHead } from "@/lib/seo";
 export const Route = createFileRoute("/resources")({
   head: () =>
     publicPageHead({
-      title: "Resource Library — Ignite Islamic Academy",
+      title: "GHIRAS | Resource Library",
       description:
-        "Download PDFs, PowerPoints and worksheets for Islamic Studies at Ignite Islamic Academy — searchable resources for KG through Grade 12.",
+        "Download PDFs, PowerPoints and worksheets for Islamic Studies at GHIRAS — searchable resources for KG through Grade 12.",
       path: "/resources",
-      ogTitle: "Resource Library — Ignite Islamic Academy",
+      ogTitle: "GHIRAS | Resource Library",
       ogDescription: "PDFs, PowerPoints and worksheets for Islamic Studies, KG through Grade 12.",
     }),
   component: ResourcesPage,

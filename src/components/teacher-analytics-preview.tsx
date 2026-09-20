@@ -14,7 +14,7 @@ import type { TeacherAnalyticsScope } from "@/lib/teacher-analytics";
 const chartConfig = {
   score: {
     label: "Avg. score",
-    color: "#F2B21B",
+    color: "#FF7A00",
   },
 };
 

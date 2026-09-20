@@ -15,7 +15,7 @@ import { useCMS, useCMSStats, useAllAnnouncements } from "@/lib/cms";
 import { gradeNameBi } from "@/lib/grade-utils";
 import { useHomepageContentPrefetch } from "@/hooks/use-cms-content-prefetch";
 import { getAccountRole, postAuthPathForRole } from "@/lib/account-role";
-import { certificateIslamicLogoUrl } from "@/lib/certificate-branding";
+import { BRAND, brandLogoPrimaryUrl } from "@/lib/brand";
 import { DepartmentLogoCard } from "@/components/brand-logo";
 import { HomepageAnnouncements } from "@/components/homepage-announcements";
 import { AdminHomeAnalyticsPreview } from "@/components/admin-home-analytics-preview";
@@ -102,11 +102,17 @@ export function AcademyHomepage({
               <Sparkles className="h-3.5 w-3.5 shrink-0" />
               <span>{tr("hero_badge")}</span>
             </div>
-            <h1 className="mt-5 font-display text-3xl font-semibold leading-[1.12] tracking-tight text-[#F4B400] sm:mt-6 sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.08] xl:text-6xl">
-              {tr("brand_name")}
+            <h1 className="mt-5 font-display text-3xl font-semibold leading-[1.12] tracking-tight text-[#FF7A00] sm:mt-6 sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.08] xl:text-6xl">
+              {BRAND.nameEn}
             </h1>
-            <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-primary/90 sm:mt-4 sm:text-base md:text-lg">
-              {tr("hero_subtitle")}
+            <p className="mt-2 font-display text-2xl font-semibold text-white sm:text-3xl md:text-4xl" dir="rtl">
+              {BRAND.nameAr}
+            </p>
+            <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-primary sm:text-lg" dir="rtl">
+              {BRAND.taglineAr}
+            </p>
+            <p className="mt-1 max-w-xl text-sm font-medium leading-relaxed text-white/85 sm:text-base">
+              {BRAND.taglineEn}
             </p>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90 sm:mt-6 sm:text-lg sm:leading-relaxed">
               {tr("hero_desc")}
@@ -119,7 +125,7 @@ export function AcademyHomepage({
                     e.preventDefault();
                     goToDashboard();
                   }}
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-foreground shadow-[0_10px_30px_-10px_rgba(242,178,27,0.45)] hover:translate-y-[-2px] transition-transform"
+                  className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_rgba(122,13,20,0.45)] hover:translate-y-[-2px] transition-transform"
                 >
                   {dashboardPath === "/teacher"
                     ? tr("teacher_title")
@@ -135,7 +141,7 @@ export function AcademyHomepage({
                   <Link
                     to="/auth"
                     search={{ mode: "signup" }}
-                    className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-foreground shadow-[0_10px_30px_-10px_rgba(242,178,27,0.45)] hover:translate-y-[-2px] transition-transform"
+                    className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_rgba(122,13,20,0.45)] hover:translate-y-[-2px] transition-transform"
                   >
                     {tr("cta_signup")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
                   </Link>
@@ -176,7 +182,7 @@ export function AcademyHomepage({
 
             <div className="mt-6 flex w-full max-w-[340px] flex-col items-center gap-4 sm:mt-8 sm:gap-5 lg:mx-auto">
               <div className="flex w-full min-w-[260px] max-w-[340px] items-center gap-3 rounded-2xl bg-white p-4 text-foreground shadow-[var(--shadow-elegant)] sm:p-5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-foreground">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                   <Award className="h-6 w-6" />
                 </div>
                 <div className="min-w-0 text-start">
@@ -186,8 +192,8 @@ export function AcademyHomepage({
               </div>
 
               <DepartmentLogoCard
-                src={certificateIslamicLogoUrl()}
-                alt={tr("dept_islamic_ed")}
+                src={brandLogoPrimaryUrl()}
+                alt={tr("school_logo_alt")}
                 className="min-w-[260px]"
               />
             </div>
@@ -251,7 +257,7 @@ export function AcademyHomepage({
                 params={{ category: c.slug }}
                 className="group rounded-2xl bg-background border border-foreground/10 p-6 hover:border-primary/60 hover:shadow-[var(--shadow-soft)] transition-all"
               >
-                <div className="h-11 w-11 rounded-xl bg-primary flex items-center justify-center text-foreground font-display text-lg">
+                <div className="h-11 w-11 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-display text-lg">
                   {i + 1}
                 </div>
                 <div className="mt-4 font-display text-xl text-foreground group-hover:text-primary">
@@ -326,7 +332,7 @@ export function AcademyHomepage({
             ].map((f) => {
               const card = (
                 <>
-                  <div className="h-12 w-12 rounded-xl bg-primary text-foreground flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center">
                     <f.icon className="h-6 w-6" />
                   </div>
                   <div className="mt-4 font-display text-xl">{f.t}</div>
@@ -383,12 +389,12 @@ export function AcademyHomepage({
               {isAdmin ? tr("admin_home_parent_directory_lead") : tr("for_parents_d")}
             </p>
             {isAdmin ? (
-              <Link to="/admin/parents" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-foreground px-6 py-3 font-semibold hover:translate-y-[-2px] transition-transform">
+              <Link to="/admin/parents" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold hover:translate-y-[-2px] transition-transform">
                 {tr("admin_home_parent_directory_cta")}
                 <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               </Link>
             ) : (
-              <Link to="/parent" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-foreground px-6 py-3 font-semibold hover:translate-y-[-2px] transition-transform">
+              <Link to="/parent" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold hover:translate-y-[-2px] transition-transform">
                 {tr("visit_parent")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               </Link>
             )}
@@ -402,12 +408,12 @@ export function AcademyHomepage({
               {isAdmin ? tr("admin_home_honor_board_lead") : tr("for_students_d")}
             </p>
             {isAdmin ? (
-              <Link to="/admin/honor-board" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-foreground px-6 py-3 font-semibold hover:bg-primary/90 transition-colors">
+              <Link to="/admin/honor-board" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold hover:bg-primary/90 transition-colors">
                 {tr("admin_home_honor_board_cta")}
                 <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               </Link>
             ) : (
-              <Link to="/student" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-foreground px-6 py-3 font-semibold hover:bg-primary/90 transition-colors">
+              <Link to="/student" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold hover:bg-primary/90 transition-colors">
                 {tr("open_portal")} <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
               </Link>
             )}

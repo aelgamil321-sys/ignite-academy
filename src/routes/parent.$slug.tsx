@@ -8,7 +8,7 @@ import { privateRouteHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/parent/$slug")({
   loader: ({ params }) => ({ slug: params.slug }),
-  head: () => privateRouteHead("Parent Guide — Ignite Islamic Academy"),
+  head: () => privateRouteHead("GHIRAS | Parent Guide"),
   component: ParentDetail,
 });
 

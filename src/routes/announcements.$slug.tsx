@@ -11,7 +11,7 @@ import { Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/announcements/$slug")({
   loader: ({ params }) => ({ slug: params.slug }),
-  head: () => ({ meta: [{ title: "Announcement — Ignite Islamic Academy" }] }),
+  head: () => ({ meta: [{ title: "GHIRAS | Announcement" }] }),
   component: AnnouncementDetail,
 });
 

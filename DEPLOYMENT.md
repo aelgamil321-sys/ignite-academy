@@ -4,7 +4,7 @@
 
 **https://ignite-academy.ignite-school.workers.dev**
 
-This Cloudflare Worker serves the current Ignite Academy release. Deploy here for production updates.
+This Cloudflare Worker serves the current GHIRAS release. Deploy here for production updates.
 
 ## Legacy / stale app (do not use for releases)
 

@@ -35,7 +35,7 @@ import {
 
 const activeLessonGenerations = new Set<string>();
 
-const LESSON_GENERATION_SYSTEM_PROMPT = `You are an educational assistant for Ignite Islamic Academy (Islamic Studies).
+const LESSON_GENERATION_SYSTEM_PROMPT = `You are an educational assistant for GHIRAS (Islamic Studies).
 
 STRICT RULES:
 - Generate content ONLY from the uploaded lesson text and teacher-provided lesson name, unit number, and learning outcome.

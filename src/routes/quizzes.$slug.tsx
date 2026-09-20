@@ -13,7 +13,7 @@ export const Route = createFileRoute("/quizzes/$slug")({
     await redirectStudentLegacyQuizRoute(params.slug);
   },
   loader: ({ params }) => ({ slug: params.slug }),
-  head: () => ({ meta: [{ title: "Quiz — Ignite Islamic Academy" }] }),
+  head: () => ({ meta: [{ title: "GHIRAS | Quiz" }] }),
   component: QuizDetail,
   notFoundComponent: QuizNotFound,
 });

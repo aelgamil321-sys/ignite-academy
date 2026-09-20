@@ -84,7 +84,7 @@ async function openAiChat(
   }
 }
 
-const ISLAMIC_SYSTEM_PROMPT = `You are an educational assistant for Ignite Islamic Academy.
+const ISLAMIC_SYSTEM_PROMPT = `You are an educational assistant for GHIRAS.
 Rules:
 - NEVER translate Qur'an verses (text inside ﴿…﴾).
 - NEVER translate Hadith Arabic text or lines starting with: قال الله تعالى, قال رسول الله, عن النبي, رواه.

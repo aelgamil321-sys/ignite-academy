@@ -34,7 +34,7 @@ function emitMjs(lang, tMap, lMap) {
   const lLines = Object.keys(lMap)
     .sort()
     .map((en) => `  "${esc(en)}": "${esc(lMap[en])}",`);
-  return `/** ${lang.toUpperCase()} translations for Ignite Islamic Academy UI. */
+  return `/** ${lang.toUpperCase()} translations for GHIRAS UI. */
 export const ${lang}T = {
 ${tLines.join("\n")}
 };

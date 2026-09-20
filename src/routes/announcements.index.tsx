@@ -12,12 +12,12 @@ import { publicPageHead } from "@/lib/seo";
 export const Route = createFileRoute("/announcements/")({
   head: () =>
     publicPageHead({
-      title: "Announcements — Ignite Islamic Academy",
+      title: "GHIRAS | Announcements",
       description:
-        "Latest news, events, exam schedules and competition updates from Ignite Islamic Academy at Ignite School in Dubai, UAE.",
+        "Latest news, events, exam schedules and competition updates from GHIRAS.",
       path: "/announcements",
-      ogTitle: "Announcements — Ignite Islamic Academy",
-      ogDescription: "School news, events and competitions from Ignite Islamic Academy.",
+      ogTitle: "GHIRAS | Announcements",
+      ogDescription: "School news, events and competitions from GHIRAS.",
     }),
   component: AnnouncementsIndex,
 });

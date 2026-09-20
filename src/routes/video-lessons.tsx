@@ -16,12 +16,12 @@ import {
 export const Route = createFileRoute("/video-lessons")({
   head: () => ({
     meta: [
-      { title: "Video Lessons — Ignite Islamic Academy" },
+      { title: "GHIRAS | Video Lessons" },
       {
         name: "description",
         content: "Watch lesson videos organised by grade — Arabic and English links for each lesson.",
       },
-      { property: "og:title", content: "Video Lessons — Ignite Islamic Academy" },
+      { property: "og:title", content: "GHIRAS | Video Lessons" },
     ],
   }),
   component: VideoLessonsPage,

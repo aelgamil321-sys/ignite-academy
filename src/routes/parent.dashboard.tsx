@@ -24,7 +24,7 @@ export const Route = createFileRoute("/parent/dashboard")({
   },
   head: () => ({
     meta: [
-      { title: "Parent Dashboard — Ignite Islamic Academy" },
+      { title: "GHIRAS | Parent Dashboard" },
       {
         name: "description",
         content: "Track your child's lesson progress, quiz scores, certificates, badges, and recent activity.",

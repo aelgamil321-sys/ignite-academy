@@ -14,7 +14,7 @@ export const Route = createFileRoute("/teacher/lead/grades/$grade/")({
     const name = loaderData?.grade.name.en ?? "Grade";
     return {
       meta: [
-        { title: `${name} — Lead Teacher` },
+        { title: `GHIRAS | ${name}` },
         { name: "robots", content: "noindex,nofollow" },
       ],
     };

@@ -10,7 +10,7 @@ import { useSchoolManagementPaths } from "@/lib/workspace-paths";
 const chartConfig = {
   score: {
     label: "Avg. score",
-    color: "#F2B21B",
+    color: "#FF7A00",
   },
 };
 

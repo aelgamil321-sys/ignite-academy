@@ -19,7 +19,7 @@ import {
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Reset Password — Ignite Islamic Academy" },
+      { title: "GHIRAS | Reset Password" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),

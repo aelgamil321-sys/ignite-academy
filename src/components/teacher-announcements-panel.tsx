@@ -94,7 +94,7 @@ export function TeacherAnnouncementsPanel({ teacherUserId }: TeacherAnnouncement
       action={
         <Link
           to="/teacher/announcements/new"
-          className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-foreground hover:bg-primary/90"
+          className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="h-3.5 w-3.5" />
           {tr("teacher_dash_ann_create")}

@@ -17,7 +17,7 @@ import { useParentShell } from "@/lib/parent-shell-context";
 export const Route = createFileRoute("/parent/settings")({
   head: () => ({
     meta: [
-      { title: "Parent Profile — Ignite Islamic Academy" },
+      { title: "GHIRAS | Parent Profile" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),

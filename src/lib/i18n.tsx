@@ -83,19 +83,19 @@ export const t = {
   nav_login: { en: "Student Login", ar: "دخول الطالب" },
 
   // Brand
-  brand_name: { en: "Ignite Islamic Academy", ar: "أكاديمية اجنايت الإسلامية" },
+  brand_name: { en: "GHIRAS", ar: "غراس" },
   brand_org: {
-    en: "Department of Islamic Education – Ignite School",
-    ar: "قسم التربية الإسلامية – مدرسة اجنايت",
+    en: "Learning Platform",
+    ar: "منصة تعليمية",
   },
-  school_logo_alt: { en: "Ignite School", ar: "مدرسة اجنايت" },
-  tagline: { en: "Igniting Knowledge, Faith, and Character", ar: "نُشعل المعرفة والإيمان والأخلاق" },
+  school_logo_alt: { en: "GHIRAS", ar: "غراس" },
+  tagline: { en: "Plant Knowledge. Create Impact.", ar: "نغرس معرفة... ونصنع أثرًا" },
 
   // Hero
   hero_badge: { en: "Online Islamic Education · KG1 to Grade 12", ar: "تعليم إسلامي عبر الإنترنت · من الروضة إلى الصف الثاني عشر" },
   hero_subtitle: {
-    en: "Department of Islamic Education – Ignite School",
-    ar: "قسم التربية الإسلامية – مدرسة اجنايت",
+    en: "Plant Knowledge. Create Impact.",
+    ar: "نغرس معرفة... ونصنع أثرًا",
   },
   hero_desc: {
     en: "A modern platform for students, parents, and teachers — bringing classical Islamic Studies to life with beautiful lessons, videos, worksheets, and interactive assessments.",
@@ -228,18 +228,18 @@ export const t = {
   ft_learn: { en: "Learn", ar: "تعلّم" },
   ft_explore: { en: "Explore", ar: "استكشف" },
   ft_contact: { en: "Contact", ar: "تواصل" },
-  ft_desc: { en: "Igniting Knowledge, Faith, and Character for students from KG1 to Grade 12.", ar: "نُشعل المعرفة والإيمان والأخلاق للطلاب من الروضة إلى الصف الثاني عشر." },
+  ft_desc: { en: "Plant Knowledge. Create Impact. — a professional learning platform for students, families, and teachers.", ar: "نغرس معرفة... ونصنع أثرًا — منصة تعليمية مهنية للطلاب والأسر والمعلمين." },
   ft_rights: { en: "All rights reserved.", ar: "جميع الحقوق محفوظة." },
   ft_built: { en: "Built with sincerity ✦ بسم الله", ar: "صُنع بإخلاص ✦ بسم الله" },
   ft_online: { en: "Online Worldwide", ar: "عبر الإنترنت حول العالم" },
 
-  // Ask Ignite AI
-  ask_label: { en: "Ask Ignite", ar: "اسأل اجنايت" },
+  // Ask GHIRAS AI
+  ask_label: { en: "Ask GHIRAS", ar: "اسأل غراس" },
   select_language: { en: "Select language", ar: "اختر اللغة" },
-  ask_sub: { en: "Ignite Islamic Academy AI Assistant", ar: "مساعد أكاديمية اجنايت الإسلامية الذكي" },
+  ask_sub: { en: "GHIRAS AI Assistant", ar: "مساعد غراس الذكي" },
   ask_greet: {
-    en: "Peace be upon you! I'm Ask Ignite. Ask me anything about your Islamic Studies lessons — Quran, Hadith, Fiqh, Seerah, and more.",
-    ar: "السلام عليكم! أنا مساعد اجنايت. اسألني أي سؤال عن دروس الدراسات الإسلامية — القرآن والحديث والفقه والسيرة وغيرها.",
+    en: "Peace be upon you! I'm Ask GHIRAS. Ask me anything about your Islamic Studies lessons — Quran, Hadith, Fiqh, Seerah, and more.",
+    ar: "السلام عليكم! أنا مساعد غراس. اسألني أي سؤال عن دروس الدراسات الإسلامية — القرآن والحديث والفقه والسيرة وغيرها.",
   },
   ask_placeholder: { en: "Type your question...", ar: "اكتب سؤالك..." },
 
@@ -280,10 +280,10 @@ export const t = {
   stage_overview: { en: "Stage Overview", ar: "نظرة عامة على المرحلة" },
 
   // About
-  about_title: { en: "About Ignite Islamic Academy", ar: "عن أكاديمية اجنايت الإسلامية" },
+  about_title: { en: "About GHIRAS", ar: "عن غراس" },
   about_lead: { en: "An online Islamic education platform serving students, parents, and teachers from KG1 to Grade 12.", ar: "منصة تعليم إسلامي عبر الإنترنت تخدم الطلاب وأولياء الأمور والمعلمين من رياض الأطفال إلى الصف الثاني عشر." },
   about_mission_t: { en: "Our Mission", ar: "رسالتنا" },
-  about_mission_d: { en: "To ignite knowledge, faith, and character in every learner through authentic, modern, and engaging Islamic Studies.", ar: "أن نُشعل المعرفة والإيمان والأخلاق في كل متعلّم من خلال دراسات إسلامية أصيلة وعصرية وجذّابة." },
+  about_mission_d: { en: "To plant knowledge, values, and character in every learner through authentic, modern, and engaging education.", ar: "أن نغرس المعرفة والقيم والأخلاق في كل متعلّم من خلال تعليم أصيل وعصري وجذّاب." },
   about_vision_t: { en: "Our Vision", ar: "رؤيتنا" },
   about_vision_d: { en: "A connected global classroom where every Muslim student has access to excellent Islamic education.", ar: "فصل دراسي عالمي مترابط يحصل فيه كل طالب مسلم على تعليم إسلامي متميز." },
   about_values_t: { en: "Our Values", ar: "قيمنا" },
@@ -307,7 +307,7 @@ export const t = {
   student_sign_out: { en: "Sign Out", ar: "تسجيل الخروج" },
   student_dash_open_menu: { en: "Open menu", ar: "فتح القائمة" },
   student_dash_nav_brand: { en: "Your personal learning workspace", ar: "مساحة التعلّم الخاصة بك" },
-  student_dash_topbar_lead: { en: "Ignite Islamic Academy", ar: "أكاديمية اجنايت الإسلامية" },
+  student_dash_topbar_lead: { en: "GHIRAS", ar: "غراس" },
   student_dash_welcome: { en: "Welcome, {name} 👋", ar: "مرحباً، {name} 👋" },
   student_dash_welcome_lead: {
     en: "Ready to continue your learning journey?",
@@ -556,7 +556,7 @@ export const t = {
     en: "Your family learning monitor",
     ar: "مراقبة تعلّم أبنائك",
   },
-  parent_dash_topbar_lead: { en: "Ignite Islamic Academy", ar: "أكاديمية اجنايت الإسلامية" },
+  parent_dash_topbar_lead: { en: "GHIRAS", ar: "غراس" },
   parent_corner_student_msg: {
     en: "Please sign in with a parent account to access Parent Corner and track your child's progress.",
     ar: "يرجى تسجيل الدخول بحساب ولي أمر للوصول إلى ركن الوالدين ومتابعة تقدّم ابنك/ابنتك.",
@@ -674,7 +674,7 @@ export const t = {
   // Admin
   admin_title: { en: "Admin Dashboard", ar: "لوحة الإدارة" },
   admin_role_label: { en: "Administrator", ar: "مسؤول النظام" },
-  admin_nav_brand: { en: "Ignite Management", ar: "إدارة اجنايت" },
+  admin_nav_brand: { en: "GHIRAS Management", ar: "إدارة غراس" },
   admin_nav_home: { en: "Admin Home", ar: "الرئيسية" },
   admin_nav_dashboard: { en: "Dashboard", ar: "لوحة التحكم" },
   admin_nav_teaching: { en: "Teaching", ar: "التدريس" },
@@ -713,8 +713,8 @@ export const t = {
   },
   admin_home_welcome: { en: "Welcome, {name}", ar: "مرحباً، {name}" },
   admin_home_intro: {
-    en: "Manage Ignite Islamic Academy from one place — teaching content, classes, staff, weekly planning, and school-wide reports.",
-    ar: "أدر أكاديمية اجنايت الإسلامية من مكان واحد — المحتوى التعليمي، الصفوف، المعلمين، التخطيط الأسبوعي، وتقارير المدرسة.",
+    en: "Manage GHIRAS from one place — teaching content, classes, staff, weekly planning, and platform reports.",
+    ar: "أدِر غراس من مكان واحد — المحتوى التعليمي، الصفوف، المعلمين، التخطيط الأسبوعي، وتقارير المنصة.",
   },
   admin_home_analytics_title: { en: "Analytics & Comparisons", ar: "التحليلات والمقارنات" },
   admin_home_analytics_lead: {
@@ -1201,8 +1201,8 @@ export const t = {
     ar: "هنا يمكنك إدارة صفوفك ومتابعة طلابك والوصول إلى أدواتك التعليمية.",
   },
   teacher_dash_islamic_logo_alt: {
-    en: "Islamic Education Department",
-    ar: "قسم التربية الإسلامية",
+    en: "GHIRAS",
+    ar: "غراس",
   },
   teacher_dash_scope_stage: { en: "Educational stage", ar: "المرحلة الدراسية" },
   teacher_dash_scope_more: { en: "+{count} more", ar: "+{count} أخرى" },
@@ -1776,6 +1776,44 @@ export const t = {
     en: "Student count must be between 0 and 30. Please adjust the student count field and try again.",
     ar: "يجب أن يكون عدد الطلاب بين 0 و30. يرجى تعديل حقل عدد الطلاب والمحاولة مرة أخرى.",
   },
+  wp_error_rls: {
+    en: "You do not have permission to save this weekly plan.",
+    ar: "ليس لديك صلاحية لحفظ هذه الخطة الأسبوعية.",
+  },
+  wp_error_week_number: {
+    en: "Week number must be between 1 and 30.",
+    ar: "يجب أن يكون رقم الأسبوع بين 1 و30.",
+  },
+  wp_error_plan_language: {
+    en: "Plan language must be English or Arabic.",
+    ar: "يجب أن تكون لغة الخطة إنجليزية أو عربية.",
+  },
+  wp_error_sections: {
+    en: "One or more selected sections are invalid for weekly planning.",
+    ar: "إحدى الشعب المحددة أو أكثر غير صالحة للتخطيط الأسبوعي.",
+  },
+  wp_error_foreign_key: {
+    en: "Weekly plan could not be saved because a linked record is missing.",
+    ar: "تعذر حفظ الخطة الأسبوعية لأن سجلاً مرتبطاً مفقود.",
+  },
+  wp_error_network: {
+    en: "Network error while saving. Check your connection and try again.",
+    ar: "حدث خطأ في الشبكة أثناء الحفظ. تحقق من الاتصال وحاول مرة أخرى.",
+  },
+  wp_error_generic: {
+    en: "Could not save the weekly plan. Please try again.",
+    ar: "تعذر حفظ الخطة الأسبوعية. يرجى المحاولة مرة أخرى.",
+  },
+  wp_stale_bundle_notice: {
+    en: "A newer version of GHIRAS is available. Save or recover your draft before refreshing.",
+    ar: "يتوفر إصدار أحدث من غراس. احفظ أو استعد مسودتك قبل التحديث.",
+  },
+  wp_draft_restore_prompt: {
+    en: "Unsaved draft found for this plan. Restore it?",
+    ar: "تم العثور على مسودة غير محفوظة لهذه الخطة. هل تريد استعادتها؟",
+  },
+  wp_draft_restore_action: { en: "Restore draft", ar: "استعادة المسودة" },
+  wp_draft_restored: { en: "Draft restored.", ar: "تمت استعادة المسودة." },
   wp_status_not_started: { en: "Not started", ar: "لم يبدأ" },
   wp_status_in_progress: { en: "In progress", ar: "قيد التنفيذ" },
   wp_status_complete: { en: "Complete", ar: "مكتمل" },
@@ -2077,8 +2115,8 @@ export const t = {
   },
   reset_password_title: { en: "Reset Password", ar: "إعادة تعيين كلمة المرور" },
   reset_password_lead: {
-    en: "Choose a new password for your Ignite Academy account.",
-    ar: "اختر كلمة مرور جديدة لحسابك في أكاديمية اجنايت.",
+    en: "Choose a new password for your GHIRAS account.",
+    ar: "اختر كلمة مرور جديدة لحسابك في غراس.",
   },
   reset_password_new: { en: "New Password", ar: "كلمة المرور الجديدة" },
   reset_password_confirm: { en: "Confirm New Password", ar: "تأكيد كلمة المرور الجديدة" },
@@ -2189,8 +2227,8 @@ export const t = {
   profile_parent: { en: "Parent Profile", ar: "ملف ولي الأمر" },
   profile_student: { en: "Profile", ar: "الملف الشخصي" },
   dept_islamic_ed: {
-    en: "Department of Islamic Education – Ignite School",
-    ar: "قسم التربية الإسلامية – مدرسة اجنايت",
+    en: "GHIRAS",
+    ar: "غراس",
   },
   empty_published_lessons: { en: "No published lessons yet.", ar: "لا توجد دروس منشورة بعد." },
   empty_announcements_short: { en: "No announcements yet.", ar: "لا توجد إعلانات بعد." },
@@ -2557,11 +2595,11 @@ export const t = {
   // Certificate template (fixed bilingual layout)
   cert_title_en: { en: "Certificate of Achievement", ar: "شهادة إنجاز" },
   cert_award_org_en: {
-    en: "Ignite School – Department of Islamic Education",
-    ar: "مدرسة اجنايت – قسم التربية الإسلامية",
+    en: "GHIRAS",
+    ar: "غراس",
   },
   cert_lesson_details_en: { en: "LESSON DETAILS", ar: "بيانات الدرس" },
-  cert_dept_alt: { en: "Department of Islamic Education", ar: "قسم التربية الإسلامية" },
+  cert_dept_alt: { en: "GHIRAS", ar: "غراس" },
 } satisfies Dict;
 
 export type TKey = keyof typeof t;

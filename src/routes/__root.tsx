@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider, useI18n } from "../lib/i18n";
 import { CMSProvider } from "../lib/cms";
+import { BRAND } from "../lib/brand";
 import { SITE_NAME } from "../lib/site-branding";
 import { absoluteOgImageUrl, googleSiteVerificationMeta, HOME_PAGE_DESCRIPTION } from "../lib/seo";
 import { Toaster } from "../components/ui/sonner";
@@ -97,6 +98,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: BRAND.favicon, type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: BRAND.appleTouchIcon },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

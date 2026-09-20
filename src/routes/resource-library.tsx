@@ -17,12 +17,12 @@ import {
 export const Route = createFileRoute("/resource-library")({
   head: () => ({
     meta: [
-      { title: "Resource Library — Ignite Islamic Academy" },
+      { title: "GHIRAS | Resource Library" },
       {
         name: "description",
         content: "Download lesson PDFs, PowerPoints, and worksheets — filterable by grade and lesson.",
       },
-      { property: "og:title", content: "Resource Library — Ignite Islamic Academy" },
+      { property: "og:title", content: "GHIRAS | Resource Library" },
     ],
   }),
   component: ResourceLibraryPage,

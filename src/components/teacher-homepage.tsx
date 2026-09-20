@@ -104,7 +104,7 @@ export function TeacherHomepage() {
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
                 <span>{tr("teacher_title")}</span>
               </div>
-              <h1 className="mt-5 font-display text-3xl font-semibold leading-tight text-[#F4B400] sm:text-4xl md:text-5xl">
+              <h1 className="mt-5 font-display text-3xl font-semibold leading-tight text-[#FF7A00] sm:text-4xl md:text-5xl">
                 {tr("teacher_home_welcome")}
               </h1>
               <p className="mt-4 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">
@@ -114,7 +114,7 @@ export function TeacherHomepage() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   to="/teacher"
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-foreground shadow-[0_10px_30px_-10px_rgba(242,178,27,0.45)] hover:translate-y-[-2px] transition-transform"
+                  className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_rgba(122,13,20,0.45)] hover:translate-y-[-2px] transition-transform"
                 >
                   {tr("teacher_title")}
                   <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />
@@ -280,7 +280,7 @@ export function TeacherHomepage() {
             </div>
             <Link
               to="/teacher"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               {tr("teacher_title")}
               <ArrowRight className={`h-4 w-4 ${dir === "rtl" ? "rotate-180" : ""}`} />

@@ -249,7 +249,7 @@ export function AdminTopBar({
   const islamicLogoUrl = certificateIslamicLogoUrl();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#2f3542] text-white shadow-md">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-brand-dark text-white shadow-md">
       <div className="container-page flex min-h-[3.25rem] min-w-0 items-center gap-2 py-2 sm:gap-3">
         <Link
           to="/admin"

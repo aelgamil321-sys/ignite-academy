@@ -26,7 +26,7 @@ import { formatError } from "@/lib/upload";
 export const Route = createFileRoute("/assignments/$assignmentId")({
   beforeLoad: () => blockParentFromStudentRoutes(),
   head: () => ({
-    meta: [{ title: "Assignment — Ignite Islamic Academy" }, { name: "robots", content: "noindex,nofollow" }],
+    meta: [{ title: "GHIRAS | Assignment" }, { name: "robots", content: "noindex,nofollow" }],
   }),
   component: AssignmentDetailPage,
 });

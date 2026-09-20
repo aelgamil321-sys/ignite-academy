@@ -1,14 +1,17 @@
 import { SCHOOL_NAME, SITE_NAME, SITE_NAME_AR } from "@/lib/site-branding";
+import {
+  BRAND,
+  HOME_PAGE_DESCRIPTION,
+  HOME_PAGE_TITLE,
+  HOME_PAGE_TITLE_AR,
+} from "@/lib/brand";
 
-/** Canonical production origin — never localhost or pages.dev. */
+/** Canonical production origin — never localhost or pages.dev. Domain change is a later phase. */
 export const CANONICAL_SITE_URL = "https://ignite-academy.ignite-school.workers.dev";
 
-export const HOME_PAGE_TITLE = `${SITE_NAME} | ${SCHOOL_NAME}`;
+export { HOME_PAGE_TITLE, HOME_PAGE_DESCRIPTION, HOME_PAGE_TITLE_AR };
 
-export const HOME_PAGE_DESCRIPTION =
-  "Ignite Islamic Academy offers bilingual Islamic education for KG through Grade 12 at Ignite School in Dubai, UAE — lessons, videos, quizzes, and learning resources.";
-
-export const DEFAULT_OG_IMAGE_PATH = "/logos/ignite-school-2.jpeg";
+export const DEFAULT_OG_IMAGE_PATH = BRAND.ogImage;
 
 /** Static public routes included in sitemap.xml (index pages only). */
 export const PUBLIC_SITEMAP_PATHS = [
@@ -114,7 +117,7 @@ export function homepageStructuredData() {
         "@id": `${url}#website`,
         url,
         name: SITE_NAME,
-        alternateName: [SITE_NAME_AR, SCHOOL_NAME],
+        alternateName: [SITE_NAME_AR, SCHOOL_NAME, HOME_PAGE_TITLE_AR],
         inLanguage: ["en", "ar", "fr", "de", "ur", "zh"],
         publisher: { "@id": `${url}#organization` },
       },
@@ -124,10 +127,7 @@ export function homepageStructuredData() {
         name: SITE_NAME,
         alternateName: SITE_NAME_AR,
         url,
-        parentOrganization: {
-          "@type": "Organization",
-          name: SCHOOL_NAME,
-        },
+        description: HOME_PAGE_DESCRIPTION,
       },
     ],
   };

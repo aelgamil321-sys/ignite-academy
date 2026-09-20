@@ -54,14 +54,21 @@ if (sitemap) {
   assertIncludes(sitemap, `<loc>${CANONICAL}/</loc>`, "sitemap includes homepage");
   assertNotIncludes(sitemap, "/student/", "sitemap excludes /student/");
   assertNotIncludes(sitemap, "/admin/", "sitemap excludes /admin/");
+} else {
+  const sitemapServer = join(ROOT, "src", "lib", "sitemap.server.ts");
+  if (existsSync(sitemapServer)) {
+    pass("sitemap served by worker route (no static public/sitemap.xml)");
+  } else {
+    fail("Missing sitemap.server.ts worker route");
+  }
 }
 
 // SSR HTML — TanStack Start on Cloudflare may not emit a static index.html.
 const indexHtmlPath = join(DIST_CLIENT, "index.html");
 if (existsSync(indexHtmlPath)) {
   const indexHtml = readFileSync(indexHtmlPath, "utf8");
-  assertIncludes(indexHtml, "Ignite Islamic Academy", "index.html brand name");
-  assertIncludes(indexHtml, "أكاديمية اجنايت الإسلامية", "index.html Arabic name in JSON-LD or content");
+  assertIncludes(indexHtml, "GHIRAS", "index.html brand name");
+  assertIncludes(indexHtml, "غراس", "index.html Arabic name in JSON-LD or content");
   assertNotIncludes(indexHtml, "lovable.app", "index.html no lovable.app URLs");
   assertNotIncludes(indexHtml, "pages.dev", "index.html no pages.dev URLs");
 } else {

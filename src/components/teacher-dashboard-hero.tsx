@@ -92,7 +92,7 @@ export function TeacherDashboardHero({ context }: TeacherDashboardHeroProps) {
           <div className="flex justify-start">
             <BrandLogo src={certificateSchoolLogoUrl()} alt={tr("school_logo_alt")} size="headerCompact" />
           </div>
-          <h2 className="px-2 text-center font-display text-sm font-semibold text-[#F4B400] sm:text-base md:text-lg">
+          <h2 className="px-2 text-center font-display text-sm font-semibold text-[#FF7A00] sm:text-base md:text-lg">
             {tr("teacher_title")}
           </h2>
           <div className="flex justify-end">

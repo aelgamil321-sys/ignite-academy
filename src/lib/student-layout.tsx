@@ -14,10 +14,11 @@ import {
   resolveStudentGate,
   setStudentShellCache,
 } from "@/lib/student-workspace-session";
+import { brandedTitle } from "@/lib/brand";
 
 export const studentRouteHead = () => ({
   meta: [
-    { title: "Student Dashboard — Ignite Islamic Academy" },
+    { title: brandedTitle("Student Dashboard") },
     { name: "robots", content: "noindex,nofollow" },
   ],
 });

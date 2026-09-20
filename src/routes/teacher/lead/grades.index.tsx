@@ -8,7 +8,7 @@ export const Route = createFileRoute("/teacher/lead/grades/")({
   validateSearch: adminGradesRouteSearch,
   head: () => ({
     meta: [
-      { title: "Grades — Lead Teacher" },
+      { title: "GHIRAS | Grades" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),

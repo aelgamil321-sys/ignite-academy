@@ -88,7 +88,7 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: pageHeadTitle("auth") },
-      { name: "description", content: "Sign in or create an account to access Ignite Islamic Academy." },
+      { name: "description", content: "Sign in or create an account to access GHIRAS." },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),

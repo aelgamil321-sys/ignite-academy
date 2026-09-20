@@ -125,7 +125,7 @@ export function TeacherClassCard({ assignment, students }: TeacherClassCardProps
               islamic_group: assignment.islamic_group ?? "",
               subject_type: assignment.subject_type,
             }}
-            className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Users className="h-4 w-4 shrink-0" />
             <span className="truncate">{tr("teacher_view_students")}</span>

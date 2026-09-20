@@ -6,7 +6,7 @@ import { useI18n, L } from "@/lib/i18n";
 export const Route = createFileRoute("/teacher/lead/quiz-submissions/")({
   head: () => ({
     meta: [
-      { title: "Quiz Submissions — Lead Teacher" },
+      { title: "GHIRAS | Quiz Submissions" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),

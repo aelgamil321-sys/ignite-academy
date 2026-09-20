@@ -190,7 +190,7 @@ function CertificateHeader({
         boxSizing: "border-box",
       }}
     >
-      <HeaderLogoBox src={islamicLogoUrl} alt={L("Department of Islamic Education", "قسم التربية الإسلامية").en} />
+      <HeaderLogoBox src={islamicLogoUrl} alt={L("GHIRAS", "غراس").en} />
       <div
         style={{
           flex: 1,
@@ -238,7 +238,7 @@ function CertificateHeader({
           }}
         />
       </div>
-      <HeaderLogoBox src={schoolLogoUrl} alt="Ignite School" />
+      <HeaderLogoBox src={schoolLogoUrl} alt="GHIRAS" />
     </div>
   );
 }
@@ -579,7 +579,7 @@ export function CertificatePageBody({ data }: { data: CertificateDisplayData }) 
         >
           <div style={{ ...colText, direction: "ltr", textAlign: "left" }}>
             <div style={{ fontWeight: 700, color: CERT_COLORS.navy, fontSize: 12, lineHeight: 1.25 }}>
-              {L("Ignite School – Department of Islamic Education", "مدرسة اجنايت – قسم التربية الإسلامية").en}
+              {L("GHIRAS", "غراس").en}
             </div>
             <div style={{ fontSize: 11, marginTop: 3 }}>is proud to award this certificate to:</div>
             <div style={nameStyle}>{data.studentName}</div>
@@ -597,7 +597,7 @@ export function CertificatePageBody({ data }: { data: CertificateDisplayData }) 
 
           <div style={{ ...colText, direction: "rtl", textAlign: "right" }}>
             <div style={{ fontWeight: 700, color: CERT_COLORS.navy, fontSize: 12, lineHeight: 1.25 }}>
-              تتشرف مدرسة اجنايت – قسم التربية الإسلامية
+              تتشرف غراس
             </div>
             <div style={{ fontSize: 11, marginTop: 3 }}>بمنح هذه الشهادة إلى الطالب/ـة:</div>
             <div style={{ ...nameStyle, direction: "rtl" }}>{data.studentNameAr}</div>

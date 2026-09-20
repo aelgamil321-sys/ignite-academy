@@ -18,7 +18,7 @@ import { useStudentShell } from "@/lib/student-shell-context";
 export const Route = createFileRoute("/student/")({
   head: () => ({
     meta: [
-      { title: "Student Dashboard — Ignite Islamic Academy" },
+      { title: "GHIRAS | Student Dashboard" },
       {
         name: "description",
         content: "Your student progress dashboard: lessons completed, quiz scores, and certificates.",

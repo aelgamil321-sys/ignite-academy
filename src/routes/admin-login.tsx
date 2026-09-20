@@ -17,7 +17,7 @@ import {
 export const Route = createFileRoute("/admin-login")({
   head: () => ({
     meta: [
-      { title: "Admin Login — Ignite Islamic Academy" },
+      { title: "GHIRAS | Admin Login" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),

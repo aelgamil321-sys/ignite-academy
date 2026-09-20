@@ -1,9 +1,19 @@
-/** Public logo files (served from /public/logos). Bump cache version when files are replaced. */
-export const CERTIFICATE_SCHOOL_LOGO_PATH = "/logos/ignite-school-2.jpeg";
-export const CERTIFICATE_ISLAMIC_LOGO_PATH = "/logos/ignite-islamic-department.jpg";
+import { BRAND, brandLogoPrimaryUrl } from "@/lib/brand";
+
+/** Public logo files (served from /public/logos). */
+export const CERTIFICATE_SCHOOL_LOGO_PATH = BRAND.logoPrimary;
+export const CERTIFICATE_ISLAMIC_LOGO_PATH = BRAND.logoPrimary;
 export const CERTIFICATE_SIGNATURE_AR_IMAGE_PATH = "/logos/ayman-signature.jpg";
 export const CERTIFICATE_SIGNATURE_EN_IMAGE_PATH = "/logos/ayman-signature.2.jpg";
-export const CERTIFICATE_LOGO_CACHE_VERSION = "20260830";
+export const CERTIFICATE_LOGO_CACHE_VERSION = "20260920";
+
+export function certificateSchoolLogoUrl(): string {
+  return brandLogoPrimaryUrl();
+}
+
+export function certificateIslamicLogoUrl(): string {
+  return brandLogoPrimaryUrl();
+}
 
 function publicAssetUrl(path: string): string {
   const url = `${path}?v=${CERTIFICATE_LOGO_CACHE_VERSION}`;
@@ -11,14 +21,6 @@ function publicAssetUrl(path: string): string {
     return new URL(url, window.location.origin).href;
   }
   return url;
-}
-
-export function certificateSchoolLogoUrl(): string {
-  return publicAssetUrl(CERTIFICATE_SCHOOL_LOGO_PATH);
-}
-
-export function certificateIslamicLogoUrl(): string {
-  return publicAssetUrl(CERTIFICATE_ISLAMIC_LOGO_PATH);
 }
 
 export function certificateSignatureArImageUrl(): string {

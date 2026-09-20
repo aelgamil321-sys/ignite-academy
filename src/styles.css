@@ -35,14 +35,12 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
 
-  /* Brand primitives (Ignite Islamic Academy) */
-  --color-ignite-gold: var(--ignite-gold);
-  --color-ignite-dark: var(--ignite-dark);
-  --color-ignite-bg: var(--ignite-bg);
+  /* Brand primitives (GHIRAS) */
+  --color-brand-accent: var(--brand-accent);
   --color-brand-dark: var(--brand-dark);
   --color-brand-dark-foreground: var(--brand-dark-foreground);
 
-  /* Legacy aliases — emerald/gold map to Ignite Gold site-wide */
+  /* Legacy aliases — gold/emerald map to GHIRAS accent */
   --color-emerald: var(--emerald);
   --color-emerald-foreground: var(--emerald-foreground);
   --color-gold: var(--gold);
@@ -53,102 +51,100 @@
   --font-sans: "Inter", system-ui, sans-serif;
   --font-arabic: "Tajawal", "Inter", system-ui, sans-serif;
 
-  --shadow-soft: 0 4px 20px -4px color-mix(in oklab, var(--ignite-dark) 12%, transparent);
-  --shadow-elegant: 0 20px 50px -20px color-mix(in oklab, var(--ignite-dark) 18%, transparent);
-  --shadow-gold: 0 10px 30px -10px color-mix(in oklab, var(--ignite-gold) 40%, transparent);
+  --shadow-soft: 0 4px 20px -4px color-mix(in oklab, var(--brand-dark) 12%, transparent);
+  --shadow-elegant: 0 20px 50px -20px color-mix(in oklab, var(--brand-dark) 18%, transparent);
+  --shadow-gold: 0 10px 30px -10px color-mix(in oklab, var(--brand-accent) 40%, transparent);
 
-  --gradient-hero: linear-gradient(135deg, var(--brand-dark) 0%, color-mix(in srgb, var(--ignite-gold) 35%, var(--brand-dark)) 100%);
-  --gradient-gold: linear-gradient(135deg, var(--ignite-gold) 0%, var(--primary-hover) 100%);
+  --gradient-hero: linear-gradient(135deg, var(--brand-dark) 0%, color-mix(in srgb, var(--brand-accent) 28%, var(--brand-dark)) 100%);
+  --gradient-gold: linear-gradient(135deg, var(--brand-accent) 0%, var(--primary-hover) 100%);
 }
 
 :root {
   --radius: 0.875rem;
 
-  /* —— Brand primitives —— */
-  --ignite-gold: #F2B21B;
-  --ignite-gold-hover: #D9A015;
-  --ignite-dark: #2F3542;
-  --ignite-bg: #F8F8F6;
+  /* —— Brand primitives (GHIRAS) —— */
+  --brand-accent: #FF7A00;
+  --brand-accent-hover: #E66E00;
 
   /* —— Semantic tokens —— */
-  --background: #F8F8F6;
-  --foreground: #2F3542;
+  --background: #FAF8F5;
+  --foreground: #2D2D2D;
 
   --card: #FFFFFF;
-  --card-foreground: #2F3542;
+  --card-foreground: #2D2D2D;
   --popover: #FFFFFF;
-  --popover-foreground: #2F3542;
+  --popover-foreground: #2D2D2D;
 
-  /* Primary actions: Ignite Gold */
-  --primary: #F2B21B;
-  --primary-hover: #D9A015;
-  --primary-foreground: #2F3542;
+  /* Primary actions: Burgundy */
+  --primary: #7A0D14;
+  --primary-hover: #5E0A10;
+  --primary-foreground: #FAF8F5;
 
   /* Secondary: white surfaces with dark text */
   --secondary: #FFFFFF;
-  --secondary-foreground: #2F3542;
+  --secondary-foreground: #2D2D2D;
 
-  --muted: #EFEFED;
-  --muted-foreground: #5A6170;
+  --muted: #E7E2DC;
+  --muted-foreground: #5A5550;
 
-  --accent: #F7F0DC;
-  --accent-foreground: #2F3542;
+  --accent: #FFF1E3;
+  --accent-foreground: #2D2D2D;
 
   --destructive: #C53030;
   --destructive-foreground: #FFFFFF;
 
-  --border: #E2E2DE;
-  --input: #E2E2DE;
-  --ring: #F2B21B;
+  --border: #E7E2DC;
+  --input: #E7E2DC;
+  --ring: #FF7A00;
 
   --success: #2F7D4A;
-  --warning: #F2B21B;
+  --warning: #FF7A00;
 
   /* Dark brand surfaces (footer, hero bands) */
-  --brand-dark: #2F3542;
-  --brand-dark-foreground: #FFFFFF;
+  --brand-dark: #2D2D2D;
+  --brand-dark-foreground: #FAF8F5;
 
-  /* Accent aliases (replaces legacy green) */
-  --gold: #F2B21B;
-  --gold-foreground: #2F3542;
-  --emerald: #F2B21B;
-  --emerald-foreground: #2F3542;
-  --cream: #F8F8F6;
+  /* Accent aliases */
+  --gold: #FF7A00;
+  --gold-foreground: #2D2D2D;
+  --emerald: #FF7A00;
+  --emerald-foreground: #2D2D2D;
+  --cream: #FAF8F5;
 }
 
 .dark {
-  --background: #1E2229;
-  --foreground: #F8F8F6;
+  --background: #1C1C1C;
+  --foreground: #FAF8F5;
 
-  --card: #2F3542;
-  --card-foreground: #F8F8F6;
-  --popover: #2F3542;
-  --popover-foreground: #F8F8F6;
+  --card: #2D2D2D;
+  --card-foreground: #FAF8F5;
+  --popover: #2D2D2D;
+  --popover-foreground: #FAF8F5;
 
-  --primary: #F2B21B;
-  --primary-hover: #E5C04A;
-  --primary-foreground: #2F3542;
+  --primary: #9A1A22;
+  --primary-hover: #7A0D14;
+  --primary-foreground: #FAF8F5;
 
-  --secondary: #3A4150;
-  --secondary-foreground: #F8F8F6;
+  --secondary: #3A3A3A;
+  --secondary-foreground: #FAF8F5;
 
-  --muted: #3A4150;
-  --muted-foreground: #B8BCC4;
+  --muted: #3A3A3A;
+  --muted-foreground: #C8C2BB;
 
-  --accent: #3A4150;
-  --accent-foreground: #F8F8F6;
+  --accent: #3A3A3A;
+  --accent-foreground: #FAF8F5;
 
   --border: #FFFFFF1F;
   --input: #FFFFFF26;
-  --ring: #F2B21B;
+  --ring: #FF7A00;
 
-  --brand-dark: #1E2229;
-  --brand-dark-foreground: #F8F8F6;
+  --brand-dark: #1C1C1C;
+  --brand-dark-foreground: #FAF8F5;
 
-  --gold: #F2B21B;
-  --gold-foreground: #2F3542;
-  --emerald: #F2B21B;
-  --emerald-foreground: #2F3542;
+  --gold: #FF7A00;
+  --gold-foreground: #2D2D2D;
+  --emerald: #FF7A00;
+  --emerald-foreground: #2D2D2D;
 }
 
 @layer base {

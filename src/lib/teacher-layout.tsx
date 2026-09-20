@@ -9,10 +9,11 @@ import { fetchTeacherContext, type TeacherContext } from "@/lib/teacher-dashboar
 import { resolveVerifiedSession } from "@/lib/email-verification";
 import { EmailVerificationRequired } from "@/components/email-verification-required";
 import { shouldDeferToPasswordReset } from "@/lib/password-recovery";
+import { brandedTitle } from "@/lib/brand";
 
 export const teacherRouteHead = () => ({
   meta: [
-    { title: "Teacher Dashboard — Ignite Islamic Academy" },
+    { title: brandedTitle("Teacher Dashboard") },
     { name: "robots", content: "noindex,nofollow" },
   ],
 });

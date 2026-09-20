@@ -18,6 +18,7 @@ import {
   Layers, ClipboardCheck, Megaphone, Plus, Trash2, Eye, EyeOff, Save, X, ExternalLink, LogOut, Pencil, RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { brandedTitle } from "@/lib/brand";
 import { uploadToStorage, formatError } from "@/lib/upload";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -44,8 +45,8 @@ export const adminRouteSearch = (search: Record<string, unknown>) => ({
 
 export const adminRouteHead = () => ({
   meta: [
-    { title: "Admin Dashboard — Ignite Islamic Academy" },
-    { name: "description", content: "Manage lessons, articles, videos, quizzes, resources and announcements for Ignite Islamic Academy." },
+    { title: brandedTitle("Admin Dashboard") },
+    { name: "description", content: "Manage lessons, articles, videos, quizzes, resources and announcements for GHIRAS." },
     { name: "robots", content: "noindex,nofollow" },
   ],
 });

@@ -1,25 +1,14 @@
 import { L } from "@/lib/i18n";
+import { brandedTitle, brandedTitleAr } from "@/lib/brand";
 import { isLang, LANG_STORAGE_KEY, type Lang } from "@/lib/i18n-config";
 
 export type PageHeadKey = "auth" | "parent_corner" | "announcements" | "lesson";
 
 const TITLES: Record<PageHeadKey, Record<Lang, string>> = {
-  auth: L(
-    "Account — Ignite Islamic Academy",
-    "الحساب — أكاديمية اجنايت الإسلامية",
-  ),
-  parent_corner: L(
-    "Parent Corner — Ignite Islamic Academy",
-    "ركن الوالدين — أكاديمية اجنايت الإسلامية",
-  ),
-  announcements: L(
-    "Announcements — Ignite Islamic Academy",
-    "الإعلانات — أكاديمية اجنايت الإسلامية",
-  ),
-  lesson: L(
-    "Lesson — Ignite Islamic Academy",
-    "الدرس — أكاديمية اجنايت الإسلامية",
-  ),
+  auth: L(brandedTitle("Account"), brandedTitleAr("الحساب")),
+  parent_corner: L(brandedTitle("Parent Corner"), brandedTitleAr("ركن الوالدين")),
+  announcements: L(brandedTitle("Announcements"), brandedTitleAr("الإعلانات")),
+  lesson: L(brandedTitle("Lesson"), brandedTitleAr("الدرس")),
 };
 
 /** Resolve active UI language for static route head (client: localStorage; SSR: Arabic). */

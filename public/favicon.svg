@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="GHIRAS">
+  <rect width="32" height="32" rx="7" fill="#7A0D14"/>
+  <path d="M16 25 V13" fill="none" stroke="#FAF8F5" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M16 19 C11.5 19 9.5 15.5 10 12 C13 13 15 15.2 16 18 Z" fill="#FF7A00"/>
+  <path d="M16 18 C17 14.5 21 12 24.5 11.5 C24 15.5 21 18.5 16 19 Z" fill="#FAF8F5"/>
+  <circle cx="16" cy="26" r="1.4" fill="#FF7A00"/>
+</svg>

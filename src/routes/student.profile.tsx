@@ -36,7 +36,7 @@ import type { Lang } from "@/lib/i18n-config";
 export const Route = createFileRoute("/student/profile")({
   head: () => ({
     meta: [
-      { title: "Student Profile — Ignite Islamic Academy" },
+      { title: "GHIRAS | Student Profile" },
       { name: "description", content: "View and update your student profile and certificate names." },
       { name: "robots", content: "noindex,nofollow" },
     ],

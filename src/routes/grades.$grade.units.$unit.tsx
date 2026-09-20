@@ -44,7 +44,7 @@ export const Route = createFileRoute("/grades/$grade/units/$unit")({
   },
   head: () => ({
     meta: [
-      { title: `Unit — Ignite Islamic Academy` },
+      { title: `GHIRAS | Unit` },
       { name: "description", content: "Unit content management." },
       { name: "robots", content: "noindex,nofollow" },
     ],

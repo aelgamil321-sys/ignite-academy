@@ -22,10 +22,10 @@ export const Route = createFileRoute("/grades/$grade/")({
   head: ({ loaderData, params }) => {
     const name = loaderData?.grade.name.en ?? "Grade";
     return publicPageHead({
-      title: `${name} Islamic Studies — Ignite Islamic Academy`,
-      description: `Islamic Studies lessons, worksheets, videos and quizzes for ${name} students at Ignite Islamic Academy.`,
+      title: `GHIRAS | ${name} Islamic Studies`,
+      description: `Islamic Studies lessons, worksheets, videos and quizzes for ${name} students at GHIRAS.`,
       path: `/grades/${params.grade}`,
-      ogTitle: `${name} Islamic Studies — Ignite Islamic Academy`,
+      ogTitle: `GHIRAS | ${name} Islamic Studies`,
       ogDescription: `Lessons, worksheets, videos and quizzes for ${name}.`,
     });
   },

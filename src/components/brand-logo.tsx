@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 
 const SIZE_CLASS = {
-  /** Homepage header — wide enough for full school logo, never cropped */
-  header: "h-11 w-28 sm:h-12 sm:w-32 md:h-14 md:w-40 lg:h-[3.75rem] lg:w-48 xl:h-16 xl:w-52",
-  /** Compact header logo for tablet row */
-  headerCompact: "h-9 w-20 sm:h-10 sm:w-24 md:h-11 md:w-28",
+  /** Full official lockup — object-contain, never crop names/tagline */
+  header: "h-14 w-36 sm:h-16 sm:w-44 md:h-[4.5rem] md:w-52 lg:h-20 lg:w-64 xl:h-[5.25rem] xl:w-72",
+  /** Tight header slot — same PNG, scaled down, still uncropped */
+  headerCompact: "h-11 w-28 sm:h-12 sm:w-32 md:h-14 md:w-40",
 } as const;
 
 type BrandLogoProps = {

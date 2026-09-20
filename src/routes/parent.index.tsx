@@ -23,8 +23,8 @@ export const Route = createFileRoute("/parent/")({
   },
   head: () =>
     privateRouteHead(
-      "Parent Corner — Ignite Islamic Academy",
-      "Parent guides and resources for Ignite Islamic Academy.",
+      "GHIRAS | Parent Corner",
+      "Parent guides and resources for GHIRAS.",
     ),
   component: ParentPage,
 });

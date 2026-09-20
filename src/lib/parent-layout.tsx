@@ -15,10 +15,11 @@ import {
   resolveParentGate,
   setParentShellCache,
 } from "@/lib/parent-workspace-session";
+import { brandedTitle } from "@/lib/brand";
 
 export const parentRouteHead = () => ({
   meta: [
-    { title: "Parent Dashboard — Ignite Islamic Academy" },
+    { title: brandedTitle("Parent Dashboard") },
     { name: "robots", content: "noindex,nofollow" },
   ],
 });

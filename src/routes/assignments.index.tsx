@@ -19,7 +19,7 @@ export const Route = createFileRoute("/assignments/")({
   beforeLoad: () => blockParentFromStudentRoutes(),
   head: () => ({
     meta: [
-      { title: "Assignments — Ignite Islamic Academy" },
+      { title: "GHIRAS | Assignments" },
       { name: "description", content: "View and submit your Islamic Studies assignments." },
       { name: "robots", content: "noindex,nofollow" },
     ],

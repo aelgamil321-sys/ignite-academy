@@ -30,7 +30,7 @@ export type TeacherStudentOverviewProps = {
 const PREVIEW_LIMIT = 4;
 
 const chartConfig = {
-  withActivity: { label: "With quiz activity", color: "#F2B21B" },
+  withActivity: { label: "With quiz activity", color: "#FF7A00" },
   withoutActivity: { label: "Without quiz activity", color: "#94a3b8" },
 };
 

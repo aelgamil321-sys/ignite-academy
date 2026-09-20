@@ -5,12 +5,12 @@ import { publicPageHead } from "@/lib/seo";
 export const Route = createFileRoute("/hall-of-fame")({
   head: () =>
     publicPageHead({
-      title: "Hall of Fame — Ignite Islamic Academy",
+      title: "GHIRAS | Hall of Fame",
       description:
-        "Celebrate student achievements at Ignite Islamic Academy — quiz excellence, certificates, and grade champions at Ignite School.",
+        "Celebrate student achievements at GHIRAS — quiz excellence, certificates, and grade champions.",
       path: "/hall-of-fame",
-      ogTitle: "Hall of Fame — Ignite Islamic Academy",
-      ogDescription: "Top students, student of the month, and grade champions at Ignite Islamic Academy.",
+      ogTitle: "GHIRAS | Hall of Fame",
+      ogDescription: "Top students, student of the month, and grade champions at GHIRAS.",
     }),
   component: HallOfFamePage,
 });

@@ -19,11 +19,11 @@ export const Route = createFileRoute("/quizzes/")({
   },
   head: () =>
     publicPageHead({
-      title: "Online Quizzes — Ignite Islamic Academy",
+      title: "GHIRAS | Online Quizzes",
       description:
-        "Interactive Islamic Studies quizzes for every grade at Ignite Islamic Academy — bilingual questions in English and Arabic, KG through Grade 12.",
+        "Interactive Islamic Studies quizzes for every grade at GHIRAS — bilingual questions in English and Arabic, KG through Grade 12.",
       path: "/quizzes",
-      ogTitle: "Online Quizzes — Ignite Islamic Academy",
+      ogTitle: "GHIRAS | Online Quizzes",
       ogDescription: "Interactive bilingual Islamic Studies quizzes for KG through Grade 12.",
     }),
   component: QuizzesIndex,

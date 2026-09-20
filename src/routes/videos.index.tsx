@@ -18,11 +18,11 @@ import { publicPageHead } from "@/lib/seo";
 export const Route = createFileRoute("/videos/")({
   head: () =>
     publicPageHead({
-      title: "Video Library — Ignite Islamic Academy",
+      title: "GHIRAS | Video Library",
       description:
-        "Islamic video library at Ignite Islamic Academy — Quran, Hadith, Aqeedah, Fiqh, Seerah and Islamic Values for KG through Grade 12.",
+        "Islamic video library at GHIRAS — Quran, Hadith, Aqeedah, Fiqh, Seerah and Islamic Values for KG through Grade 12.",
       path: "/videos",
-      ogTitle: "Video Library — Ignite Islamic Academy",
+      ogTitle: "GHIRAS | Video Library",
       ogDescription: "Islamic video library across six core subjects.",
     }),
   component: VideosIndex,
