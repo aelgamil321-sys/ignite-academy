@@ -5,7 +5,7 @@ import { TranslationLoadingIndicator } from "@/components/translation-loading-in
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAccountRole } from "@/hooks/use-account-role";
-import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
+import { brandLogoTransparentUrl } from "@/lib/brand";
 import { BrandLogo } from "@/components/brand-logo";
 import { SafeNotificationBell } from "@/components/notification-bell";
 import { cn } from "@/lib/utils";
@@ -173,7 +173,7 @@ export function SiteHeader() {
             ? tr("profile_student")
             : tr("nav_home");
 
-  const schoolLogoUrl = certificateSchoolLogoUrl();
+  const schoolLogoUrl = brandLogoTransparentUrl();
   const schoolLogoAlt = tr("school_logo_alt");
 
   const brandLink = (compact?: boolean) => (

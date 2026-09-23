@@ -46,28 +46,28 @@ export function SiteFooter() {
 
         {!isParent && (
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">{tr("ft_learn")}</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-[#FF7A00] mb-4">{tr("ft_learn")}</h4>
             <ul className="space-y-2 text-sm opacity-85">
               {learn.map((l, i) => (
-                <li key={i}><Link to={l.to} className="transition-colors hover:text-primary">{l.label}</Link></li>
+                <li key={i}><Link to={l.to} className="transition-colors hover:text-[#FF7A00]">{l.label}</Link></li>
               ))}
             </ul>
           </div>
         )}
 
         <div className={isParent ? "md:col-start-2" : ""}>
-          <h4 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">{tr("ft_explore")}</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-[#FF7A00] mb-4">{tr("ft_explore")}</h4>
           <ul className="space-y-2 text-sm opacity-85">
             {explore.map((l, i) => (
-              <li key={i}><Link to={l.to} className="transition-colors hover:text-primary">{l.label}</Link></li>
+              <li key={i}><Link to={l.to} className="transition-colors hover:text-[#FF7A00]">{l.label}</Link></li>
             ))}
           </ul>
         </div>
 
         <div>
-          <h4 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">{tr("ft_contact")}</h4>
+          <h4 className="text-sm font-semibold uppercase tracking-wider text-[#FF7A00] mb-4">{tr("ft_contact")}</h4>
           <ul className="space-y-3 text-sm opacity-85">
-            <li><Link to="/contact" className="underline hover:text-primary">{tr("nav_contact")}</Link></li>
+            <li><Link to="/contact" className="underline hover:text-[#FF7A00]">{tr("nav_contact")}</Link></li>
           </ul>
         </div>
       </div>

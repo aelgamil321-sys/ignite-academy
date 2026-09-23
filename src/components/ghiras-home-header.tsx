@@ -4,7 +4,7 @@ import { useState } from "react";
 import { LanguageSelector } from "@/components/language-selector";
 import { BrandLogo } from "@/components/brand-logo";
 import { useI18n } from "@/lib/i18n";
-import { brandLogoPrimaryUrl } from "@/lib/brand";
+import { brandLogoTransparentUrl } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 const HOME_NAV = [
@@ -26,7 +26,7 @@ export function GhirasHomeHeader() {
   const [open, setOpen] = useState(false);
   const { tr, dir } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const logoUrl = brandLogoPrimaryUrl();
+  const logoUrl = brandLogoTransparentUrl();
 
   const iconBtn =
     "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E7E2DC] bg-white text-[#2D2D2D] transition-colors hover:border-[#7A0D14]/40 hover:text-[#7A0D14]";

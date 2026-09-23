@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode, Ref } from "react";
-import { BRAND, brandLogoPrimaryUrl } from "@/lib/brand";
+import { BRAND, brandLogoTransparentUrl } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 export type GhirasWatermarkVariant =
@@ -102,7 +102,7 @@ export function GhirasWatermark({
       )}
     >
       <img
-        src={brandLogoPrimaryUrl()}
+        src={brandLogoTransparentUrl()}
         alt=""
         draggable={false}
         className={cn(
@@ -221,12 +221,12 @@ export function GhirasBrandSignature({
     <div className={cn("flex min-w-0 items-center gap-3", className)}>
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-lg bg-[#FAF8F5] p-1",
-          compact ? "h-10 w-10" : "h-12 w-12",
+          "flex shrink-0 items-center justify-center bg-transparent",
+          compact ? "h-10 w-28" : "h-12 w-36",
         )}
       >
         <img
-          src={brandLogoPrimaryUrl()}
+          src={brandLogoTransparentUrl()}
           alt=""
           className="h-full w-full object-contain object-center"
           draggable={false}

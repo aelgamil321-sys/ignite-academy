@@ -39,6 +39,8 @@
   --color-brand-accent: var(--brand-accent);
   --color-brand-dark: var(--brand-dark);
   --color-brand-dark-foreground: var(--brand-dark-foreground);
+  --color-on-dark: var(--on-dark);
+  --color-on-dark-muted: var(--on-dark-muted);
 
   /* Legacy aliases — gold/emerald map to GHIRAS accent */
   --color-emerald: var(--emerald);
@@ -100,9 +102,11 @@
   --success: #2F7D4A;
   --warning: #FF7A00;
 
-  /* Dark brand surfaces (footer, hero bands) */
+  /* Dark brand surfaces (footer, hero bands, role sidebars) */
   --brand-dark: #2D2D2D;
   --brand-dark-foreground: #FAF8F5;
+  --on-dark: #FFFFFF;
+  --on-dark-muted: #E7E2DC;
 
   /* Accent aliases */
   --gold: #FF7A00;
@@ -140,6 +144,8 @@
 
   --brand-dark: #1C1C1C;
   --brand-dark-foreground: #FAF8F5;
+  --on-dark: #FFFFFF;
+  --on-dark-muted: #E7E2DC;
 
   --gold: #FF7A00;
   --gold-foreground: #2D2D2D;

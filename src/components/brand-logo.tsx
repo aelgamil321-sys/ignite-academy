@@ -5,6 +5,8 @@ const SIZE_CLASS = {
   header: "h-14 w-36 sm:h-16 sm:w-44 md:h-[4.5rem] md:w-52 lg:h-20 lg:w-64 xl:h-[5.25rem] xl:w-72",
   /** Tight header slot — same PNG, scaled down, still uncropped */
   headerCompact: "h-11 w-28 sm:h-12 sm:w-32 md:h-14 md:w-40",
+  /** Dark sidebar — full lockup scaled down, no crop */
+  sidebar: "h-12 w-[9.5rem] sm:h-[3.25rem] sm:w-[10.5rem]",
 } as const;
 
 type BrandLogoProps = {
@@ -16,11 +18,17 @@ type BrandLogoProps = {
 
 export function BrandLogo({ src, alt, size = "header", className }: BrandLogoProps) {
   return (
-    <div className={cn("flex shrink-0 items-center justify-center overflow-visible", SIZE_CLASS[size], className)}>
+    <div
+      className={cn(
+        "flex shrink-0 items-center justify-center overflow-visible bg-transparent",
+        SIZE_CLASS[size],
+        className,
+      )}
+    >
       <img
         src={src}
         alt={alt}
-        className="h-full w-full object-contain object-center"
+        className="h-full w-full bg-transparent object-contain object-center"
         loading="eager"
         decoding="async"
       />

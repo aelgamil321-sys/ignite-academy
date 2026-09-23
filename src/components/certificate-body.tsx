@@ -15,6 +15,7 @@ import {
   certificateSignatureArImageUrl,
   certificateSignatureEnImageUrl,
 } from "@/lib/certificate-branding";
+import { brandLogoTransparentUrl } from "@/lib/brand";
 import { ghirasPrintWatermarkStyle } from "@/components/brand/ghiras-watermark";
 
 /** Landscape A4 at ~96dpi for html2canvas capture */
@@ -485,7 +486,7 @@ export function CertificatePageBody({ data }: { data: CertificateDisplayData }) 
     <>
       <div style={{ position: "absolute", inset: 0, ...PATTERN_BG, zIndex: 0 }} />
       <img
-        src={schoolLogoUrl}
+        src={brandLogoTransparentUrl()}
         alt=""
         aria-hidden="true"
         draggable={false}

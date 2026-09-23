@@ -37,8 +37,8 @@ function ProgressRing({ value, label }: { value: number; label: string }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="font-display text-base leading-none text-primary">{value}%</span>
-        <span className="mt-0.5 text-[8px] uppercase tracking-wider text-white/55">{label}</span>
+        <span className="font-display text-base leading-none text-white">{value}%</span>
+        <span className="mt-0.5 text-[8px] uppercase tracking-wider text-[#E7E2DC]">{label}</span>
       </div>
     </div>
   );
@@ -83,7 +83,7 @@ export function ParentDashboardHero({
               profilePhotoPath={report.profilePhotoPath}
               alt={report.arabicName}
               className="h-14 w-14 shrink-0 ring-2 ring-primary/35 sm:h-16 sm:w-16"
-              fallbackClassName="bg-primary/15 text-primary text-sm"
+              fallbackClassName="bg-primary text-primary-foreground text-sm"
             />
 
             <div className="min-w-0 flex-1">

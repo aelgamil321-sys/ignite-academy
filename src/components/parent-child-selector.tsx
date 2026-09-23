@@ -23,7 +23,7 @@ export function ParentChildSelector({
   if (variant === "compact") {
     return (
       <div role="tablist" aria-label={tr("parent_select_child")}>
-        <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-white/55">
+        <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#E7E2DC]">
           {tr("parent_your_children")}
         </div>
         <div className="flex flex-wrap gap-1.5">

@@ -37,7 +37,7 @@ export function StudentDashboardHero() {
           <h1 className="font-display text-xl font-semibold leading-tight text-white sm:text-2xl">
             {trf("student_dash_welcome", { name: displayName })}
           </h1>
-          <p className="mt-1 text-sm text-white/75 sm:text-base">{tr("student_dash_welcome_lead")}</p>
+          <p className="mt-1 text-sm text-[#E7E2DC] sm:text-base">{tr("student_dash_welcome_lead")}</p>
         </div>
         <div className="flex min-w-0 flex-wrap gap-2 sm:max-w-[48%] sm:justify-end">
           {identityChips.map((chip) => (

@@ -21,8 +21,8 @@ import {
 } from "@/lib/student-grade-nav";
 import { useStudentShell } from "@/lib/student-shell-context";
 import { cn } from "@/lib/utils";
-import { BrandLogo } from "@/components/brand-logo";
-import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
+import { GhirasSidebarBrand } from "@/components/brand/ghiras-sidebar-brand";
+import { darkNav } from "@/lib/theme";
 
 type NavItem = {
   key: string;
@@ -70,18 +70,12 @@ function NavLinkItem({
 
   const className = cn(
     "flex min-h-[2.375rem] items-center gap-2 rounded-lg px-2 text-[0.875rem] font-medium transition-colors",
-    active
-      ? "bg-primary/15 text-primary"
-      : item.disabled
-        ? "cursor-not-allowed text-white/35"
-        : "text-white/80 hover:bg-white/8 hover:text-white",
+    active ? darkNav.itemActive : item.disabled ? darkNav.itemDisabled : darkNav.item,
   );
 
   const content = (
     <>
-      <item.icon
-        className={cn("h-[1.125rem] w-[1.125rem] shrink-0", active ? "text-primary" : "text-white/70")}
-      />
+      <item.icon className={active ? darkNav.iconActive : darkNav.icon} />
       <span className="min-w-0 text-start">{tr(item.labelKey)}</span>
     </>
   );
@@ -118,18 +112,12 @@ function NavLinkItem({
 
 function SidebarHeader({ tr }: { tr: (key: string) => string }) {
   return (
-    <div className="shrink-0 border-b border-white/10 px-2.5 py-2.5">
-      <Link to="/student" className="mb-2 flex items-center">
-        <BrandLogo
-          src={certificateSchoolLogoUrl()}
-          alt={tr("school_logo_alt")}
-          size="headerCompact"
-          className="h-10 w-[7.5rem] rounded-md bg-white p-0.5"
-        />
-      </Link>
-      <p className="font-display text-[0.8125rem] font-semibold text-primary">{tr("student_nav_dashboard")}</p>
-      <p className="text-[10px] leading-snug text-white/55">{tr("student_dash_nav_brand")}</p>
-    </div>
+    <GhirasSidebarBrand
+      to="/student"
+      alt={tr("school_logo_alt")}
+      title={tr("student_nav_dashboard")}
+      subtitle={tr("student_dash_nav_brand")}
+    />
   );
 }
 
@@ -183,12 +171,12 @@ function SidebarFooter({
     <div className="shrink-0 border-t border-white/10 px-2 py-2">
       <div className="min-w-0 px-1">
         <p className="truncate text-[0.8125rem] font-medium text-white">{displayName}</p>
-        <p className="truncate text-[11px] text-white/55">{email}</p>
+        <p className="truncate text-[11px] text-[#E7E2DC]">{email}</p>
       </div>
       <button
         type="button"
         onClick={() => void logout()}
-        className="mt-1.5 flex min-h-[2.375rem] w-full items-center gap-2 rounded-lg px-2 text-[0.875rem] font-medium text-white/75 transition-colors hover:bg-white/8 hover:text-white"
+        className={darkNav.signOut}
       >
         <LogOut className="h-[1.125rem] w-[1.125rem] shrink-0" />
         {tr("student_sign_out")}

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { BrandLogo } from "@/components/brand-logo";
-import { certificateIslamicLogoUrl, certificateSchoolLogoUrl } from "@/lib/certificate-branding";
+import { brandLogoTransparentUrl } from "@/lib/brand";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { useI18n } from "@/lib/i18n";
 import { gradeSlugToStageKey } from "@/lib/teacher-homepage";
@@ -88,20 +88,11 @@ export function TeacherDashboardHero({ context }: TeacherDashboardHeroProps) {
   return (
     <section className="relative overflow-hidden rounded-2xl bg-brand-dark text-white shadow-[var(--shadow-soft)]">
       <div className="relative border-b border-white/10 px-4 py-3 sm:px-5">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 sm:gap-6">
-          <div className="flex justify-start">
-            <BrandLogo src={certificateSchoolLogoUrl()} alt={tr("school_logo_alt")} size="headerCompact" />
-          </div>
-          <h2 className="px-2 text-center font-display text-sm font-semibold text-[#FF7A00] sm:text-base md:text-lg">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <BrandLogo src={brandLogoTransparentUrl()} alt={tr("school_logo_alt")} size="headerCompact" />
+          <h2 className="min-w-0 font-display text-sm font-semibold text-[#FF7A00] sm:text-base md:text-lg">
             {tr("teacher_title")}
           </h2>
-          <div className="flex justify-end">
-            <BrandLogo
-              src={certificateIslamicLogoUrl()}
-              alt={tr("teacher_dash_islamic_logo_alt")}
-              size="headerCompact"
-            />
-          </div>
         </div>
       </div>
 
@@ -109,20 +100,20 @@ export function TeacherDashboardHero({ context }: TeacherDashboardHeroProps) {
         <h1 className="font-display text-xl font-semibold leading-tight text-white sm:text-2xl">
           {tr("teacher_home_welcome")}
         </h1>
-        <p className="mt-1 text-sm text-white/80">{trf("teacher_welcome_name", { name: context.fullName })}</p>
-        <p className="mt-0.5 line-clamp-2 text-xs text-white/65 sm:text-sm">{tr("teacher_dash_hero_lead")}</p>
+        <p className="mt-1 text-sm text-[#E7E2DC]">{trf("teacher_welcome_name", { name: context.fullName })}</p>
+        <p className="mt-0.5 line-clamp-2 text-xs text-[#E7E2DC] sm:text-sm">{tr("teacher_dash_hero_lead")}</p>
 
         <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
           {chipGroups.map((group) => (
             <div key={group.label} className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/50">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#E7E2DC]">
                 {group.label}
               </p>
               <div className="mt-1 flex flex-wrap gap-1.5">
                 {group.values.map((value) => (
                   <span
                     key={`${group.label}-${value}`}
-                    className="inline-flex max-w-full items-center rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/90"
+                    className="inline-flex max-w-full items-center rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white"
                   >
                     <span className="truncate">{value}</span>
                   </span>

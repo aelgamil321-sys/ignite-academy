@@ -4,7 +4,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSelector } from "@/components/language-selector";
 import { SafeNotificationBell } from "@/components/notification-bell";
 import { StudentProfileAvatar } from "@/components/student-profile-avatar";
-import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
+import { brandLogoTransparentUrl } from "@/lib/brand";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -35,19 +35,17 @@ export function TeacherDashboardTopbar({
 
         <Link to="/teacher" className="hidden min-w-0 shrink-0 items-center lg:flex">
           <BrandLogo
-            src={certificateSchoolLogoUrl()}
+            src={brandLogoTransparentUrl()}
             alt={tr("school_logo_alt")}
             size="headerCompact"
-            className="rounded-md bg-white p-0.5"
           />
         </Link>
 
         <Link to="/teacher" className="flex min-w-0 shrink-0 items-center gap-2 lg:hidden">
           <BrandLogo
-            src={certificateSchoolLogoUrl()}
+            src={brandLogoTransparentUrl()}
             alt={tr("school_logo_alt")}
             size="headerCompact"
-            className="rounded-md bg-white p-0.5"
           />
         </Link>
 

@@ -64,7 +64,7 @@ export function TeacherQuickActions({ variant = "card" }: TeacherQuickActionsPro
             className={cn(
               "group flex min-h-11 min-w-0 items-start gap-2.5 rounded-xl p-2.5 transition-colors sm:p-3",
               variant === "navy"
-                ? "border border-white/10 bg-white/5 hover:border-primary/40 hover:bg-white/10"
+                ? "border border-white/20 bg-white/8 hover:border-[#FF7A00]/55 hover:bg-white/12"
                 : "border border-border bg-background hover:border-primary/40 hover:bg-muted/30",
             )}
           >
@@ -72,7 +72,7 @@ export function TeacherQuickActions({ variant = "card" }: TeacherQuickActionsPro
               className={cn(
                 "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
                 variant === "navy"
-                  ? "bg-primary/20 text-primary"
+                  ? "bg-primary text-primary-foreground"
                   : "bg-primary/10 text-primary",
               )}
             >
@@ -82,7 +82,7 @@ export function TeacherQuickActions({ variant = "card" }: TeacherQuickActionsPro
               className={cn(
                 "min-w-0 pt-0.5 text-xs font-semibold leading-snug sm:text-sm",
                 variant === "navy"
-                  ? "text-white group-hover:text-primary"
+                  ? "text-white group-hover:text-[#FF7A00]"
                   : "text-foreground group-hover:text-primary",
               )}
             >
@@ -97,7 +97,7 @@ export function TeacherQuickActions({ variant = "card" }: TeacherQuickActionsPro
   if (variant === "navy") {
     return (
       <section className="flex h-full min-w-0 flex-col rounded-2xl border border-brand-dark/20 bg-brand-dark p-4 shadow-[var(--shadow-soft)] sm:p-5">
-        <h3 className="mb-3 font-display text-base text-primary sm:text-lg">{tr("teacher_home_quick_actions")}</h3>
+        <h3 className="mb-3 font-display text-base text-white sm:text-lg">{tr("teacher_home_quick_actions")}</h3>
         {grid}
       </section>
     );

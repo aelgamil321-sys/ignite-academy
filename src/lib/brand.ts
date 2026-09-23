@@ -18,15 +18,18 @@ export const BRAND = {
     dark: "#2D2D2D",
     softGray: "#E7E2DC",
   },
+  /** Official GHIRAS PNG (white background, full lockup). Certificates / print headers. */
   logoPrimary: "/logos/ghiras-primary.png",
-  /** No official compact PNG was supplied. UI branding uses the primary PNG. Tab icons keep a tiny mark only. */
-  logoCompact: "/logos/ghiras-primary.png",
+  /** Official GHIRAS PNG with true alpha — dark surfaces, watermarks, and light chrome. */
+  logoTransparent: "/logos/ghiras-primary-transparent.png",
+  /** No official compact PNG was supplied. UI branding uses the transparent lockup. */
+  logoCompact: "/logos/ghiras-primary-transparent.png",
   favicon: "/favicon.svg",
   appleTouchIcon: "/favicon.svg",
   ogImage: "/logos/ghiras-primary.png",
 } as const;
 
-const LOGO_CACHE_VERSION = "20260920png";
+const LOGO_CACHE_VERSION = "20260924png";
 
 function publicAssetUrl(path: string): string {
   const url = `${path}?v=${LOGO_CACHE_VERSION}`;
@@ -38,6 +41,11 @@ function publicAssetUrl(path: string): string {
 
 export function brandLogoPrimaryUrl(): string {
   return publicAssetUrl(BRAND.logoPrimary);
+}
+
+/** True-alpha lockup for UI chrome, dark surfaces, and watermarks. */
+export function brandLogoTransparentUrl(): string {
+  return publicAssetUrl(BRAND.logoTransparent);
 }
 
 export function brandLogoCompactUrl(): string {

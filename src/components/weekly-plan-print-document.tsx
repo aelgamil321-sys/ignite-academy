@@ -3,7 +3,7 @@ import type {
   WeeklyPlanDocumentPeriod,
 } from "@/lib/weekly-plan-document-model";
 import { WEEKLY_PLAN_PDF_EXPORT_ID } from "@/lib/weekly-plan-document-model";
-import { brandLogoPrimaryUrl } from "@/lib/brand";
+import { brandLogoTransparentUrl } from "@/lib/brand";
 import { ghirasPrintWatermarkStyle } from "@/components/brand/ghiras-watermark";
 
 function CellValue({ value }: { value: string }) {
@@ -392,7 +392,7 @@ export function WeeklyPlanPrintDocument({ model }: { model: WeeklyPlanDocumentMo
         }
       `}</style>
       <img
-        src={brandLogoPrimaryUrl()}
+        src={brandLogoTransparentUrl()}
         alt=""
         aria-hidden="true"
         draggable={false}

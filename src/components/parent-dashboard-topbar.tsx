@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, UserRound } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSelector } from "@/components/language-selector";
-import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
+import { brandLogoTransparentUrl } from "@/lib/brand";
 import { useI18n } from "@/lib/i18n";
 import { useParentShell } from "@/lib/parent-shell-context";
 import { cn } from "@/lib/utils";
@@ -53,19 +53,17 @@ export function ParentDashboardTopbar({ onMenuClick }: ParentDashboardTopbarProp
 
         <Link to="/parent/dashboard" className="hidden min-w-0 shrink-0 items-center lg:flex">
           <BrandLogo
-            src={certificateSchoolLogoUrl()}
+            src={brandLogoTransparentUrl()}
             alt={tr("school_logo_alt")}
             size="headerCompact"
-            className="rounded-md bg-white p-0.5"
           />
         </Link>
 
         <Link to="/parent/dashboard" className="flex min-w-0 shrink-0 items-center gap-2 lg:hidden">
           <BrandLogo
-            src={certificateSchoolLogoUrl()}
+            src={brandLogoTransparentUrl()}
             alt={tr("school_logo_alt")}
             size="headerCompact"
-            className="rounded-md bg-white p-0.5"
           />
         </Link>
 

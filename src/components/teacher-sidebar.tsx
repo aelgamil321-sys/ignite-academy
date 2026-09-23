@@ -25,8 +25,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { BrandLogo } from "@/components/brand-logo";
-import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
+import { GhirasSidebarBrand } from "@/components/brand/ghiras-sidebar-brand";
+import { darkNav } from "@/lib/theme";
 
 type NavItem = {
   to: string;
@@ -206,14 +206,10 @@ function NavLinkItem({
       onClick={onNavigate}
       className={cn(
         "flex min-h-[2.375rem] items-center gap-2 rounded-lg px-2 py-1.5 text-[0.875rem] font-medium leading-snug transition-colors",
-        active
-          ? "bg-primary/15 text-primary"
-          : "text-white/80 hover:bg-white/8 hover:text-white",
+        active ? darkNav.itemActive : darkNav.item,
       )}
     >
-      <item.icon
-        className={cn("h-[1.125rem] w-[1.125rem] shrink-0", active ? "text-primary" : "text-white/70")}
-      />
+      <item.icon className={active ? darkNav.iconActive : darkNav.icon} />
       <span className="min-w-0 text-start">{tr(item.labelKey)}</span>
     </Link>
   );
@@ -234,7 +230,7 @@ function NavSection({
 }) {
   return (
     <div className="space-y-0.5">
-      <p className="px-2 pb-0.5 pt-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/45 first:pt-0">
+      <p className={darkNav.section}>
         {tr(titleKey)}
       </p>
       {items.map((item) => (
@@ -252,18 +248,12 @@ function NavSection({
 
 function SidebarHeader({ tr }: { tr: (key: string) => string }) {
   return (
-    <div className="shrink-0 border-b border-white/10 px-2.5 py-2.5">
-      <Link to="/teacher" className="mb-2 flex items-center">
-        <BrandLogo
-          src={certificateSchoolLogoUrl()}
-          alt={tr("school_logo_alt")}
-          size="headerCompact"
-          className="h-10 w-[7.5rem] rounded-md bg-white p-0.5"
-        />
-      </Link>
-      <p className="font-display text-[0.8125rem] font-semibold text-primary">{tr("teacher_title")}</p>
-      <p className="text-[10px] leading-snug text-white/55">{tr("teacher_dash_nav_brand")}</p>
-    </div>
+    <GhirasSidebarBrand
+      to="/teacher"
+      alt={tr("school_logo_alt")}
+      title={tr("teacher_title")}
+      subtitle={tr("teacher_dash_nav_brand")}
+    />
   );
 }
 
@@ -330,12 +320,12 @@ function SidebarFooter({
     <div className="shrink-0 border-t border-white/10 px-2 py-2">
       <div className="min-w-0 px-1">
         <p className="truncate text-[0.8125rem] font-medium text-white">{teacherName}</p>
-        <p className="truncate text-[11px] text-white/55">{email}</p>
+        <p className="truncate text-[11px] text-[#E7E2DC]">{email}</p>
       </div>
       <button
         type="button"
         onClick={() => void logout()}
-        className="mt-1.5 flex min-h-[2.375rem] w-full items-center gap-2 rounded-lg px-2 text-[0.875rem] font-medium text-white/75 transition-colors hover:bg-white/8 hover:text-white"
+        className={darkNav.signOut}
       >
         <LogOut className="h-[1.125rem] w-[1.125rem] shrink-0" />
         {tr("teacher_sign_out")}

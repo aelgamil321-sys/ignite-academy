@@ -13,8 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { certificateIslamicLogoUrl, certificateSchoolLogoUrl } from "@/lib/certificate-branding";
-import { HOME_PAGE_TITLE } from "@/lib/brand";
+import { brandLogoTransparentUrl, HOME_PAGE_TITLE } from "@/lib/brand";
 import { profileInitials } from "@/lib/admin-profile";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -246,8 +245,7 @@ export function AdminTopBar({
   const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const searchTab = typeof search.tab === "string" ? (search.tab as AdminTab) : undefined;
 
-  const schoolLogoUrl = certificateSchoolLogoUrl();
-  const islamicLogoUrl = certificateIslamicLogoUrl();
+  const schoolLogoUrl = brandLogoTransparentUrl();
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-brand-dark text-white shadow-md">
@@ -257,7 +255,7 @@ export function AdminTopBar({
           search={{ tab: "overview" }}
           className="flex shrink-0 items-center gap-2 min-w-0"
         >
-          <BrandLogo src={schoolLogoUrl} alt={tr("school_logo_alt")} size="headerCompact" className="rounded-md bg-white p-0.5" />
+          <BrandLogo src={schoolLogoUrl} alt={tr("school_logo_alt")} size="headerCompact" />
           <div className="min-w-0 hidden md:block">
             <div className="font-display text-sm font-semibold leading-tight text-white truncate">
               {HOME_PAGE_TITLE}
@@ -285,14 +283,8 @@ export function AdminTopBar({
         </nav>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 ms-auto">
-          <BrandLogo
-            src={islamicLogoUrl}
-            alt={tr("dept_islamic_ed")}
-            size="headerCompact"
-            className="hidden xl:flex opacity-95"
-          />
-          <SafeNotificationBell className="h-10 w-10 border-white/20 bg-white/10 text-white hover:border-primary/50 hover:text-primary" />
-          <LanguageSelector className="h-10 border-white/20 bg-white/10 text-white hover:border-primary/50 hover:text-primary" />
+          <SafeNotificationBell className="h-10 w-10 border-white/20 bg-white/10 text-white hover:border-[#FF7A00]/50 hover:text-white" />
+          <LanguageSelector className="h-10 border-white/20 bg-white/10 text-white hover:border-[#FF7A00]/50 hover:text-white" />
           <DropdownMenu>
             <DropdownMenuTrigger
               className="flex min-h-10 max-w-[10.5rem] items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-left hover:bg-white/10 transition-colors"
