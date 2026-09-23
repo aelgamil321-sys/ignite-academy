@@ -6,8 +6,8 @@ import {
   HOME_PAGE_TITLE_AR,
 } from "@/lib/brand";
 
-/** Canonical production origin — never localhost or pages.dev. Domain change is a later phase. */
-export const CANONICAL_SITE_URL = "https://ignite-academy.ignite-school.workers.dev";
+/** Canonical production origin — official custom domain. */
+export const CANONICAL_SITE_URL = "https://ghirasacademy.ae";
 
 export { HOME_PAGE_TITLE, HOME_PAGE_DESCRIPTION, HOME_PAGE_TITLE_AR };
 
@@ -116,15 +116,15 @@ export function homepageStructuredData() {
         "@type": "WebSite",
         "@id": `${url}#website`,
         url,
-        name: SITE_NAME,
-        alternateName: [SITE_NAME_AR, SCHOOL_NAME, HOME_PAGE_TITLE_AR],
+        name: HOME_PAGE_TITLE,
+        alternateName: [SITE_NAME, SITE_NAME_AR, SCHOOL_NAME, HOME_PAGE_TITLE_AR],
         inLanguage: ["en", "ar", "fr", "de", "ur", "zh"],
         publisher: { "@id": `${url}#organization` },
       },
       {
         "@type": "EducationalOrganization",
         "@id": `${url}#organization`,
-        name: SITE_NAME,
+        name: HOME_PAGE_TITLE,
         alternateName: SITE_NAME_AR,
         url,
         description: HOME_PAGE_DESCRIPTION,

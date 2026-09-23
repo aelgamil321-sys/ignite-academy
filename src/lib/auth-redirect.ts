@@ -4,7 +4,7 @@ import { hasSignupAuthHash, isRecoveryAuthHash } from "@/lib/password-recovery";
 
 /** Where Supabase sends users after confirming signup email (must be allowlisted in Supabase Auth). */
 export const SIGNUP_EMAIL_REDIRECT_URL =
-  "https://ignite-academy.ignite-school.workers.dev/auth?mode=login&email_confirmed=true";
+  "https://ghirasacademy.ae/auth?mode=login&email_confirmed=true";
 
 /** Sign-up options that request confirmation emails when verification is required. */
 export function signupAuthOptions(

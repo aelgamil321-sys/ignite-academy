@@ -10,4 +10,4 @@ Disallow: /auth
 Disallow: /assignments/
 Disallow: /reset-password
 
-Sitemap: https://ignite-academy.ignite-school.workers.dev/sitemap.xml
+Sitemap: https://ghirasacademy.ae/sitemap.xml

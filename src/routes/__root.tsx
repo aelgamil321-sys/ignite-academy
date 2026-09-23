@@ -14,8 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider, useI18n } from "../lib/i18n";
 import { CMSProvider } from "../lib/cms";
 import { BRAND } from "../lib/brand";
-import { SITE_NAME } from "../lib/site-branding";
-import { absoluteOgImageUrl, googleSiteVerificationMeta, HOME_PAGE_DESCRIPTION } from "../lib/seo";
+import { absoluteOgImageUrl, googleSiteVerificationMeta, HOME_PAGE_DESCRIPTION, HOME_PAGE_TITLE } from "../lib/seo";
 import { Toaster } from "../components/ui/sonner";
 import { PasswordRecoveryGuard } from "../components/password-recovery-guard";
 
@@ -87,9 +86,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: SITE_NAME },
+      { title: HOME_PAGE_TITLE },
       { name: "description", content: HOME_PAGE_DESCRIPTION },
-      { property: "og:site_name", content: SITE_NAME },
+      { property: "og:site_name", content: HOME_PAGE_TITLE },
       { property: "og:type", content: "website" },
       { property: "og:image", content: absoluteOgImageUrl() },
       { name: "twitter:card", content: "summary_large_image" },

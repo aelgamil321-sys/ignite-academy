@@ -2,9 +2,14 @@
 
 ## Current active production app
 
-**https://ignite-academy.ignite-school.workers.dev**
+**https://ghirasacademy.ae**
 
-This Cloudflare Worker serves the current GHIRAS release. Deploy here for production updates.
+This Cloudflare Worker (`ghiras-academy`) serves the current GHIRAS release on the official custom domain. Deploy here for production updates.
+
+Legacy workers.dev hostnames 301 to the official domain:
+
+- `https://ghiras-academy.ignite-school.workers.dev`
+- `https://ignite-academy.ignite-school.workers.dev`
 
 ## Legacy / stale app (do not use for releases)
 
@@ -34,7 +39,15 @@ npm run preview
 npm run deploy
 ```
 
-This runs `npm run build` then `wrangler deploy`.
+This runs `npm run build` then `wrangler deploy` to Worker **ghiras-academy**.
+
+To refresh the old-hostname 301 Worker only:
+
+```bash
+node node_modules/wrangler/bin/wrangler.js deploy --config scripts/wrangler.ghiras-legacy-redirect.jsonc
+```
+
+Do not point `wrangler.jsonc` back at `ignite-academy` or you will replace that redirect with the full app.
 
 **GitHub push to `main` does not deploy production.** You must run `npm run deploy` (or an equivalent CI step) after merging.
 

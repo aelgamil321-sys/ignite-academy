@@ -4,6 +4,18 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { handleTranslateApi } from "./lib/api/translate-route.server";
 import { handleIgniteApi } from "./lib/api/ai-route.server";
 import { renderErrorPage } from "./lib/error-page";
+import { CANONICAL_SITE_URL } from "./lib/seo";
+
+const LEGACY_PUBLIC_HOSTS = new Set([
+  "ghiras-academy.ignite-school.workers.dev",
+  "ignite-academy.ignite-school.workers.dev",
+]);
+
+function redirectLegacyPublicHost(request: Request): Response | null {
+  const url = new URL(request.url);
+  if (!LEGACY_PUBLIC_HOSTS.has(url.hostname.toLowerCase())) return null;
+  return Response.redirect(`${CANONICAL_SITE_URL}${url.pathname}${url.search}`, 301);
+}
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -42,7 +54,13 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const legacyRedirect = redirectLegacyPublicHost(request);
+      if (legacyRedirect) return legacyRedirect;
       const url = new URL(request.url);
+      if (url.pathname === "/sitemap.xml") {
+        const { sitemapResponse } = await import("@/lib/sitemap.server");
+        return sitemapResponse();
+      }
       if (url.pathname === "/api/translate") {
         return handleTranslateApi(request);
       }

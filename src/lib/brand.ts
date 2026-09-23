@@ -52,8 +52,8 @@ export function brandedTitleAr(pageAr: string): string {
   return `${BRAND.nameAr} | ${pageAr}`;
 }
 
-export const HOME_PAGE_TITLE = `${BRAND.nameEn} | ${BRAND.platformEn}`;
-export const HOME_PAGE_TITLE_AR = `${BRAND.nameAr} | ${BRAND.platformAr}`;
+export const HOME_PAGE_TITLE = `${BRAND.nameEn} | ${BRAND.nameAr}`;
+export const HOME_PAGE_TITLE_AR = `${BRAND.nameAr} | ${BRAND.nameEn}`;
 
 export const HOME_PAGE_DESCRIPTION =
   "Professional learning platform focused on knowledge, values, growth and impact.";

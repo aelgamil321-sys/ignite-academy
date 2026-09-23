@@ -1,0 +1,6 @@
+{
+  "account_id": "5b23be343baa16154aaf959302d90a0d",
+  "name": "ignite-academy",
+  "compatibility_date": "2026-08-04",
+  "main": "./ghiras-legacy-redirect-worker.mjs"
+}

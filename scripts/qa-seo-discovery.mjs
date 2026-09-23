@@ -8,7 +8,7 @@ import { join } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..");
 const DIST_CLIENT = join(ROOT, "dist", "client");
-const CANONICAL = "https://ignite-academy.ignite-school.workers.dev";
+const CANONICAL = "https://ghirasacademy.ae";
 
 const failures = [];
 const passes = [];
