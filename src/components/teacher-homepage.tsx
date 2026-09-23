@@ -18,6 +18,7 @@ import patternImg from "@/assets/pattern.jpg";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
+import { GhirasSiteFrame, GhirasWatermark } from "@/components/brand/ghiras-watermark";
 import { useI18n } from "@/lib/i18n";
 import { gradeDisplayName } from "@/lib/grade-utils";
 import { STAGE_CARD_CONFIG, STAGE_CARD_IMAGES } from "@/lib/stage-images";
@@ -77,19 +78,19 @@ export function TeacherHomepage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <GhirasSiteFrame density="sparse" className="bg-background text-foreground">
         <SiteHeader />
         <main className="container-page flex items-center gap-2 py-24 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           {tr("teacher_loading")}
         </main>
         <SiteFooter />
-      </div>
+      </GhirasSiteFrame>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <GhirasSiteFrame density="sparse" className="bg-background text-foreground">
       <SiteHeader />
       <main>
         <section className="relative overflow-hidden bg-brand-dark text-white">
@@ -136,7 +137,9 @@ export function TeacherHomepage() {
           </div>
         </section>
 
-        <section className="container-page py-16">
+        <section className="relative overflow-hidden">
+          <GhirasWatermark variant="section" position="bottom-end" size="lg" hideBelow="md" />
+          <div className="container-page relative z-10 py-16">
           <h2 className="font-display text-2xl text-foreground md:text-3xl">{tr("teacher_home_scope_summary")}</h2>
           {stats ? (
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -151,6 +154,7 @@ export function TeacherHomepage() {
               />
             </div>
           ) : null}
+          </div>
         </section>
 
         <section className="container-page py-8 pb-16">
@@ -290,6 +294,6 @@ export function TeacherHomepage() {
       </main>
       <SiteFooter />
       <AskMrAhmed />
-    </div>
+    </GhirasSiteFrame>
   );
 }

@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, ChevronDown, LogOut, Menu, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSelector } from "@/components/language-selector";
 import { SafeNotificationBell } from "@/components/notification-bell";
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { certificateIslamicLogoUrl, certificateSchoolLogoUrl } from "@/lib/certificate-branding";
+import { HOME_PAGE_TITLE } from "@/lib/brand";
 import { profileInitials } from "@/lib/admin-profile";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -256,13 +257,10 @@ export function AdminTopBar({
           search={{ tab: "overview" }}
           className="flex shrink-0 items-center gap-2 min-w-0"
         >
-          <BrandLogo src={schoolLogoUrl} alt={tr("school_logo_alt")} size="headerCompact" className="hidden sm:flex" />
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground sm:hidden">
-            <BookOpen className="h-4 w-4" />
-          </div>
+          <BrandLogo src={schoolLogoUrl} alt={tr("school_logo_alt")} size="headerCompact" className="rounded-md bg-white p-0.5" />
           <div className="min-w-0 hidden md:block">
             <div className="font-display text-sm font-semibold leading-tight text-white truncate">
-              {tr("brand_name")}
+              {HOME_PAGE_TITLE}
             </div>
             <div className="text-[10px] uppercase tracking-wider text-white/70">{tr("admin_nav_brand")}</div>
           </div>

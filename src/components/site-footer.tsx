@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen } from "lucide-react";
+import { GhirasBrandSignature } from "@/components/brand/ghiras-watermark";
 import { useI18n } from "@/lib/i18n";
 import { useAccountRole } from "@/hooks/use-account-role";
+import { HOME_PAGE_TITLE } from "@/lib/brand";
 
 export function SiteFooter() {
-  const { tr, locale } = useI18n();
+  const { tr } = useI18n();
   const { isParent } = useAccountRole();
 
   const learn: Array<{ label: string; to: string }> = isParent
@@ -39,15 +40,7 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-brand-dark/20 bg-brand-dark text-brand-dark-foreground">
       <div className="container-page py-16 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-1">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <BookOpen className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="font-display text-lg">{tr("brand_name")}</div>
-              <div className="text-[11px] uppercase tracking-[0.18em] opacity-70">{tr("brand_org")}</div>
-            </div>
-          </div>
+          <GhirasBrandSignature />
           <p className="mt-4 text-sm opacity-80 leading-relaxed">{tr("ft_desc")}</p>
         </div>
 
@@ -80,7 +73,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-page py-5 text-xs opacity-70 flex flex-col md:flex-row gap-2 justify-between">
-          <span>© {new Date().getFullYear()} {tr("brand_name")}. {tr("ft_rights")}</span>
+          <span>© {new Date().getFullYear()} {HOME_PAGE_TITLE}. {tr("ft_rights")}</span>
           <span>{tr("ft_built")}</span>
         </div>
       </div>

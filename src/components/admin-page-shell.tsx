@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AdminTopBar } from "@/components/admin-top-bar";
+import { GhirasAmbientField } from "@/components/brand/ghiras-watermark";
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs";
 
 export function AdminPageShell({
@@ -28,9 +29,10 @@ export function AdminPageShell({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex min-w-0 flex-col bg-background">
+    <div className="relative flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-background">
+      <GhirasAmbientField density="dashboard" pinned />
       <AdminTopBar profile={profile} onLogout={onLogout} />
-      <main className="min-w-0 flex-1">
+      <main className="relative z-10 min-w-0 flex-1">
         {!hidePageHeader ? (
           <section className="border-b border-border bg-gradient-to-b from-cream/80 to-background">
             <div className="container-page py-6 sm:py-8 md:py-10">

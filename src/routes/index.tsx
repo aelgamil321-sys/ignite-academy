@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { GhirasHomeHeader } from "@/components/ghiras-home-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
+import { GhirasSiteFrame } from "@/components/brand/ghiras-watermark";
 import { AcademyHomepage } from "@/components/academy-homepage";
 import { useI18n } from "@/lib/i18n";
 import { homepageHead } from "@/lib/seo";
@@ -64,14 +65,14 @@ function AdminHomeRedirect() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <GhirasSiteFrame className="bg-background text-foreground">
       <SiteHeader />
       <main className="container-page flex items-center gap-2 py-24 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
         {tr("verifying_access")}
       </main>
       <SiteFooter />
-    </div>
+    </GhirasSiteFrame>
   );
 }
 
@@ -84,14 +85,14 @@ function StudentHomeRedirect() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <GhirasSiteFrame className="bg-background text-foreground">
       <SiteHeader />
       <main className="container-page flex items-center gap-2 py-24 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
         {tr("verifying_access")}
       </main>
       <SiteFooter />
-    </div>
+    </GhirasSiteFrame>
   );
 }
 
@@ -104,35 +105,35 @@ function ParentHomeRedirect() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <GhirasSiteFrame className="bg-background text-foreground">
       <SiteHeader />
       <main className="container-page flex items-center gap-2 py-24 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
         {tr("verifying_access")}
       </main>
       <SiteFooter />
-    </div>
+    </GhirasSiteFrame>
   );
 }
 
 function HomeRoleLoading() {
   const { tr } = useI18n();
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <GhirasSiteFrame className="bg-background text-foreground">
       <SiteHeader />
       <main className="container-page flex items-center gap-2 py-24 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
         {tr("teacher_loading")}
       </main>
       <SiteFooter />
-    </div>
+    </GhirasSiteFrame>
   );
 }
 
 function HomeRoleError() {
   const { tr } = useI18n();
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <GhirasSiteFrame className="bg-background text-foreground">
       <SiteHeader />
       <main className="container-page py-24 space-y-2">
         <p className="text-sm font-semibold text-destructive">
@@ -143,17 +144,17 @@ function HomeRoleError() {
         </p>
       </main>
       <SiteFooter />
-    </div>
+    </GhirasSiteFrame>
   );
 }
 
 function PublicHome({ signedIn }: { signedIn: boolean }) {
   return (
-    <div className="min-h-screen overflow-x-clip bg-background text-foreground">
+    <GhirasSiteFrame className="bg-background text-foreground">
       <GhirasHomeHeader />
       <AcademyHomepage signedIn={signedIn} />
       <SiteFooter />
       <AskMrAhmed />
-    </div>
+    </GhirasSiteFrame>
   );
 }

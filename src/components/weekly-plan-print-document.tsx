@@ -3,6 +3,8 @@ import type {
   WeeklyPlanDocumentPeriod,
 } from "@/lib/weekly-plan-document-model";
 import { WEEKLY_PLAN_PDF_EXPORT_ID } from "@/lib/weekly-plan-document-model";
+import { brandLogoPrimaryUrl } from "@/lib/brand";
+import { ghirasPrintWatermarkStyle } from "@/components/brand/ghiras-watermark";
 
 function CellValue({ value }: { value: string }) {
   return <div className="wp-v">{value}</div>;
@@ -130,6 +132,7 @@ export function WeeklyPlanPrintDocument({ model }: { model: WeeklyPlanDocumentMo
     >
       <style>{`
         .wp-root {
+          position: relative;
           width: 297mm;
           min-height: 210mm;
           box-sizing: border-box;
@@ -138,6 +141,11 @@ export function WeeklyPlanPrintDocument({ model }: { model: WeeklyPlanDocumentMo
           color: #1a1a1a;
           font-size: 8pt;
           line-height: 1.25;
+        }
+        .wp-root > table,
+        .wp-root > .wp-sheet {
+          position: relative;
+          z-index: 2;
         }
         .wp-root * { box-sizing: border-box; }
         .wp-sheet { width: 100%; border-collapse: collapse; margin: 0; }
@@ -383,6 +391,13 @@ export function WeeklyPlanPrintDocument({ model }: { model: WeeklyPlanDocumentMo
           }
         }
       `}</style>
+      <img
+        src={brandLogoPrimaryUrl()}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        style={ghirasPrintWatermarkStyle(380, 0.025)}
+      />
 
       {/* Title bar */}
       <table className="wp-sheet">

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
+import { GhirasDashboardPane } from "@/components/brand/ghiras-watermark";
 import { ParentDashboardTopbar } from "@/components/parent-dashboard-topbar";
 import { ParentSidebar } from "@/components/parent-sidebar";
 import { ParentShellProvider, type ParentShellContextValue } from "@/lib/parent-shell-context";
@@ -14,7 +15,7 @@ type ParentDashboardShellProps = {
 export function ParentDashboardShell({ value, children }: ParentDashboardShellProps) {
   const { dir } = useI18n();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const mainRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLMainElement>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const hash = useRouterState({ select: (s) => s.location.hash });
 
@@ -32,12 +33,7 @@ export function ParentDashboardShell({ value, children }: ParentDashboardShellPr
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <ParentDashboardTopbar onMenuClick={() => setMobileNavOpen(true)} />
-          <main
-            ref={mainRef}
-            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-5 lg:p-6"
-          >
-            {children}
-          </main>
+          <GhirasDashboardPane mainRef={mainRef}>{children}</GhirasDashboardPane>
         </div>
       </div>
     </ParentShellProvider>

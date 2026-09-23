@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { GhirasDashboardPane } from "@/components/brand/ghiras-watermark";
 import { TeacherDashboardTopbar } from "@/components/teacher-dashboard-topbar";
 import { TeacherSidebar } from "@/components/teacher-sidebar";
 import type { TeacherContext } from "@/lib/teacher-dashboard";
@@ -48,9 +49,7 @@ export function TeacherDashboardShell({
             profilePhotoPath={profilePhotoPath}
             onMenuClick={() => setMobileNavOpen(true)}
           />
-          <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-5 lg:p-6">
-            {children}
-          </main>
+          <GhirasDashboardPane>{children}</GhirasDashboardPane>
         </div>
       </div>
     </TeacherShellProvider>

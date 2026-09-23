@@ -51,6 +51,15 @@ export function ParentDashboardTopbar({ onMenuClick }: ParentDashboardTopbarProp
           <Menu className="h-5 w-5" />
         </button>
 
+        <Link to="/parent/dashboard" className="hidden min-w-0 shrink-0 items-center lg:flex">
+          <BrandLogo
+            src={certificateSchoolLogoUrl()}
+            alt={tr("school_logo_alt")}
+            size="headerCompact"
+            className="rounded-md bg-white p-0.5"
+          />
+        </Link>
+
         <Link to="/parent/dashboard" className="flex min-w-0 shrink-0 items-center gap-2 lg:hidden">
           <BrandLogo
             src={certificateSchoolLogoUrl()}

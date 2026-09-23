@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
+import { GhirasSiteFrame } from "@/components/brand/ghiras-watermark";
 import { StudentDashboardShell } from "@/components/student-dashboard-shell";
 import { StudentWorkspaceLoading } from "@/components/student-workspace-loading";
 import { useStudentWorkspaceChrome } from "@/hooks/use-student-workspace-chrome";
@@ -15,23 +16,23 @@ export function StudentOrPublicSiteLayout({ children }: { children: ReactNode })
 
   if (chrome.status === "pending") {
     return (
-      <div className="flex min-h-screen flex-col">
+      <GhirasSiteFrame>
         <SiteHeader />
         <main className="container-page flex-1 py-12">
           <StudentWorkspaceLoading />
         </main>
         <SiteFooter />
         <AskMrAhmed />
-      </div>
+      </GhirasSiteFrame>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <GhirasSiteFrame>
       <SiteHeader />
       <main className="container-page flex-1">{children}</main>
       <SiteFooter />
       <AskMrAhmed />
-    </div>
+    </GhirasSiteFrame>
   );
 }

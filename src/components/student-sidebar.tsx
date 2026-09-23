@@ -21,6 +21,8 @@ import {
 } from "@/lib/student-grade-nav";
 import { useStudentShell } from "@/lib/student-shell-context";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand-logo";
+import { certificateSchoolLogoUrl } from "@/lib/certificate-branding";
 
 type NavItem = {
   key: string;
@@ -117,6 +119,14 @@ function NavLinkItem({
 function SidebarHeader({ tr }: { tr: (key: string) => string }) {
   return (
     <div className="shrink-0 border-b border-white/10 px-2.5 py-2.5">
+      <Link to="/student" className="mb-2 flex items-center">
+        <BrandLogo
+          src={certificateSchoolLogoUrl()}
+          alt={tr("school_logo_alt")}
+          size="headerCompact"
+          className="h-10 w-[7.5rem] rounded-md bg-white p-0.5"
+        />
+      </Link>
       <p className="font-display text-[0.8125rem] font-semibold text-primary">{tr("student_nav_dashboard")}</p>
       <p className="text-[10px] leading-snug text-white/55">{tr("student_dash_nav_brand")}</p>
     </div>

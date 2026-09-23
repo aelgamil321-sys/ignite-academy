@@ -3,12 +3,13 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs";
+import { GhirasSiteFrame } from "@/components/brand/ghiras-watermark";
 
 export function PageShell({
   eyebrow, title, lead, crumbs, children,
 }: { eyebrow?: string; title: string; lead?: string; crumbs?: Crumb[]; children: ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <GhirasSiteFrame>
       <SiteHeader />
       <main className="flex-1">
         <section className="bg-gradient-to-b from-cream to-background border-b border-border">
@@ -23,6 +24,6 @@ export function PageShell({
       </main>
       <SiteFooter />
       <AskMrAhmed />
-    </div>
+    </GhirasSiteFrame>
   );
 }

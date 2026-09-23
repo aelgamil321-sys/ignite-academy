@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AskMrAhmed } from "@/components/ask-mr-ahmed";
+import { GhirasSiteFrame } from "@/components/brand/ghiras-watermark";
 import { useI18n } from "@/lib/i18n";
 import { getAccountRole, getPostAuthPath, postAuthPathForRole } from "@/lib/account-role";
 import { fetchTeacherRequestForUser } from "@/lib/teacher-requests";
@@ -734,7 +735,7 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <GhirasSiteFrame>
       <SiteHeader />
       <main className="flex-1">
         <section className="container-page py-10 md:py-14">
@@ -1256,7 +1257,6 @@ function AuthPage() {
           )}
         </div>
 
-        {/* Side panel */}
         <div className="rounded-3xl bg-gradient-to-br from-brand-dark to-primary text-primary-foreground p-8 shadow-[var(--shadow-elegant)]">
           <GraduationCap className="h-10 w-10 text-gold" />
           <h3 className="mt-4 font-display text-2xl">
@@ -1278,6 +1278,6 @@ function AuthPage() {
       </main>
       <SiteFooter />
       <AskMrAhmed />
-    </div>
+    </GhirasSiteFrame>
   );
 }

@@ -15,6 +15,7 @@ import {
   certificateSignatureArImageUrl,
   certificateSignatureEnImageUrl,
 } from "@/lib/certificate-branding";
+import { ghirasPrintWatermarkStyle } from "@/components/brand/ghiras-watermark";
 
 /** Landscape A4 at ~96dpi for html2canvas capture */
 export const CERTIFICATE_WIDTH_PX = 1123;
@@ -110,33 +111,6 @@ function CornerMotif({
         }}
       />
     </div>
-  );
-}
-
-function MosqueWatermark() {
-  return (
-    <svg
-      width="280"
-      height="160"
-      viewBox="0 0 280 160"
-      style={{
-        position: "absolute",
-        left: "50%",
-        top: "54%",
-        transform: "translate(-50%, -50%)",
-        opacity: 0.05,
-        pointerEvents: "none",
-        zIndex: 0,
-      }}
-      aria-hidden="true"
-    >
-      <ellipse cx="140" cy="130" rx="100" ry="14" fill={CERT_COLORS.navy} />
-      <rect x="95" y="72" width="90" height="58" fill={CERT_COLORS.navy} />
-      <path d="M72 72 L140 18 L208 72 Z" fill={CERT_COLORS.navy} />
-      <circle cx="140" cy="52" r="10" fill={CERT_COLORS.gold} />
-      <rect x="55" y="78" width="18" height="52" fill={CERT_COLORS.navy} />
-      <rect x="207" y="78" width="18" height="52" fill={CERT_COLORS.navy} />
-    </svg>
   );
 }
 
@@ -510,7 +484,13 @@ export function CertificatePageBody({ data }: { data: CertificateDisplayData }) 
   return (
     <>
       <div style={{ position: "absolute", inset: 0, ...PATTERN_BG, zIndex: 0 }} />
-      <MosqueWatermark />
+      <img
+        src={schoolLogoUrl}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        style={ghirasPrintWatermarkStyle(460, 0.028)}
+      />
 
       <div
         style={{
